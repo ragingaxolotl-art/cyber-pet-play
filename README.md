@@ -21,3 +21,4 @@ Version links:
 - [2026-09-30-ff0c6aa](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-09-30-ff0c6aa/)
 - [2026-10-01-3911c37](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-01-3911c37/)
 - [2026-10-01-ca8bbaa](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-01-ca8bbaa/)
+- [2026-10-01-b95a298](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-01-b95a298/)
