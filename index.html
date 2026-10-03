@@ -1,1 +1,23 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><title>Cyber Pet Project</title><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=versions/2026-10-03-6d3af24/"><p><a href="versions/2026-10-03-6d3af24/">Play Cyber Pet Project</a></p></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Cyber Pet Project</title><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body><p id="loading">Loading the latest Cyber Pet game…</p>
+<script>
+(async () => {
+  try {
+    // Keep the permanent URL. Every reload checks the catalog again; an already
+    // running game is never interrupted by a later publication.
+    const catalogResponse = await fetch('releases.json', {cache: 'no-store'});
+    if (!catalogResponse.ok) throw Error('Could not check the latest release.');
+    const catalog = await catalogResponse.json();
+    const latest = catalog[catalog.length - 1];
+    if (!latest || !/^versions\/[a-z0-9-]+\/$/.test(latest.path)) throw Error('Invalid release catalog.');
+    const base = new URL(latest.path, location.href);
+    const response = await fetch(new URL('index.html', base), {cache: 'no-store'});
+    if (!response.ok) throw Error('Could not load the latest release.');
+    const html = (await response.text()).replace('<head>', '<head><base href="' + base.href + '">');
+    document.open(); document.write(html); document.close();
+  } catch (error) {
+    document.getElementById('loading').textContent = 'Unable to load the game. Please refresh to try again.';
+  }
+})();
+</script></body></html>
