@@ -1,0 +1,32 @@
+// Reassemble checked release chunks as the original Godot fetch responses.
+(() => {
+  const assets = {"index.wasm":{"size":37902138,"parts":[{"path":"../../chunks/749aaa39cc88b1e48e463bab3b414025d22a0efe3d80ed0ee4e201f75c45bd49.bin","sha256":"749aaa39cc88b1e48e463bab3b414025d22a0efe3d80ed0ee4e201f75c45bd49","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/6948ae05aa26b3f091dddccf99361028bd890b6207360224b184987e2692bfd7.bin","sha256":"6948ae05aa26b3f091dddccf99361028bd890b6207360224b184987e2692bfd7","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/c508336f810fa0a6813368e1f2dd10d31ae934a5f959122cd86573f18e643008.bin","sha256":"c508336f810fa0a6813368e1f2dd10d31ae934a5f959122cd86573f18e643008","size":4347706,"offset":0,"length":4347706}],"type":"application/wasm"},"index.pck":{"size":194808692,"parts":[{"path":"../../chunks/81a3ad675401ed74653f5200ffec09d66e83ae4fbbf2e5be1274aa626ac61608.bin","sha256":"81a3ad675401ed74653f5200ffec09d66e83ae4fbbf2e5be1274aa626ac61608","size":34,"offset":0,"length":34},{"path":"../../chunks/19d5963e673c9d4011f91ac081a6848f7ce3d7c15d81f6e9c8f5856fe5268404.bin","sha256":"19d5963e673c9d4011f91ac081a6848f7ce3d7c15d81f6e9c8f5856fe5268404","size":16777216,"offset":34,"length":16777182},{"path":"../../chunks/16a5180468672ab1643b796387c490df0907556d71226e9dedbce6f341c438d2.bin","sha256":"16a5180468672ab1643b796387c490df0907556d71226e9dedbce6f341c438d2","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/b59a919ca273e6ce3c6cfbab274f2c4c03a8d89ef147375bed6e33c3245dff66.bin","sha256":"b59a919ca273e6ce3c6cfbab274f2c4c03a8d89ef147375bed6e33c3245dff66","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/8b27dfac5dacf3d6e128823eff370411b4583927a6db10bfa623baeab9dd7a19.bin","sha256":"8b27dfac5dacf3d6e128823eff370411b4583927a6db10bfa623baeab9dd7a19","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/67132448c64e1a67237c638f9ce0a53c695b2672d37657cad23c2102570324cc.bin","sha256":"67132448c64e1a67237c638f9ce0a53c695b2672d37657cad23c2102570324cc","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/ef8427f2894bc6e705ea23a80ccbbc489a67d60af498748ee15203e264c7a722.bin","sha256":"ef8427f2894bc6e705ea23a80ccbbc489a67d60af498748ee15203e264c7a722","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/3b19ad745558cdb379aa9cd19e802dcb5b7f239bf04ec89a36b1a2db060ace5e.bin","sha256":"3b19ad745558cdb379aa9cd19e802dcb5b7f239bf04ec89a36b1a2db060ace5e","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/7dfcc2236c7ce0cfb02258a3baab76d736ab6705de5f35c732c87de3b1782071.bin","sha256":"7dfcc2236c7ce0cfb02258a3baab76d736ab6705de5f35c732c87de3b1782071","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/321ffef28beed4c9b93f46a03c282b7257b490f940a5708caadaff6089c135a7.bin","sha256":"321ffef28beed4c9b93f46a03c282b7257b490f940a5708caadaff6089c135a7","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/30c76b6934d20e34c33e19ab92b8e8c4abc3527c5841789980d4e5e6c284b0e9.bin","sha256":"30c76b6934d20e34c33e19ab92b8e8c4abc3527c5841789980d4e5e6c284b0e9","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/e48a93b238540c1aded9367f9e7d540d55d792ec1b5d68acb2e46df196797a15.bin","sha256":"e48a93b238540c1aded9367f9e7d540d55d792ec1b5d68acb2e46df196797a15","size":16777216,"offset":0,"length":16777216},{"path":"../../chunks/bc9e5bf4ef64be8ad6dfc76f9af5fad3260df4aabc43f100ec2cad7324d8933b.bin","sha256":"bc9e5bf4ef64be8ad6dfc76f9af5fad3260df4aabc43f100ec2cad7324d8933b","size":10224340,"offset":0,"length":8789888},{"path":"../../chunks/126354f847ddebece009476fdf8f3e8f0ef6dbc8b8728762bcfbeee337921e06.bin","sha256":"126354f847ddebece009476fdf8f3e8f0ef6dbc8b8728762bcfbeee337921e06","size":1033640,"offset":0,"length":580392},{"path":"../../chunks/020ce8c3460c29c3fc70641114842fbc5633a3cf2299d4e86393f92ced65cf41.bin","sha256":"020ce8c3460c29c3fc70641114842fbc5633a3cf2299d4e86393f92ced65cf41","size":456832,"offset":0,"length":456832},{"path":"../../chunks/476cac8287c02b1c9a2ce9379045eb7da55165d0af3e2fb1fe648406991c6240.bin","sha256":"476cac8287c02b1c9a2ce9379045eb7da55165d0af3e2fb1fe648406991c6240","size":7286,"offset":0,"length":7286},{"path":"../../chunks/35dc3db294b662ec82e3267f9acfefe21ac5ed345b5db68b7f09baa257350803.bin","sha256":"35dc3db294b662ec82e3267f9acfefe21ac5ed345b5db68b7f09baa257350803","size":424918,"offset":0,"length":424918}],"type":"application/octet-stream"}};
+  const nativeFetch = window.fetch.bind(window);
+  const base = new URL('.', document.baseURI);
+  window.fetch = async (input, options) => {
+    const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, base);
+    const name = Object.keys(assets).find(name => new URL(name, base).href === url.href);
+    if (!name) return nativeFetch(input, options);
+    const asset = assets[name];
+    let next = 0;
+    const signal = options?.signal || (input instanceof Request ? input.signal : undefined);
+    const body = new ReadableStream({
+      async pull(controller) {
+        try {
+          if (next === asset.parts.length) { controller.close(); return; }
+          const part = asset.parts[next++];
+          const response = await nativeFetch(new URL(part.path, base), {signal});
+          if (!response.ok) throw Error('Game download failed. Please reload to try again.');
+          const data = await response.arrayBuffer();
+          const digest = await crypto.subtle.digest('SHA-256', data);
+          const hash = Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, '0')).join('');
+          if (data.byteLength !== part.size || hash !== part.sha256) throw Error('Game download was incomplete. Please reload.');
+          const offset = part.offset ?? 0, length = part.length ?? data.byteLength;
+          if (!Number.isSafeInteger(offset) || !Number.isSafeInteger(length) || offset < 0 || length <= 0 || offset + length > data.byteLength) throw Error('Invalid game download slice.');
+          controller.enqueue(new Uint8Array(data, offset, length));
+        } catch (error) { controller.error(error); }
+      }
+    });
+    return new Response(body, {headers: {'Content-Type': asset.type, 'Content-Length': String(asset.size)}});
+  };
+})();
