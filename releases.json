@@ -210,5 +210,9 @@
   {
     "version": "2026-10-08-184c083-release",
     "path": "versions/2026-10-08-184c083-release/"
+  },
+  {
+    "version": "2026-10-08-2885d86-memory-help",
+    "path": "versions/2026-10-08-2885d86-memory-help/"
   }
 ]
