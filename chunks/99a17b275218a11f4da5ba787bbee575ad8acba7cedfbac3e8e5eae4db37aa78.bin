@@ -1,0 +1,421 @@
+
+      }
+    }
+  },
+  "requirements": {
+    "fields": {
+      "feed": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "clean": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "play": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "walk": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "sleep": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "hurdles": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "memory": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "strength": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "charisma": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      },
+      "party": {
+        "items": {
+          "choices": [
+            "idle",
+            "walking",
+            "sad_walking",
+            "happy",
+            "sad",
+            "eat",
+            "sleeping",
+            "jump",
+            "tired"
+          ]
+        },
+        "min_count": 1,
+        "max_count": 9
+      }
+    }
+  },
+  "strength": {
+    "fields": {
+      "charge_cycle_seconds": {
+        "min": 0.1,
+        "max": 10
+      },
+      "charge_acceleration": {
+        "min": 0.1,
+        "max": 10
+      },
+      "charge_target": {
+        "min": 0,
+        "max": 1
+      },
+      "aim_cycle_seconds": {
+        "min": 0.1,
+        "max": 10
+      },
+      "aim_acceleration": {
+        "min": 0.1,
+        "max": 10
+      },
+      "perfect_distance": {
+        "min": 0,
+        "max": 0.99
+      },
+      "center_multiplier": {
+        "min": 1,
+        "max": 10
+      },
+      "energy_power_floor": {
+        "min": 0,
+        "max": 1
+      },
+      "perfect_energy_ratio": {
+        "min": 0,
+        "max": 1
+      },
+      "happiness_gain": {
+        "min": 0,
+        "max": 100
+      },
+      "xp_growth_multiplier": {
+        "min": 0,
+        "max": 100
+      },
+      "charge_feedback_seconds": {
+        "min": 0.1,
+        "max": 10
+      },
+      "charge_perfect_score": {
+        "min": 0,
+        "max": 100,
+        "integer": true
+      },
+      "charge_excellent_score": {
+        "min": 0,
+        "max": 100,
+        "integer": true
+      }
+    }
+  },
+  "charisma": {
+    "fields": {
+      "duration_seconds": {
+        "min": 5,
+        "max": 120
+      },
+      "bpm": {
+        "min": 40,
+        "max": 240
+      },
+      "note_seconds": {
+        "min": 0.001,
+        "max": 100
+      },
+      "miss_progress": {
+        "min": 1.01,
+        "max": 2
+      },
+      "perfect_window": {
+        "min": 0.001,
+        "max": 100
+      },
+      "great_window": {
+        "min": 0.001,
+        "max": 100
+      },
+      "good_window": {
+        "min": 0.001,
+        "max": 100
+      },
+      "xp_growth_multiplier": {
+        "min": 0.001,
+        "max": 100
+      },
+      "fullness_cost": {
+        "min": 0.001,
+        "max": 100
+      },
+      "difficulties": {
+        "fields": {
+          "easy": {
+            "fields": {
+              "meter_start": {
+                "min": 0,
+                "max": 100
+              },
+              "miss_meter_loss": {
+                "min": 0,
+                "max": 100
+              },
+              "energy_loss_per_second": {
+                "min": 0,
+                "max": 100
+              },
+              "double_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "arc_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "rhythm_beats": {
+                "items": {
+                  "min": 0.25,
+                  "max": 8
+                },
+                "min_count": 1,
+                "max_count": 16
+              }
+            }
+          },
+          "medium": {
+            "fields": {
+              "meter_start": {
+                "min": 0,
+                "max": 100
+              },
+              "miss_meter_loss": {
+                "min": 0,
+                "max": 100
+              },
+              "energy_loss_per_second": {
+                "min": 0,
+                "max": 100
+              },
+              "double_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "arc_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "rhythm_beats": {
+                "items": {
+                  "min": 0.25,
+                  "max": 8
+                },
+                "min_count": 1,
+                "max_count": 16
+              }
+            }
+          },
+          "hard": {
+            "fields": {
+              "meter_start": {
+                "min": 0,
+                "max": 100
+              },
+              "miss_meter_loss": {
+                "min": 0,
+                "max": 100
+              },
+              "energy_loss_per_second": {
+                "min": 0,
+                "max": 100
+              },
+              "double_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "arc_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "rhythm_beats": {
+                "items": {
+                  "min": 0.25,
+                  "max": 8
+                },
+                "min_count": 1,
+                "max_count": 16
+              }
+            }
+          },
+          "extreme": {
+            "fields": {
+              "meter_start": {
+                "min": 0,
+                "max": 100
+              },
+              "miss_meter_loss": {
+                "min": 0,
+                "max": 100
+              },
+              "energy_loss_per_second": {
+                "min": 0,
+                "max": 100
+              },
+              "double_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "arc_chance": {
+                "min": 0,
+                "max": 1
+              },
+              "rhythm_beats": {
+                "items": {
+                  "min": 0.25,
+                  "max": 8
+                },
+                "min_count": 1,
+                "max_count": 16
+              }
+            }
+          }
+        }
+      },
+      "beat_offset_seconds": {
+        "min": -1,
+        "max": 1
+      },
+      "hold_every_notes": {
+        "min": 2,
+        "max": 20
+      },
+      "hold_beats": {
+        "min": 1,
+        "max": 4
