@@ -70,3 +70,4 @@ Version links:
 - [2026-10-08-184c083-release](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-08-184c083-release/)
 - [2026-10-08-2885d86-memory-help](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-08-2885d86-memory-help/)
 - [2026-10-09-location-browser](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-09-location-browser/)
+- [2026-10-09-teacher-access](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-09-teacher-access/)
