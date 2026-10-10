@@ -72,3 +72,4 @@ Version links:
 - [2026-10-09-location-browser](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-09-location-browser/)
 - [2026-10-09-teacher-access](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-09-teacher-access/)
 - [2026-10-10-dance-holds](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-10-dance-holds/)
+- [2026-10-10-dance-usability](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-10-dance-usability/)
