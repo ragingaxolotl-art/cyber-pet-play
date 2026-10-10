@@ -234,5 +234,9 @@
   {
     "version": "2026-10-10-nature-starters",
     "path": "versions/2026-10-10-nature-starters/"
+  },
+  {
+    "version": "2026-10-10-visemes",
+    "path": "versions/2026-10-10-visemes/"
   }
 ]
