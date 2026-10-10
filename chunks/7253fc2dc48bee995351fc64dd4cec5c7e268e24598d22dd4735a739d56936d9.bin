@@ -1,0 +1,2529 @@
+hunger": {
+    "format": "EZF-1",
+    "renderer_version": "1.0.0",
+    "formal_id": "EZF:1af78cfb28a27640899239ce",
+    "formal_digest": "1af78cfb28a27640899239cefb959789d43aa16f1d58f807830d92ea938aeb7c",
+    "semantic_digest": "2cce7920fab57a72e9a2fe6e95c4d9ae18ad0fbab7b8df1cf1948e93a46264da",
+    "semantic_ir": {
+      "ir_version": "1.0",
+      "root_clause": "n001",
+      "speech_act": "assertion",
+      "nodes": [
+        {
+          "node_id": "n001",
+          "kind": "clause",
+          "clause_type": "predication"
+        },
+        {
+          "node_id": "n002",
+          "kind": "lexical_occurrence",
+          "target_type": "atom",
+          "target_id": "ORI:211",
+          "runtime_state": {
+            "code": 1
+          }
+        }
+      ],
+      "edges": [
+        {
+          "edge_id": "e001",
+          "type": "centers",
+          "from": "n002",
+          "to": "n001"
+        }
+      ],
+      "discourse_constraints": {},
+      "utterance_id": "UTT:2cce7920fab57a72e9a2fe6e",
+      "serialization": {
+        "canonical_format": "EZIR-JSON-1",
+        "content_digest": "2cce7920fab57a72e9a2fe6e95c4d9ae18ad0fbab7b8df1cf1948e93a46264da"
+      }
+    },
+    "performance": {
+      "profile": "reference-midi-v1",
+      "anchor_midi": 60,
+      "transposition_semantically_significant": false,
+      "primary_contour": "level",
+      "contour_relative_semitones": [
+        0,
+        0
+      ],
+      "secondary_contours": [],
+      "lexical_events": [
+        {
+          "occurrence_id": "n002",
+          "target_id": "ORI:211",
+          "register": "middle",
+          "base_midi": 60,
+          "family_qualified_transliteration": "nu\u00b7mok",
+          "formal_carrier": "nu-nu-ki-ki",
+          "family_opening_relative_semitones": [
+            0,
+            1,
+            7
+          ],
+          "family_opening_absolute_midi": [
+            60,
+            61,
+            67
+          ],
+          "address_relative_semitones": [
+            0,
+            -2,
+            0,
+            2
+          ],
+          "address_absolute_midi": [
+            60,
+            58,
+            60,
+            62
+          ],
+          "note_duration_beats": 1.0,
+          "runtime_tail": {
+            "code": 1,
+            "name": "active",
+            "relative_motion_semitones": -2,
+            "absolute_note": 60,
+            "articulation": "firm_return",
+            "duration_beats": 0.5
+          }
+        }
+      ],
+      "structural_events": [
+        {
+          "edge_id": "e001",
+          "edge_type": "centers",
+          "from": "n002",
+          "to": "n001",
+          "boundary": "medium_gap",
+          "boundary_beats": 1.0
+        }
+      ],
+      "statement_boundary": "long_gap",
+      "statement_boundary_beats": 2.0
+    },
+    "literal_gloss": "n002:operative target-ground dependence[1]"
+  },
+  "care": {
+    "format": "EZF-1",
+    "renderer_version": "1.0.0",
+    "formal_id": "EZF:45556e433a0cb6e49b7a713b",
+    "formal_digest": "45556e433a0cb6e49b7a713bd9fd301e98b527b57d2d0ae1e0aa432b6d73b1f2",
+    "semantic_digest": "c2b4165e23dfb691feeb116b4af94f05b44ea7326ce5373d273ace393faf0920",
+    "semantic_ir": {
+      "ir_version": "1.0",
+      "root_clause": "n001",
+      "speech_act": "assertion",
+      "nodes": [
+        {
+          "node_id": "n001",
+          "kind": "clause",
+          "clause_type": "predication"
+        },
+        {
+          "node_id": "n002",
+          "kind": "lexical_occurrence",
+          "target_type": "atom",
+          "target_id": "LIF:211",
+          "runtime_state": {
+            "code": 1
+          }
+        }
+      ],
+      "edges": [
+        {
+          "edge_id": "e001",
+          "type": "centers",
+          "from": "n002",
+          "to": "n001"
+        }
+      ],
+      "discourse_constraints": {},
+      "utterance_id": "UTT:c2b4165e23dfb691feeb116b",
+      "serialization": {
+        "canonical_format": "EZIR-JSON-1",
+        "content_digest": "c2b4165e23dfb691feeb116b4af94f05b44ea7326ce5373d273ace393faf0920"
+      }
+    },
+    "performance": {
+      "profile": "reference-midi-v1",
+      "anchor_midi": 60,
+      "transposition_semantically_significant": false,
+      "primary_contour": "level",
+      "contour_relative_semitones": [
+        0,
+        0
+      ],
+      "secondary_contours": [],
+      "lexical_events": [
+        {
+          "occurrence_id": "n002",
+          "target_id": "LIF:211",
+          "register": "middle",
+          "base_midi": 60,
+          "family_qualified_transliteration": "ni\u00b7mok",
+          "formal_carrier": "ni-nu-ki-ki",
+          "family_opening_relative_semitones": [
+            0,
+            4,
+            7
+          ],
+          "family_opening_absolute_midi": [
+            60,
+            64,
+            67
+          ],
+          "address_relative_semitones": [
+            0,
+            -2,
+            0,
+            2
+          ],
+          "address_absolute_midi": [
+            60,
+            58,
+            60,
+            62
+          ],
+          "note_duration_beats": 1.0,
+          "runtime_tail": {
+            "code": 1,
+            "name": "active",
+            "relative_motion_semitones": -2,
+            "absolute_note": 60,
+            "articulation": "firm_return",
+            "duration_beats": 0.5
+          }
+        }
+      ],
+      "structural_events": [
+        {
+          "edge_id": "e001",
+          "edge_type": "centers",
+          "from": "n002",
+          "to": "n001",
+          "boundary": "medium_gap",
+          "boundary_beats": 1.0
+        }
+      ],
+      "statement_boundary": "long_gap",
+      "statement_boundary_beats": 2.0
+    },
+    "literal_gloss": "n002:active care[1]"
+  },
+  "phonemes": [
+    "AA",
+    "AE",
+    "AH",
+    "AO",
+    "AW",
+    "AY",
+    "B",
+    "CH",
+    "D",
+    "DH",
+    "EH",
+    "ER",
+    "EY",
+    "F",
+    "G",
+    "HH",
+    "IH",
+    "IY",
+    "JH",
+    "K",
+    "L",
+    "M",
+    "N",
+    "NG",
+    "OW",
+    "OY",
+    "P",
+    "R",
+    "S",
+    "SH",
+    "T",
+    "TH",
+    "UH",
+    "UW",
+    "V",
+    "W",
+    "Y",
+    "Z",
+    "ZH",
+    "WB"
+  ],
+  "dictionary": {
+    "water": [
+      "W",
+      "AO",
+      "T",
+      "ER"
+    ],
+    "food": [
+      "F",
+      "UW",
+      "D"
+    ],
+    "home": [
+      "HH",
+      "OW",
+      "M"
+    ],
+    "friend": [
+      "F",
+      "R",
+      "EH",
+      "N",
+      "D"
+    ],
+    "robot": [
+      "R",
+      "OW",
+      "B",
+      "AA",
+      "T"
+    ],
+    "data": [
+      "D",
+      "EY",
+      "T",
+      "AH"
+    ],
+    "message": [
+      "M",
+      "EH",
+      "S",
+      "IH",
+      "JH"
+    ],
+    "zibble": [
+      "Z",
+      "IH",
+      "B",
+      "AH",
+      "L"
+    ],
+    "xenoflirp": [
+      "Z",
+      "IY",
+      "N",
+      "OW",
+      "F",
+      "L",
+      "ER",
+      "P"
+    ]
+  },
+  "rules": [
+    [
+      "tion",
+      [
+        "SH",
+        "AH",
+        "N"
+      ]
+    ],
+    [
+      "tch",
+      [
+        "CH"
+      ]
+    ],
+    [
+      "dge",
+      [
+        "JH"
+      ]
+    ],
+    [
+      "ch",
+      [
+        "CH"
+      ]
+    ],
+    [
+      "sh",
+      [
+        "SH"
+      ]
+    ],
+    [
+      "th",
+      [
+        "TH"
+      ]
+    ],
+    [
+      "ng",
+      [
+        "NG"
+      ]
+    ],
+    [
+      "ph",
+      [
+        "F"
+      ]
+    ],
+    [
+      "wh",
+      [
+        "W"
+      ]
+    ],
+    [
+      "qu",
+      [
+        "K",
+        "W"
+      ]
+    ],
+    [
+      "ck",
+      [
+        "K"
+      ]
+    ],
+    [
+      "ee",
+      [
+        "IY"
+      ]
+    ],
+    [
+      "ea",
+      [
+        "IY"
+      ]
+    ],
+    [
+      "oo",
+      [
+        "UW"
+      ]
+    ],
+    [
+      "oa",
+      [
+        "OW"
+      ]
+    ],
+    [
+      "ai",
+      [
+        "EY"
+      ]
+    ],
+    [
+      "ay",
+      [
+        "EY"
+      ]
+    ],
+    [
+      "oi",
+      [
+        "OY"
+      ]
+    ],
+    [
+      "oy",
+      [
+        "OY"
+      ]
+    ],
+    [
+      "ow",
+      [
+        "AW"
+      ]
+    ],
+    [
+      "ou",
+      [
+        "AW"
+      ]
+    ],
+    [
+      "ar",
+      [
+        "AA",
+        "R"
+      ]
+    ],
+    [
+      "er",
+      [
+        "ER"
+      ]
+    ],
+    [
+      "ir",
+      [
+        "ER"
+      ]
+    ],
+    [
+      "ur",
+      [
+        "ER"
+      ]
+    ],
+    [
+      "or",
+      [
+        "AO",
+        "R"
+      ]
+    ]
+  ],
+  "single": {
+    "a": [
+      "AE"
+    ],
+    "b": [
+      "B"
+    ],
+    "c": [
+      "K"
+    ],
+    "d": [
+      "D"
+    ],
+    "e": [
+      "EH"
+    ],
+    "f": [
+      "F"
+    ],
+    "g": [
+      "G"
+    ],
+    "h": [
+      "HH"
+    ],
+    "i": [
+      "IH"
+    ],
+    "j": [
+      "JH"
+    ],
+    "k": [
+      "K"
+    ],
+    "l": [
+      "L"
+    ],
+    "m": [
+      "M"
+    ],
+    "n": [
+      "N"
+    ],
+    "o": [
+      "AA"
+    ],
+    "p": [
+      "P"
+    ],
+    "q": [
+      "K"
+    ],
+    "r": [
+      "R"
+    ],
+    "s": [
+      "S"
+    ],
+    "t": [
+      "T"
+    ],
+    "u": [
+      "UH"
+    ],
+    "v": [
+      "V"
+    ],
+    "w": [
+      "W"
+    ],
+    "x": [
+      "K",
+      "S"
+    ],
+    "y": [
+      "Y"
+    ],
+    "z": [
+      "Z"
+    ]
+  }
+}
+       {
+  "energy_recovery_threshold": 50.0,
+  "energy_recovery_per_second": 0.12,
+  "tired_recovery_bonus_per_second": 0.16,
+  "recovery_fullness_per_second": 0.08,
+  "tired_fullness_bonus_per_second": 0.12,
+  "low_care_threshold": 25.0,
+  "hungry_energy_loss_per_second": 0.08,
+  "tired_happiness_loss_per_second": 0.05,
+  "dirty_happiness_loss_per_second": 0.1,
+  "dirty_fullness_loss_per_second": 0.035,
+  "dirty_health_loss_per_second": 0.05,
+  "action_health_seconds": 1.5
+}
+     {
+  "base_weight": 4,
+  "answer_bonus": 3,
+  "starting_care": {
+    "happiness": 70.0,
+    "energy": 65.0,
+    "health": 80.0,
+    "cleanliness": 75.0,
+    "fullness": 60.0
+  },
+  "questions": {
+    "1": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "disposition": [
+            "Calm"
+          ],
+          "constitution": [
+            "Normal"
+          ],
+          "neurological_style": [
+            "Balanced"
+          ]
+        },
+        "B": {
+          "disposition": [
+            "Curious",
+            "Bold"
+          ],
+          "metabolism": [
+            "Fast"
+          ],
+          "neurological_style": [
+            "Imaginative"
+          ]
+        },
+        "C": {
+          "disposition": [
+            "Curious",
+            "Serious"
+          ],
+          "neurological_style": [
+            "Analytical",
+            "Observant"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Cheerful"
+          ],
+          "favorite_food_tags": [
+            "Fresh"
+          ],
+          "neurological_style": [
+            "Expressive"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Shy",
+            "Calm"
+          ],
+          "neurological_style": [
+            "Observant",
+            "Empathic"
+          ]
+        },
+        "F": {
+          "disposition": [
+            "Angry"
+          ],
+          "body_type": [
+            "Strong"
+          ],
+          "musculature": [
+            "Powerful"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Lazy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Serious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ]
+        },
+        "I": {
+          "disposition": [
+            "Bold",
+            "Angry"
+          ],
+          "musculature": [
+            "Muscular"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Energetic"
+          ],
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "Your perfect free day has one rule: you cannot spend it the way you normally would. What do you choose instead?",
+          "answers": {
+            "A": "Find somewhere peaceful, take my time, and enjoy having no schedule.",
+            "B": "Go somewhere I have never been and see what I discover along the way.",
+            "C": "Pick something I have always wondered about and finally figure out how it works.",
+            "D": "Spend the day with people I enjoy and make it into something fun to remember.",
+            "E": "Choose a quiet place where I can watch what is going on without needing to be in the middle of it.",
+            "F": "Do something difficult and physical where I can really push myself.",
+            "G": "Do as little as possible and enjoy not having to accomplish anything.",
+            "H": "Use the day to finish something important that I never seem to have enough time for.",
+            "I": "Choose something intense or competitive where I can really test myself.",
+            "J": "Pack the day with activities and keep moving until I run out of time."
+          }
+        },
+        {
+          "question": "Which headline would you most want to describe your Saturday?",
+          "answers": {
+            "A": "Nothing Urgent Happened, and That Was Perfect",
+            "B": "Local Person Wanders Somewhere New and Finds Something Unexpected",
+            "C": "Mystery Finally Solved After Hours of Investigation",
+            "D": "Friends Turn an Ordinary Day Into Something Memorable",
+            "E": "Quiet Observer Notices What Everyone Else Missed",
+            "F": "Challenge Accepted: Difficult Task Finished the Hard Way",
+            "G": "Absolutely Nothing Accomplished; No Regrets",
+            "H": "Long-Ignored Project Finally Completed",
+            "I": "Competition Gets Intense",
+            "J": "Somehow Ten Activities Fit Into One Day"
+          }
+        }
+      ]
+    },
+    "2": {
+      "answers": "ABCDEFGH",
+      "effects": {
+        "A": {
+          "body_type": [
+            "Strong"
+          ],
+          "musculature": [
+            "Muscular"
+          ]
+        },
+        "B": {
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ],
+          "disposition": [
+            "Energetic"
+          ]
+        },
+        "C": {
+          "body_type": [
+            "Heavy"
+          ],
+          "constitution": [
+            "Hardy"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Curious",
+            "Serious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Confident",
+            "Cheerful"
+          ],
+          "neurological_style": [
+            "Expressive"
+          ]
+        },
+        "F": {
+          "disposition": [
+            "Serious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Observant"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Energetic"
+          ],
+          "metabolism": [
+            "Fast"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Lazy",
+            "Shy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "While exploring an unfamiliar place, part of the route ahead has collapsed. There are several possible ways forward, but none looks completely safe. What would you be most likely to do?",
+          "answers": {
+            "A": "Look for something solid I could move, brace, or use to make a safer path.",
+            "B": "Look for a route that requires quick movement but keeps me away from the weakest area.",
+            "C": "Choose the route that looks rough but solid enough to support me, even if it is slow going.",
+            "D": "Stop and study every option until I understand which route has the best chance of working.",
+            "E": "Stay upbeat, talk through the options with everyone, and help the group commit to a choice.",
+            "F": "Watch the ground, walls, and surroundings for small warning signs before deciding.",
+            "G": "Keep moving and try the most direct route rather than standing around too long.",
+            "H": "Decide it is not worth the risk and wait back while someone else figures out what to do."
+          }
+        },
+        {
+          "question": "A community center loses power during a storm. Which job would you naturally take?",
+          "answers": {
+            "A": "Move heavy tables and equipment where they are needed.",
+            "B": "Move quickly between rooms delivering supplies and messages.",
+            "C": "Help secure doors, windows, and anything that needs to withstand the storm.",
+            "D": "Figure out the safest and most efficient plan for everyone.",
+            "E": "Keep people calm, positive, and communicating.",
+            "F": "Watch for small hazards or problems others might overlook.",
+            "G": "Keep running errands and handling whatever needs immediate attention.",
+            "H": "Stay somewhere quiet and out of the way unless someone needs me."
+          }
+        }
+      ]
+    },
+    "3": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "favorite_taste": [
+            "Sweet"
+          ],
+          "favorite_food_tags": [
+            "Fruity",
+            "Fresh"
+          ]
+        },
+        "B": {
+          "favorite_taste": [
+            "Salty"
+          ],
+          "favorite_food_tags": [
+            "Toasted",
+            "Mild"
+          ]
+        },
+        "C": {
+          "favorite_taste": [
+            "Sour"
+          ],
+          "favorite_food_tags": [
+            "Citrusy",
+            "Sharp",
+            "Fresh"
+          ]
+        },
+        "D": {
+          "favorite_taste": [
+            "Bitter"
+          ],
+          "favorite_food_tags": [
+            "Earthy",
+            "Herbaceous"
+          ]
+        },
+        "E": {
+          "favorite_taste": [
+            "Savory"
+          ],
+          "favorite_food_tags": [
+            "Rich",
+            "Creamy"
+          ]
+        },
+        "F": {
+          "favorite_taste": [
+            "Savory"
+          ],
+          "favorite_food_tags": [
+            "Smoky",
+            "Charred",
+            "Spicy"
+          ]
+        },
+        "G": {
+          "favorite_food_tags": [
+            "Fresh",
+            "Herbaceous",
+            "Grassy"
+          ]
+        },
+        "H": {
+          "favorite_taste": [
+            "Sweet"
+          ],
+          "favorite_food_tags": [
+            "Fruity",
+            "Ripe",
+            "Fresh"
+          ]
+        },
+        "I": {
+          "favorite_taste": [
+            "Savory"
+          ],
+          "favorite_food_tags": [
+            "Roasted",
+            "Earthy",
+            "Caramelized"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "You’re at a restaurant where every dish is a surprise. You can only choose by looking at the main ingredients. Which one would you pick?",
+          "answers": {
+            "A": "Strawberries, mango, mint, and honey.",
+            "B": "Toasted bread, sea salt, butter, and mild cheese.",
+            "C": "Lemon, lime, green apple, and cucumber.",
+            "D": "Dark leafy greens, rosemary, mushrooms, and black tea.",
+            "E": "Cream, roasted garlic, parmesan, and potatoes.",
+            "F": "Smoked peppers, grilled meat, chili, and charred corn.",
+            "G": "Fresh herbs, cucumber, peas, and leafy greens.",
+            "H": "Peach, watermelon, berries, and ripe pear.",
+            "I": "Roasted squash, mushrooms, browned onions, and toasted nuts.",
+            "J": "Whatever the chef decides to make."
+          }
+        },
+        {
+          "question": "You can take home one mystery grocery bag. You only see four ingredients sticking out of the top. Which one do you grab?",
+          "answers": {
+            "A": "Pineapple, blueberries, mint, and honey.",
+            "B": "Pretzel bread, butter, sea salt, and mozzarella.",
+            "C": "Grapefruit, lemon, green apple, and cucumber.",
+            "D": "Kale, rosemary, mushrooms, and unsweetened cocoa.",
+            "E": "Parmesan, cream, garlic, and potatoes.",
+            "F": "Chipotle peppers, smoked sausage, corn, and chili flakes.",
+            "G": "Basil, cucumber, peas, and arugula.",
+            "H": "Peaches, cherries, melon, and pears.",
+            "I": "Roasted mushrooms, squash, onions, and pecans.",
+            "J": "The completely sealed bag with no clues."
+          }
+        }
+      ]
+    },
+    "4": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "disposition": [
+            "Cheerful"
+          ],
+          "constitution": [
+            "Normal"
+          ],
+          "neurological_style": [
+            "Empathic"
+          ]
+        },
+        "B": {
+          "disposition": [
+            "Curious",
+            "Serious"
+          ],
+          "neurological_style": [
+            "Analytical",
+            "Imaginative"
+          ]
+        },
+        "C": {
+          "disposition": [
+            "Energetic"
+          ],
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Lazy",
+            "Calm"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Bold",
+            "Angry"
+          ]
+        },
+        "F": {
+          "constitution": [
+            "Hardy",
+            "Resilient"
+          ],
+          "disposition": [
+            "Calm"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Confident",
+            "Cheerful"
+          ],
+          "neurological_style": [
+            "Expressive"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Shy",
+            "Calm"
+          ],
+          "neurological_style": [
+            "Observant",
+            "Empathic"
+          ]
+        },
+        "I": {
+          "disposition": [
+            "Serious",
+            "Curious"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Energetic"
+          ],
+          "body_type": [
+            "Small"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "Someone tells you, 'I planned a surprise for you. You are either going to love it or hate it.' What is your immediate reaction?",
+          "answers": {
+            "A": "Smile and hope they chose something everyone can enjoy together.",
+            "B": "Start trying to work out what it could be from every clue I can get.",
+            "C": "Get excited immediately and want to leave right now.",
+            "D": "Stay relaxed. I will find out when I find out.",
+            "E": "Tell them they had better not have chosen something ridiculous.",
+            "F": "Whatever it is, I will deal with it when we get there.",
+            "G": "Play along confidently and make a big show of trying to guess.",
+            "H": "Feel a little nervous, but pay close attention to their face and how they are acting.",
+            "I": "Ask a few specific questions so I can narrow down what they planned.",
+            "J": "Start bouncing between guesses because waiting is the hardest part."
+          }
+        },
+        {
+          "question": "You’re starting a story about someone who finds a strange object buried in their backyard. Which first line would you use?",
+          "answers": {
+            "A": "Before touching it, I called someone over so we could look at it together.",
+            "B": "The scratches on its surface had to mean something.",
+            "C": "I grabbed it before I had time to talk myself out of it.",
+            "D": "I sat beside it for a while and waited.",
+            "E": "Whatever it was, I was already annoyed that it had interrupted my day.",
+            "F": "I didn’t panic; strange things usually make more sense once you deal with them.",
+            "G": "I held it up like I had just discovered buried treasure.",
+            "H": "I noticed something move inside it before anyone else did.",
+            "I": "I checked the shape, markings, weight, and every visible seam.",
+            "J": "Within seconds, I was already digging for more."
+          }
+        }
+      ]
+    },
+    "5": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ]
+        },
+        "B": {
+          "body_type": [
+            "Heavy"
+          ],
+          "constitution": [
+            "Hardy"
+          ],
+          "disposition": [
+            "Bold"
+          ]
+        },
+        "C": {
+          "disposition": [
+            "Curious",
+            "Serious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Calm"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Balanced"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Cheerful",
+            "Energetic"
+          ],
+          "neurological_style": [
+            "Expressive"
+          ]
+        },
+        "F": {
+          "constitution": [
+            "Hardy",
+            "Resilient"
+          ],
+          "disposition": [
+            "Cheerful"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Lazy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Calm"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "I": {
+          "body_type": [
+            "Agile"
+          ],
+          "disposition": [
+            "Curious"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Bold",
+            "Energetic"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "You can live in one unusual place for an entire year. Which kind of home sounds most appealing?",
+          "answers": {
+            "A": "A compact home in a place where I could walk, climb, and explore everywhere.",
+            "B": "A huge old stone house in a rugged place where bad weather would barely matter.",
+            "C": "A cleverly designed home full of hidden storage, puzzles, tools, and things to figure out.",
+            "D": "A simple, organized home where everything has a purpose and daily life feels easy.",
+            "E": "A colorful home in the middle of a lively neighborhood where something is always happening.",
+            "F": "A comfortable cabin built to handle storms, cold, mud, and whatever else the year brings.",
+            "G": "The easiest place possible: comfortable furniture, everything nearby, and very little upkeep.",
+            "H": "A quiet home far from crowds where the days move slowly.",
+            "I": "A small unusual home near trails, rooftops, tunnels, or places I could constantly explore.",
+            "J": "A home right in the middle of the action where I could jump into something new at any time."
+          }
+        },
+        {
+          "question": "You have to spend one month on an island. Basic food, water, and shelter are already taken care of. You may bring ONE extra item or material. Which would you choose?",
+          "answers": {
+            "A": "A lightweight climbing rope and compact movement gear.",
+            "B": "A heavy-duty multipurpose tool built to take a beating.",
+            "C": "A detailed field guide, measuring tools, and a notebook for studying the island.",
+            "D": "A dependable solar-powered utility kit that makes everyday tasks easier.",
+            "E": "A musical instrument I could play whenever I wanted.",
+            "F": "A rugged repair kit with durable materials for fixing almost anything.",
+            "G": "The most comfortable hammock and pillow I could find.",
+            "H": "A comfortable chair and a huge collection of books.",
+            "I": "A compact exploration pack for reaching difficult parts of the island.",
+            "J": "A box of games, sports gear, and activities so I would always have something to do."
+          }
+        },
+        {
+          "question": "You get to design a vehicle for a fictional world. What feature matters most to you?",
+          "answers": {
+            "A": "It can turn quickly, fit through tight spaces, and handle tricky terrain.",
+            "B": "It is large, solid, and difficult to damage.",
+            "C": "Its controls give you detailed information about everything around you.",
+            "D": "It uses very little fuel and can travel a long way efficiently.",
+            "E": "It looks fun, stands out, and makes people smile when it arrives.",
+            "F": "It keeps working even in terrible weather and rough conditions.",
+            "G": "It practically drives itself so you barely have to do anything.",
+            "H": "It is comfortable, steady, and designed for slow travel.",
+            "I": "It can reach small or unusual places other vehicles cannot.",
+            "J": "It is fast, exciting, and always ready to go."
+          }
+        }
+      ]
+    },
+    "6": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "disposition": [
+            "Calm"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "B": {
+          "disposition": [
+            "Serious"
+          ],
+          "constitution": [
+            "Hardy"
+          ],
+          "neurological_style": [
+            "Observant"
+          ]
+        },
+        "C": {
+          "constitution": [
+            "Resilient"
+          ],
+          "disposition": [
+            "Calm"
+          ]
+        },
+        "D": {
+          "constitution": [
+            "Hardy"
+          ],
+          "metabolism": [
+            "Efficient"
+          ]
+        },
+        "E": {
+          "constitution": [
+            "Resilient"
+          ],
+          "disposition": [
+            "Curious"
+          ],
+          "neurological_style": [
+            "Imaginative"
+          ]
+        },
+        "F": {
+          "body_type": [
+            "Agile"
+          ],
+          "disposition": [
+            "Curious"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Lazy",
+            "Calm"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Curious",
+            "Serious"
+          ],
+          "neurological_style": [
+            "Analytical",
+            "Observant"
+          ]
+        },
+        "I": {
+          "constitution": [
+            "Resilient"
+          ],
+          "disposition": [
+            "Calm"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Cheerful"
+          ],
+          "constitution": [
+            "Normal"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "Something you planned for weeks completely fails at the last minute. Finish the sentence: 'My first instinct would probably be to...'",
+          "answers": {
+            "A": "...slow down and give myself a little time before deciding what comes next.",
+            "B": "...look carefully at what went wrong so I do not make the same mistake twice.",
+            "C": "...accept that it happened, reset, and start again without making it a huge deal.",
+            "D": "...focus on what still works and build a practical backup plan from that.",
+            "E": "...turn the failure into a completely different idea and see where the new direction goes.",
+            "F": "...move quickly, try another route, and learn what works by testing it.",
+            "G": "...take the opportunity to stop for a while instead of immediately replacing the plan.",
+            "H": "...analyze exactly where the plan failed before changing anything.",
+            "I": "...stay steady and work through the problem one piece at a time.",
+            "J": "...find something enjoyable to do instead and keep the day from being ruined."
+          }
+        },
+        {
+          "question": "You find ten prepared backpacks. You may take one without opening it. Which label do you trust most?",
+          "answers": {
+            "A": "TAKE YOUR TIME",
+            "B": "NOTICE EVERYTHING",
+            "C": "BUILT TO BOUNCE BACK",
+            "D": "MAKE IT LAST",
+            "E": "EXPECT THE UNEXPECTED",
+            "F": "KEEP MOVING",
+            "G": "COMFORT FIRST",
+            "H": "THINK BEFORE YOU ACT",
+            "I": "TOUGH ENOUGH",
+            "J": "GOOD FOR MOST SITUATIONS"
+          }
+        }
+      ]
+    },
+    "7": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ]
+        },
+        "B": {
+          "body_type": [
+            "Strong"
+          ],
+          "musculature": [
+            "Muscular",
+            "Powerful"
+          ]
+        },
+        "C": {
+          "body_type": [
+            "Heavy"
+          ],
+          "constitution": [
+            "Hardy"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Serious",
+            "Curious"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Cheerful",
+            "Confident"
+          ],
+          "neurological_style": [
+            "Empathic",
+            "Expressive"
+          ]
+        },
+        "F": {
+          "constitution": [
+            "Hardy",
+            "Resilient"
+          ]
+        },
+        "G": {
+          "metabolism": [
+            "Slow",
+            "Efficient"
+          ]
+        },
+        "H": {
+          "metabolism": [
+            "Fast"
+          ],
+          "constitution": [
+            "Normal"
+          ]
+        },
+        "I": {
+          "disposition": [
+            "Lazy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Curious",
+            "Bold"
+          ],
+          "neurological_style": [
+            "Imaginative"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "You receive a ticket that lets you instantly become really good at ONE kind of activity. Which ticket are you hoping is inside the envelope?",
+          "answers": {
+            "A": "Movement skills that require speed, balance, and coordination.",
+            "B": "A strength-based skill where power and control matter.",
+            "C": "A demanding outdoor skill that requires endurance and toughness.",
+            "D": "Solving complicated puzzles, systems, or mysteries.",
+            "E": "Performing, communicating, or connecting with an audience.",
+            "F": "A survival skill that would help me handle difficult conditions.",
+            "G": "A skill for making everyday tasks easier and more efficient.",
+            "H": "Something fast-paced that keeps me moving.",
+            "I": "Something relaxing that I could do without much effort.",
+            "J": "A creative skill where I could experiment and invent things."
+          }
+        },
+        {
+          "question": "Which of these situations do you think you would be BEST at handling?",
+          "answers": {
+            "A": "Getting through a challenge that depends on balance, timing, and quick movement.",
+            "B": "Handling a task that requires strength and physical effort.",
+            "C": "Sticking with a difficult situation for a long time without giving up.",
+            "D": "Figuring out a confusing problem that nobody understands yet.",
+            "E": "Helping a group feel comfortable, understood, and ready to work together.",
+            "F": "Keeping going when conditions become uncomfortable or difficult.",
+            "G": "Finding a simple, efficient way to handle a repetitive problem.",
+            "H": "Keeping up when everything suddenly starts happening very quickly.",
+            "I": "Staying comfortable and unbothered when everyone else is rushing around.",
+            "J": "Coming up with an unusual solution when the obvious ideas are not working."
+          }
+        },
+        {
+          "question": "You may choose one ability, but none of them is perfect. Which do you take?",
+          "answers": {
+            "A": "Incredible balance and speed, but no extra strength.",
+            "B": "Incredible strength, but you are not especially fast.",
+            "C": "You can withstand difficult conditions, but you still feel uncomfortable.",
+            "D": "You can understand complicated systems, but only after studying them carefully.",
+            "E": "You can instantly understand how other people are feeling.",
+            "F": "You recover from difficult situations unusually well.",
+            "G": "You can make supplies last much longer than they normally would.",
+            "H": "You have lots of energy, but you burn through it quickly.",
+            "I": "You rarely feel rushed, but it takes a lot to get you moving.",
+            "J": "You can imagine unusual possibilities other people do not see."
+          }
+        }
+      ]
+    },
+    "8": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "metabolism": [
+            "Fast"
+          ],
+          "disposition": [
+            "Energetic"
+          ]
+        },
+        "B": {
+          "body_type": [
+            "Strong",
+            "Heavy"
+          ],
+          "musculature": [
+            "Muscular"
+          ]
+        },
+        "C": {
+          "disposition": [
+            "Shy",
+            "Calm"
+          ],
+          "neurological_style": [
+            "Empathic"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Cheerful"
+          ],
+          "neurological_style": [
+            "Expressive"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Curious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Imaginative"
+          ]
+        },
+        "F": {
+          "constitution": [
+            "Resilient",
+            "Hardy"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Lazy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Angry",
+            "Bold"
+          ]
+        },
+        "I": {
+          "disposition": [
+            "Serious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Energetic"
+          ],
+          "body_type": [
+            "Small"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "You are dropped into the middle of a huge festival. You have no schedule and nobody is waiting for you. A few minutes later, where are we most likely to find you?",
+          "answers": {
+            "A": "Moving quickly from attraction to attraction so I can experience as much as possible.",
+            "B": "Trying one of the big physical challenges or strength games.",
+            "C": "At a quieter area with one or two people, taking everything in.",
+            "D": "Near a performance, laughing, talking, or joining whatever looks fun.",
+            "E": "Checking out the strangest exhibit because I want to know what it is.",
+            "F": "Trying an outdoor or endurance activity that most people skip.",
+            "G": "Sitting somewhere comfortable and enjoying the atmosphere without doing much.",
+            "H": "Trying the boldest or most intense attraction available.",
+            "I": "Studying the map and choosing a few things that seem most worthwhile.",
+            "J": "Running toward whatever looks exciting at that exact moment."
+          }
+        },
+        {
+          "question": "You arrive at a huge building with ten rooms. You only have time to enter one. Which sign pulls you in?",
+          "answers": {
+            "A": "FAST-PACED CHALLENGES",
+            "B": "TEST YOUR STRENGTH",
+            "C": "QUIET SPACE — SMALL GROUPS ONLY",
+            "D": "LIVE PERFORMANCE — PARTICIPATION WELCOME",
+            "E": "THINGS YOU HAVE PROBABLY NEVER SEEN BEFORE",
+            "F": "ENDURANCE CHALLENGE",
+            "G": "LOUNGE — DO ABSOLUTELY NOTHING",
+            "H": "EXTREME EXPERIENCE",
+            "I": "STRATEGY ROOM",
+            "J": "SURPRISE ACTIVITY EVERY FIVE MINUTES"
+          }
+        }
+      ]
+    },
+    "9": {
+      "answers": "ABCDEFGHIJ",
+      "effects": {
+        "A": {
+          "disposition": [
+            "Cheerful",
+            "Confident"
+          ],
+          "neurological_style": [
+            "Empathic",
+            "Expressive"
+          ]
+        },
+        "B": {
+          "body_type": [
+            "Strong"
+          ],
+          "musculature": [
+            "Muscular"
+          ]
+        },
+        "C": {
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Serious"
+          ],
+          "metabolism": [
+            "Efficient"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "E": {
+          "disposition": [
+            "Curious"
+          ],
+          "neurological_style": [
+            "Imaginative"
+          ]
+        },
+        "F": {
+          "disposition": [
+            "Shy",
+            "Calm"
+          ],
+          "constitution": [
+            "Resilient"
+          ],
+          "neurological_style": [
+            "Observant",
+            "Empathic"
+          ]
+        },
+        "G": {
+          "disposition": [
+            "Bold",
+            "Confident"
+          ],
+          "neurological_style": [
+            "Expressive"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Serious"
+          ],
+          "constitution": [
+            "Hardy"
+          ],
+          "favorite_food_tags": [
+            "Rich"
+          ],
+          "neurological_style": [
+            "Observant"
+          ]
+        },
+        "I": {
+          "disposition": [
+            "Lazy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Energetic",
+            "Cheerful"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "Five people are trying to solve something difficult. Nobody has assigned jobs. After ten minutes, what are you probably doing?",
+          "answers": {
+            "A": "Keeping everyone talking and making sure nobody gets pushed out of the discussion.",
+            "B": "Taking on the part that requires the most physical work.",
+            "C": "Moving between tasks and helping wherever something needs to happen quickly.",
+            "D": "Breaking the problem into pieces and working through them logically.",
+            "E": "Suggesting possibilities nobody has tried yet.",
+            "F": "Quietly noticing problems, reactions, and details that the group may be missing.",
+            "G": "Speaking up confidently and helping the group make a decision.",
+            "H": "Watching closely and taking responsibility for the difficult, unglamorous part of the job.",
+            "I": "Waiting until there is a clear task that actually needs me.",
+            "J": "Keeping the energy up and helping everyone stay positive."
+          }
+        },
+        {
+          "question": "In the movie version of a fictional heist, which role sounds most like you?",
+          "answers": {
+            "A": "The person who keeps the team together when tensions rise.",
+            "B": "The muscle.",
+            "C": "The runner who gets things where they need to go.",
+            "D": "The planner.",
+            "E": "The person with the bizarre idea nobody else considered.",
+            "F": "The lookout who notices tiny changes.",
+            "G": "The one willing to make the call when everyone hesitates.",
+            "H": "The person trusted with the hardest job because they will stick with it.",
+            "I": "The one who waits until they are actually needed.",
+            "J": "The one keeping everyone energized and optimistic."
+          }
+        }
+      ]
+    },
+    "10": {
+      "answers": "ABCDEFGHIJK",
+      "effects": {
+        "A": {
+          "disposition": [
+            "Bold",
+            "Confident"
+          ]
+        },
+        "B": {
+          "disposition": [
+            "Curious",
+            "Serious"
+          ],
+          "neurological_style": [
+            "Analytical"
+          ]
+        },
+        "C": {
+          "disposition": [
+            "Cheerful",
+            "Confident"
+          ],
+          "neurological_style": [
+            "Empathic",
+            "Expressive"
+          ]
+        },
+        "D": {
+          "disposition": [
+            "Calm"
+          ],
+          "constitution": [
+            "Resilient"
+          ],
+          "neurological_style": [
+            "Balanced"
+          ]
+        },
+        "E": {
+          "body_type": [
+            "Strong"
+          ],
+          "musculature": [
+            "Powerful"
+          ]
+        },
+        "F": {
+          "body_type": [
+            "Agile"
+          ],
+          "metabolism": [
+            "Fast"
+          ],
+          "disposition": [
+            "Energetic"
+          ]
+        },
+        "G": {
+          "constitution": [
+            "Hardy",
+            "Resilient"
+          ],
+          "disposition": [
+            "Calm"
+          ]
+        },
+        "H": {
+          "disposition": [
+            "Curious",
+            "Shy"
+          ],
+          "neurological_style": [
+            "Observant",
+            "Imaginative"
+          ]
+        },
+        "I": {
+          "disposition": [
+            "Lazy"
+          ],
+          "body_type": [
+            "Heavy"
+          ],
+          "metabolism": [
+            "Slow"
+          ]
+        },
+        "J": {
+          "disposition": [
+            "Energetic",
+            "Bold"
+          ]
+        },
+        "K": {
+          "body_type": [
+            "Average"
+          ],
+          "musculature": [
+            "Average"
+          ],
+          "constitution": [
+            "Normal"
+          ],
+          "neurological_style": [
+            "Balanced"
+          ]
+        }
+      },
+      "question_pool": [
+        {
+          "question": "FINAL QUESTION — A strange machine suddenly lights up in front of you. A message says: 'You may do ONE thing before this machine disappears.' What do you do?",
+          "answers": {
+            "A": "Choose a control confidently and see what happens.",
+            "B": "Study the symbols and try to determine what the controls probably do.",
+            "C": "Look for a way to use the machine to create something everyone could experience.",
+            "D": "Pause, stay calm, and choose only after I feel comfortable with the decision.",
+            "E": "Look for the control that seems to require the most force or produces the strongest response.",
+            "F": "Try something that looks fast, active, or movement-based.",
+            "G": "Choose the option that looks safest and most likely to keep working even if something goes wrong.",
+            "H": "Inspect tiny details and look for a hidden or unusual function.",
+            "I": "Choose the easiest-looking option and avoid making the situation more complicated than it needs to be.",
+            "J": "Hit the option that looks the most exciting and deal with the result afterward.",
+            "K": "Choose the plainest, most ordinary-looking control because it seems like the sensible default."
+          }
+        },
+        {
+          "question": "Your phone receives one impossible message from an unknown sender. Which one are you most likely to respond to?",
+          "answers": {
+            "A": "Take a chance. I think you can handle it.",
+            "B": "There is a puzzle hidden in this message.",
+            "C": "Someone could really use your help.",
+            "D": "There is no rush. Answer when you are ready.",
+            "E": "I need someone strong enough to handle something difficult.",
+            "F": "Meet me somewhere that requires a little climbing.",
+            "G": "This might be difficult, but it will not break you.",
+            "H": "You noticed something everyone else ignored.",
+            "I": "There is an easy way to do this.",
+            "J": "This is probably a bad idea, but it could be fun.",
+            "K": "Nothing unusual. Just checking in."
+          }
+        }
+      ]
+    }
+  }
+}
+         {
+  "feed": [
+    "eat"
+  ],
+  "clean": [
+    "idle"
+  ],
+  "play": [
+    "happy"
+  ],
+  "walk": [
+    "walking"
+  ],
+  "sleep": [
+    "sleeping"
+  ],
+  "hurdles": [
+    "walking",
+    "jump"
+  ],
+  "memory": [
+    "idle"
+  ],
+  "strength": [
+    "idle"
+  ],
+  "charisma": [
+    "happy"
+  ],
+  "party": [
+    "happy",
+    "walking"
+  ]
+}
+              {
+  "balance": {
+    "fields": {
+      "starting_stats": {
+        "fields": {
+          "fullness": {
+            "min": 0,
+            "max": 100
+          },
+          "happiness": {
+            "min": 0,
+            "max": 100
+          },
+          "energy": {
+            "min": 0,
+            "max": 100
+          },
+          "health": {
+            "min": 0,
+            "max": 100
+          },
+          "cleanliness": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      "decay_per_minute": {
+        "fields": {
+          "fullness": {
+            "min": 0,
+            "max": 100
+          },
+          "happiness": {
+            "min": 0,
+            "max": 100
+          },
+          "energy": {
+            "min": 0,
+            "max": 100
+          },
+          "cleanliness": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      "sleep_energy_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "walk_energy_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "walk_cleanliness_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "walk_pixels_per_second": {
+        "min": 1,
+        "max": 1000
+      },
+      "actions": {
+        "fields": {
+          "feed": {
+            "fields": {
+              "animation": {
+                "choices": [
+                  "idle",
+                  "walking",
+                  "sad_walking",
+                  "happy",
+                  "sad",
+                  "eat",
+                  "sleeping",
+                  "jump",
+                  "tired"
+                ]
+              },
+              "changes": {
+                "fields": {
+                  "happiness": {
+                    "min": -100,
+                    "max": 100
+                  }
+                }
+              }
+            }
+          },
+          "play": {
+            "fields": {
+              "animation": {
+                "choices": [
+                  "idle",
+                  "walking",
+                  "sad_walking",
+                  "happy",
+                  "sad",
+                  "eat",
+                  "sleeping",
+                  "jump",
+                  "tired"
+                ]
+              },
+              "duration_seconds": {
+                "min": 0.02,
+                "max": 300
+              },
+              "changes": {
+                "fields": {
+                  "happiness": {
+                    "min": -100,
+                    "max": 100
+                  },
+                  "energy": {
+                    "min": -100,
+                    "max": 100
+                  },
+                  "fullness": {
+                    "min": -30,
+                    "max": 0
+                  },
+                  "cleanliness": {
+                    "min": -30,
+                    "max": 0
+                  }
+                }
+              },
+              "repeat_penalty": {
+                "min": 0,
+                "max": 20
+              }
+            }
+          }
+        }
+      },
+      "health": {
+        "fields": {
+          "baseline": {
+            "min": 0,
+            "max": 100
+          },
+          "low_threshold": {
+            "min": 0,
+            "max": 100
+          },
+          "critical_penalty_multiplier": {
+            "min": 0,
+            "max": 100
+          },
+          "critical_penalty_flat": {
+            "min": 0,
+            "max": 100
+          },
+          "medium_threshold": {
+            "min": 0,
+            "max": 100
+          },
+          "medium_penalty_multiplier": {
+            "min": 0,
+            "max": 100
+          },
+          "good_threshold": {
+            "min": 0,
+            "max": 99
+          },
+          "good_bonus_multiplier": {
+            "min": 0,
+            "max": 100
+          },
+          "decline_per_second": {
+            "min": 0,
+            "max": 100
+          },
+          "recovery_per_second": {
+            "min": 0,
+            "max": 100
+          },
+          "good_recovery_bonus_per_second": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      "skills": {
+        "fields": {
+          "starting_level": {
+            "min": 0,
+            "max": 4,
+            "integer": true
+          },
+          "first_level_xp": {
+            "min": 1,
+            "max": 10000
+          },
+          "last_level_xp": {
+            "min": 1,
+            "max": 10000
+          },
+          "curve_power": {
+            "min": 0.1,
+            "max": 10
+          }
+        }
+      },
+      "mental_games": {
+        "fields": {
+          "focus_energy_savings_per_level": {
+            "min": 0,
+            "max": 1
+          },
+          "maximum_focus_energy_savings": {
+            "min": 0,
+            "max": 0.95
+          }
+        }
+      }
+    }
+  },
+  "hurdles": {
+    "fields": {
+      "round_seconds": {
+        "min": 0.02,
+        "max": 300
+      },
+      "jump_seconds": {
+        "min": 0.02,
+        "max": 300
+      },
+      "jump_height": {
+        "min": 1,
+        "max": 250
+      },
+      "clear_height": {
+        "min": 1,
+        "max": 250
+      },
+      "hurdle_speed": {
+        "min": 1,
+        "max": 1000
+      },
+      "acceleration_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "maximum_acceleration": {
+        "min": 0,
+        "max": 1000
+      },
+      "spawn_start_seconds": {
+        "min": 0.02,
+        "max": 300
+      },
+      "spawn_min_seconds": {
+        "min": 0.02,
+        "max": 300
+      },
+      "spawn_ramp_seconds": {
+        "min": 0.02,
+        "max": 300
+      },
+      "energy_loss_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "cleanliness_loss_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "hit_energy_penalty": {
+        "min": 0,
+        "max": 100
+      },
+      "hit_happiness_penalty": {
+        "min": 0,
+        "max": 100
+      },
+      "hunger_exit_cost": {
+        "min": 0,
+        "max": 100
+      },
+      "energy_exit_cost": {
+        "min": 0,
+        "max": 100
+      },
+      "xp_per_second": {
+        "min": 0,
+        "max": 10000
+      },
+      "xp_per_hurdle": {
+        "min": 0,
+        "max": 10000
+      },
+      "stamina_xp_ratio": {
+        "min": 0,
+        "max": 1
+      },
+      "xp_growth_multiplier": {
+        "min": 0,
+        "max": 1
+      },
+      "speed_airtime_per_level": {
+        "min": 0,
+        "max": 0.1
+      },
+      "maximum_airtime_bonus": {
+        "min": 0,
+        "max": 1
+      },
+      "stamina_energy_step": {
+        "min": 0,
+        "max": 1
+      },
+      "minimum_energy_multiplier": {
+        "min": 0,
+        "max": 1
+      },
+      "crash_seconds": {
+        "min": 0.01,
+        "max": 10
+      },
+      "crash_energy_multiplier": {
+        "min": 0,
+        "max": 10
+      },
+      "crash_cleanliness_multiplier": {
+        "min": 0,
+        "max": 10
+      },
+      "hunger_loss_per_second": {
+        "min": 0,
+        "max": 100
+      },
+      "finish_happiness_gain": {
+        "min": 0,
+        "max": 100
+      },
+      "escape_happiness_gain": {
+        "min": 0,
+        "max": 100
+      },
+      "rough_run_best_ratio": {
+        "min": 0,
+        "max": 1
+      },
+      "rough_run_happiness": {
+        "min": 0,
+        "max": 100
+      },
+      "acceleration_per_clear": {
+        "min": 0,
+        "max": 100
+      },
+      "maximum_hurdles": {
+        "min": 1,
+        "max": 6,
+        "integer": true
+      },
+      "minimum_gap_pixels": {
+        "min": 1,
+        "max": 1040
+      },
+      "minimum_gap_seconds": {
+        "min": 0.02,
+        "max": 5
+      },
+      "spawn_retry_seconds": {
+        "min": 0.02,
+        "max": 1
+      },
+      "spawn_offset_pixels": {
+        "min": 0,
+        "max": 100
+      },
+      "walking_base_frame_seconds": {
+        "min": 0.02,
+        "max": 1
+      },
+      "walking_min_frame_seconds": {
+        "min": 0.02,
+        "max": 1
+      },
+      "walking_frame_reduction_per_level": {
+        "min": 0,
+        "max": 0.05
+      },
+      "cleanliness_speed_factor": {
+        "min": 0,
+        "max": 0.1
+      }
+    }
+  },
+  "memory": {
+    "fields": {
+      "difficulties": {
+        "fields": {
+          "easy": {
+            "fields": {
+              "pairs": {
+                "min": 1,
+                "max": 20,
+                "integer": true
+              },
+              "columns": {
+                "min": 1,
+                "max": 8,
+                "integer": true
+              },
+              "preview_seconds": {
+                "min": 0,
+                "max": 30
+              },
+              "max_misses": {
+                "min": 1,
+                "max": 99,
+                "integer": true
+              },
+              "energy_cost": {
+                "min": 0,
+                "max": 100
+              },
+              "fullness_cost": {
+                "min": 0,
+                "max": 100
+              },
+              "score_reward_threshold": {
+                "min": 0,
+                "max": 1
+              }
+            }
+          },
+          "medium": {
+            "fields": {
+              "pairs": {
+                "min": 1,
+                "max": 20,
+                "integer": true
+              },
+              "columns": {
+                "min": 1,
+                "max": 8,
+                "integer": true
+              },
+              "preview_seconds": {
+                "min": 0,
+                "max": 30
+              },
+              "max_misses": {
+                "min": 1,
+                "max": 99,
+                "integer": true
+              },
+              "energy_cost": {
+                "min": 0,
+                "max": 100
+              },
+              "fullness_cost": {
+                "min": 0,
+                "max": 100
+              },
+              "score_reward_threshold": {
+                "min": 0,
+                "max": 1
+              }
+            }
+          },
+          "hard": {
+            "fields": {
+              "pairs": {
+                "min": 1,
+                "max": 20,
+                "integer": true
+              },
+              "columns": {
+                "min": 1,
+                "max": 8,
+                "integer": true
+              },
+              "preview_seconds": {
+                "min": 0,
+                "max": 30
+              },
+              "max_misses": {
+                "min": 1,
+                "max": 99,
+                "integer": true
+              },
+              "energy_cost": {
+                "min": 0,
+                "max": 100
+              },
+              "fullness_cost": {
+                "min": 0,
+                "max": 100
+              },
+              "score_reward_threshold": {
+                "min": 0,
+                "max": 1
+              }
+            }
+          }
+        }
+      },
+      "mismatch_seconds": {
+        "min": 0.02,
+        "max": 300
+      },
+      "xp_per_pair": {
+        "min": 0,
+        "max": 10000
+      },
+      "completion_bonus_ratio": {
+        "min": 0,
+        "max": 1
+      },
+      "focus_xp_ratio": {
+        "min": 0,
+        "max": 1
+      },
+      "score_per_pair": {
+        "min": 0,
+        "max": 10000
+      },
+      "miss_score_penalty": {
+        "min": 0,
+        "max": 10000
+      },
+      "completion_happiness": {
+        "min": 0,
+        "max": 100
+      },
+      "preview_bonuses": {
+        "items": {
+          "min": 0,
+          "max": 30
+        },
+        "count": 5
+      },
+      "swap_chances": {
+        "items": {
+          "min": 0,
+          "max": 1
+        },
+        "count": 5
+      },
+      "swap_seconds": {
+        "items": {
+          "min": 0.02,
+          "max": 300
+        },
+        "count": 5
+      },
+      "xp_growth_multiplier": {
+        "min": 0,
+        "max": 1
+      },
+      "score_happiness": {
+        "min": 0,
+        "max": 100
+      },
+      "help": {
+        "fields": {
+          "energy_cost": {
+            "type": "number",
+            "min": 0,
+            "max": 100
+          },
+          "active_energy_per_second": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "stamina_savings": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "minimum_energy": {
+            "type": "number",
+            "min": 0,
+            "max": 100
+          },
+          "refusal_low": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "refusal_high": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "wrong_low": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "wrong_high": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "tired_wrong_bonus": {
+            "type": "number",
+            "min": 0,
+            "max": 1
+          },
+          "jump_seconds": {
+            "type": "number",
+            "min": 0.01,
+            "max": 10
+          }
+        }

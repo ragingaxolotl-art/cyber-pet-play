@@ -76,3 +76,4 @@ Version links:
 - [2026-10-10-nature-starters](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-10-nature-starters/)
 - [2026-10-10-visemes](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-10-visemes/)
 - [2026-10-10-flavor-tags](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-10-flavor-tags/)
+- [2026-10-10-musical-pets](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-10-musical-pets/)
