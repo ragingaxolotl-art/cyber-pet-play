@@ -238,5 +238,9 @@
   {
     "version": "2026-10-10-visemes",
     "path": "versions/2026-10-10-visemes/"
+  },
+  {
+    "version": "2026-10-10-flavor-tags",
+    "path": "versions/2026-10-10-flavor-tags/"
   }
 ]
