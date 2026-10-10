@@ -230,5 +230,9 @@
   {
     "version": "2026-10-10-dance-usability",
     "path": "versions/2026-10-10-dance-usability/"
+  },
+  {
+    "version": "2026-10-10-nature-starters",
+    "path": "versions/2026-10-10-nature-starters/"
   }
 ]
