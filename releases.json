@@ -258,5 +258,9 @@
   {
     "version": "2026-10-11-atlas40",
     "path": "versions/2026-10-11-atlas40/"
+  },
+  {
+    "version": "2026-10-11-atlas41",
+    "path": "versions/2026-10-11-atlas41/"
   }
 ]
