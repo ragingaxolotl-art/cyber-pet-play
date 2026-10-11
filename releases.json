@@ -282,5 +282,9 @@
   {
     "version": "2026-10-11-character-selection",
     "path": "versions/2026-10-11-character-selection/"
+  },
+  {
+    "version": "2026-10-11-care-toolbar",
+    "path": "versions/2026-10-11-care-toolbar/"
   }
 ]

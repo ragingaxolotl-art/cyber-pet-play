@@ -86,3 +86,4 @@ Version links:
 - [2026-10-11-faster-loading](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-faster-loading/)
 - [2026-10-11-medicine-cabinet](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-medicine-cabinet/)
 - [2026-10-11-character-selection](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-character-selection/)
+- [2026-10-11-care-toolbar](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-care-toolbar/)
