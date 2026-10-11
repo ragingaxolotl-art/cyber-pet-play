@@ -1,0 +1,1127 @@
+acheboard_the_unintended_board_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/cacheboard_the_unintended_board_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/cacheboard_the_unintended_board/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/layered_cache_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/layered_cache/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/layered_cache_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/layered_cache/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/layered_cache/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/layered_cache/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/layered_cache/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/layered_cache/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/layered_cache/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/first_place_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/first_place/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/first_place_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/first_place/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/first_place/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/first_place/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/first_place/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/first_place/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/first_place/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/sublevel_and_pump_forty_seven_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/sublevel_and_pump_forty_seven_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/sublevel_and_pump_forty_seven/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/warm_copy_garden_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/warm_copy_garden_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/warm_copy_garden/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/last_city_of_many_forms_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/last_city_of_many_forms_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/last_city_of_many_forms/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/dormant_external_gate_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/dormant_external_gate_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/dormant_external_gate/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/underway_of_returning_signals_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/underway_of_returning_signals_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/underway_of_returning_signals/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/folded_garden_of_six_traditions_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/folded_garden_of_six_traditions_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/folded_garden_of_six_traditions/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/still_loading_forest_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/still_loading_forest_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/still_loading_forest/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/coral_data_labyrinth.png",
+      "source_assets": [
+        "res://assets/backgrounds/coral_data_labyrinth.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/coral_data_labyrinth_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/coral_data_labyrinth_layers/01.png",
+        "res://assets/backgrounds/coral_data_labyrinth_layers/02.png",
+        "res://assets/backgrounds/coral_data_labyrinth_layers/03.png",
+        "res://assets/backgrounds/coral_data_labyrinth_layers/04.png",
+        "res://assets/backgrounds/coral_data_labyrinth_layers/05.png",
+        "res://assets/backgrounds/coral_data_labyrinth_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/coral_data_labyrinth_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/coral_data_labyrinth_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16_layers/01.png",
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16_layers/02.png",
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16_layers/03.png",
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16_layers/04.png",
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16_layers/05.png",
+        "res://assets/backgrounds/coral_data_labyrinth_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/kelp_tower_shelf.png",
+      "source_assets": [
+        "res://assets/backgrounds/kelp_tower_shelf.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/kelp_tower_shelf_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/kelp_tower_shelf_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16_layers/01.png",
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16_layers/02.png",
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16_layers/03.png",
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16_layers/04.png",
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16_layers/05.png",
+        "res://assets/backgrounds/kelp_tower_shelf_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/red_glass_erg.png",
+      "source_assets": [
+        "res://assets/backgrounds/red_glass_erg.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/red_glass_erg_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/red_glass_erg_layers/01.png",
+        "res://assets/backgrounds/red_glass_erg_layers/02.png",
+        "res://assets/backgrounds/red_glass_erg_layers/03.png",
+        "res://assets/backgrounds/red_glass_erg_layers/04.png",
+        "res://assets/backgrounds/red_glass_erg_layers/05.png",
+        "res://assets/backgrounds/red_glass_erg_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/red_glass_erg_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/red_glass_erg_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/red_glass_erg_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/red_glass_erg_pixel16_layers/01.png",
+        "res://assets/backgrounds/red_glass_erg_pixel16_layers/02.png",
+        "res://assets/backgrounds/red_glass_erg_pixel16_layers/03.png",
+        "res://assets/backgrounds/red_glass_erg_pixel16_layers/04.png",
+        "res://assets/backgrounds/red_glass_erg_pixel16_layers/05.png",
+        "res://assets/backgrounds/red_glass_erg_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/marble_dune_cemetery.png",
+      "source_assets": [
+        "res://assets/backgrounds/marble_dune_cemetery.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/marble_dune_cemetery_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/marble_dune_cemetery_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16_layers/01.png",
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16_layers/02.png",
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16_layers/03.png",
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16_layers/04.png",
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16_layers/05.png",
+        "res://assets/backgrounds/marble_dune_cemetery_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/copper_canyon_chorus_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/copper_canyon_chorus_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/copper_canyon_chorus/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/cloudroot_tepuis.png",
+      "source_assets": [
+        "res://assets/backgrounds/cloudroot_tepuis.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/cloudroot_tepuis_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/cloudroot_tepuis_layers/01.png",
+        "res://assets/backgrounds/cloudroot_tepuis_layers/02.png",
+        "res://assets/backgrounds/cloudroot_tepuis_layers/03.png",
+        "res://assets/backgrounds/cloudroot_tepuis_layers/04.png",
+        "res://assets/backgrounds/cloudroot_tepuis_layers/05.png",
+        "res://assets/backgrounds/cloudroot_tepuis_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/cloudroot_tepuis_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/cloudroot_tepuis_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16_layers/01.png",
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16_layers/02.png",
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16_layers/03.png",
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16_layers/04.png",
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16_layers/05.png",
+        "res://assets/backgrounds/cloudroot_tepuis_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/glacial_memory_fjord.png",
+      "source_assets": [
+        "res://assets/backgrounds/glacial_memory_fjord.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/glacial_memory_fjord_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/glacial_memory_fjord_layers/01.png",
+        "res://assets/backgrounds/glacial_memory_fjord_layers/02.png",
+        "res://assets/backgrounds/glacial_memory_fjord_layers/03.png",
+        "res://assets/backgrounds/glacial_memory_fjord_layers/04.png",
+        "res://assets/backgrounds/glacial_memory_fjord_layers/05.png",
+        "res://assets/backgrounds/glacial_memory_fjord_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/glacial_memory_fjord_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/glacial_memory_fjord_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16_layers/01.png",
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16_layers/02.png",
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16_layers/03.png",
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16_layers/04.png",
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16_layers/05.png",
+        "res://assets/backgrounds/glacial_memory_fjord_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/karst_lantern_provinces.png",
+      "source_assets": [
+        "res://assets/backgrounds/karst_lantern_provinces.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/karst_lantern_provinces_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/karst_lantern_provinces_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16_layers/01.png",
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16_layers/02.png",
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16_layers/03.png",
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16_layers/04.png",
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16_layers/05.png",
+        "res://assets/backgrounds/karst_lantern_provinces_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/blackwater.png",
+      "source_assets": [
+        "res://assets/backgrounds/blackwater.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/blackwater_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/blackwater_layers/01.png",
+        "res://assets/backgrounds/blackwater_layers/02.png",
+        "res://assets/backgrounds/blackwater_layers/03.png",
+        "res://assets/backgrounds/blackwater_layers/04.png",
+        "res://assets/backgrounds/blackwater_layers/05.png",
+        "res://assets/backgrounds/blackwater_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/blackwater_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/blackwater_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/blackwater_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/blackwater_pixel16_layers/01.png",
+        "res://assets/backgrounds/blackwater_pixel16_layers/02.png",
+        "res://assets/backgrounds/blackwater_pixel16_layers/03.png",
+        "res://assets/backgrounds/blackwater_pixel16_layers/04.png",
+        "res://assets/backgrounds/blackwater_pixel16_layers/05.png",
+        "res://assets/backgrounds/blackwater_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/inverted_rainforest_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/inverted_rainforest_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/inverted_rainforest/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/patchwork_prairie_of_broken_seasons.png",
+      "source_assets": [
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/patchwork_prairie_of_broken_seasons_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/patchwork_prairie_of_broken_seasons_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16_layers/01.png",
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16_layers/02.png",
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16_layers/03.png",
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16_layers/04.png",
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16_layers/05.png",
+        "res://assets/backgrounds/patchwork_prairie_of_broken_seasons_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/monsoon_stepwell_city.png",
+      "source_assets": [
+        "res://assets/backgrounds/monsoon_stepwell_city.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/monsoon_stepwell_city_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/monsoon_stepwell_city_layers/01.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_layers/02.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_layers/03.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_layers/04.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_layers/05.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/monsoon_stepwell_city_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/monsoon_stepwell_city_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16_layers/01.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16_layers/02.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16_layers/03.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16_layers/04.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16_layers/05.png",
+        "res://assets/backgrounds/monsoon_stepwell_city_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/rainward.png",
+      "source_assets": [
+        "res://assets/backgrounds/rainward.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/rainward_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/rainward_layers/01.png",
+        "res://assets/backgrounds/rainward_layers/02.png",
+        "res://assets/backgrounds/rainward_layers/03.png",
+        "res://assets/backgrounds/rainward_layers/04.png",
+        "res://assets/backgrounds/rainward_layers/05.png",
+        "res://assets/backgrounds/rainward_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/rainward_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/rainward_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/rainward_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/rainward_pixel16_layers/01.png",
+        "res://assets/backgrounds/rainward_pixel16_layers/02.png",
+        "res://assets/backgrounds/rainward_pixel16_layers/03.png",
+        "res://assets/backgrounds/rainward_pixel16_layers/04.png",
+        "res://assets/backgrounds/rainward_pixel16_layers/05.png",
+        "res://assets/backgrounds/rainward_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/museum_of_unfinished_rooms_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/museum_of_unfinished_rooms_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/museum_of_unfinished_rooms/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/ice_cave_of_paused_dawn_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/ice_cave_of_paused_dawn_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/ice_cave_of_paused_dawn/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/skyfold_boundary_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/skyfold_boundary_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/skyfold_boundary/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/valley_that_restores_wrong_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/valley_that_restores_wrong_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/valley_that_restores_wrong/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/plain_of_missing_distance_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/plain_of_missing_distance_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/plain_of_missing_distance/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/stormwall_orchard_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/stormwall_orchard_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/stormwall_orchard/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/room_behind_the_false_horizon.png",
+      "source_assets": [
+        "res://assets/backgrounds/room_behind_the_false_horizon.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/room_behind_the_false_horizon_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/room_behind_the_false_horizon_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16_layers/01.png",
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16_layers/02.png",
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16_layers/03.png",
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16_layers/04.png",
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16_layers/05.png",
+        "res://assets/backgrounds/room_behind_the_false_horizon_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/door_archive_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/door_archive/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/door_archive_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/door_archive/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/door_archive/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/door_archive/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/door_archive/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/door_archive/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/door_archive/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/maintenance_chapel_without_a_god_exterior_approach.png",
+      "source_assets": [
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/maintenance_chapel_without_a_god_exterior_approach_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers/01.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers/02.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers/03.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers/04.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers/05.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_exterior_approach_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/maintenance_chapel_without_a_god_interior_main_room.png",
+      "source_assets": [
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/maintenance_chapel_without_a_god_interior_main_room_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers/01.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers/02.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers/03.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers/04.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers/05.png",
+        "res://assets/backgrounds/maintenance_chapel_without_a_god_interior_main_room_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/ceiling_desert_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/ceiling_desert_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/ceiling_desert/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/firefly_ice_shelf.png",
+      "source_assets": [
+        "res://assets/backgrounds/firefly_ice_shelf.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/firefly_ice_shelf_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/firefly_ice_shelf_layers/01.png",
+        "res://assets/backgrounds/firefly_ice_shelf_layers/02.png",
+        "res://assets/backgrounds/firefly_ice_shelf_layers/03.png",
+        "res://assets/backgrounds/firefly_ice_shelf_layers/04.png",
+        "res://assets/backgrounds/firefly_ice_shelf_layers/05.png",
+        "res://assets/backgrounds/firefly_ice_shelf_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/firefly_ice_shelf_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/firefly_ice_shelf_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16_layers/01.png",
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16_layers/02.png",
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16_layers/03.png",
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16_layers/04.png",
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16_layers/05.png",
+        "res://assets/backgrounds/firefly_ice_shelf_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/half_restored_palace_of_floors_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/half_restored_palace_of_floors_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/half_restored_palace_of_floors/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/rooms_of_mismatched_seasons_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/rooms_of_mismatched_seasons_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/rooms_of_mismatched_seasons/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/hall_that_forgets_its_walls_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/hall_that_forgets_its_walls_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/hall_that_forgets_its_walls/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/recursive_lighthouse_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/composite.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/recursive_lighthouse_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/layers/01.png",
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/layers/02.png",
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/layers/03.png",
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/layers/04.png",
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/layers/05.png",
+        "res://assets/backgrounds/atlas_expansion/recursive_lighthouse/layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/garden.png",
+      "source_assets": [
+        "res://assets/backgrounds/garden.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/garden_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/garden_layers/01.png",
+        "res://assets/backgrounds/garden_layers/02.png",
+        "res://assets/backgrounds/garden_layers/03.png",
+        "res://assets/backgrounds/garden_layers/04.png",
+        "res://assets/backgrounds/garden_layers/05.png",
+        "res://assets/backgrounds/garden_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/garden_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/garden_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/garden_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/garden_pixel16_layers/01.png",
+        "res://assets/backgrounds/garden_pixel16_layers/02.png",
+        "res://assets/backgrounds/garden_pixel16_layers/03.png",
+        "res://assets/backgrounds/garden_pixel16_layers/04.png",
+        "res://assets/backgrounds/garden_pixel16_layers/05.png",
+        "res://assets/backgrounds/garden_pixel16_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/unfinished_underground_sun.png",
+      "source_assets": [
+        "res://assets/backgrounds/unfinished_underground_sun.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/unfinished_underground_sun_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/unfinished_underground_sun_layers/01.png",
+        "res://assets/backgrounds/unfinished_underground_sun_layers/02.png",
+        "res://assets/backgrounds/unfinished_underground_sun_layers/03.png",
+        "res://assets/backgrounds/unfinished_underground_sun_layers/04.png",
+        "res://assets/backgrounds/unfinished_underground_sun_layers/05.png",
+        "res://assets/backgrounds/unfinished_underground_sun_layers/06.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/unfinished_underground_sun_pixel16.png",
+      "source_assets": [
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16.png"
+      ]
+    },
+    {
+      "attribution": "Inherits approved source attribution from assets/manifest.json",
+      "operation": "320x180 source-order alpha composite",
+      "path": "res://assets/backgrounds/thumbnails/unfinished_underground_sun_pixel16_layers.png",
+      "source_assets": [
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16_layers/01.png",
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16_layers/02.png",
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16_layers/03.png",
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16_layers/04.png",
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16_layers/05.png",
+        "res://assets/backgrounds/unfinished_underground_sun_pixel16_layers/06.png"
+      ]
+    }
+  ]
+}
+  
