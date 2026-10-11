@@ -250,5 +250,9 @@
   {
     "version": "2026-10-10-dba-locations",
     "path": "versions/2026-10-10-dba-locations/"
+  },
+  {
+    "version": "2026-10-11-atlas39",
+    "path": "versions/2026-10-11-atlas39/"
   }
 ]
