@@ -7,7 +7,7 @@ The editable Godot project is maintained separately. No student files or saves a
 your browser. Download pet backups before clearing browser data or changing devices.
 
 This is a development preview. Classroom accounts and physical card return are not connected.
-First loading the latest version downloads about 263 MiB; later loads can reuse cached files.
+First loading the latest version downloads about 268 MiB; later loads can reuse cached files.
 
 Credits: Memory card artwork by ePics, copied unchanged under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 Made with [Godot Engine](https://godotengine.org/license/) (MIT license). Pip is original anonymous test artwork;
@@ -81,3 +81,4 @@ Version links:
 - [2026-10-11-atlas39](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-atlas39/)
 - [2026-10-11-atlas40](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-atlas40/)
 - [2026-10-11-atlas41](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-atlas41/)
+- [2026-10-11-atlas42](https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-atlas42/)
