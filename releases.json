@@ -286,5 +286,9 @@
   {
     "version": "2026-10-11-care-toolbar",
     "path": "versions/2026-10-11-care-toolbar/"
+  },
+  {
+    "version": "2026-10-11-student-book",
+    "path": "versions/2026-10-11-student-book/"
   }
 ]
