@@ -278,5 +278,9 @@
   {
     "version": "2026-10-11-medicine-cabinet",
     "path": "versions/2026-10-11-medicine-cabinet/"
+  },
+  {
+    "version": "2026-10-11-character-selection",
+    "path": "versions/2026-10-11-character-selection/"
   }
 ]
