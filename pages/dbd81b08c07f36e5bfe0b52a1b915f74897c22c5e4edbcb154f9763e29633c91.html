@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><base href="https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-strength-stack/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+<title>Cyber Pet Project</title>
+<style>
+html, body, #canvas {
+margin: 0;
+padding: 0;
+border: 0;
+}
+
+body {
+color: white;
+background-color: black;
+overflow: hidden;
+touch-action: none;
+}
+
+#canvas {
+display: block;
+}
+
+#canvas:focus {
+outline: none;
+}
+
+#status, #status-splash, #status-progress {
+position: absolute;
+left: 0;
+right: 0;
+}
+
+#status, #status-splash {
+top: 0;
+bottom: 0;
+}
+
+#status {
+background-color: #242424;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+visibility: hidden;
+}
+
+#status-splash {
+max-height: 100%;
+max-width: 100%;
+margin: auto;
+}
+
+#status-splash.show-image--false {
+display: none;
+}
+
+#status-splash.fullsize--true {
+height: 100%;
+width: 100%;
+object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+image-rendering: pixelated;
+}
+
+#status-progress, #status-notice {
+display: none;
+}
+
+#status-progress {
+bottom: 10%;
+width: 50%;
+margin: 0 auto;
+}
+
+#status-notice {
+background-color: #5b3943;
+border-radius: 0.5rem;
+border: 1px solid #9b3943;
+color: #e0e0e0;
+font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+line-height: 1.3;
+margin: 0 2rem;
+overflow: hidden;
+padding: 1rem;
+text-align: center;
+z-index: 1;
+}
+</style>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="../2026-09-30-4acbcf1/index.icon.png" />
+<link rel="apple-touch-icon" href="../2026-09-30-4acbcf1/index.apple-touch-icon.png"/>
+
+</head>
+<body>
+<canvas id="canvas">
+Your browser does not support the canvas tag.
+</canvas>
+
+<noscript>
+Your browser does not support JavaScript.
+</noscript>
+
+<div id="status">
+<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="../2026-09-30-4acbcf1/index.png" alt="">
+<progress id="status-progress"></progress>
+<div id="status-notice"></div>
+</div>
+
+<script>(() => {
+let assetsReady;
+async function loadAssets() {
+const response = await nativeFetch(new URL("https://raw.githubusercontent.com/ragingaxolotl-art/cyber-pet-play/662045cc2295f39619b6db41e45449f90955a48d/manifests/70fd0d0a71b934b4a39f1874934417a0752b705af50e80498a038a5071eed18f.json", base));
+if (!response.ok) throw Error('Could not load game details. Please reload.');
+const metadata = await response.json();
+if (metadata.format !== 2) throw Error('Invalid game details.');
+for (const asset of Object.values(metadata.assets)) {
+asset.parts = asset.parts.map(([index, offset, length]) => {
+const [directory, sha256, size] = metadata.chunks[index];
+return {path: metadata.bases[directory] + sha256 + '.bin', sha256, size, offset, length};
+});
+}
+return metadata.assets;
+}
+const nativeFetch = window.fetch.bind(window);
+const base = new URL('.', document.baseURI);
+window.fetch = async (input, options) => {
+assetsReady ||= loadAssets();
+const assets = await assetsReady;
+const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, base);
+const name = Object.keys(assets).find(name => new URL(name, base).href === url.href);
+if (!name) return nativeFetch(input, options);
+const asset = assets[name];
+let next = 0;
+const signal = options?.signal || (input instanceof Request ? input.signal : undefined);
+const downloads = new Map();
+const remaining = new Map();
+for (const part of asset.parts) remaining.set(part.sha256, (remaining.get(part.sha256) || 0) + 1);
+const abort = new AbortController();
+const cancel = () => abort.abort();
+if (signal?.aborted) cancel();
+else signal?.addEventListener('abort', cancel, {once: true});
+const finish = () => signal?.removeEventListener('abort', cancel);
+function download(part) {
+if (!downloads.has(part.sha256)) {
+downloads.set(part.sha256, (async () => {
+const response = await nativeFetch(new URL(part.path, base), {signal: abort.signal});
+if (!response.ok) throw Error('Game download failed. Please reload to try again.');
+const data = await response.arrayBuffer();
+const digest = await crypto.subtle.digest('SHA-256', data);
+const hash = Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, '0')).join('');
+if (data.byteLength !== part.size || hash !== part.sha256) throw Error('Game download was incomplete. Please reload.');
+return data;
+})().then(data => ({data}), error => ({error})));
+}
+return downloads.get(part.sha256);
+}
+const body = new ReadableStream({
+async pull(controller) {
+try {
+if (next === asset.parts.length) { finish(); controller.close(); return; }
+for (let index = next; index < Math.min(next + 4, asset.parts.length); index++) download(asset.parts[index]);
+const part = asset.parts[next++];
+const result = await download(part);
+if (result.error) throw result.error;
+abort.signal.throwIfAborted();
+const data = result.data;
+const offset = part.offset ?? 0, length = part.length ?? data.byteLength;
+if (data.byteLength !== part.size || !Number.isSafeInteger(offset) || !Number.isSafeInteger(length) || offset < 0 || length <= 0 || offset + length > data.byteLength) throw Error('Invalid game download slice.');
+const uses = remaining.get(part.sha256) - 1;
+remaining.set(part.sha256, uses);
+if (!uses) downloads.delete(part.sha256);
+controller.enqueue(new Uint8Array(data, offset, length));
+} catch (error) { cancel(); finish(); downloads.clear(); controller.error(error); }
+},
+cancel() { cancel(); finish(); downloads.clear(); }
+});
+return new Response(body, {headers: {'Content-Type': asset.type, 'Content-Length': String(asset.size)}});
+};
+})();
+</script>
+<script src="../2026-10-08-d05b853/index.js" integrity="sha256-M8lMsxdfMzO4Lio75ejob3eYbwqiBCsWMfY2ek5btro="></script>
+<script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":280080496,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+const statusOverlay = document.getElementById('status');
+const statusProgress = document.getElementById('status-progress');
+const statusNotice = document.getElementById('status-notice');
+
+let initializing = true;
+let statusMode = '';
+
+function setStatusMode(mode) {
+if (statusMode === mode || !initializing) {
+return;
+}
+if (mode === 'hidden') {
+statusOverlay.remove();
+initializing = false;
+return;
+}
+statusOverlay.style.visibility = 'visible';
+statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+statusMode = mode;
+}
+
+function setStatusNotice(text) {
+while (statusNotice.lastChild) {
+statusNotice.removeChild(statusNotice.lastChild);
+}
+const lines = text.split('\n');
+lines.forEach((line) => {
+statusNotice.appendChild(document.createTextNode(line));
+statusNotice.appendChild(document.createElement('br'));
+});
+}
+
+function displayFailureNotice(err) {
+console.error(err);
+if (err instanceof Error) {
+setStatusNotice(err.message);
+} else if (typeof err === 'string') {
+setStatusNotice(err);
+} else {
+setStatusNotice('An unknown error occurred.');
+}
+setStatusMode('notice');
+initializing = false;
+}
+
+const missing = Engine.getMissingFeatures({
+threads: GODOT_THREADS_ENABLED,
+});
+
+if (missing.length !== 0) {
+if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+let serviceWorkerRegistrationPromise;
+try {
+serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+} catch (err) {
+serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+}
+// There's a chance that installing the service worker would fix the issue
+Promise.race([
+serviceWorkerRegistrationPromise.then((registration) => {
+if (registration != null) {
+return Promise.reject(new Error('Service worker already exists.'));
+}
+return registration;
+}).then(() => engine.installServiceWorker()),
+// For some reason, `getRegistration()` can stall
+new Promise((resolve) => {
+setTimeout(() => resolve(), 2000);
+}),
+]).then(() => {
+// Reload if there was no error.
+window.location.reload();
+}).catch((err) => {
+console.error('Error while registering service worker:', err);
+});
+} else {
+// Display the message as usual
+const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+displayFailureNotice(missingMsg + missing.join('\n'));
+}
+} else {
+setStatusMode('progress');
+engine.startGame({
+'onProgress': function (current, total) {
+if (current > 0 && total > 0) {
+statusProgress.value = current;
+statusProgress.max = total;
+} else {
+statusProgress.removeAttribute('value');
+statusProgress.removeAttribute('max');
+}
+},
+}).then(() => {
+setStatusMode('hidden');
+}, displayFailureNotice);
+}
+}());
+</script>
+</body>
+</html>
+
