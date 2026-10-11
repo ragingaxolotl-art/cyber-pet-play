@@ -274,5 +274,9 @@
   {
     "version": "2026-10-11-faster-loading",
     "path": "versions/2026-10-11-faster-loading/"
+  },
+  {
+    "version": "2026-10-11-medicine-cabinet",
+    "path": "versions/2026-10-11-medicine-cabinet/"
   }
 ]
