@@ -1,0 +1,13 @@
+
+      },
+      "cleanliness_loss_per_second": {
+        "min": 0,
+        "max": 2
+      },
+      "stamina_cleanliness_savings_per_level": {
+        "min": 0,
+        "max": 0.1
+      },
+      "maximum_cleanliness_savings": {
+        "min": 0,
+        "max": 0.8
