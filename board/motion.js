@@ -1,6 +1,6 @@
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
-export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5};
+export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
 export const floor=(level)=>.86-level*.255;
 export const stations={food:{level:1,left:.43,right:.59},wash:{level:2,left:.34,right:.53}};
 export function hasAction(data,action){
@@ -30,7 +30,20 @@ export function foodRemaining(pet){
 export function engagementSeconds(pet,activity){
   return activity==='tag'?6+axis(pet,'activity_level')*18+axis(pet,'sociability')*8-axis(pet,'curiosity')*4:3+axis(pet,'sociability')*10+axis(pet,'curiosity')*5;
 }
+// Keep resting tag partners side by side, including near either screen edge.
+export function standBeside(a,b){
+  if(a.level!==b.level||a.stair||b.stair)return;
+  const gap=(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.012;
+  if(Math.abs(a.x-b.x)>=gap)return;
+  const left=a.x<=b.x?a:b,right=left===a?b:a;
+  const center=Math.max(gap/2+.04,Math.min(1-gap/2-.04,(a.x+b.x)/2));
+  left.x=center-gap/2;right.x=center+gap/2;
+}
+export function addWalkingDirt(pet,distance){
+  pet.cleanliness=Math.max(0,Math.min(1,pet.cleanliness-distance*tuning.dirtPerStage));
+}
 export function startConversation(a,b,afterTag=false){
+  if(afterTag)standBeside(a,b);
   const curious=axis(a,'curiosity')>.65,shy=axis(a,'sociability')<.35||axis(b,'sociability')<.35;
   const generous=axis(a,'generosity')>.65||axis(b,'generosity')>.65;
   const lowMood=(a.data.stats?.happiness??50)<=35||(b.data.stats?.happiness??50)<=35;
@@ -68,6 +81,7 @@ export function advanceTag(pets,dt){
     game.cooldown=Math.max(0,game.cooldown-dt);
     const gap=distance(chaser.x,runner.x);chaser.direction=Math.sign(gap)||runner.direction;
     runner.x=wrapped(runner.x+runner.direction*runSpeed*dt);
+    addWalkingDirt(runner,runSpeed*dt);addWalkingDirt(chaser,runSpeed*1.4*dt);
     chaser.x=wrapped(chaser.x+chaser.direction*runSpeed*1.4*dt);
     if(game.cooldown===0&&Math.abs(distance(chaser.x,runner.x))<.014){
       game.chaser=runner;game.runner=chaser;game.cooldown=1.5;game.tags++;
@@ -89,6 +103,11 @@ export function interactPets(pets){
   }
 }
 export function tick(pet,dt){
+  const before=pet.x,walking=pet.mode==='walk';
+  tickMotion(pet,dt);
+  if(walking&&hasAction(pet.data,'walking'))addWalkingDirt(pet,Math.abs(distance(before,pet.x)));
+}
+function tickMotion(pet,dt){
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
   pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
   if(pet.mode==='tag')return;
@@ -108,6 +127,7 @@ export function tick(pet,dt){
   if(pet.mode==='wash'){
     pet.x+=pet.direction*speed*.65*dt;
     const zone=stations.wash;pet.washProgress=Math.max(0,Math.min(1,(pet.direction>0?pet.x-zone.left:zone.right-pet.x)/(zone.right-zone.left)));
+    pet.cleanliness=1-(1-(pet.washStartCleanliness??pet.cleanliness))*(1-pet.washProgress);
     if(pet.washProgress>=1){pet.cleanliness=1;pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=50;pet.emote='ok';pet.emoteTime=4;}
     return;
   }
@@ -131,7 +151,7 @@ export function tick(pet,dt){
       pet.emote='hearts';pet.emoteTime=3;return;
     }
     if(pet.level===2&&crosses(pet.direction>0?stations.wash.left:stations.wash.right)){
-      pet.mode='wash';pet.clock=0;pet.washProgress=0;return;
+      pet.mode='wash';pet.clock=0;pet.washProgress=0;pet.washStartCleanliness=pet.cleanliness;return;
     }
   }
   if(pet.cooldown===0)for(const stair of stairs){

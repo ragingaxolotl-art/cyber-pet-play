@@ -1,10 +1,10 @@
-import {randomLike,withCompanions} from './group.js?v=8';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=8';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=8';
-import {favoriteFood} from './food.js?v=8';
-import {drawLandscape,drawWash} from './scenery.js?v=8';
-import {refreshRoster} from './connection.js?v=8';
-import {readBackup} from './backups.js?v=8';
+import {randomLike,withCompanions} from './group.js?v=9';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=9';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=9';
+import {favoriteFood} from './food.js?v=9';
+import {drawLandscape,drawWash} from './scenery.js?v=9';
+import {refreshRoster} from './connection.js?v=9';
+import {readBackup} from './backups.js?v=9';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -38,6 +38,25 @@ function stage(){
   if(landscapeDirty){const painter=landscape.getContext('2d');painter.setTransform(landscape.width/width,0,0,landscape.height/height,0,0);drawLandscape(painter,width,height,backdrop);landscapeDirty=false;}
   ctx.drawImage(landscape,0,0,width,height);
 }
+const dirtLayer=document.createElement('canvas');dirtLayer.width=dirtLayer.height=192;
+const dirtPainter=dirtLayer.getContext('2d');
+function drawDirt(img,bounds,x,y,w,h,direction,amount){
+  if(amount<.005)return;
+  const d=dirtPainter;d.clearRect(0,0,192,192);d.globalCompositeOperation='source-over';
+  d.fillStyle='#745138';
+  for(let i=0;i<18;i++){
+    d.globalAlpha=Math.max(0,Math.min(.8,(amount-i*.025)*1.8));
+    d.beginPath();d.ellipse(25+(i*47)%145,65+(i*37)%115,5+i%4,3+i%5,i,0,Math.PI*2);d.fill();
+  }
+  d.globalAlpha=1;d.globalCompositeOperation='destination-in';
+  d.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,0,0,192,192);
+  d.globalCompositeOperation='source-over';
+  ctx.save();ctx.translate(x,y);ctx.scale(direction,1);ctx.drawImage(dirtLayer,-w/2,-h,w,h);ctx.restore();
+}
+function petSize(data){
+  const desired=Math.min(height*.115,Math.max(14,width/(Math.ceil(pets.length/3)+2)*.70));
+  return {desired,scale:Math.min(desired/data.maxHeight,desired*1.6/data.maxWidth)};
+}
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,y=petFloor(pet)*height;
   let action=['walk','wash','tag'].includes(pet.mode)&&hasAction(data,'walking')?'walking':'idle';
@@ -47,8 +66,7 @@ function drawPet(pet){
   const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations.idle[0]);
   if(!img)return;
   const maxHeight=data.maxHeight,maxWidth=data.maxWidth,bounds=artworkBounds.get(img);
-  const desired=Math.min(height*.115,Math.max(14,width/(Math.ceil(pets.length/3)+2)*.70));
-  const scale=Math.min(desired/maxHeight,desired*1.6/maxWidth),w=bounds.w*scale,h=bounds.h*scale;
+  const {desired,scale}=petSize(data),w=bounds.w*scale,h=bounds.h*scale;
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,y+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
   ctx.save();ctx.translate(x,y);ctx.scale(pet.direction,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,-w/2,-h,w,h);ctx.restore();
   const unit=Math.max(.65,Math.min(width/1280,height/595));
@@ -74,16 +92,12 @@ function drawPet(pet){
     const sx=Math.max(tw/2+4,Math.min(width-tw/2-4,x)),sy=y-desired-65*unit;
     roundRect(sx-tw/2,sy,tw,24*unit,8*unit,'#fff8e9','#d8c7a8');ctx.fillStyle='#344b66';ctx.fillText(text,sx,sy+16*unit);
   }
-  // Dirt flecks are a local display effect; the wash clears them for this session.
-  if(pet.mode==='wash'){
-    ctx.save();ctx.globalAlpha=(1-pet.cleanliness)*(1-pet.washProgress);ctx.fillStyle='#755b43';
-    for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(x+Math.sin(i*2)*desired*.22,y-desired*(.2+i*.14),Math.max(1.5,desired*.025),0,Math.PI*2);ctx.fill();}ctx.restore();
-  }
+  drawDirt(img,bounds,x,y,w,h,pet.direction,1-pet.cleanliness);
 
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets)tick(p,dt);advanceTag(pets,dt);interactPets(pets);}
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);interactPets(pets);}
   stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
