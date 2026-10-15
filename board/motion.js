@@ -27,23 +27,63 @@ export function foodRemaining(pet){
   // Eight visible bites, with no change to the character's actual save data.
   return Math.max(0,Math.min(1,Math.ceil(8*pet.timer/pet.mealDuration)/8));
 }
+export function engagementSeconds(pet,activity){
+  return activity==='tag'?6+axis(pet,'activity_level')*18+axis(pet,'sociability')*8-axis(pet,'curiosity')*4:3+axis(pet,'sociability')*10+axis(pet,'curiosity')*5;
+}
+export function startConversation(a,b,afterTag=false){
+  const curious=axis(a,'curiosity')>.65,shy=axis(a,'sociability')<.35||axis(b,'sociability')<.35;
+  const generous=axis(a,'generosity')>.65||axis(b,'generosity')>.65;
+  const lowMood=(a.data.stats?.happiness??50)<=35||(b.data.stats?.happiness??50)<=35;
+  const opening=afterTag?['laughing','eager']:lowMood?['frustrated','hearts']:shy?['thinking','cute']:curious?['question','thinking']:generous?['hearts','love']:['laughing','eager'];
+  const reply=lowMood?['cute','hearts']:shy?['cute','hearts']:curious?['eager','ok']:generous?['love','hearts']:['laughing','laughing'];
+  const likes=[a.data.boardLike||a.data.food?.name||'snacks',b.data.boardLike||b.data.food?.name||'snacks'];
+  for(const [index,p] of [a,b].entries()){
+    const duration=engagementSeconds(p,'talk');
+    p.mode='social';p.clock=0;p.timer=duration;p.socialDuration=duration;p.socialReply=reply[index];p.engagement=1;p.tagGame=null;
+    p.socialCooldown=duration+20+p.random()*25;p.direction=p.x<(index===0?b:a).x?1:-1;
+    p.emote=opening[index];p.emoteTime=duration;
+    p.speech=afterTag?'That was fun!':index===0?'I like '+likes[0]+'!':'What do you like?';
+    p.speechReply=index===0?'What about you?':'I like '+likes[1]+'!';
+  }
+}
+export function startTag(a,b){
+  if(!hasAction(a.data,'walking')||!hasAction(b.data,'walking'))return false;
+  const game={players:[a,b],chaser:a,runner:b,cooldown:1,tags:0};
+  for(const p of game.players){p.mode='tag';p.tagGame=game;p.engagement=1;p.clock=0;p.socialCooldown=0;p.emote='eager';p.emoteTime=3;p.speech=p===a?"You're it!":'Catch me!';}
+  a.direction=b.direction=a.x<=b.x?1:-1;return true;
+}
+const wrapped=x=>((x+.035)%1.07+1.07)%1.07-.035;
+const distance=(from,to)=>{let d=to-from;if(d>.535)d-=1.07;if(d<-.535)d+=1.07;return d;};
+export function advanceTag(pets,dt){
+  const present=new Set(pets),games=new Set(pets.filter(p=>p.mode==='tag').map(p=>p.tagGame));
+  for(const game of games){
+    if(!game)continue;
+    const [a,b]=game.players;
+    if(!present.has(a)||!present.has(b)||a.level!==b.level||!game.players.every(p=>p.mode==='tag'&&hasAction(p.data,'walking'))){
+      for(const p of game.players)if(p.mode==='tag'){p.mode='idle';p.tagGame=null;p.timer=2;p.socialCooldown=20;p.speech='';}continue;
+    }
+    for(const p of game.players)p.engagement=Math.max(0,p.engagement-dt/engagementSeconds(p,'tag'));
+    if(game.players.some(p=>p.engagement<=0)){startConversation(a,b,true);continue;}
+    const runner=game.runner,chaser=game.chaser,runSpeed=tuning.walkSpeed*(1.5+axis(runner,'activity_level'));
+    game.cooldown=Math.max(0,game.cooldown-dt);
+    const gap=distance(chaser.x,runner.x);chaser.direction=Math.sign(gap)||runner.direction;
+    runner.x=wrapped(runner.x+runner.direction*runSpeed*dt);
+    chaser.x=wrapped(chaser.x+chaser.direction*runSpeed*1.4*dt);
+    if(game.cooldown===0&&Math.abs(distance(chaser.x,runner.x))<.014){
+      game.chaser=runner;game.runner=chaser;game.cooldown=1.5;game.tags++;
+      chaser.direction=runner.direction;chaser.speech='Tag!';runner.speech="I'm it!";chaser.emote='laughing';runner.emote='eager';chaser.emoteTime=runner.emoteTime=2;
+    }
+  }
+}
 export function interactPets(pets){
   const eligible=p=>!p.stair&&['walk','idle'].includes(p.mode)&&p.socialCooldown<=0&&p.x>.04&&p.x<.96;
   for(let level=0;level<3;level++){
     const row=pets.filter(p=>p.level===level&&eligible(p)).sort((a,b)=>a.x-b.x);
     for(let i=0;i<row.length-1;i++){
       const a=row[i],b=row[i+1];if(!eligible(a)||!eligible(b)||b.x-a.x>.055)continue;
-      const curious=axis(a,'curiosity')>.65,shy=axis(a,'sociability')<.35||axis(b,'sociability')<.35;
-      const generous=axis(a,'generosity')>.65||axis(b,'generosity')>.65;
-      const lowMood=(a.data.stats?.happiness??50)<=35||(b.data.stats?.happiness??50)<=35;
-      const opening=lowMood?['frustrated','hearts']:shy?['thinking','cute']:curious?['question','thinking']:generous?['hearts','love']:['laughing','eager'];
-      const reply=lowMood?['cute','hearts']:shy?['cute','hearts']:curious?['eager','ok']:generous?['love','hearts']:['laughing','laughing'];
-      const duration=4+a.random()*2;
-      for(const [index,p] of [a,b].entries()){
-        p.mode='social';p.clock=0;p.timer=duration;p.socialDuration=duration;p.socialReply=reply[index];
-        p.socialCooldown=duration+20+p.random()*25;p.direction=index===0?1:-1;
-        p.emote=opening[index];p.emoteTime=duration;
-      }
+      const playful=(axis(a,'activity_level')+axis(b,'activity_level'))/2;
+      const canPlay=(a.data.stats?.energy??100)>12&&(b.data.stats?.energy??100)>12;
+      if(!(canPlay&&a.random()<.15+playful*.6&&startTag(a,b)))startConversation(a,b);
       i++;
     }
   }
@@ -51,7 +91,8 @@ export function interactPets(pets){
 export function tick(pet,dt){
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
   pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
-  if(pet.mode==='social'){pet.timer-=dt;if(pet.timer<pet.socialDuration/2)pet.emote=pet.socialReply;if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emoteTime=0;}return;}
+  if(pet.mode==='tag')return;
+  if(pet.mode==='social'){pet.timer-=dt;pet.engagement=Math.max(0,pet.timer/pet.socialDuration);if(pet.timer<pet.socialDuration/2){pet.emote=pet.socialReply;pet.speech=pet.speechReply;}if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emote='thinking';pet.emoteTime=2;pet.speech='';}return;}
   // Artwork capabilities come from successfully decoded frames, never placeholders.
   if(!hasAction(pet.data,'walking')){
     pet.mode='idle';pet.stair=null;pet.timer-=dt;
