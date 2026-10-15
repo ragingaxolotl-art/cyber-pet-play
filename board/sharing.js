@@ -1,0 +1,36 @@
+import {foodScore} from './food.js';
+const trait=(pet,key)=>(pet.data.personality?.[key]??50)/100;
+// One carried item and directional friendships belong only to this board session.
+export function chooseItem(pet,foods,random=pet.random){
+  if(!foods.length)return null;
+  const ranked=foods.map(food=>({food,score:foodScore(food,pet.data.foodPreferences)})).sort((a,b)=>b.score-a.score);
+  const best=ranked[0].score;
+  const choices=ranked.filter(row=>row.score>=best-(trait(pet,'curiosity')>.65?1:0));
+  return choices[Math.min(choices.length-1,Math.floor(random()*choices.length))].food;
+}
+export function collectItem(pet){
+  if(pet.heldItem||!pet.data.food)return false;
+  pet.heldItem=pet.data.food;pet.heldTime=0;return true;
+}
+export function friendship(pet,other){return pet.friendships?.get(other.data.id)??50;}
+export function shareItem(giver,recipient){
+  if(!giver.heldItem||recipient.heldItem||giver.shareCooldown>0||recipient.shareCooldown>0)return null;
+  const item=giver.heldItem,score=foodScore(item,recipient.data.foodPreferences);
+  // Zero includes a hated taste with no stronger favorite-tag match.
+  const reaction=score<=0?'disliked':score>=3?'liked':'neutral';
+  const change=reaction==='disliked'?-3:reaction==='liked'?4:1;
+  recipient.friendships??=new Map();recipient.friendships.set(giver.data.id,Math.max(0,Math.min(100,friendship(recipient,giver)+change)));
+  giver.shareCooldown=recipient.shareCooldown=60;
+  giver.speech='Want some '+item.name+'?';giver.speechReply='Maybe next time!';giver.emote='hearts';
+  recipient.speech=reaction==='disliked'?"Not my favorite…":reaction==='liked'?'My favorite! Thank you!':'Thanks for sharing!';
+  recipient.speechReply=reaction==='disliked'?'Friendship −3':reaction==='liked'?'Friendship +4':'Friendship +1';
+  recipient.emote=recipient.socialReply=reaction==='disliked'?'frustrated':'hearts';
+  if(reaction!=='disliked'){recipient.heldItem=item;recipient.heldTime=0;giver.heldItem=null;giver.speechReply="You're welcome!";}
+  return {reaction,change,item};
+}
+export function trySharing(a,b){
+  for(const [giver,recipient] of [[a,b],[b,a]]){
+    if(giver.heldItem&&!recipient.heldItem&&giver.shareCooldown<=0&&recipient.shareCooldown<=0&&giver.random()<.15+.7*trait(giver,'generosity'))return shareItem(giver,recipient);
+  }
+  return null;
+}

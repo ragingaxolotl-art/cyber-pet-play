@@ -1,10 +1,11 @@
-import {randomLike,withCompanions} from './group.js?v=9';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=9';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=9';
-import {favoriteFood} from './food.js?v=9';
-import {drawLandscape,drawWash} from './scenery.js?v=9';
-import {refreshRoster} from './connection.js?v=9';
-import {readBackup} from './backups.js?v=9';
+import {chooseItem} from './sharing.js?v=10';
+import {randomLike,withCompanions} from './group.js?v=10';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=10';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=10';
+import {favoriteFood} from './food.js?v=10';
+import {drawLandscape,drawWash} from './scenery.js?v=10';
+import {refreshRoster} from './connection.js?v=10';
+import {readBackup} from './backups.js?v=10';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -61,7 +62,7 @@ function drawPet(pet){
   const data=pet.data,x=pet.x*width,y=petFloor(pet)*height;
   let action=['walk','wash','tag'].includes(pet.mode)&&hasAction(data,'walking')?'walking':'idle';
   if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
-  if(pet.mode==='eat'&&hasAction(data,'eat'))action='eat';
+  if(['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
   const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
   const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations.idle[0]);
   if(!img)return;
@@ -75,13 +76,21 @@ function drawPet(pet){
     const label=data.name.length>16?data.name.slice(0,15)+'…':data.name,lw=ctx.measureText(label).width+12*unit;
     roundRect(x-lw/2,y+10*unit,lw,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x,y+font+11*unit);
   }
-  if(pet.mode==='eat'&&data.food){
-    const image=foodImages.get(data.food.id),size=desired*.43*Math.sqrt(foodRemaining(pet)),fx=x+pet.direction*desired*.49;
+  if(pet.heldItem&&!['eat','snack'].includes(pet.mode)){
+    let image=foodImages.get(pet.heldItem.id);
+    if(!image){image=new Image();image.src=pet.heldItem.sprite;foodImages.set(pet.heldItem.id,image);}
+    const size=desired*.34,ix=x+pet.direction*(w*.45+size*.35);
+    roundRect(ix-size*.65,y-size*1.1,size*1.3,size*1.2,4,'#d5af70');
+    if(image.complete&&image.naturalWidth)ctx.drawImage(image,ix-size/2,y-size,size,size);
+  }
+  if(['eat','snack'].includes(pet.mode)&&data.food){
+    const meal=pet.mode==='snack'?pet.heldItem:data.food;
+    const image=foodImages.get(meal.id),size=desired*.43*Math.sqrt(foodRemaining(pet)),fx=x+pet.direction*desired*.49;
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
-    ctx.font=`600 ${Math.max(9,font*.85)}px system-ui`;const label=data.food.name,tw=ctx.measureText(label).width+14*unit;
+    ctx.font=`600 ${Math.max(9,font*.85)}px system-ui`;const label=meal.name,tw=ctx.measureText(label).width+14*unit;
     roundRect(x-tw/2,y-desired-24*unit,tw,19*unit,6*unit,'#fff1c9');ctx.fillStyle='#3b523b';ctx.fillText(label,x,y-desired-11*unit);
   }
-  if(pet.emoteTime>0 && pet.mode!=='eat'){
+  if(pet.emoteTime>0 && !['eat','snack'].includes(pet.mode)){
     const ey=y-desired-20*unit,size=38*unit;
     if(!drawFeeling(ctx,pet.emote,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[pet.emote]||'…',x,ey+6*unit);}
 
@@ -103,11 +112,11 @@ function render(time){
 }
 function setPets(data,label){
   if(label==='class')data=withCompanions(data,companions);
-  for(const pet of data){const key=pet.id;if(pet.isSample&&!sessionLikes.has(key))sessionLikes.set(key,randomLike(foods));pet.food=pet.isSample?sessionLikes.get(key):favoriteFood(foods,pet.foodPreferences);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
+  for(const pet of data){const key=pet.id;if(pet.isSample&&!sessionLikes.has(key))sessionLikes.set(key,randomLike(foods));pet.food=pet.isSample?sessionLikes.get(key):chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
-  const existing=new Map(pets.map(p=>[p.data,p]));
-  loaded=data;pets=data.map((pet,i)=>existing.get(pet)||makePet(pet,i,data.length));mode=label;
+  const existing=new Map(pets.map(p=>[p.data,p])),byId=new Map(pets.map(p=>[p.data.id,p]));
+  loaded=data;pets=data.map((pet,i)=>{if(existing.has(pet))return existing.get(pet);const fresh=makePet(pet,i,data.length),old=byId.get(pet.id);if(old){fresh.heldItem=old.heldItem;fresh.friendships=old.friendships;fresh.shareCooldown=old.shareCooldown;fresh.heldTime=old.heldTime;}return fresh;});mode=label;
   $('status').textContent=label==='sample'?'Sample pets':`${data.length} ${data.length===1?'pet':'pets'} together`;
   $('caption').textContent=label==='sample'?`${data.length} sample pets · Jungle kitchen + cloud wash`:`${data.length} Cyber Pets · ${data.filter(p=>!hasAction(p,'walking')).length} resting without movement art · Display only`;
   $('empty').hidden=data.length>0;
