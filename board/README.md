@@ -52,3 +52,7 @@ Fern, Echo, Moss and Nova are permanent colorful board residents and join every 
 
 ### Saved appearance (v16)
 The public projection now retains only validated display.pet_scale (0.01–16) and display.pet_y_offset (−2048–2048). Projection cache v3 rebuilds existing backups. Board uses original artwork pixel dimensions even when browser decoding downsizes images, with the Godot 1.25 pixel conversion and common board/crowd factor (220 game-pixel reference). Scale is no longer normalized away per pet. Positive Y moves down, negative Y moves up relative to the platform; shadows stay on the platform. Defaults match Godot: scale 3, offset 0. Changes come from the most recent uploaded backup, not unsaved editor drafts.
+
+
+### Wash coverage fix (v17)
+Cleaning and water effects follow physical presence in the top-floor wash, after all movement systems run. Tag, games, shared walks, construction travel and station cooldowns no longer bypass cleaning. Crossing distance plus time under water removes dirt; standing under water also cleans. Other floors, stairs and screen-wrap jumps do not count.

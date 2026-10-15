@@ -1,19 +1,20 @@
-import {displayMetrics,sourceScale} from './display.js?v=16';
-import {createCompanions,withResidents} from './companions.js?v=16';
-import {isClassPet} from './profile.js?v=16';
-import {advanceGames,drawGames} from './games.js?v=16';
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=16';
-import {chooseItem} from './sharing.js?v=16';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=16';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=16';
-import {favoriteFood} from './food.js?v=16';
-import {drawLandscape,drawWash} from './scenery.js?v=16';
-import {refreshRoster} from './connection.js?v=16';
-import {readBackup} from './backups.js?v=16';
+import {createWash,advanceWash} from './wash.js?v=17';
+import {displayMetrics,sourceScale} from './display.js?v=17';
+import {createCompanions,withResidents} from './companions.js?v=17';
+import {isClassPet} from './profile.js?v=17';
+import {advanceGames,drawGames} from './games.js?v=17';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=17';
+import {chooseItem} from './sharing.js?v=17';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=17';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=17';
+import {favoriteFood} from './food.js?v=17';
+import {drawLandscape,drawWash} from './scenery.js?v=17';
+import {refreshRoster} from './connection.js?v=17';
+import {readBackup} from './backups.js?v=17';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
-const livingWorld=createWorld();
+const livingWorld=createWorld(),washHistory=createWash();
 let companions=[];
 
 let width=1600,height=850,mode='class',busy=false;
@@ -100,7 +101,7 @@ function drawPet(pet){
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceGames(pets,dt,elapsed);interactPets(pets);}
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceGames(pets,dt,elapsed);interactPets(pets);advanceWash(washHistory,pets,dt);}
   stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   animationRequest=requestAnimationFrame(render);
 }

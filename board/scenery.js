@@ -62,7 +62,7 @@ function cloudWash(c,w,h){
   c.fillStyle='#eaf5e8';c.font=`600 ${h*.017}px system-ui`;c.textAlign='center';c.fillText('WALK THROUGH · FRESHEN UP',x,y-hh*.59);
 }
 export function drawWash(c,w,h,pets,time){
-  const zone=stations.wash,active=pets.filter(p=>p.mode==='wash');if(!active.length)return;
+  const zone=stations.wash,active=pets.filter(p=>p.washActive);if(!active.length)return;
   c.save();c.strokeStyle='#c9f8ffb0';c.lineWidth=Math.max(1,h*.0016);
   for(let i=0;i<28;i++){const x=w*(zone.left+.012+(zone.right-zone.left-.024)*i/27),t=(time*.62+i*.137)%1,y=h*(floor(2)-.14+t*.135);c.beginPath();c.moveTo(x,y);c.lineTo(x,y+h*.012);c.stroke();}
   for(const p of active)for(let i=0;i<5;i++){const phase=(time*.4+i*.19)%1,x=p.x*w+Math.sin(i*2+time)*h*.019,y=floor(2)*h-phase*h*.11;c.globalAlpha=(1-phase)*.8;ellipse(c,x,y,h*.003+i*h*.001,h*.003+i*h*.001,'#edffff');}
