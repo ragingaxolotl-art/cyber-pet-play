@@ -48,3 +48,7 @@ Each pet gets 48 stable, randomly placed body-wide dirt marks. Walking adds dirt
 
 ### Companion correction (v15)
 Fern, Echo, Moss and Nova are permanent colorful board residents and join every auto-loaded class. Pip and uploaded test-character copies remain excluded. Resident objects, colors and randomized preferences stay stable through class polling; the latest speed/Love, dirt and hidden-inventory behavior applies to them too.
+
+
+### Saved appearance (v16)
+The public projection now retains only validated display.pet_scale (0.01–16) and display.pet_y_offset (−2048–2048). Projection cache v3 rebuilds existing backups. Board uses original artwork pixel dimensions even when browser decoding downsizes images, with the Godot 1.25 pixel conversion and common board/crowd factor (220 game-pixel reference). Scale is no longer normalized away per pet. Positive Y moves down, negative Y moves up relative to the platform; shadows stay on the platform. Defaults match Godot: scale 3, offset 0. Changes come from the most recent uploaded backup, not unsaved editor drafts.

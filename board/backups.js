@@ -38,7 +38,7 @@ export async function readBackup(buffer,expectedHash){
   const verified=async name=>{const data=await extract(name);if(await hash(data)!==manifest.files[name])throw Error('Backup file checksum did not match: '+name);return data;};
   const config=JSON.parse(decode(await verified('config.json'))), progress=JSON.parse(decode(await verified('progress.json')));
   if(!config.animations||!Array.isArray(config.animations.idle)||!config.animations.idle.length)throw Error('This pet has no idle artwork.');
-  const images=new Map();let pixels=0,sourcePixels=0;
+  const images=new Map(),sourceScales=new Map();let pixels=0,sourcePixels=0;
   try{
     for(const action of ['idle','walking','eat','happy','sad']){
       const frames=config.animations[action];if(!frames)continue;
@@ -52,10 +52,11 @@ export async function readBackup(buffer,expectedHash){
         if(!w||!h||w>4096||h>4096||sourcePixels>128000000)throw Error('Artwork is too large for the board.');
         const ratio=Math.min(1,320/Math.max(w,h)),rw=Math.max(1,Math.round(w*ratio)),rh=Math.max(1,Math.round(h*ratio));pixels+=rw*rh;
         if(pixels>24000000)throw Error('Animation memory limit reached.');
+        sourceScales.set(name,{x:w/rw,y:h/rh});
         images.set(name,await createImageBitmap(new Blob([data],{type:'image/png'}),{resizeWidth:rw,resizeHeight:rh,resizeQuality:'high'}));
       }
     }
     const cleanliness=Number(progress.stats?.cleanliness);
-    return {id:manifest.character_id,name:String(config.name||'Cyber Pet').slice(0,60),config,images,stats:progress.stats||{},speed:progress.skills?.levels?.speed,love:progress.bond?.love,personality:progress.personality||config.starter_traits?.personality||{},foodPreferences:progress.food_preferences||config.starter_traits?.food_preferences||{},cleanliness:Number.isFinite(cleanliness)?Math.max(0,Math.min(1,cleanliness/100)):.35,pixels};
+    return {id:manifest.character_id,name:String(config.name||'Cyber Pet').slice(0,60),config,images,sourceScales,stats:progress.stats||{},speed:progress.skills?.levels?.speed,love:progress.bond?.love,personality:progress.personality||config.starter_traits?.personality||{},foodPreferences:progress.food_preferences||config.starter_traits?.food_preferences||{},cleanliness:Number.isFinite(cleanliness)?Math.max(0,Math.min(1,cleanliness/100)):.35,pixels};
   }catch(error){for(const image of images.values())image.close?.();throw error;}
 }

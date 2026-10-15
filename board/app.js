@@ -1,14 +1,15 @@
-import {createCompanions,withResidents} from './companions.js?v=15';
-import {isClassPet} from './profile.js?v=15';
-import {advanceGames,drawGames} from './games.js?v=15';
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=15';
-import {chooseItem} from './sharing.js?v=15';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=15';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=15';
-import {favoriteFood} from './food.js?v=15';
-import {drawLandscape,drawWash} from './scenery.js?v=15';
-import {refreshRoster} from './connection.js?v=15';
-import {readBackup} from './backups.js?v=15';
+import {displayMetrics,sourceScale} from './display.js?v=16';
+import {createCompanions,withResidents} from './companions.js?v=16';
+import {isClassPet} from './profile.js?v=16';
+import {advanceGames,drawGames} from './games.js?v=16';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=16';
+import {chooseItem} from './sharing.js?v=16';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=16';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=16';
+import {favoriteFood} from './food.js?v=16';
+import {drawLandscape,drawWash} from './scenery.js?v=16';
+import {refreshRoster} from './connection.js?v=16';
+import {readBackup} from './backups.js?v=16';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -58,12 +59,10 @@ function drawDirt(img,bounds,x,y,w,h,direction,amount,pattern){
   d.globalCompositeOperation='source-over';
   ctx.save();ctx.translate(x,y);ctx.scale(direction,1);ctx.drawImage(dirtLayer,-w/2,-h,w,h);ctx.restore();
 }
-function petSize(data){
-  const desired=Math.min(height*.115,Math.max(14,width/(Math.ceil(pets.length/3)+2)*.70));
-  return {desired,scale:Math.min(desired/data.maxHeight,desired*1.6/data.maxWidth)};
-}
+function petSize(data){return displayMetrics(data,width,height,pets.length);}
 function drawPet(pet){
-  const data=pet.data,x=pet.x*width,y=(petFloor(pet)-(pet.worldBob||0))*height;
+  const data=pet.data,x=pet.x*width,groundY=(petFloor(pet)-(pet.worldBob||0))*height;
+  const metrics=petSize(data),y=groundY+metrics.offsetY;
   let action=((['game','build'].includes(pet.mode)&&pet.gameMoving)||['walk','wash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
   if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
   if(['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
@@ -71,8 +70,8 @@ function drawPet(pet){
   const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations.idle[0]);
   if(!img)return;
   const maxHeight=data.maxHeight,maxWidth=data.maxWidth,bounds=artworkBounds.get(img);
-  const size=petSize(data),desired=size.desired*(pet.mode==='shelter'?(pet.shelterScale||1):1),scale=size.scale*(pet.mode==='shelter'?(pet.shelterScale||1):1),w=bounds.w*scale,h=bounds.h*scale;
-  ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,y+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
+  const original=sourceScale(data,name),size=metrics,desired=size.desired*(pet.mode==='shelter'?(pet.shelterScale||1):1),scale=size.scale*(pet.mode==='shelter'?(pet.shelterScale||1):1),w=bounds.w*original.x*scale,h=bounds.h*original.y*scale;
+  ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
   ctx.save();ctx.translate(x,y);ctx.scale(pet.direction,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,-w/2,-h,w,h);ctx.restore();
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
@@ -107,7 +106,7 @@ function render(time){
 }
 function setPets(data,label){
   data=data.filter(isClassPet);if(label==='class')data=withResidents(data,companions);
-  for(const pet of data){pet.food=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
+  for(const pet of data){pet.food=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.entries()].map(([name,image])=>{const b=measureArtwork(image),s=sourceScale(pet,name);return {h:b.h*s.y,w:b.w*s.x};});pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
   const existing=new Map(pets.map(p=>[p.data,p])),byId=new Map(pets.map(p=>[p.data.boardId||p.data.id,p]));
