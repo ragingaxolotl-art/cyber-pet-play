@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=14';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside} from './motion.js?v=14';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=15';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside} from './motion.js?v=15';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
 const eligible=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)&&p.socialCooldown<=0&&(p.data.stats?.energy??100)>12;

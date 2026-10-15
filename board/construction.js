@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=14';
-import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=14';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=15';
+import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=15';
 export const createBuildings=()=>Array.from({length:3},()=>({phase:'bare',progress:0,workers:[],lastBuildCycle:-1,recruitAt:0,dust:0}));
 const available=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)&&hasAction(p.data,'walking');
 export function workRate(helpers){return Math.max(0,helpers)/18;}

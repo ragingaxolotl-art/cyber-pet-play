@@ -1,17 +1,19 @@
-import {isClassPet} from './profile.js?v=14';
-import {advanceGames,drawGames} from './games.js?v=14';
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=14';
-import {chooseItem} from './sharing.js?v=14';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=14';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=14';
-import {favoriteFood} from './food.js?v=14';
-import {drawLandscape,drawWash} from './scenery.js?v=14';
-import {refreshRoster} from './connection.js?v=14';
-import {readBackup} from './backups.js?v=14';
+import {createCompanions,withResidents} from './companions.js?v=15';
+import {isClassPet} from './profile.js?v=15';
+import {advanceGames,drawGames} from './games.js?v=15';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=15';
+import {chooseItem} from './sharing.js?v=15';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=15';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=15';
+import {favoriteFood} from './food.js?v=15';
+import {drawLandscape,drawWash} from './scenery.js?v=15';
+import {refreshRoster} from './connection.js?v=15';
+import {readBackup} from './backups.js?v=15';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 const livingWorld=createWorld();
+let companions=[];
 
 let width=1600,height=850,mode='class',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
@@ -104,7 +106,7 @@ function render(time){
   animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){
-  data=data.filter(isClassPet);
+  data=data.filter(isClassPet);if(label==='class')data=withResidents(data,companions);
   for(const pet of data){pet.food=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
@@ -171,7 +173,7 @@ async function refreshClass(){
     const result=await refreshRoster(list.pets.filter(isClassPet),loaded,async item=>readBackup(await(await request(item.path)).arrayBuffer()));
     setPets(result.pets,'class');
     $('message').textContent=result.failures.join(' • ');
-    $('caption').textContent=`${pets.length} class ${pets.length===1?'pet':'pets'} · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Board settings':''}`;
+    $('caption').textContent=`${pets.filter(p=>!p.data.isCompanion).length} class pets + ${companions.length} colorful companions · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Board settings':''}`;
   }catch(error){
     $('message').textContent=error.message;
     $('caption').textContent='Class connection unavailable · Keeping current pets · Retrying automatically';
@@ -184,4 +186,12 @@ $('files').onchange=async()=>{if(busy)return;const files=[...$('files').files];i
 let displayGeneration=0;
 $('names').onchange=()=>{showNames=$('names').checked;};
 resize();animationRequest=requestAnimationFrame(render);syncDisplay();
-$('caption').textContent='Loading backed-up class pets automatically';refreshClass();
+async function startBoard(){
+  try{
+    const config=await(await fetch('assets/demo.json')).json(),images=new Map();
+    for(const name of new Set(['idle','walking','eat','happy'].flatMap(action=>config.animations[action]||[]))){const image=new Image();image.src='assets/'+name;await image.decode();images.set(name,image);}
+    companions=createCompanions(config,images);await foodReady;setPets([],'class');
+  }catch{$('message').textContent='Colorful companions could not load. Reload to retry.';}
+  await refreshClass();
+}
+$('caption').textContent='Loading backed-up class pets automatically';startBoard();
