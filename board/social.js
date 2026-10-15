@@ -1,4 +1,4 @@
-import {friendship,shareItem} from './sharing.js?v=11';
+import {friendship,shareItem} from './sharing.js?v=12';
 import {foodScore} from './food.js';
 const trait=(p,key)=>(p.data.personality?.[key]??50)/100;
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
