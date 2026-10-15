@@ -1,4 +1,5 @@
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration} from './motion.js';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining} from './motion.js';
 import {favoriteFood} from './food.js';
 import {drawLandscape,drawWash} from './scenery.js';
 import {readConnection,rememberConnection,forgetConnection,refreshRoster} from './connection.js';
@@ -9,6 +10,7 @@ let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matc
 let width=1600,height=850,mode='sample',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
 const landscape=document.createElement('canvas');let landscapeDirty=true,showNames=true,foods=[];
+loadEmotes().catch(()=>{});
 const foodReady=fetch('assets/foods.json').then(r=>{if(!r.ok)throw Error('Food catalog is unavailable.');return r.json();}).then(data=>{foods=data;}).catch(()=>{$('caption').textContent='Food catalog unavailable; wandering and cloud wash remain available.';});
 function measureArtwork(image){
   if(artworkBounds.has(image))return artworkBounds.get(image);
@@ -37,7 +39,7 @@ function stage(){
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,y=petFloor(pet)*height;
   let action=['walk','wash'].includes(pet.mode)&&hasAction(data,'walking')?'walking':'idle';
-  if(pet.emoteTime>0 && pet.mode==='idle' && data.config.animations.happy?.length)action='happy';
+  if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
   if(pet.mode==='eat'&&hasAction(data,'eat'))action='eat';
   const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
   const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations.idle[0]);
@@ -54,12 +56,16 @@ function drawPet(pet){
     roundRect(x-lw/2,y+10*unit,lw,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x,y+font+11*unit);
   }
   if(pet.mode==='eat'&&data.food){
-    const image=foodImages.get(data.food.id),size=desired*.43,fx=x+pet.direction*desired*.49;
+    const image=foodImages.get(data.food.id),size=desired*.43*Math.sqrt(foodRemaining(pet)),fx=x+pet.direction*desired*.49;
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
     ctx.font=`600 ${Math.max(9,font*.85)}px system-ui`;const label=data.food.name,tw=ctx.measureText(label).width+14*unit;
     roundRect(x-tw/2,y-desired-24*unit,tw,19*unit,6*unit,'#fff1c9');ctx.fillStyle='#3b523b';ctx.fillText(label,x,y-desired-11*unit);
-  }else if(pet.emoteTime>0){
-    const ey=y-desired-30*unit;ctx.font=`600 ${18*unit}px system-ui`;const bw=Math.max(36*unit,ctx.measureText(pet.emote).width+20*unit);roundRect(x-bw/2,ey,bw,28*unit,10*unit,'#fff4df','#d8c7a8');ctx.fillStyle='#344b66';ctx.fillText(pet.emote,x,ey+20*unit);
+  }
+  if(pet.emoteTime>0 && pet.mode!=='eat'){
+    const ey=y-desired-20*unit,size=38*unit;
+    roundRect(x-size*.65,ey-size*.65,size*1.3,size*1.3,10*unit,'#fff4df','#d8c7a8');
+    if(!drawFeeling(ctx,pet.emote,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[pet.emote]||'…',x,ey+6*unit);}
+
   }
   // Dirt flecks are a local display effect; the wash clears them for this session.
   if(pet.mode==='wash'){
@@ -70,7 +76,7 @@ function drawPet(pet){
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets)tick(p,dt);}
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets)tick(p,dt);interactPets(pets);}
   stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);
   requestAnimationFrame(render);
 }

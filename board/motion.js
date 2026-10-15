@@ -9,17 +9,49 @@ export function hasAction(data,action){
 }
 export function makePet(data,index,count,random=Math.random){
   const level=index%3, perLevel=Math.ceil(count/3);
-  return {data,level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0};
+  return {data,level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:''};
 }
 const axis=(pet,key)=>(Number.isFinite(pet.data.personality?.[key])?Math.max(0,Math.min(100,pet.data.personality[key])):50)/100;
 export function chooseEmote(pet){
-  const choices=[['♫',.3+axis(pet,'activity_level')],['♡',.3+axis(pet,'generosity')],['!',.3+axis(pet,'bravery')],['?',.3+axis(pet,'curiosity')],['Hi!',.3+axis(pet,'sociability')],['…',1.3-axis(pet,'sociability')]];
+  const stats=pet.data.stats||{};
+  if(stats.health<=15)return 'crying';
+  if(stats.energy<=12)return 'sleepy';
+  if(stats.fullness<=12)return 'drooling';
+  if(stats.happiness<=35)return 'frustrated';
+  const choices=[['eager',.3+axis(pet,'activity_level')],['hearts',.3+axis(pet,'generosity')],['cute',.3+axis(pet,'bravery')],['question',.3+axis(pet,'curiosity')],['laughing',.3+axis(pet,'sociability')],['thinking',1.3-axis(pet,'sociability')]];
   let pick=pet.random()*choices.reduce((sum,x)=>sum+x[1],0);
-  for(const [text,weight] of choices){pick-=weight;if(pick<=0)return text;}return '♡';
+  for(const [text,weight] of choices){pick-=weight;if(pick<=0)return text;}return 'cute';
+}
+export function foodRemaining(pet){
+  if(pet.mode!=='eat'||!pet.mealDuration)return 0;
+  // Eight visible bites, with no change to the character's actual save data.
+  return Math.max(0,Math.min(1,Math.ceil(8*pet.timer/pet.mealDuration)/8));
+}
+export function interactPets(pets){
+  const eligible=p=>!p.stair&&['walk','idle'].includes(p.mode)&&p.socialCooldown<=0&&p.x>.04&&p.x<.96;
+  for(let level=0;level<3;level++){
+    const row=pets.filter(p=>p.level===level&&eligible(p)).sort((a,b)=>a.x-b.x);
+    for(let i=0;i<row.length-1;i++){
+      const a=row[i],b=row[i+1];if(!eligible(a)||!eligible(b)||b.x-a.x>.055)continue;
+      const curious=axis(a,'curiosity')>.65,shy=axis(a,'sociability')<.35||axis(b,'sociability')<.35;
+      const generous=axis(a,'generosity')>.65||axis(b,'generosity')>.65;
+      const lowMood=(a.data.stats?.happiness??50)<=35||(b.data.stats?.happiness??50)<=35;
+      const opening=lowMood?['frustrated','hearts']:shy?['thinking','cute']:curious?['question','thinking']:generous?['hearts','love']:['laughing','eager'];
+      const reply=lowMood?['cute','hearts']:shy?['cute','hearts']:curious?['eager','ok']:generous?['love','hearts']:['laughing','laughing'];
+      const duration=4+a.random()*2;
+      for(const [index,p] of [a,b].entries()){
+        p.mode='social';p.clock=0;p.timer=duration;p.socialDuration=duration;p.socialReply=reply[index];
+        p.socialCooldown=duration+20+p.random()*25;p.direction=index===0?1:-1;
+        p.emote=opening[index];p.emoteTime=duration;
+      }
+      i++;
+    }
+  }
 }
 export function tick(pet,dt){
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
-  pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);
+  pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
+  if(pet.mode==='social'){pet.timer-=dt;if(pet.timer<pet.socialDuration/2)pet.emote=pet.socialReply;if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emoteTime=0;}return;}
   // Artwork capabilities come from successfully decoded frames, never placeholders.
   if(!hasAction(pet.data,'walking')){
     pet.mode='idle';pet.stair=null;pet.timer-=dt;
@@ -28,14 +60,14 @@ export function tick(pet,dt){
   }
   if(pet.mode==='eat'){
     pet.timer-=dt;
-    if(pet.timer<=0||!hasAction(pet.data,'eat')){pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=55;pet.emote='♡';pet.emoteTime=3;}
+    if(pet.timer<=0||!hasAction(pet.data,'eat')){pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=55;pet.emote='hearts';pet.emoteTime=3;}
     return;
   }
   const speed=tuning.walkSpeed*(.65+axis(pet,'activity_level')*.9);
   if(pet.mode==='wash'){
     pet.x+=pet.direction*speed*.65*dt;
     const zone=stations.wash;pet.washProgress=Math.max(0,Math.min(1,(pet.direction>0?pet.x-zone.left:zone.right-pet.x)/(zone.right-zone.left)));
-    if(pet.washProgress>=1){pet.cleanliness=1;pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=50;pet.emote='✦';pet.emoteTime=4;}
+    if(pet.washProgress>=1){pet.cleanliness=1;pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=50;pet.emote='ok';pet.emoteTime=4;}
     return;
   }
   if(pet.stair){
@@ -54,8 +86,8 @@ export function tick(pet,dt){
   if(pet.stationCooldown===0){
     if(pet.level===1&&pet.data.food&&hasAction(pet.data,'eat')&&crosses(pet.foodSpot)){
       pet.x=pet.foodSpot;pet.mode='eat';pet.clock=0;
-      pet.timer=Math.max(6,animationDuration(pet.data.config,'eat')*2);
-      pet.emote='♡';pet.emoteTime=3;return;
+      pet.timer=Math.max(6,animationDuration(pet.data.config,'eat')*2);pet.mealDuration=pet.timer;
+      pet.emote='hearts';pet.emoteTime=3;return;
     }
     if(pet.level===2&&crosses(pet.direction>0?stations.wash.left:stations.wash.right)){
       pet.mode='wash';pet.clock=0;pet.washProgress=0;return;
