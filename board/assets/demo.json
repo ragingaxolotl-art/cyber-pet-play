@@ -1,0 +1,89 @@
+{
+  "name": "Pip \u00b7 test character",
+  "frame_time": 0.25,
+  "display": {
+    "pet_scale": 1.5,
+    "pet_y_offset": 0.0,
+    "title_pet_scale": 1.6875
+  },
+  "animations": {
+    "idle": [
+      "idle_0.svg",
+      "idle_1.svg",
+      "idle_2.svg"
+    ],
+    "walking": [
+      "walking_0.svg",
+      "walking_1.svg",
+      "walking_2.svg",
+      "walking_3.svg",
+      "walking_4.svg"
+    ],
+    "eat": [
+      "eat_0.svg",
+      "eat_1.svg",
+      "eat_2.svg",
+      "eat_3.svg"
+    ],
+    "sleeping": [
+      "sleeping_0.svg",
+      "sleeping_1.svg",
+      "sleeping_2.svg",
+      "sleeping_3.svg"
+    ],
+    "happy": [
+      "happy_0.svg",
+      "happy_1.svg",
+      "happy_2.svg",
+      "happy_3.svg"
+    ],
+    "jump": [
+      "jump_0.svg",
+      "jump_1.svg",
+      "jump_2.svg",
+      "jump_3.svg"
+    ],
+    "sad": [
+      "sad_0.svg",
+      "sad_1.svg",
+      "sad_2.svg"
+    ]
+  },
+  "animation_loops": {
+    "idle": {
+      "enabled": true,
+      "start": 0,
+      "end": 2
+    },
+    "walking": {
+      "enabled": true,
+      "start": 3,
+      "end": 4
+    },
+    "eat": {
+      "enabled": false,
+      "start": 0,
+      "end": 3
+    },
+    "sleeping": {
+      "enabled": true,
+      "start": 2,
+      "end": 3
+    },
+    "happy": {
+      "enabled": false,
+      "start": 0,
+      "end": 3
+    },
+    "jump": {
+      "enabled": false,
+      "start": 0,
+      "end": 3
+    },
+    "sad": {
+      "enabled": true,
+      "start": 0,
+      "end": 2
+    }
+  }
+}
