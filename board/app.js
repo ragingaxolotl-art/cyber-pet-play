@@ -1,13 +1,13 @@
-import {randomLike,withCompanions} from './group.js?v=7';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=7';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=7';
-import {favoriteFood} from './food.js?v=7';
-import {drawLandscape,drawWash} from './scenery.js?v=7';
-import {readConnection,rememberConnection,forgetConnection,refreshRoster} from './connection.js?v=7';
-import {readBackup} from './backups.js?v=7';
+import {randomLike,withCompanions} from './group.js?v=8';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=8';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=8';
+import {favoriteFood} from './food.js?v=8';
+import {drawLandscape,drawWash} from './scenery.js?v=8';
+import {refreshRoster} from './connection.js?v=8';
+import {readBackup} from './backups.js?v=8';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
-let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0;
+let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 let sessionLikes=new Map(),companions=[];
 let width=1600,height=850,mode='sample',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
@@ -25,7 +25,7 @@ function measureArtwork(image){
 }
 const backdrop=new Image();backdrop.src='assets/location.png';
 function resize(){
-  const box=canvas.getBoundingClientRect();width=box.width;height=box.height;
+  const box=canvas.getBoundingClientRect();width=Math.max(1,box.width);height=Math.max(1,box.height);
   // Native pixels up to a 4K pixel budget, including high-DPI laptop mirroring.
   const ratio=Math.min(devicePixelRatio||1,Math.sqrt(3840*2160/Math.max(1,width*height)));
   canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);
@@ -85,7 +85,7 @@ function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
   if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets)tick(p,dt);advanceTag(pets,dt);interactPets(pets);}
   stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);
-  requestAnimationFrame(render);
+  animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){
   if(label==='class')data=withCompanions(data,companions);
@@ -101,17 +101,36 @@ function setPets(data,label){
 function pause(){paused=!paused;syncPause();}
 function syncPause(){$('pause').textContent=paused?'Play':'Pause';$('pause').setAttribute('aria-pressed',String(paused));}
 $('pause').onclick=pause;syncPause();
-$('setup').onclick=()=>{$('connection').showModal();$('password').focus();};
+$('setup').onclick=()=>{$('connection').showModal();};
 document.querySelector('.close').onclick=()=>$('connection').close();
-$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('caption').textContent='Use your browser’s full-screen command to fill the board.';}};
-document.addEventListener('fullscreenchange',()=>document.body.classList.toggle('board-mode',!!document.fullscreenElement));
-document.addEventListener('keydown',event=>{if($('connection').open)return;if(event.code==='Space'){event.preventDefault();pause();}if(event.key==='Escape')document.body.classList.remove('board-mode');});
-document.addEventListener('visibilitychange',()=>{previous=0;});
-function loading(value){busy=value;document.querySelector('.primary').disabled=value;$('files').disabled=value;$('forget').disabled=value;}
-async function request(path,credential,teacher=false){
-  if(!/^\/board-api(?:\/connect|\/[a-z0-9_-]{3,32}\/[1-9][0-9]{0,8})?$/.test(path))throw Error('Unexpected classroom response.');
-  const result=await fetch(API+path,{headers:{[teacher?'X-Teacher-Password':'X-Board-Token']:credential},cache:'no-store',signal:AbortSignal.timeout(45000)});
-  if(!result.ok){let message='Classroom could not be loaded.';try{message=(await result.json()).error||message;}catch{}const error=Error(message);error.status=result.status;throw error;}return result;
+let fullscreenBusy=false;
+function syncDisplay(){
+  const full=!!document.fullscreenElement;
+  document.body.classList.remove('board-mode');
+  $('fullscreen').textContent=full?'Exit full screen':'Full screen ↗';
+  $('fullscreen').setAttribute('aria-pressed',String(full));
+  previous=0;requestAnimationFrame(()=>{resize();requestAnimationFrame(resize);});
+}
+async function toggleFullscreen(){
+  if(fullscreenBusy)return;fullscreenBusy=true;
+  try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}
+  catch{$('caption').textContent='Use your browser’s full-screen command to fill the board.';}
+  finally{fullscreenBusy=false;syncDisplay();}
+}
+$('fullscreen').onclick=toggleFullscreen;$('exit-fullscreen').onclick=toggleFullscreen;
+document.addEventListener('fullscreenchange',syncDisplay);
+document.addEventListener('fullscreenerror',syncDisplay);
+window.addEventListener('resize',syncDisplay);
+window.visualViewport?.addEventListener('resize',syncDisplay);
+window.addEventListener('pagehide',()=>{cancelAnimationFrame(animationRequest);animationRequest=null;previous=0;});
+window.addEventListener('pageshow',event=>{syncDisplay();if(animationRequest===null)animationRequest=requestAnimationFrame(render);if(event.persisted)refreshClass();});
+document.addEventListener('keydown',event=>{if($('connection').open)return;if(event.code==='Space'){event.preventDefault();pause();}});
+document.addEventListener('visibilitychange',()=>{previous=0;if(!document.hidden)syncDisplay();});
+function loading(value){busy=value;document.querySelector('.primary').disabled=value;$('files').disabled=value;}
+async function request(path){
+  if(!/^\/board-api\/public(?:\/[a-f0-9]{64})?$/.test(path))throw Error('Unexpected classroom response.');
+  const result=await fetch(API+path,{cache:'no-store',signal:AbortSignal.timeout(45000)});
+  if(!result.ok){let message='Classroom could not be loaded.';try{message=(await result.json()).error||message;}catch{}throw Error(message);}return result;
 }
 async function loadMany(items,read,label){
   displayGeneration++;
@@ -125,39 +144,24 @@ async function loadMany(items,read,label){
   if(next.length||!items.length)setPets(next,label);
   if(failures.length){$('message').textContent=`Loaded ${next.length} of ${items.length}. ${failures.join(' • ')}`;$('caption').textContent=`${next.length} pets loaded · ${failures.length} could not load — see Load class`;}else{$('connection').close();$('message').textContent='';}
 }
-let connection;try{connection=readConnection(localStorage);}catch{}let autoEnabled=!!connection;
-function connectionStatus(){ $('forget').hidden=!connection; }
+let autoEnabled=true;
 async function refreshClass(){
-  if(busy||!connection||!autoEnabled)return;
+  if(busy||!autoEnabled)return;
   loading(true);displayGeneration++;
   try{
     await foodReady;
-    const list=await(await request('/board-api',connection.token)).json();
+    const list=await(await request('/board-api/public')).json();
     if(!Array.isArray(list.pets))throw Error('Unexpected classroom response.');
-    const result=await refreshRoster(list.pets,loaded,async item=>readBackup(await(await request(item.path,connection.token)).arrayBuffer(),item.sha256));
+    const result=await refreshRoster(list.pets,loaded,async item=>readBackup(await(await request(item.path)).arrayBuffer()));
     if(result.pets.length||!list.pets.length)setPets(result.pets,'class');
     $('message').textContent=result.failures.join(' • ');
-    $('caption').textContent=`${result.pets.length} class ${result.pets.length===1?'pet':'pets'} + ${companions.length} colorful companions · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Connect class':''}`;
+    $('caption').textContent=`${result.pets.length} class ${result.pets.length===1?'pet':'pets'} + ${companions.length} colorful companions · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Board settings':''}`;
   }catch(error){
-    if(error.status===401){autoEnabled=false;connection=null;try{forgetConnection(localStorage);}catch{}connectionStatus();}
     $('message').textContent=error.message;
-    $('caption').textContent=error.status===401?'Reconnect this board in Connect class.':'Class connection unavailable · Keeping current pets · Retrying automatically';
+    $('caption').textContent='Class connection unavailable · Keeping current pets · Retrying automatically';
   }finally{loading(false);}
 }
-$('connect').onsubmit=async event=>{
-  event.preventDefault();if(busy)return;loading(true);let password=$('password').value;$('password').value='';
-  try{
-    connection=await(await request('/board-api/connect',password,true)).json();
-    autoEnabled=true;connectionStatus();
-    let remembered=true;try{rememberConnection(localStorage,connection);}catch{remembered=false;}
-    loading(false);await refreshClass();
-    if(!remembered)$('message').textContent='Connected for this visit. Enable browser storage to remember this board.';
-    else if(!$('message').textContent)$('connection').close();
-  }catch(error){$('message').textContent=error.message;}finally{password='';loading(false);}
-};
-$('forget').onclick=()=>{autoEnabled=false;connection=null;try{forgetConnection(localStorage);}catch{}connectionStatus();setPets([],'local');$('message').textContent='Connection forgotten on this browser.';};
-
-connectionStatus();
+$('refresh-class').onclick=async()=>{autoEnabled=true;await refreshClass();if(!$('message').textContent)$('connection').close();};
 setInterval(()=>refreshClass(),60000);
 window.addEventListener('online',()=>refreshClass());
 $('files').onchange=async()=>{if(busy)return;const files=[...$('files').files];if(!files.length)return;autoEnabled=false;loading(true);try{await loadMany(files,async file=>{if(file.size>32*1024*1024)throw Error('Backup exceeds 32 MiB.');return readBackup(await file.arrayBuffer());},'local');}finally{$('files').value='';loading(false);}};
@@ -180,5 +184,5 @@ function showDemo(count){
 }
 $('sample-crowd').onclick=async()=>{if(busy)return;autoEnabled=false;loading(true);try{await demo(Number($('crowd-count').value));$('connection').close();}finally{loading(false);}};
 $('names').onchange=()=>{showNames=$('names').checked;};
-resize();requestAnimationFrame(render);
-(async()=>{try{await demo(5);}catch{$('caption').textContent='Connect your class to start.';}if(connection){$('caption').textContent='Loading your class · Five sample pets are keeping the board company';await refreshClass();}})();
+resize();animationRequest=requestAnimationFrame(render);syncDisplay();
+(async()=>{try{await demo(5);}catch{$('caption').textContent='Connect your class to start.';}$('caption').textContent='Loading backed-up class pets automatically';await refreshClass();})();
