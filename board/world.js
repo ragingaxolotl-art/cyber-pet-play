@@ -1,10 +1,11 @@
-import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=13';
-import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=13';
+import {splashDirt} from './dirt.js?v=14';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=14';
+import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=14';
+import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=14';
 export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{level:2,left:.67,right:.97}];
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];
 export const worldModes=new Set(['shelter','puddle','watch','explore','celebrate','quiet','startle']);
-const trait=(p,key)=>(p.data.personality?.[key]??50)/100;
 export function weatherAt(time){const phase=time%240;return {rain:phase>=30&&phase<90,celebrate:phase>=150&&phase<168,rustle:phase>=110&&phase<116,cycle:Math.floor(time/240)};}
 export const butterflyAt=(level,time)=>.40+.16*Math.sin(time*.08+level*2);
 export function beginWorld(p,kind,target,duration=10){p.mode=kind;p.worldTarget=target;p.worldTimer=duration;p.clock=0;p.socialCooldown=duration+10;p.emote=kind==='quiet'?'sleepy':kind==='puddle'?'eager':kind==='shelter'?'sweat':kind==='startle'?'question':'thinking';p.emoteTime=4;}
@@ -28,16 +29,16 @@ export function advanceWorld(world,pets,dt,time){
     if(previous&&previous.level===p.level&&!p.stair&&!p.routeFloor&&Math.abs(p.x-previous.x)<.1&&p.x!==previous.x){
       const patch=mud[p.level],pool=puddles[p.level];
       if(Math.abs(p.x-patch.x)<patch.r)addWalkingDirt(p,Math.abs(p.x-previous.x)*5);
-      if(Math.abs(p.x-pool.x)<pool.r&&p.splashCooldown===0){splash(world,p);p.splashCooldown=.45;}
+      if(Math.abs(p.x-pool.x)<pool.r&&p.splashCooldown===0){splash(world,p,true);splashDirt(p);p.splashCooldown=.45;}
     }
     if(worldModes.has(p.mode)){
       const moving=hasAction(p.data,'walking'),delta=(p.worldTarget??p.x)-p.x;
-      if(moving&&Math.abs(delta)>.002){const step=Math.min(Math.abs(delta),tuning.walkSpeed*(.7+trait(p,'activity_level')*.6)*dt);p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}
+      if(moving&&Math.abs(delta)>.002){const step=Math.min(Math.abs(delta),travelSpeed(p)*dt);p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}
       else {
         p.worldTimer-=dt;
-        if(p.mode==='puddle'){p.worldBob=Math.abs(Math.sin(p.clock*5))*.009;if(p.splashCooldown===0){splash(world,p,true);p.splashCooldown=.7;addWalkingDirt(p,.12);p.emote='laughing';p.emoteTime=2;}}
+        if(p.mode==='puddle'){p.worldBob=Math.abs(Math.sin(p.clock*5))*.009;if(p.splashCooldown===0){splash(world,p,true);p.splashCooldown=.7;splashDirt(p,.1);p.emote='laughing';p.emoteTime=2;}}
         if(p.mode==='watch'){p.direction=butterflyAt(p.level,time)>p.x?1:-1;}
-        if(p.mode==='shelter'){p.emote='cute';p.emoteTime=2;}
+        if(p.mode==='shelter'){p.emote=traitFeeling(p,'sociability');p.emoteTime=2;}
         if(p.mode==='celebrate'){p.emote='hearts';p.emoteTime=2;p.worldBob=moving?Math.abs(Math.sin(p.clock*4))*.004:0;}
       }
       if(p.mode==='shelter'?(!weather.rain&&Math.abs(delta)<.002):p.worldTimer<=0)finish(p);
@@ -47,18 +48,18 @@ export function advanceWorld(world,pets,dt,time){
     const canWalk=hasAction(p.data,'walking');
     if(weather.rain&&p.rainSeen!==weather.cycle){
       p.rainSeen=weather.cycle;
-      if(canWalk){const playful=trait(p,'activity_level')*.45+trait(p,'curiosity')*.25;if(p.random()>playful&&world.buildings[p.level].phase==='ready'){beginWorld(p,'shelter',(huts[p.level].left+huts[p.level].right)/2,60);}else beginWorld(p,'puddle',puddles[p.level].x,5+trait(p,'activity_level')*7);}
+      if(canWalk){const playful=trait(p,'activity_level')*.35+trait(p,'curiosity')*.25+expression(p).reckless*.2;if(p.random()>playful&&world.buildings[p.level].phase==='ready'){beginWorld(p,'shelter',(huts[p.level].left+huts[p.level].right)/2,60);}else beginWorld(p,'puddle',puddles[p.level].x,5+trait(p,'activity_level')*7);}
       else {p.emote='sweat';p.emoteTime=5;}
       continue;
     }
     if(p.worldCooldown>0)continue;
     if(weather.celebrate){beginWorld(p,'celebrate',canWalk?.46+trait(p,'sociability')*.13:p.x,5+trait(p,'sociability')*8);continue;}
-    if(weather.rustle){beginWorld(p,'startle',canWalk&&trait(p,'bravery')>.6?.58:p.x,4);p.emote=trait(p,'bravery')>.6?'question':'sweat';continue;}
+    if(weather.rustle){beginWorld(p,'startle',canWalk&&trait(p,'bravery')>.6?(love(p)>.5?.58:puddles[p.level].x):p.x,4);p.emote=traitFeeling(p,'bravery');p.worldTimer=3+expression(p).caution*(1-love(p))*7;continue;}
     const pick=p.random(),curious=trait(p,'curiosity');
     if(canWalk&&pick<trait(p,'activity_level')*.18)beginWorld(p,'puddle',puddles[p.level].x,5);
     else if(pick<.22+curious*.30){beginWorld(p,'watch',p.x,5+curious*7);p.emote='question';}
-    else if(canWalk&&pick<.65){beginWorld(p,'explore',.58,5+curious*6);p.emote='thinking';}
-    else {beginWorld(p,'quiet',p.x,5+(1-trait(p,'sociability'))*9);p.emote=p.level===2?'thinking':'sleepy';}
+    else if(canWalk&&pick<.65){beginWorld(p,'explore',curious<.4&&love(p)<.5?p.x:.58,5+curious*6);p.emote=traitFeeling(p,'curiosity');}
+    else {beginWorld(p,'quiet',p.x,5+(1-trait(p,'sociability'))*9);p.emote=traitFeeling(p,'activity_level');}
   }
 }
 const oval=(c,x,y,rx,ry,color)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();};

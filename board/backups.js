@@ -56,6 +56,6 @@ export async function readBackup(buffer,expectedHash){
       }
     }
     const cleanliness=Number(progress.stats?.cleanliness);
-    return {id:manifest.character_id,name:String(config.name||'Cyber Pet').slice(0,60),config,images,stats:progress.stats||{},personality:progress.personality||config.starter_traits?.personality||{},foodPreferences:progress.food_preferences||config.starter_traits?.food_preferences||{},cleanliness:Number.isFinite(cleanliness)?Math.max(0,Math.min(1,cleanliness/100)):.35,pixels};
+    return {id:manifest.character_id,name:String(config.name||'Cyber Pet').slice(0,60),config,images,stats:progress.stats||{},speed:progress.skills?.levels?.speed,love:progress.bond?.love,personality:progress.personality||config.starter_traits?.personality||{},foodPreferences:progress.food_preferences||config.starter_traits?.food_preferences||{},cleanliness:Number.isFinite(cleanliness)?Math.max(0,Math.min(1,cleanliness/100)):.35,pixels};
   }catch(error){for(const image of images.values())image.close?.();throw error;}
 }

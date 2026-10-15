@@ -1,5 +1,7 @@
-import {collectItem,friendship} from './sharing.js?v=13';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=13';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=14';
+import {makeDirt} from './dirt.js?v=14';
+import {collectItem,friendship} from './sharing.js?v=14';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=14';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -11,18 +13,16 @@ export function hasAction(data,action){
 }
 export function makePet(data,index,count,random=Math.random){
   const level=index%3, perLevel=Math.ceil(count/3);
-  return {data,level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:'',heldItem:null,friendships:new Map(),shareCooldown:0};
+  return {data,dirtPattern:makeDirt(),level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:'',heldItem:null,friendships:new Map(),shareCooldown:0};
 }
-const axis=(pet,key)=>(Number.isFinite(pet.data.personality?.[key])?Math.max(0,Math.min(100,pet.data.personality[key])):50)/100;
 export function chooseEmote(pet){
   const stats=pet.data.stats||{};
   if(stats.health<=15)return 'crying';
   if(stats.energy<=12)return 'sleepy';
   if(stats.fullness<=12)return 'drooling';
   if(stats.happiness<=35&&!(pet.comfortTime>0))return 'frustrated';
-  const choices=[['eager',.3+axis(pet,'activity_level')],['hearts',.3+axis(pet,'generosity')],['cute',.3+axis(pet,'bravery')],['question',.3+axis(pet,'curiosity')],['laughing',.3+axis(pet,'sociability')],['thinking',1.3-axis(pet,'sociability')]];
-  let pick=pet.random()*choices.reduce((sum,x)=>sum+x[1],0);
-  for(const [text,weight] of choices){pick-=weight;if(pick<=0)return text;}return 'cute';
+  const keys=['activity_level','generosity','bravery','curiosity','sociability','assertiveness'];
+  return traitFeeling(pet,keys[Math.min(5,Math.floor(pet.random()*keys.length))]);
 }
 export function foodRemaining(pet){
   if(!['eat','snack'].includes(pet.mode)||!pet.mealDuration)return 0;
@@ -45,7 +45,7 @@ export function addWalkingDirt(pet,distance){
   pet.cleanliness=Math.max(0,Math.min(1,pet.cleanliness-distance*tuning.dirtPerStage));
 }
 export function startConversation(a,b,afterTag=false){
-  if(afterTag)standBeside(a,b);
+  standBeside(a,b);
   const curious=axis(a,'curiosity')>.65,shy=axis(a,'sociability')<.35||axis(b,'sociability')<.35;
   const generous=axis(a,'generosity')>.65||axis(b,'generosity')>.65;
   const lowMood=(a.data.stats?.happiness??50)<=35||(b.data.stats?.happiness??50)<=35;
@@ -56,7 +56,7 @@ export function startConversation(a,b,afterTag=false){
     const duration=engagementSeconds(p,'talk');
     p.mode='social';p.clock=0;p.timer=duration;p.socialDuration=duration;p.socialReply=reply[index];p.engagement=1;p.tagGame=null;
     p.socialCooldown=duration+20+p.random()*25;p.direction=p.x<(index===0?b:a).x?1:-1;
-    p.emote=opening[index];p.emoteTime=duration;
+    p.emote=love(p)<.5?traitFeeling(p,'sociability'):opening[index];p.socialReply=love(p)<.5?traitFeeling(p,'assertiveness'):reply[index];p.emoteTime=duration;
     p.speech=afterTag?'That was fun!':index===0?'I like '+likes[0]+'!':'What do you like?';
     p.speechReply=index===0?'What about you?':'I like '+likes[1]+'!';
   }
@@ -80,12 +80,12 @@ export function advanceTag(pets,dt){
     }
     for(const p of game.players)p.engagement=Math.max(0,p.engagement-dt/engagementSeconds(p,'tag'));
     if(game.players.some(p=>p.engagement<=0)){startConversation(a,b,true);continue;}
-    const runner=game.runner,chaser=game.chaser,runSpeed=tuning.walkSpeed*(1.5+axis(runner,'activity_level'));
+    const runner=game.runner,chaser=game.chaser,runSpeed=travelSpeed(runner)*1.6,chaseSpeed=travelSpeed(chaser)*1.8;
     game.cooldown=Math.max(0,game.cooldown-dt);
     const gap=distance(chaser.x,runner.x);chaser.direction=Math.sign(gap)||runner.direction;
     runner.x=wrapped(runner.x+runner.direction*runSpeed*dt);
-    addWalkingDirt(runner,runSpeed*dt);addWalkingDirt(chaser,runSpeed*1.4*dt);
-    chaser.x=wrapped(chaser.x+chaser.direction*runSpeed*1.4*dt);
+    addWalkingDirt(runner,runSpeed*dt);addWalkingDirt(chaser,chaseSpeed*dt);
+    chaser.x=wrapped(chaser.x+chaser.direction*chaseSpeed*dt);
     if(game.cooldown===0&&Math.abs(distance(chaser.x,runner.x))<.014){
       game.chaser=runner;game.runner=chaser;game.cooldown=1.5;game.tags++;
       chaser.direction=runner.direction;chaser.speech='Tag!';runner.speech="I'm it!";chaser.emote='laughing';runner.emote='eager';chaser.emoteTime=runner.emoteTime=2;
@@ -98,6 +98,7 @@ export function interactPets(pets){
     const row=pets.filter(p=>p.level===level&&eligible(p)).sort((a,b)=>a.x-b.x);
     for(let i=0;i<row.length-1;i++){
       const a=row[i],b=row[i+1];if(!eligible(a)||!eligible(b)||b.x-a.x>.055)continue;
+      if(!willing(b,a)){standBeside(a,b);a.socialCooldown=12+love(a)*25;b.socialCooldown=20;b.emote=traitFeeling(b,'sociability');b.emoteTime=3;a.emote=traitFeeling(a,'assertiveness');a.emoteTime=3;continue;}
       if(trySocial(a,b,socialWorld())){i++;continue;}
       const playful=(axis(a,'activity_level')+axis(b,'activity_level'))/2;
       const affinity=(friendship(a,b)+friendship(b,a))/100;
@@ -140,7 +141,7 @@ function tickMotion(pet,dt){
     if(pet.timer<=0||!hasAction(pet.data,'eat')){collectItem(pet);pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=55;pet.emote='hearts';pet.emoteTime=3;}
     return;
   }
-  const speed=tuning.walkSpeed*(.65+axis(pet,'activity_level')*.9);
+  const speed=travelSpeed(pet);
   if(pet.mode==='wash'){
     pet.x+=pet.direction*speed*.65*dt;
     const zone=stations.wash;pet.washProgress=Math.max(0,Math.min(1,(pet.direction>0?pet.x-zone.left:zone.right-pet.x)/(zone.right-zone.left)));
@@ -185,7 +186,7 @@ function tickMotion(pet,dt){
   }
   if(pet.x>1.035)pet.x=-.035;
   if(pet.x<-.035)pet.x=1.035;
-  if(pet.timer<=0){pet.mode='idle';pet.clock=0;pet.timer=tuning.minPause+pet.random()*(tuning.maxPause-tuning.minPause);pet.emote=chooseEmote(pet);pet.emoteTime=tuning.emoteSeconds;if(pet.random()<.3)pet.direction*=-1;}
+  if(pet.timer<=0){pet.mode='idle';pet.clock=0;pet.timer=tuning.minPause+pet.random()*(tuning.maxPause-tuning.minPause)+expression(pet).rest*5+expression(pet).inertia*6+expression(pet).withdrawal*3;pet.emote=chooseEmote(pet);pet.emoteTime=tuning.emoteSeconds;if(pet.random()<.3)pet.direction*=-1;}
 }
 export function petFloor(pet){
   if(Number.isFinite(pet.routeFloor))return pet.routeFloor;
@@ -218,5 +219,5 @@ export function frameIndex(config,action,seconds){
   for(let i=0;i<count;i++){if(remaining<durations[i])return i;remaining-=durations[i];}return count-1;
 }
 
-export const socialWorld=()=>({standBeside,hasAction,tuning,stairs,stations,floor,addWalkingDirt});
+export const socialWorld=()=>({standBeside,hasAction,tuning,stairs,stations,floor,addWalkingDirt,travelSpeed});
 export function advanceInteractions(pets,dt){advanceSocial(pets,dt,socialWorld());}

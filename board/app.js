@@ -1,19 +1,19 @@
-import {advanceGames,drawGames} from './games.js?v=13';
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=13';
-import {chooseItem} from './sharing.js?v=13';
-import {randomLike,withCompanions} from './group.js?v=13';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=13';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=13';
-import {favoriteFood} from './food.js?v=13';
-import {drawLandscape,drawWash} from './scenery.js?v=13';
-import {refreshRoster} from './connection.js?v=13';
-import {readBackup} from './backups.js?v=13';
+import {isClassPet} from './profile.js?v=14';
+import {advanceGames,drawGames} from './games.js?v=14';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=14';
+import {chooseItem} from './sharing.js?v=14';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=14';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=14';
+import {favoriteFood} from './food.js?v=14';
+import {drawLandscape,drawWash} from './scenery.js?v=14';
+import {refreshRoster} from './connection.js?v=14';
+import {readBackup} from './backups.js?v=14';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 const livingWorld=createWorld();
-let sessionLikes=new Map(),companions=[];
-let width=1600,height=850,mode='sample',busy=false;
+
+let width=1600,height=850,mode='class',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
 const landscape=document.createElement('canvas');let landscapeDirty=true,showNames=true,foods=[];
 loadEmotes().catch(()=>{});
@@ -44,13 +44,12 @@ function stage(){
 }
 const dirtLayer=document.createElement('canvas');dirtLayer.width=dirtLayer.height=192;
 const dirtPainter=dirtLayer.getContext('2d');
-function drawDirt(img,bounds,x,y,w,h,direction,amount){
+function drawDirt(img,bounds,x,y,w,h,direction,amount,pattern){
   if(amount<.005)return;
   const d=dirtPainter;d.clearRect(0,0,192,192);d.globalCompositeOperation='source-over';
-  d.fillStyle='#745138';
-  for(let i=0;i<18;i++){
-    d.globalAlpha=Math.max(0,Math.min(.8,(amount-i*.025)*1.8));
-    d.beginPath();d.ellipse(25+(i*47)%145,65+(i*37)%115,5+i%4,3+i%5,i,0,Math.PI*2);d.fill();
+  for(const [i,spot] of pattern.entries()){
+    d.fillStyle=spot.shade;d.globalAlpha=Math.max(0,Math.min(.85,(amount-i*.012)*2));
+    d.beginPath();d.ellipse(spot.x,spot.y,spot.rx,spot.ry,spot.angle,0,Math.PI*2);d.fill();
   }
   d.globalAlpha=1;d.globalCompositeOperation='destination-in';
   d.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,0,0,192,192);
@@ -79,13 +78,6 @@ function drawPet(pet){
     const label=data.name.length>16?data.name.slice(0,15)+'…':data.name,lw=ctx.measureText(label).width+12*unit;
     roundRect(x-lw/2,y+10*unit,lw,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x,y+font+11*unit);
   }
-  if(pet.heldItem&&!['eat','snack'].includes(pet.mode)){
-    let image=foodImages.get(pet.heldItem.id);
-    if(!image){image=new Image();image.src=pet.heldItem.sprite;foodImages.set(pet.heldItem.id,image);}
-    const size=desired*.34,ix=x+pet.direction*(w*.45+size*.35);
-    roundRect(ix-size*.65,y-size*1.1,size*1.3,size*1.2,4,'#d5af70');
-    if(image.complete&&image.naturalWidth)ctx.drawImage(image,ix-size/2,y-size,size,size);
-  }
   if(['eat','snack'].includes(pet.mode)&&data.food){
     const meal=pet.mode==='snack'?pet.heldItem:data.food;
     const image=foodImages.get(meal.id),size=desired*.43*Math.sqrt(foodRemaining(pet)),fx=x+pet.direction*desired*.49;
@@ -102,7 +94,7 @@ function drawPet(pet){
     if(!image){image=new Image();image.src=pet.displayItem.sprite;foodImages.set(pet.displayItem.id,image);}
     const size=desired*.5;if(image.complete&&image.naturalWidth)ctx.drawImage(image,x-size/2,y-desired-65*unit-size/2,size,size);
   }
-  drawDirt(img,bounds,x,y,w,h,pet.direction,1-pet.cleanliness);
+  drawDirt(img,bounds,x,y,w,h,pet.direction,1-pet.cleanliness,pet.dirtPattern);
 
 }
 function render(time){
@@ -112,12 +104,12 @@ function render(time){
   animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){
-  if(label==='class')data=withCompanions(data,companions);
-  for(const pet of data){const key=pet.id;if(pet.isSample&&!sessionLikes.has(key))sessionLikes.set(key,randomLike(foods));pet.food=pet.isSample?sessionLikes.get(key):chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
+  data=data.filter(isClassPet);
+  for(const pet of data){pet.food=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
-  const existing=new Map(pets.map(p=>[p.data,p])),byId=new Map(pets.map(p=>[p.data.id,p]));
-  loaded=data;pets=data.map((pet,i)=>{if(existing.has(pet))return existing.get(pet);const fresh=makePet(pet,i,data.length),old=byId.get(pet.id);if(old){fresh.heldItem=old.heldItem;fresh.friendships=old.friendships;fresh.shareCooldown=old.shareCooldown;fresh.heldTime=old.heldTime;fresh.knownFavorites=old.knownFavorites;fresh.dislikedGifts=old.dislikedGifts;fresh.giftFor=old.giftFor;fresh.comfortTime=old.comfortTime;}return fresh;});mode=label;
+  const existing=new Map(pets.map(p=>[p.data,p])),byId=new Map(pets.map(p=>[p.data.boardId||p.data.id,p]));
+  loaded=data;pets=data.map((pet,i)=>{if(existing.has(pet))return existing.get(pet);const fresh=makePet(pet,i,data.length),old=byId.get(pet.boardId||pet.id);if(old){fresh.dirtPattern=old.dirtPattern;fresh.cleanliness=old.cleanliness;fresh.heldItem=old.heldItem;fresh.friendships=old.friendships;fresh.shareCooldown=old.shareCooldown;fresh.heldTime=old.heldTime;fresh.knownFavorites=old.knownFavorites;fresh.dislikedGifts=old.dislikedGifts;fresh.giftFor=old.giftFor;fresh.comfortTime=old.comfortTime;}return fresh;});mode=label;
   $('status').textContent=label==='sample'?'Sample pets':`${data.length} ${data.length===1?'pet':'pets'} together`;
   $('caption').textContent=label==='sample'?`${data.length} sample pets · Jungle kitchen + cloud wash`:`${data.length} Cyber Pets · ${data.filter(p=>!hasAction(p,'walking')).length} resting without movement art · Display only`;
   $('empty').hidden=data.length>0;
@@ -176,10 +168,10 @@ async function refreshClass(){
     await foodReady;
     const list=await(await request('/board-api/public')).json();
     if(!Array.isArray(list.pets))throw Error('Unexpected classroom response.');
-    const result=await refreshRoster(list.pets,loaded,async item=>readBackup(await(await request(item.path)).arrayBuffer()));
-    if(result.pets.length||!list.pets.length)setPets(result.pets,'class');
+    const result=await refreshRoster(list.pets.filter(isClassPet),loaded,async item=>readBackup(await(await request(item.path)).arrayBuffer()));
+    setPets(result.pets,'class');
     $('message').textContent=result.failures.join(' • ');
-    $('caption').textContent=`${result.pets.length} class ${result.pets.length===1?'pet':'pets'} + ${companions.length} colorful companions · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Board settings':''}`;
+    $('caption').textContent=`${pets.length} class ${pets.length===1?'pet':'pets'} · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Board settings':''}`;
   }catch(error){
     $('message').textContent=error.message;
     $('caption').textContent='Class connection unavailable · Keeping current pets · Retrying automatically';
@@ -189,24 +181,7 @@ $('refresh-class').onclick=async()=>{autoEnabled=true;await refreshClass();if(!$
 setInterval(()=>refreshClass(),60000);
 window.addEventListener('online',()=>refreshClass());
 $('files').onchange=async()=>{if(busy)return;const files=[...$('files').files];if(!files.length)return;autoEnabled=false;loading(true);try{await loadMany(files,async file=>{if(file.size>32*1024*1024)throw Error('Backup exceeds 32 MiB.');return readBackup(await file.arrayBuffer());},'local');}finally{$('files').value='';loading(false);}};
-let demoData,displayGeneration=0;
-async function demo(count=5){
-  const generation=++displayGeneration;
-  await foodReady;
-  if(demoData){showDemo(count);return;}
-  const config=await(await fetch('assets/demo.json')).json(),images=new Map();
-  for(const action of ['idle','walking','eat','happy'])for(const name of config.animations[action]){const image=new Image();image.src='assets/'+name;await image.decode();images.set(name,image);}
-  demoData={config,images};if(generation===displayGeneration)showDemo(count);
-}
-function showDemo(count){
-  const names=['Pip','Fern','Echo','Moss','Nova','Clover','Pebble','Sunny','Orbit','Willow','Sprout','Luna'];
-  sessionLikes.clear();
-  const tastes=['Sweet','Salty','Sour','Bitter','Savory'];
-  const data=Array.from({length:count},(_,i)=>({id:'sample-'+i,isSample:true,name:names[i%names.length]+(i>=names.length?' '+(1+Math.floor(i/names.length)):''),...demoData,tint:Math.floor(Math.random()*360),foodPreferences:{favorite_taste:tastes[i%5],hated_taste:tastes[(i+2)%5],favorite_food_tags:['Fresh','Fruity','Roasted'],hated_food_tags:['Bitter','Fermented','Charred']},personality:{activity_level:Math.random()*100,curiosity:Math.random()*100,sociability:Math.random()*100,generosity:Math.random()*100,bravery:Math.random()*100}}));
-  companions=data.slice(0,5);
-  setPets(data,'sample');
-}
-$('sample-crowd').onclick=async()=>{if(busy)return;autoEnabled=false;loading(true);try{await demo(Number($('crowd-count').value));$('connection').close();}finally{loading(false);}};
+let displayGeneration=0;
 $('names').onchange=()=>{showNames=$('names').checked;};
 resize();animationRequest=requestAnimationFrame(render);syncDisplay();
-(async()=>{try{await demo(5);}catch{$('caption').textContent='Connect your class to start.';}$('caption').textContent='Loading backed-up class pets automatically';await refreshClass();})();
+$('caption').textContent='Loading backed-up class pets automatically';refreshClass();

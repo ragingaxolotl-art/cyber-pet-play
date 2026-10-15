@@ -1,4 +1,5 @@
-import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=13';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=14';
+import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=14';
 export const createBuildings=()=>Array.from({length:3},()=>({phase:'bare',progress:0,workers:[],lastBuildCycle:-1,recruitAt:0,dust:0}));
 const available=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)&&hasAction(p.data,'walking');
 export function workRate(helpers){return Math.max(0,helpers)/18;}
@@ -11,9 +12,9 @@ export function advanceConstruction(world,pets,dt,time,huts,weather){
   if(b.phase==='ready'&&!weather.rain&&time%240>110&&!pets.some(p=>p.level===level&&p.mode==='shelter'))b.phase='dismantling';
   if(b.phase==='dismantling'&&weather.rain)b.phase='building';
   if(!['building','dismantling'].includes(b.phase))continue;
-  if(time>=b.recruitAt){b.recruitAt=time+2;for(const p of pets){if(b.workers.length>=6)break;if(p.level!==level||!available(p)||p.random()>.25+(p.data.personality?.generosity??50)/100*.65)continue;p.mode='build';p.buildingJob=b;p.clock=0;p.emote='eager';p.emoteTime=4;b.workers.push(p);}}
+  if(time>=b.recruitAt){b.recruitAt=time+2;for(const p of pets){if(b.workers.length>=6)break;if(p.level!==level||!available(p)||p.random()>expression(p).cooperation)continue;p.mode='build';p.buildingJob=b;p.clock=0;p.emote='eager';p.emoteTime=4;b.workers.push(p);}}
   const hut=huts[level],span=hut.right-hut.left;let helpers=0;
-  b.workers.forEach((p,i)=>{const target=hut.left+.03+(span-.06)*(i+.5)/b.workers.length;p.worldTarget=target;const delta=target-p.x,step=Math.min(Math.abs(delta),tuning.walkSpeed*dt);p.gameMoving=step>.00001;
+  b.workers.forEach((p,i)=>{const target=hut.left+.03+(span-.06)*(i+.5)/b.workers.length;p.worldTarget=target;const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*dt);p.gameMoving=step>.00001;
    if(Math.abs(delta)>.003){p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}else{helpers++;p.worldBob=Math.abs(Math.sin(p.clock*9+i))*.004;p.emote='sweat';p.emoteTime=2;}
   });
   b.helpers=helpers;if(helpers)b.dust=.8;

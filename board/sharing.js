@@ -1,5 +1,5 @@
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=14';
 import {foodScore} from './food.js';
-const trait=(pet,key)=>(pet.data.personality?.[key]??50)/100;
 // One carried item and directional friendships belong only to this board session.
 export function chooseItem(pet,foods,random=pet.random){
   if(!foods.length)return null;
@@ -11,7 +11,7 @@ export function chooseItem(pet,foods,random=pet.random){
 export function collectItem(pet){
   if(pet.heldItem||!pet.data.food)return false;
   const known=[...(pet.knownFavorites?.entries()||[])];
-  const gift=known.length&&pet.random()<trait(pet,'generosity')*.8?known[Math.floor(pet.random()*known.length)]:null;
+  const gift=known.length&&pet.random()<expression(pet).giving*(.2+love(pet)*.8)?known[Math.floor(pet.random()*known.length)]:null;
   pet.heldItem=gift?gift[1]:pet.data.food;pet.giftFor=gift?gift[0]:null;pet.heldTime=0;return true;
 }
 export function friendship(pet,other){return pet.friendships?.get(other.data.id)??50;}
@@ -23,8 +23,8 @@ export function shareItem(giver,recipient){
   const change=reaction==='disliked'?-3:reaction==='liked'?4:1;
   recipient.friendships??=new Map();recipient.friendships.set(giver.data.id,Math.max(0,Math.min(100,friendship(recipient,giver)+change)));
   giver.shareCooldown=recipient.shareCooldown=60;
-  giver.emote='hearts';
-  recipient.emote=recipient.socialReply=reaction==='disliked'?'frustrated':'hearts';
+  giver.emote=traitFeeling(giver,'generosity');
+  recipient.emote=recipient.socialReply=reaction==='disliked'?(love(recipient)>.5?'thinking':'frustrated'):'hearts';
   if(reaction!=='disliked'){recipient.heldItem=item;recipient.heldTime=0;giver.heldItem=null;}
   return {reaction,change,item};
 }

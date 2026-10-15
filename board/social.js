@@ -1,6 +1,6 @@
-import {friendship,shareItem} from './sharing.js?v=13';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=14';
+import {friendship,shareItem} from './sharing.js?v=14';
 import {foodScore} from './food.js';
-const trait=(p,key)=>(p.data.personality?.[key]??50)/100;
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
 export function rememberFavorite(observer,other){
@@ -18,7 +18,7 @@ export function startGesture(a,b,kind,world){
 export function startTogether(a,b,kind,world){
   if(!world.hasAction(a.data,'walking')||!world.hasAction(b.data,'walking')||a.level!==b.level)return false;
   world.standBeside(a,b);
-  const speed=world.tuning.walkSpeed*(.65+Math.min(trait(a,'activity_level'),trait(b,'activity_level'))*.9);
+  const speed=Math.min(travelSpeed(a),travelSpeed(b));
   const group={players:[a,b],kind,time:0,duration:8+Math.min(trait(a,'sociability'),trait(b,'sociability'))*12,speed,direction:a.direction||1};
   for(const p of group.players){p.mode=kind;p.socialGroup=group;p.socialCooldown=45;feeling(p,kind==='escort'?'sweat':'hearts',4);}
   if(kind==='escort'){
@@ -34,13 +34,13 @@ export function startTogether(a,b,kind,world){
 export function trySocial(a,b,world){
   // Comfort and cleaning take precedence over games; neither changes game saves.
   for(const [helper,other] of [[a,b],[b,a]]){
-    const generous=trait(helper,'generosity');
-    if((other.data.stats?.happiness??100)<=35&&!(other.comfortTime>0)&&helper.random()<.3+generous*.6){startGesture(helper,other,'comfort',world);return true;}
-    if(other.cleanliness<.35&&friendship(helper,other)>=50&&helper.random()<generous*.35&&startTogether(helper,other,'escort',world))return true;
-    if(helper.heldItem&&(!helper.giftFor||helper.giftFor===other.data.id)&&!helper.dislikedGifts?.get(other.data.id)?.has(helper.heldItem.id)&&!other.heldItem&&helper.shareCooldown<=0&&other.shareCooldown<=0&&helper.random()<.15+generous*.7){startGesture(helper,other,'offer',world);return true;}
+    const generous=expression(helper).giving,care=expression(helper).help;
+    if((other.data.stats?.happiness??100)<=35&&!(other.comfortTime>0)&&helper.random()<care*.9){startGesture(helper,other,'comfort',world);return true;}
+    if(other.cleanliness<.35&&friendship(helper,other)>=50&&helper.random()<care*.35&&startTogether(helper,other,'escort',world))return true;
+    if((love(helper)<.5||(helper.data.stats?.fullness??100)>20)&&helper.heldItem&&(!helper.giftFor||helper.giftFor===other.data.id)&&!helper.dislikedGifts?.get(other.data.id)?.has(helper.heldItem.id)&&!other.heldItem&&helper.shareCooldown<=0&&other.shareCooldown<=0&&helper.random()<.05+generous*.8){startGesture(helper,other,'offer',world);return true;}
   }
-  if(a.random()<.2+trait(a,'curiosity')*.35){startGesture(a,b,'learn',world);return true;}
-  if(friendship(a,b)>=50&&friendship(b,a)>=50&&a.random()<.15+trait(a,'sociability')*.3)return startTogether(a,b,'together',world);
+  if(a.random()<(.2+trait(a,'curiosity')*.35)*(.35+love(a)*.65)){startGesture(a,b,'learn',world);return true;}
+  if(friendship(a,b)>=50&&friendship(b,a)>=50&&a.random()<(.15+trait(a,'sociability')*.3)*(.3+love(a)*.7))return startTogether(a,b,'together',world);
   return false;
 }
 function finish(group){
@@ -56,9 +56,9 @@ export function advanceSocial(pets,dt,world){
         g.resolved=true;
         if(g.kind==='learn'){rememberFavorite(a,b);rememberFavorite(b,a);b.displayItem=b.data.food;a.displayItem=a.data.food;feeling(a,'hearts',5);feeling(b,'hearts',5);}
         if(g.kind==='comfort'){b.comfortTime=70;feeling(b,'cute',5);feeling(a,'hearts',5);b.friendships??=new Map();b.friendships.set(a.data.id,Math.min(100,friendship(b,a)+2));}
-        if(g.kind==='offer'){feeling(b,foodScore(a.heldItem,b.data.foodPreferences)<=0?'frustrated':'hearts',5);}
+        if(g.kind==='offer'){feeling(b,foodScore(a.heldItem,b.data.foodPreferences)<=0?(love(b)>.5?'thinking':'frustrated'):'hearts',5);}
       }
-      if(g.kind==='offer'&&g.time>=4&&!g.transferred){g.transferred=true;const result=shareItem(a,b);if(result){if(result.reaction==='disliked'){a.dislikedGifts??=new Map();if(!a.dislikedGifts.has(b.data.id))a.dislikedGifts.set(b.data.id,new Set());a.dislikedGifts.get(b.data.id).add(result.item.id);}a.displayItem=result.item;feeling(a,result.reaction==='disliked'?'thinking':'hearts',3);feeling(b,result.reaction==='disliked'?'frustrated':'hearts',3);}}
+      if(g.kind==='offer'&&g.time>=4&&!g.transferred){g.transferred=true;const result=shareItem(a,b);if(result){if(result.reaction==='disliked'){a.dislikedGifts??=new Map();if(!a.dislikedGifts.has(b.data.id))a.dislikedGifts.set(b.data.id,new Set());a.dislikedGifts.get(b.data.id).add(result.item.id);}a.displayItem=result.item;feeling(a,result.reaction==='disliked'?(love(a)>.5?'thinking':traitFeeling(a,'generosity')):'hearts',3);feeling(b,result.reaction==='disliked'?(love(b)>.5?'thinking':'frustrated'):'hearts',3);}}
       if(g.time>=7)finish(g);
     }else if(g.kind==='together'){
       if(!g.players.every(p=>world.hasAction(p.data,'walking'))){finish(g);continue;}
