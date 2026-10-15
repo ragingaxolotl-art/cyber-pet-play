@@ -1,12 +1,13 @@
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=12';
-import {chooseItem} from './sharing.js?v=12';
-import {randomLike,withCompanions} from './group.js?v=12';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=12';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=12';
-import {favoriteFood} from './food.js?v=12';
-import {drawLandscape,drawWash} from './scenery.js?v=12';
-import {refreshRoster} from './connection.js?v=12';
-import {readBackup} from './backups.js?v=12';
+import {advanceGames,drawGames} from './games.js?v=13';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=13';
+import {chooseItem} from './sharing.js?v=13';
+import {randomLike,withCompanions} from './group.js?v=13';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=13';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=13';
+import {favoriteFood} from './food.js?v=13';
+import {drawLandscape,drawWash} from './scenery.js?v=13';
+import {refreshRoster} from './connection.js?v=13';
+import {readBackup} from './backups.js?v=13';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -39,7 +40,7 @@ new ResizeObserver(resize).observe(canvas);
 function roundRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
 function stage(){
   if(landscapeDirty){const painter=landscape.getContext('2d');painter.setTransform(landscape.width/width,0,0,landscape.height/height,0,0);drawLandscape(painter,width,height,backdrop);landscapeDirty=false;}
-  ctx.drawImage(landscape,0,0,width,height);drawWorldGround(ctx,width,height);
+  ctx.drawImage(landscape,0,0,width,height);drawWorldGround(ctx,width,height,livingWorld);
 }
 const dirtLayer=document.createElement('canvas');dirtLayer.width=dirtLayer.height=192;
 const dirtPainter=dirtLayer.getContext('2d');
@@ -62,7 +63,7 @@ function petSize(data){
 }
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,y=(petFloor(pet)-(pet.worldBob||0))*height;
-  let action=(['walk','wash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
+  let action=((['game','build'].includes(pet.mode)&&pet.gameMoving)||['walk','wash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
   if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
   if(['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
   const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
@@ -106,8 +107,8 @@ function drawPet(pet){
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);interactPets(pets);}
-  stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceGames(pets,dt,elapsed);interactPets(pets);}
+  stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){

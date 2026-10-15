@@ -1,4 +1,5 @@
-import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=12';
+import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=13';
+import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=13';
 export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{level:2,left:.67,right:.97}];
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];
@@ -8,13 +9,14 @@ export function weatherAt(time){const phase=time%240;return {rain:phase>=30&&pha
 export const butterflyAt=(level,time)=>.40+.16*Math.sin(time*.08+level*2);
 export function beginWorld(p,kind,target,duration=10){p.mode=kind;p.worldTarget=target;p.worldTimer=duration;p.clock=0;p.socialCooldown=duration+10;p.emote=kind==='quiet'?'sleepy':kind==='puddle'?'eager':kind==='shelter'?'sweat':kind==='startle'?'question':'thinking';p.emoteTime=4;}
 function finish(p){p.mode='idle';p.timer=2;p.clock=0;p.worldCooldown=20+p.random()*25;p.shelterScale=1;p.worldBob=0;p.socialCooldown=8;}
-export function createWorld(){return {splashes:[],previous:new WeakMap(),rainCycle:-1};}
+export function createWorld(){return {buildings:createBuildings(),splashes:[],previous:new WeakMap(),rainCycle:-1};}
 function splash(world,p,muddy=false){
   for(let i=0;i<7;i++)world.splashes.push({x:p.x,y:floor(p.level),vx:(i-3)*.012,vy:-.035-(i%3)*.014,age:0,muddy});
   if(world.splashes.length>210)world.splashes.splice(0,world.splashes.length-210);
 }
 export function advanceWorld(world,pets,dt,time){
   const weather=weatherAt(time);
+  advanceConstruction(world,pets,dt,time,huts,weather);
   for(const s of world.splashes){s.age+=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=.16*dt;}
   world.splashes=world.splashes.filter(s=>s.age<.65);
   // Assign distinct places under each broad roof. All shelter occupants remain visible.
@@ -45,7 +47,7 @@ export function advanceWorld(world,pets,dt,time){
     const canWalk=hasAction(p.data,'walking');
     if(weather.rain&&p.rainSeen!==weather.cycle){
       p.rainSeen=weather.cycle;
-      if(canWalk){const playful=trait(p,'activity_level')*.45+trait(p,'curiosity')*.25;if(p.random()>playful){beginWorld(p,'shelter',(huts[p.level].left+huts[p.level].right)/2,60);}else beginWorld(p,'puddle',puddles[p.level].x,5+trait(p,'activity_level')*7);}
+      if(canWalk){const playful=trait(p,'activity_level')*.45+trait(p,'curiosity')*.25;if(p.random()>playful&&world.buildings[p.level].phase==='ready'){beginWorld(p,'shelter',(huts[p.level].left+huts[p.level].right)/2,60);}else beginWorld(p,'puddle',puddles[p.level].x,5+trait(p,'activity_level')*7);}
       else {p.emote='sweat';p.emoteTime=5;}
       continue;
     }
@@ -60,18 +62,22 @@ export function advanceWorld(world,pets,dt,time){
   }
 }
 const oval=(c,x,y,rx,ry,color)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();};
-export function drawWorldGround(c,w,h){
+export function drawWorldGround(c,w,h,world){
   for(const hut of huts){const x=hut.left*w,ww=(hut.right-hut.left)*w,y=floor(hut.level)*h,hh=h*.19;
+    const building=world?.buildings[hut.level];
+    if(building&&building.progress===0){c.fillStyle='#ad8458';for(let i=0;i<5;i++)c.fillRect(x+ww*.38+i*3,y-5-i*3,ww*.20,4);continue;}
+    c.save();if(building&&building.progress<1){c.beginPath();c.rect(x-ww*.04,y-hh*building.progress,ww*1.08,hh*building.progress+4);c.clip();}
     c.fillStyle='#263b3a70';c.fillRect(x,y-hh*.78,ww,hh*.78);
     c.fillStyle=hut.level===2?'#b9dce3':'#a77e52';c.fillRect(x,y-hh*.75,ww*.022,hh*.75);c.fillRect(x+ww*.978,y-hh*.75,ww*.022,hh*.75);
     c.fillStyle=hut.level===2?'#e4f3ed':'#658d56';c.beginPath();c.moveTo(x-ww*.035,y-hh*.75);c.lineTo(x+ww*.12,y-hh);c.lineTo(x+ww*.88,y-hh);c.lineTo(x+ww*1.035,y-hh*.75);c.closePath();c.fill();
     c.strokeStyle=hut.level===2?'#a8cbd2':'#446c40';c.lineWidth=2;for(let i=1;i<17;i++){const xx=x+ww*i/18;c.beginPath();c.moveTo(xx,y-hh*.98);c.lineTo(xx+ww*.015,y-hh*.78);c.stroke();}
-    c.fillStyle='#ddc39a';c.fillRect(x,y,ww,h*.006);
+    c.fillStyle='#ddc39a';c.fillRect(x,y,ww,h*.006);c.restore();
   }
   for(const patch of mud){const y=floor(patch.level)*h;oval(c,patch.x*w,y+2,patch.r*w,h*.007,'#77583e');for(let i=0;i<6;i++)oval(c,(patch.x+Math.sin(i*3)*patch.r*.75)*w,y+Math.cos(i)*h*.003,w*.003,h*.002,'#a57a4f');}
   for(const pool of puddles){const y=floor(pool.level)*h;oval(c,pool.x*w,y+2,pool.r*w,h*.008,'#7bb5ba');oval(c,(pool.x-.008)*w,y,pool.r*w*.7,h*.003,'#c8eef0');}
 }
 export function drawWorldAtmosphere(c,w,h,world,time){
+  drawConstruction(c,w,h,world,huts,time);
   const weather=weatherAt(time);
   for(let level=0;level<3;level++){
     const x=butterflyAt(level,time)*w,y=(floor(level)-.15+Math.sin(time*.8+level)*.012)*h,wing=Math.abs(Math.sin(time*9))*7+2;
@@ -79,7 +85,7 @@ export function drawWorldAtmosphere(c,w,h,world,time){
     // A small changing pinwheel invites investigation without blocking the path.
     const px=.58*w,py=(floor(level)-.075)*h;c.strokeStyle='#cbb284';c.lineWidth=2;c.beginPath();c.moveTo(px,py);c.lineTo(px,floor(level)*h);c.stroke();c.save();c.translate(px,py);c.rotate(time*(weather.rustle?5:.4));for(let i=0;i<4;i++){c.rotate(Math.PI/2);c.fillStyle=['#e9ac75','#8dc6bd','#e6d68f','#b6a3d0'][i];c.beginPath();c.moveTo(0,0);c.lineTo(h*.015,0);c.lineTo(h*.012,h*.012);c.fill();}c.restore();
   }
-  if(weather.rain){c.save();c.strokeStyle='#c9edf080';c.lineWidth=1.3;for(let i=0;i<95;i++){const x=((i*.137+time*.012)%1)*w,y=((i*.219+time*.45)%1)*h;const covered=huts.some(hut=>x>hut.left*w&&x<hut.right*w&&y>(floor(hut.level)-.14)*h&&y<floor(hut.level)*h);if(!covered){c.beginPath();c.moveTo(x,y);c.lineTo(x-w*.002,y+h*.014);c.stroke();}}c.restore();}
+  if(weather.rain){c.save();c.strokeStyle='#c9edf080';c.lineWidth=1.3;for(let i=0;i<95;i++){const x=((i*.137+time*.012)%1)*w,y=((i*.219+time*.45)%1)*h;const covered=huts.some(hut=>world.buildings[hut.level].phase==='ready'&&x>hut.left*w&&x<hut.right*w&&y>(floor(hut.level)-.14)*h&&y<floor(hut.level)*h);if(!covered){c.beginPath();c.moveTo(x,y);c.lineTo(x-w*.002,y+h*.014);c.stroke();}}c.restore();}
   for(const s of world.splashes){c.globalAlpha=1-s.age/.65;oval(c,s.x*w,s.y*h,Math.max(1,w*.0017),Math.max(2,h*.004),s.muddy?'#a1845a':'#b3edf4');}c.globalAlpha=1;
   if(weather.celebrate){for(let i=0;i<35;i++){const x=((i*.173+time*.008)%1)*w,y=((i*.213+time*.08)%1)*h;c.fillStyle=['#f5ce85','#e9a8c9','#add7bf'][i%3];c.fillRect(x,y,4,4);}}
 }
