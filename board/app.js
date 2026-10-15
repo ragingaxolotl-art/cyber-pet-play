@@ -1,14 +1,14 @@
-import {randomLike} from './group.js?v=6';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=6';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=6';
-import {favoriteFood} from './food.js?v=6';
-import {drawLandscape,drawWash} from './scenery.js?v=6';
-import {readConnection,rememberConnection,forgetConnection,refreshRoster} from './connection.js?v=6';
-import {readBackup} from './backups.js?v=6';
+import {randomLike,withCompanions} from './group.js?v=7';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=7';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=7';
+import {favoriteFood} from './food.js?v=7';
+import {drawLandscape,drawWash} from './scenery.js?v=7';
+import {readConnection,rememberConnection,forgetConnection,refreshRoster} from './connection.js?v=7';
+import {readBackup} from './backups.js?v=7';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0;
-let sessionLikes=new Map();
+let sessionLikes=new Map(),companions=[];
 let width=1600,height=850,mode='sample',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
 const landscape=document.createElement('canvas');let landscapeDirty=true,showNames=true,foods=[];
@@ -65,7 +65,6 @@ function drawPet(pet){
   }
   if(pet.emoteTime>0 && pet.mode!=='eat'){
     const ey=y-desired-20*unit,size=38*unit;
-    roundRect(x-size*.65,ey-size*.65,size*1.3,size*1.3,10*unit,'#fff4df','#d8c7a8');
     if(!drawFeeling(ctx,pet.emote,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[pet.emote]||'…',x,ey+6*unit);}
 
   }
@@ -89,7 +88,8 @@ function render(time){
   requestAnimationFrame(render);
 }
 function setPets(data,label){
-  for(const pet of data){const key=pet.id;if(label==='sample'&&!sessionLikes.has(key))sessionLikes.set(key,randomLike(foods));pet.food=label==='sample'?sessionLikes.get(key):favoriteFood(foods,pet.foodPreferences);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
+  if(label==='class')data=withCompanions(data,companions);
+  for(const pet of data){const key=pet.id;if(pet.isSample&&!sessionLikes.has(key))sessionLikes.set(key,randomLike(foods));pet.food=pet.isSample?sessionLikes.get(key):favoriteFood(foods,pet.foodPreferences);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.values()].map(measureArtwork);pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
   const existing=new Map(pets.map(p=>[p.data,p]));
@@ -137,7 +137,7 @@ async function refreshClass(){
     const result=await refreshRoster(list.pets,loaded,async item=>readBackup(await(await request(item.path,connection.token)).arrayBuffer(),item.sha256));
     if(result.pets.length||!list.pets.length)setPets(result.pets,'class');
     $('message').textContent=result.failures.join(' • ');
-    $('caption').textContent=`${result.pets.length} Cyber ${result.pets.length===1?'Pet':'Pets'} · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Connect class':''}`;
+    $('caption').textContent=`${result.pets.length} class ${result.pets.length===1?'pet':'pets'} + ${companions.length} colorful companions · Auto-updates every minute${result.failures.length?' · Some updates unavailable — see Connect class':''}`;
   }catch(error){
     if(error.status===401){autoEnabled=false;connection=null;try{forgetConnection(localStorage);}catch{}connectionStatus();}
     $('message').textContent=error.message;
@@ -174,7 +174,8 @@ function showDemo(count){
   const names=['Pip','Fern','Echo','Moss','Nova','Clover','Pebble','Sunny','Orbit','Willow','Sprout','Luna'];
   sessionLikes.clear();
   const tastes=['Sweet','Salty','Sour','Bitter','Savory'];
-  const data=Array.from({length:count},(_,i)=>({id:'sample-'+i,name:names[i%names.length]+(i>=names.length?' '+(1+Math.floor(i/names.length)):''),...demoData,tint:Math.floor(Math.random()*360),foodPreferences:{favorite_taste:tastes[i%5],hated_taste:tastes[(i+2)%5],favorite_food_tags:['Fresh','Fruity','Roasted'],hated_food_tags:['Bitter','Fermented','Charred']},personality:{activity_level:Math.random()*100,curiosity:Math.random()*100,sociability:Math.random()*100,generosity:Math.random()*100,bravery:Math.random()*100}}));
+  const data=Array.from({length:count},(_,i)=>({id:'sample-'+i,isSample:true,name:names[i%names.length]+(i>=names.length?' '+(1+Math.floor(i/names.length)):''),...demoData,tint:Math.floor(Math.random()*360),foodPreferences:{favorite_taste:tastes[i%5],hated_taste:tastes[(i+2)%5],favorite_food_tags:['Fresh','Fruity','Roasted'],hated_food_tags:['Bitter','Fermented','Charred']},personality:{activity_level:Math.random()*100,curiosity:Math.random()*100,sociability:Math.random()*100,generosity:Math.random()*100,bravery:Math.random()*100}}));
+  companions=data.slice(0,5);
   setPets(data,'sample');
 }
 $('sample-crowd').onclick=async()=>{if(busy)return;autoEnabled=false;loading(true);try{await demo(Number($('crowd-count').value));$('connection').close();}finally{loading(false);}};
