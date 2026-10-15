@@ -10,7 +10,9 @@ export function chooseItem(pet,foods,random=pet.random){
 }
 export function collectItem(pet){
   if(pet.heldItem||!pet.data.food)return false;
-  pet.heldItem=pet.data.food;pet.heldTime=0;return true;
+  const known=[...(pet.knownFavorites?.entries()||[])];
+  const gift=known.length&&pet.random()<trait(pet,'generosity')*.8?known[Math.floor(pet.random()*known.length)]:null;
+  pet.heldItem=gift?gift[1]:pet.data.food;pet.giftFor=gift?gift[0]:null;pet.heldTime=0;return true;
 }
 export function friendship(pet,other){return pet.friendships?.get(other.data.id)??50;}
 export function shareItem(giver,recipient){
@@ -21,11 +23,9 @@ export function shareItem(giver,recipient){
   const change=reaction==='disliked'?-3:reaction==='liked'?4:1;
   recipient.friendships??=new Map();recipient.friendships.set(giver.data.id,Math.max(0,Math.min(100,friendship(recipient,giver)+change)));
   giver.shareCooldown=recipient.shareCooldown=60;
-  giver.speech='Want some '+item.name+'?';giver.speechReply='Maybe next time!';giver.emote='hearts';
-  recipient.speech=reaction==='disliked'?"Not my favorite…":reaction==='liked'?'My favorite! Thank you!':'Thanks for sharing!';
-  recipient.speechReply=reaction==='disliked'?'Friendship −3':reaction==='liked'?'Friendship +4':'Friendship +1';
+  giver.emote='hearts';
   recipient.emote=recipient.socialReply=reaction==='disliked'?'frustrated':'hearts';
-  if(reaction!=='disliked'){recipient.heldItem=item;recipient.heldTime=0;giver.heldItem=null;giver.speechReply="You're welcome!";}
+  if(reaction!=='disliked'){recipient.heldItem=item;recipient.heldTime=0;giver.heldItem=null;}
   return {reaction,change,item};
 }
 export function trySharing(a,b){

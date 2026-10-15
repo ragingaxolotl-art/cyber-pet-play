@@ -1,4 +1,5 @@
-import {collectItem,trySharing,friendship} from './sharing.js?v=10';
+import {collectItem,friendship} from './sharing.js?v=11';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=11';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -18,7 +19,7 @@ export function chooseEmote(pet){
   if(stats.health<=15)return 'crying';
   if(stats.energy<=12)return 'sleepy';
   if(stats.fullness<=12)return 'drooling';
-  if(stats.happiness<=35)return 'frustrated';
+  if(stats.happiness<=35&&!(pet.comfortTime>0))return 'frustrated';
   const choices=[['eager',.3+axis(pet,'activity_level')],['hearts',.3+axis(pet,'generosity')],['cute',.3+axis(pet,'bravery')],['question',.3+axis(pet,'curiosity')],['laughing',.3+axis(pet,'sociability')],['thinking',1.3-axis(pet,'sociability')]];
   let pick=pet.random()*choices.reduce((sum,x)=>sum+x[1],0);
   for(const [text,weight] of choices){pick-=weight;if(pick<=0)return text;}return 'cute';
@@ -59,7 +60,7 @@ export function startConversation(a,b,afterTag=false){
     p.speech=afterTag?'That was fun!':index===0?'I like '+likes[0]+'!':'What do you like?';
     p.speechReply=index===0?'What about you?':'I like '+likes[1]+'!';
   }
-  trySharing(a,b);
+
 }
 export function startTag(a,b){
   if(!hasAction(a.data,'walking')||!hasAction(b.data,'walking'))return false;
@@ -97,6 +98,7 @@ export function interactPets(pets){
     const row=pets.filter(p=>p.level===level&&eligible(p)).sort((a,b)=>a.x-b.x);
     for(let i=0;i<row.length-1;i++){
       const a=row[i],b=row[i+1];if(!eligible(a)||!eligible(b)||b.x-a.x>.055)continue;
+      if(trySocial(a,b,socialWorld())){i++;continue;}
       const playful=(axis(a,'activity_level')+axis(b,'activity_level'))/2;
       const affinity=(friendship(a,b)+friendship(b,a))/100;
       if(a.random()>Math.max(.25,Math.min(1,affinity))){a.socialCooldown=b.socialCooldown=8;continue;}
@@ -112,11 +114,12 @@ export function tick(pet,dt){
   if(walking&&hasAction(pet.data,'walking'))addWalkingDirt(pet,Math.abs(distance(before,pet.x)));
 }
 function tickMotion(pet,dt){
+  pet.comfortTime=Math.max(0,(pet.comfortTime||0)-dt);
   pet.shareCooldown=Math.max(0,(pet.shareCooldown||0)-dt);
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
   pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
   if(pet.heldItem)pet.heldTime=(pet.heldTime||0)+dt;
-  if(pet.mode==='tag')return;
+  if(['tag','gesture','together','escort'].includes(pet.mode))return;
   if(pet.mode==='social'){pet.timer-=dt;pet.engagement=Math.max(0,pet.timer/pet.socialDuration);if(pet.timer<pet.socialDuration/2){pet.emote=pet.socialReply;pet.speech=pet.speechReply;}if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emote='thinking';pet.emoteTime=2;pet.speech='';}return;}
   if(pet.mode==='snack'){
     pet.timer-=dt;
@@ -185,6 +188,7 @@ function tickMotion(pet,dt){
   if(pet.timer<=0){pet.mode='idle';pet.clock=0;pet.timer=tuning.minPause+pet.random()*(tuning.maxPause-tuning.minPause);pet.emote=chooseEmote(pet);pet.emoteTime=tuning.emoteSeconds;if(pet.random()<.3)pet.direction*=-1;}
 }
 export function petFloor(pet){
+  if(Number.isFinite(pet.routeFloor))return pet.routeFloor;
   if(!pet.stair)return floor(pet.level);
   const t=pet.stair, steps=18, stepped=Math.floor(t.progress*steps)/steps;
   return floor(t.source)+(floor(t.target)-floor(t.source))*stepped;
@@ -213,3 +217,6 @@ export function frameIndex(config,action,seconds){
   }
   for(let i=0;i<count;i++){if(remaining<durations[i])return i;remaining-=durations[i];}return count-1;
 }
+
+export const socialWorld=()=>({standBeside,hasAction,tuning,stairs,stations,floor,addWalkingDirt});
+export function advanceInteractions(pets,dt){advanceSocial(pets,dt,socialWorld());}

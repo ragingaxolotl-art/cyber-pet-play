@@ -20,4 +20,4 @@ export function drawFeeling(c,group,seconds,x,y,size){
   const f=frames[Math.floor(seconds*(group==='hearts'?12:8))%frames.length],scale=size/Math.max(f.w,f.h);
   c.save();c.imageSmoothingEnabled=false;c.drawImage(f.image,f.x,f.y,f.w,f.h,x-f.w*scale/2,y-f.h*scale/2,f.w*scale,f.h*scale);c.restore();return true;
 }
-export const feelingFallback={eager:'!',hearts:'♡',love:'♡',cute:'☺',question:'?',thinking:'…',laughing:'♫',ok:'✓',sleepy:'Zz',drooling:'Yum',frustrated:'…',crying:'…'};
+export const feelingFallback={eager:'!',hearts:'♡',love:'♡',cute:'☺',question:'?',thinking:'…',laughing:'♫',ok:'✓',sleepy:'☾',drooling:'♡',frustrated:'…',crying:'…'};

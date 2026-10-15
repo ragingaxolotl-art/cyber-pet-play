@@ -1,11 +1,11 @@
-import {chooseItem} from './sharing.js?v=10';
-import {randomLike,withCompanions} from './group.js?v=10';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=10';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag} from './motion.js?v=10';
-import {favoriteFood} from './food.js?v=10';
-import {drawLandscape,drawWash} from './scenery.js?v=10';
-import {refreshRoster} from './connection.js?v=10';
-import {readBackup} from './backups.js?v=10';
+import {chooseItem} from './sharing.js?v=11';
+import {randomLike,withCompanions} from './group.js?v=11';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=11';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=11';
+import {favoriteFood} from './food.js?v=11';
+import {drawLandscape,drawWash} from './scenery.js?v=11';
+import {refreshRoster} from './connection.js?v=11';
+import {readBackup} from './backups.js?v=11';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -60,7 +60,7 @@ function petSize(data){
 }
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,y=petFloor(pet)*height;
-  let action=['walk','wash','tag'].includes(pet.mode)&&hasAction(data,'walking')?'walking':'idle';
+  let action=['walk','wash','tag','together','escort'].includes(pet.mode)&&hasAction(data,'walking')?'walking':'idle';
   if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
   if(['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
   const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
@@ -87,26 +87,24 @@ function drawPet(pet){
     const meal=pet.mode==='snack'?pet.heldItem:data.food;
     const image=foodImages.get(meal.id),size=desired*.43*Math.sqrt(foodRemaining(pet)),fx=x+pet.direction*desired*.49;
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
-    ctx.font=`600 ${Math.max(9,font*.85)}px system-ui`;const label=meal.name,tw=ctx.measureText(label).width+14*unit;
-    roundRect(x-tw/2,y-desired-24*unit,tw,19*unit,6*unit,'#fff1c9');ctx.fillStyle='#3b523b';ctx.fillText(label,x,y-desired-11*unit);
+
   }
   if(pet.emoteTime>0 && !['eat','snack'].includes(pet.mode)){
     const ey=y-desired-20*unit,size=38*unit;
     if(!drawFeeling(ctx,pet.emote,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[pet.emote]||'…',x,ey+6*unit);}
 
   }
-  if(['social','tag'].includes(pet.mode)&&pet.speech){
-    const text=pet.speech.length>32?pet.speech.slice(0,31)+'…':pet.speech;
-    ctx.font=`600 ${Math.max(10,12*unit)}px system-ui`;const tw=ctx.measureText(text).width+16*unit;
-    const sx=Math.max(tw/2+4,Math.min(width-tw/2-4,x)),sy=y-desired-65*unit;
-    roundRect(sx-tw/2,sy,tw,24*unit,8*unit,'#fff8e9','#d8c7a8');ctx.fillStyle='#344b66';ctx.fillText(text,sx,sy+16*unit);
+  if(pet.displayItem){
+    let image=foodImages.get(pet.displayItem.id);
+    if(!image){image=new Image();image.src=pet.displayItem.sprite;foodImages.set(pet.displayItem.id,image);}
+    const size=desired*.5;if(image.complete&&image.naturalWidth)ctx.drawImage(image,x-size/2,y-desired-65*unit-size/2,size,size);
   }
   drawDirt(img,bounds,x,y,w,h,pet.direction,1-pet.cleanliness);
 
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);interactPets(pets);}
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);advanceInteractions(pets,dt);interactPets(pets);}
   stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
@@ -116,7 +114,7 @@ function setPets(data,label){
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
   const existing=new Map(pets.map(p=>[p.data,p])),byId=new Map(pets.map(p=>[p.data.id,p]));
-  loaded=data;pets=data.map((pet,i)=>{if(existing.has(pet))return existing.get(pet);const fresh=makePet(pet,i,data.length),old=byId.get(pet.id);if(old){fresh.heldItem=old.heldItem;fresh.friendships=old.friendships;fresh.shareCooldown=old.shareCooldown;fresh.heldTime=old.heldTime;}return fresh;});mode=label;
+  loaded=data;pets=data.map((pet,i)=>{if(existing.has(pet))return existing.get(pet);const fresh=makePet(pet,i,data.length),old=byId.get(pet.id);if(old){fresh.heldItem=old.heldItem;fresh.friendships=old.friendships;fresh.shareCooldown=old.shareCooldown;fresh.heldTime=old.heldTime;fresh.knownFavorites=old.knownFavorites;fresh.dislikedGifts=old.dislikedGifts;fresh.giftFor=old.giftFor;fresh.comfortTime=old.comfortTime;}return fresh;});mode=label;
   $('status').textContent=label==='sample'?'Sample pets':`${data.length} ${data.length===1?'pet':'pets'} together`;
   $('caption').textContent=label==='sample'?`${data.length} sample pets · Jungle kitchen + cloud wash`:`${data.length} Cyber Pets · ${data.filter(p=>!hasAction(p,'walking')).length} resting without movement art · Display only`;
   $('empty').hidden=data.length>0;
