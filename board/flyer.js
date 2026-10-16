@@ -1,6 +1,6 @@
-import {floor} from './motion.js?v=22';
-import {trait,traitFeeling,love} from './profile.js?v=22';
-import {drawFeeling} from './emotes.js?v=22';
+import {floor} from './motion.js?v=23';
+import {trait,traitFeeling,love} from './profile.js?v=23';
+import {drawFeeling} from './emotes.js?v=23';
 // One scenery character. Toy props and greetings are session-only, never save data.
 export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'fly',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0};}
 const FLIGHT_CYCLE=1.2,TALK_CYCLE=2.4;

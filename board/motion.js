@@ -1,7 +1,7 @@
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=22';
-import {makeDirt} from './dirt.js?v=22';
-import {collectItem,friendship} from './sharing.js?v=22';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=22';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=23';
+import {makeDirt} from './dirt.js?v=23';
+import {collectItem,friendship} from './sharing.js?v=23';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=23';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};

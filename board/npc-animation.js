@@ -1,16 +1,17 @@
-import {availablePairs,choosePair} from './host-interactions.js?v=22';
-import {drawFeeling} from './emotes.js?v=22';
-export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=23';
+import {availablePairs,choosePair} from './host-interactions.js?v=23';
+import {drawFeeling} from './emotes.js?v=23';
+export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};
- const response=await fetch('assets/npcs/clips.json?v=22');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
+ const response=await fetch('assets/npcs/clips.json?v=23');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
  for(const [who,clips] of Object.entries(manifest)){
-  hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc)};}
+  hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc),targetImage:info.targetSrc?load(info.targetSrc):null};}
  }
 }
 const ready=clip=>clip?.image?.complete&&clip.image.naturalWidth>0;
 export function advanceHosts(h,c,dt){
- h.clock+=dt;
+ h.clock+=dt;advanceHostWalk(h,c,dt);
  // An in-progress gesture finishes its recovery frames even if a pet joins the queue.
  if(h.pair){
   c.hostReady=false;h.pair.clock+=dt;
@@ -21,10 +22,12 @@ export function advanceHosts(h,c,dt){
   }
   return;
  }
- if(c.customer||c.queue?.length)h.pendingPair=false;
+ if(h.walker||c.customer||c.queue?.length)h.pendingPair=false;
  else if(h.clock>=h.nextPair&&availablePairs(h).length)h.pendingPair=true;
- const next=(c.servingHost||0)^1;c.hostReady=false;
+ const candidate=walkCandidate(h,c);
+ const next=c.preferredHost??((c.servingHost||0)^1);c.hostReady=false;
  for(let i=0;i<2;i++){
+  if(h.walker?.index===i)continue;
   const s=h.people[i],clips=h.art['host'+(i+1)]||{};
   if(s.heldRest){if(h.pendingPair)continue;s.heldRest=false;}
   if(c.customer&&c.servingHost===i){s.action='serve';s.clock=c.clock;s.customer=c.customer;continue;}
@@ -33,6 +36,7 @@ export function advanceHosts(h,c,dt){
   if(s.clock>=duration){
    s.clock=0;s.feeling='';s.action='idle';
    if(h.pendingPair){s.heldRest=true;continue;}
+   if(candidate===i&&beginHostWalk(h,i)){c.preferredHost=1-i;continue;}
    if(c.queue?.length){if(i===next)c.hostReady=true;else if(h.clock>s.nextBreak&&ready(clips.talk)){s.action='talk';s.nextBreak=h.clock+9;s.feeling='cute';}}
    else if(s.reply||h.clock>s.nextBreak){
     // Alternate short, staggered conversations and occasional selfies, never interrupt service.
@@ -49,10 +53,12 @@ export function advanceHosts(h,c,dt){
 }
 export function drawHost(c,w,h,person,clips,x,elapsed){
  const clip=ready(clips?.[person.action])?clips[person.action]:clips?.idle;if(!ready(clip))return false;
- const duration=clip.duration||2.4,index=Math.min(clip.count-1,Math.floor(Math.min(1,person.clock/duration)*clip.count));
+ const duration=clip.duration||2.4;let index=Math.min(clip.count-1,Math.floor(Math.min(1,person.clock/duration)*clip.count));
+ if(person.action==='walk'&&person.reverseWalk)index=clip.count-1-index;
+ const frame=clip.frames?.[index]??index;
  // A shared, continuous breathing phase carries across every action without a transform reset.
- const resting=(index===0||index===clip.count-1)&&ready({image:clip.restImage}),image=resting?clip.restImage:clip.image,sx=resting?0:(clip.frames?.[index]??index)*64;
- const size=h*.122,top=h*(.605-.125)+Math.sin(elapsed*2.1)*h*.0007;c.save();c.imageSmoothingEnabled=false;c.drawImage(image,sx,0,64,64,x*w-size/2,top,size,size);c.restore();
+ const resting=(index===0||index===clip.count-1)&&ready({image:clip.restImage}),target=frame===clip.targetFrame&&ready({image:clip.targetImage}),image=resting?clip.restImage:target?clip.targetImage:clip.image,sx=resting||target?0:frame*64;
+ const size=h*.122,top=h*(.605-.125)+Math.sin(elapsed*2.1)*h*.0007;c.save();c.imageSmoothingEnabled=false;c.drawImage(image,sx,0,64,64,Math.max(size/2,Math.min(w-size/2,x*w+(person.offset||0)*h))-size/2,top,size,size);c.restore();
  if(person.feeling)drawFeeling(c,person.feeling,elapsed,x*w,top-h*.025,h*.029);
  return true;
 }

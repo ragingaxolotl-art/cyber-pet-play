@@ -1,7 +1,7 @@
-import {travelSpeed,trait,love} from './profile.js?v=22';
-import {foodScore} from './food.js?v=22';
-import {collectItem} from './sharing.js?v=22';
-import {hasAction,animationDuration} from './motion.js?v=22';
+import {travelSpeed,trait,love} from './profile.js?v=23';
+import {foodScore} from './food.js?v=23';
+import {collectItem} from './sharing.js?v=23';
+import {hasAction,animationDuration} from './motion.js?v=23';
 const FRONT=.49,LEFT=.045,RIGHT=.97,GAP=.014;
 export const queueWidth=p=>Math.max(.018,p.bodyWidth||.055);
 export const queueGap=(a,b)=>(queueWidth(a)+queueWidth(b))/2+GAP;
@@ -65,6 +65,6 @@ export function advanceCounterQueue(c,pets,dt,ready,timing){
  const head=c.queue[0];
  if(!c.customer&&head&&c.hostReady!==false&&Math.abs(head.x-FRONT)<.00001){
   const destination=seat(c,head);
-  if(destination!==null){head.counterSeat=destination;c.customer=head;c.clock=0;c.servingHost=(c.servingHost||0)^1;}
+  if(destination!==null){head.counterSeat=destination;c.customer=head;c.clock=0;c.servingHost=c.preferredHost??((c.servingHost||0)^1);}
  }
 }
