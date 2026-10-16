@@ -49,8 +49,6 @@ function feedingHouse(c,w,h){
   c.fillStyle='#225841';c.beginPath();c.moveTo(x-ww*.58,y-hh*.72);c.lineTo(x,y-hh*1.10);c.lineTo(x+ww*.58,y-hh*.72);c.closePath();c.fill();
   for(let i=0;i<9;i++)leaf(c,x+(i-4)*ww*.12,y-hh*.77+Math.abs(i-4)*hh*.014,ww*.095,i%2?.24:-.24,i%2?'#51935c':'#73aa64');
   sign(c,'FAVORITE FOOD HOUSE',x,y-hh*.88,ww*.77,hh*.22,'#82633a');
-  // Plates mark several eating spots across the open-front house.
-  for(let i=0;i<5;i++){const px=w*(.45+i*.03);ellipse(c,px,y-h*.012,w*.009,h*.004,'#e9d9b4');}
   for(const side of [-1,1]){const px=x+side*ww*.62;box(c,px-ww*.045,y-hh*.19,ww*.09,hh*.19,4,'#a4784b');for(let i=0;i<4;i++)leaf(c,px+(i-1.5)*ww*.018,y-hh*.26,ww*.045,i-.9,'#78ac67');}
 }
 function cloudWash(c,w,h){

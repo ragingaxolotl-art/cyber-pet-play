@@ -1,22 +1,24 @@
-import {advanceHygiene} from './hygiene.js?v=19';
-import {createWash,advanceWash} from './wash.js?v=19';
-import {displayMetrics,sourceScale} from './display.js?v=19';
-import {createCompanions,withResidents} from './companions.js?v=19';
-import {isClassPet} from './profile.js?v=19';
-import {advanceGames,drawGames} from './games.js?v=19';
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=19';
-import {chooseItem} from './sharing.js?v=19';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=19';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=19';
-import {favoriteFood} from './food.js?v=19';
-import {drawLandscape,drawWash} from './scenery.js?v=19';
-import {refreshRoster} from './connection.js?v=19';
-import {readBackup} from './backups.js?v=19';
+import {createCounter,advanceCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=20';
+import {advanceHygiene} from './hygiene.js?v=20';
+import {createWash,advanceWash} from './wash.js?v=20';
+import {displayMetrics,sourceScale} from './display.js?v=20';
+import {createCompanions,withResidents} from './companions.js?v=20';
+import {isClassPet} from './profile.js?v=20';
+import {advanceGames,drawGames} from './games.js?v=20';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=20';
+import {chooseItem} from './sharing.js?v=20';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=20';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=20';
+import {favoriteFood} from './food.js?v=20';
+import {drawLandscape,drawWash} from './scenery.js?v=20';
+import {refreshRoster} from './connection.js?v=20';
+import {readBackup} from './backups.js?v=20';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 const livingWorld=createWorld(),washHistory=createWash();
 let companions=[];
+const counter=createCounter(),counterArt=loadCounterArt();
 
 let width=1600,height=850,mode='class',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
@@ -67,7 +69,7 @@ function drawPet(pet){
   const metrics=petSize(data),y=groundY+metrics.offsetY;
   let action=((['game','build'].includes(pet.mode)&&pet.gameMoving)||['walk','wash','seekWash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
   if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
-  if(['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
+  if(!pet.awaitingCounter&&['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
   const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
   const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations.idle[0]);
   if(!img)return;
@@ -81,7 +83,7 @@ function drawPet(pet){
     const label=data.name.length>16?data.name.slice(0,15)+'…':data.name,lw=ctx.measureText(label).width+12*unit;
     roundRect(x-lw/2,y+10*unit,lw,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x,y+font+11*unit);
   }
-  if(['eat','snack'].includes(pet.mode)&&data.food){
+  if(!pet.awaitingCounter&&['eat','snack'].includes(pet.mode)&&data.food){
     const meal=pet.mode==='snack'?pet.heldItem:data.food;
     const image=foodImages.get(meal.id),size=desired*.43*Math.sqrt(foodRemaining(pet)),fx=x+pet.direction*desired*.49;
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
@@ -102,8 +104,8 @@ function drawPet(pet){
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceHygiene(pets,dt);advanceGames(pets,dt,elapsed);interactPets(pets);advanceWash(washHistory,pets,dt);}
-  stage();for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.counterService=true;p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceCounter(counter,pets,dt,counterArtReady(counterArt));advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceHygiene(pets,dt);advanceGames(pets,dt,elapsed);interactPets(pets);advanceWash(washHistory,pets,dt);}
+  stage();drawCounter(ctx,width,height,counter,counterArt,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){

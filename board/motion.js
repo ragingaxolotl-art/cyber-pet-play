@@ -1,7 +1,7 @@
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=19';
-import {makeDirt} from './dirt.js?v=19';
-import {collectItem,friendship} from './sharing.js?v=19';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=19';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=20';
+import {makeDirt} from './dirt.js?v=20';
+import {collectItem,friendship} from './sharing.js?v=20';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=20';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -25,7 +25,7 @@ export function chooseEmote(pet){
   return traitFeeling(pet,keys[Math.min(5,Math.floor(pet.random()*keys.length))]);
 }
 export function foodRemaining(pet){
-  if(!['eat','snack'].includes(pet.mode)||!pet.mealDuration)return 0;
+  if(pet.awaitingCounter||!['eat','snack'].includes(pet.mode)||!pet.mealDuration)return 0;
   // Eight visible bites, with no change to the character's actual save data.
   return Math.max(0,Math.min(1,Math.ceil(8*pet.timer/pet.mealDuration)/8));
 }
@@ -137,6 +137,7 @@ function tickMotion(pet,dt){
     return;
   }
   if(pet.mode==='eat'){
+    if(pet.awaitingCounter)return;
     pet.timer-=dt;
     if(pet.timer<=0||!hasAction(pet.data,'eat')){collectItem(pet);pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=55;pet.emote='hearts';pet.emoteTime=3;}
     return;
@@ -166,7 +167,7 @@ function tickMotion(pet,dt){
     if(pet.level===1&&pet.data.food&&crosses(pet.foodSpot)){
       if(pet.heldItem&&hasAction(pet.data,'eat'))pet.heldItem=null;
       if(!hasAction(pet.data,'eat')){collectItem(pet);pet.stationCooldown=55;return;}
-      pet.x=pet.foodSpot;pet.mode='eat';pet.clock=0;
+      pet.x=pet.foodSpot;pet.mode='eat';pet.clock=0;pet.awaitingCounter=!!pet.counterService;pet.counterWait=0;
       pet.timer=Math.max(6,animationDuration(pet.data.config,'eat')*2);pet.mealDuration=pet.timer;
       pet.emote='hearts';pet.emoteTime=3;return;
     }

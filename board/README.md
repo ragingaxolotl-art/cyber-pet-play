@@ -63,3 +63,7 @@ Pets seek the cloud wash from any level using stairs when session cleanliness fa
 Shelter construction begins only during rain. Pets wanting cover and friendly/helpful pets join; a per-rain decision prevents repeated recruitment rolls from eventually forcing everyone to build. Pets wanting shelter can wait for a roof or join construction. Finished shelter-seekers huddle; helpers who enjoy rain can return outside. Once rain ends and occupants leave, workers dismantle full or unfinished huts. More helpers still work faster in cartoon smoke. All decisions remain session-only and emote-based.
 
 Build starts are staggered per level (3–21 seconds after rain is noticed); teardown starts 8–36 seconds after rain stops. Helpers join individually at randomized 2–6 second intervals. Travel adds natural variation, and arrived helpers still accelerate actual work.
+
+
+## Food-house attendant
+Two user-provided 4×4 sprite atlases are mapped in `dist/counter.js`; frame choices and original attribution are in `dist/assets/attendant/README.md`. The attendant stays behind the raised counter, turns using intermediate poses, serves queued favorite-food orders, and returns to a restrained idle. Unconnected gestures are omitted. Pets wait for the handoff before their eating animation and shrinking meal begin. Missing NPC art permits immediate meals. No character/profile data is changed.
