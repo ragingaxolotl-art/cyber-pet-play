@@ -1,4 +1,4 @@
-import {clipReady} from './host-interactions.js?v=28';
+import {clipReady} from './host-interactions.js?v=29';
 export const galleryPoses=[['look','hair','delight','lean'],['look','wave','phone','lean']];
 export function walkCandidate(h,c){
  if(h.walker||h.pair||h.pendingPair||h.clock<(h.nextWalk??18)||((c.customer||c.queue?.length)&&h.clock<(h.nextWalk??18)+45))return null;

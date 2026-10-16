@@ -1,9 +1,9 @@
-import {freeForActivity} from './activity-state.js?v=28';
-import {resolveAction,aliases} from './pet-animation.js?v=28';
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=28';
-import {makeDirt} from './dirt.js?v=28';
-import {collectItem,friendship} from './sharing.js?v=28';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=28';
+import {freeForActivity} from './activity-state.js?v=29';
+import {resolveAction,aliases} from './pet-animation.js?v=29';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=29';
+import {makeDirt} from './dirt.js?v=29';
+import {collectItem,friendship} from './sharing.js?v=29';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=29';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -73,7 +73,7 @@ export function startConversation(a,b,afterTag=false){
 export function startTag(a,b){
   if(!hasAction(a.data,'walking')||!hasAction(b.data,'walking'))return false;
   const game={players:[a,b],chaser:a,runner:b,cooldown:1,tags:0};
-  for(const p of game.players){p.mode='tag';p.tagGame=game;p.engagement=1;p.clock=0;p.socialCooldown=0;p.emote='eager';p.emoteTime=3;p.speech=p===a?"You're it!":'Catch me!';}
+  for(const p of game.players){p.mode='tag';p.tagGame=game;p.gameCooldown=30;p.engagement=1;p.clock=0;p.socialCooldown=0;p.emote='eager';p.emoteTime=3;p.speech=p===a?"You're it!":'Catch me!';}
   a.direction=b.direction=a.x<=b.x?1:-1;return true;
 }
 const wrapped=x=>((x+.035)%1.07+1.07)%1.07-.035;

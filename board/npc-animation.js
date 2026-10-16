@@ -1,11 +1,11 @@
-import {clipFrameAt} from './clip-timing.js?v=28';
-import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=28';
-import {availablePairs,choosePair} from './host-interactions.js?v=28';
-import {drawFeeling} from './emotes.js?v=28';
+import {clipFrameAt} from './clip-timing.js?v=29';
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=29';
+import {availablePairs,choosePair} from './host-interactions.js?v=29';
+import {drawFeeling} from './emotes.js?v=29';
 export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};
- const response=await fetch('assets/npcs/clips.json?v=28');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
+ const response=await fetch('assets/npcs/clips.json?v=29');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
  for(const [who,clips] of Object.entries(manifest)){
   hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc),targetImage:info.targetSrc?load(info.targetSrc):null};}
  }

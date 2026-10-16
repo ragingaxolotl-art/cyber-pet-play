@@ -1,6 +1,6 @@
-import {floor} from './motion.js?v=28';
-import {hostX} from './host-interactions.js?v=28';
-import {weatherAt,huts} from './world.js?v=28';
+import {floor} from './motion.js?v=29';
+import {hostX} from './host-interactions.js?v=29';
+import {weatherAt,huts} from './world.js?v=29';
 // Seconds, not frame counts. Visits remain brief with several quiet minutes between.
 export const visitSettings={duration:48,variation:12,quiet:240,quietVariation:180,rainChance:.75,rainDelay:5,rainVariation:12,minQuiet:150};
 export function visitState(random){return {age:0,nextVisit:105+random()*90,lastDeparture:-Infinity,visitRemaining:0,visits:0,trail:[],glitter:[],particleClock:0,wasRaining:false,rainChecked:-1,magicAttempted:false};}

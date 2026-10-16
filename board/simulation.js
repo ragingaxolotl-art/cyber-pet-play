@@ -1,16 +1,16 @@
-import {preserveRecovery} from './activity-state.js?v=28';
-import {advancePetPresentation} from './pet-animation.js?v=28';
-import {advanceMagic} from './unicorn-events.js?v=28';
-import {prepareCounterQueue} from './counter-queue.js?v=28';
-import {advanceCounter} from './counter.js?v=28';
-import {advanceHosts} from './npc-animation.js?v=28';
-import {advanceFlyer} from './flyer.js?v=28';
-import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=28';
-import {advanceMeals} from './meals.js?v=28';
-import {advanceGames} from './games.js?v=28';
-import {advanceWorld} from './world.js?v=28';
-import {advanceHygiene} from './hygiene.js?v=28';
-import {advanceWash} from './wash.js?v=28';
+import {preserveRecovery} from './activity-state.js?v=29';
+import {advancePetPresentation} from './pet-animation.js?v=29';
+import {advanceMagic} from './unicorn-events.js?v=29';
+import {prepareCounterQueue} from './counter-queue.js?v=29';
+import {advanceCounter} from './counter.js?v=29';
+import {advanceHosts} from './npc-animation.js?v=29';
+import {advanceFlyer} from './flyer.js?v=29';
+import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=29';
+import {advanceMeals} from './meals.js?v=29';
+import {advanceGames} from './games.js?v=29';
+import {advanceWorld} from './world.js?v=29';
+import {advanceHygiene} from './hygiene.js?v=29';
+import {advanceWash} from './wash.js?v=29';
 // Keep this exact update order shared by the live board and coexistence tests.
 // Active actions finish first, then care/play invitations, then optional scenery.
 export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){
@@ -21,7 +21,10 @@ export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){
  advanceHosts(hosts,counter,dt);run(()=>advanceFlyer(flyer,pets,dt,aspect,time));run(()=>advanceCounter(counter,pets,dt,artReady));
  run(()=>advanceTag(pets,dt));run(()=>advanceInteractions(pets,dt));
  // Rotate which optional invitation system gets first choice. Active modes remain owned.
- const choices=[()=>advanceMeals(pets,dt),()=>advanceGames(pets,dt,time,scene.gameSchedule??={next:4,counts:{}}),()=>interactPets(pets),()=>advanceWorld(livingWorld,pets,dt,time),()=>advanceHygiene(pets,dt)];
- const first=Math.floor(time/12)%choices.length;for(let i=0;i<choices.length;i++)run(choices[(first+i)%choices.length]);
+ const gameSchedule=scene.gameSchedule??={next:4,counts:{},lastStarted:0};
+ const choices=[()=>advanceMeals(pets,dt),()=>advanceGames(pets,dt,time,gameSchedule),()=>interactPets(pets),()=>advanceWorld(livingWorld,pets,dt,time),()=>advanceHygiene(pets,dt)];
+ // After a quiet spell, free pets get a play invitation before optional care.
+ // Never interrupt an owned activity, a food reaction, or recovery.
+ const first=time-(gameSchedule.lastStarted??0)>=30?1:Math.floor(time/12)%choices.length;for(let i=0;i<choices.length;i++)run(choices[(first+i)%choices.length]);
  advanceWash(washHistory,pets,dt);advanceMagic(flyer,pets,hosts,livingWorld,dt,time,aspect);for(const p of pets)advancePetPresentation(p,dt);
 }

@@ -1,9 +1,9 @@
-import {freeForActivity} from './activity-state.js?v=28';
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=28';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=28';
+import {freeForActivity} from './activity-state.js?v=29';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=29';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=29';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
-const eligible=p=>freeForActivity(p)&&p.socialCooldown<=0;
+const eligible=p=>freeForActivity(p)&&!(p.gameCooldown>0);
 const feeling=(p,e)=>{p.emote=e;p.emoteTime=3;};
 const invitationStates=new WeakMap();
 export function chooseGame(p,counts={},allowed=null){
@@ -23,11 +23,12 @@ export function startGame(players,kind,rematch=0){
 function move(p,target,dt,multiplier=1){const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*multiplier*dt);p.gameMoving=step>.00001;if(step){p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}}
 function finish(g,allowRematch=true){
  const owned=g.players.filter(p=>p.playGroup===g&&p.mode==='game');
- for(const p of g.players){if(p.playGroup!==g)continue;p.playGroup=null;if(!owned.includes(p))continue;p.gameMoving=false;p.worldBob=0;p.displayItem=null;p.mode='idle';p.timer=2;p.socialCooldown=12+p.random()*8;feeling(p,traitFeeling(p,'sociability'));}
+ for(const p of g.players){if(p.playGroup!==g)continue;p.playGroup=null;if(!owned.includes(p))continue;p.gameMoving=false;p.worldBob=0;p.displayItem=null;p.mode='idle';p.timer=2;p.socialCooldown=12+p.random()*8;p.gameCooldown=18+p.random()*12;feeling(p,traitFeeling(p,'sociability'));}
  const sorted=[...owned].sort((a,b)=>a.x-b.x);for(let i=1;i<sorted.length;i++)if(active(sorted[i-1])&&active(sorted[i]))standBeside(sorted[i-1],sorted[i]);
  if(owned.length===g.players.length&&allowRematch&&!g.rematch&&g.players.every(p=>(p.data.stats?.energy??100)>25)&&g.players[0].random()<trait(g.players[0],'activity_level')*.3)startGame(g.players,g.kind,1);
 }
 export function advanceGames(pets,dt,time,schedule){
+ for(const p of pets)p.gameCooldown=Math.max(0,(p.gameCooldown||0)-dt);
  const present=new Set(pets),groups=new Set(pets.map(p=>p.playGroup).filter(Boolean));
  for(const g of groups){
   if(g.players.some(p=>!present.has(p)||p.mode!=='game'||p.level!==g.level)||(!['copy','favorites'].includes(g.kind)&&g.players.some(p=>!active(p)))){finish(g,false);continue;}
@@ -51,15 +52,18 @@ export function advanceGames(pets,dt,time,schedule){
  // every free pet. Underused games gain weight, including tag itself.
  schedule??=invitationStates.get(pets);if(!schedule){schedule={next:4,counts:{}};invitationStates.set(pets,schedule);}
  if(time<schedule.next)return;schedule.next=time+2;
+ const activeDue=time-(schedule.lastActiveStarted??0)>=30;
  const free=pets.filter(eligible).sort((a,b)=>(a.lastGameInvite??-1)-(b.lastGameInvite??-1));
+ // A quiet stationary pair must not consume every invitation before movers.
+ if(activeDue)free.sort((a,b)=>Number(active(b))-Number(active(a)));
  for(const leader of free){
   const energy=Math.max(0,Math.min(1,(leader.data.stats?.energy??100)/100));
   if(leader.random()>(.4+trait(leader,'activity_level')*.25+trait(leader,'sociability')*.2)*(.55+.45*energy))continue;
-  const neighbors=free.filter(p=>p!==leader&&eligible(p)&&p.level===leader.level&&Math.abs(p.x-leader.x)<.35&&willing(p,leader));
+  const neighbors=free.filter(p=>p!==leader&&eligible(p)&&p.level===leader.level&&Math.abs(p.x-leader.x)<(activeDue&&active(p)&&active(leader)?.9:.35)&&willing(p,leader));
   if(!neighbors.length)continue;
   const movers=neighbors.filter(active),moving=active(leader)&&movers.length>0,allowed=moving?['tag',...gameKinds]:['copy','favorites'];
   const kind=moving&&!schedule.counts.tag?'tag':chooseGame(leader,schedule.counts,allowed),players=[leader,...(['copy','favorites'].includes(kind)?neighbors:movers).slice(0,kind==='tag'?1:2)];
-  if(startGame(players,kind)){schedule.counts[kind]=(schedule.counts[kind]||0)+1;schedule.next=time+9+leader.random()*7;for(const p of players)p.lastGameInvite=time;break;}
+  if(startGame(players,kind)){schedule.counts[kind]=(schedule.counts[kind]||0)+1;schedule.lastStarted=time;if(!['copy','favorites'].includes(kind))schedule.lastActiveStarted=time;schedule.next=time+9+leader.random()*7;for(const p of players)p.lastGameInvite=time;break;}
  }
 
 }

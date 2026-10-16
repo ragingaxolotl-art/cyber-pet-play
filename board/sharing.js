@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=28';
-import {foodScore} from './food.js?v=28';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=29';
+import {foodScore} from './food.js?v=29';
 // One carried item and directional friendships belong only to this board session.
 export function chooseItem(pet,foods,random=pet.random){
   if(!foods.length)return null;
