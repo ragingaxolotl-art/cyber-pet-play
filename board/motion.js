@@ -1,7 +1,7 @@
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=20';
-import {makeDirt} from './dirt.js?v=20';
-import {collectItem,friendship} from './sharing.js?v=20';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=20';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=21';
+import {makeDirt} from './dirt.js?v=21';
+import {collectItem,friendship} from './sharing.js?v=21';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=21';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -115,12 +115,13 @@ export function tick(pet,dt){
   if(walking&&hasAction(pet.data,'walking'))addWalkingDirt(pet,Math.abs(distance(before,pet.x)));
 }
 function tickMotion(pet,dt){
+  pet.foodReactionTime=Math.max(0,(pet.foodReactionTime||0)-dt);
   pet.comfortTime=Math.max(0,(pet.comfortTime||0)-dt);
   pet.shareCooldown=Math.max(0,(pet.shareCooldown||0)-dt);
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
   pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
   if(pet.heldItem)pet.heldTime=(pet.heldTime||0)+dt;
-  if(['seekWash','shelterWait','game','build','tag','gesture','together','escort','shelter','puddle','watch','explore','celebrate','quiet','startle'].includes(pet.mode))return;
+  if(['counterQueue','counterLeave','seekWash','shelterWait','game','build','tag','gesture','together','escort','shelter','puddle','watch','explore','celebrate','quiet','startle'].includes(pet.mode))return;
   if(pet.mode==='social'){pet.timer-=dt;pet.engagement=Math.max(0,pet.timer/pet.socialDuration);if(pet.timer<pet.socialDuration/2){pet.emote=pet.socialReply;pet.speech=pet.speechReply;}if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emote='thinking';pet.emoteTime=2;pet.speech='';}return;}
   if(pet.mode==='snack'){
     pet.timer-=dt;
@@ -164,7 +165,10 @@ function tickMotion(pet,dt){
   const before=pet.x;pet.x+=pet.direction*speed*dt;
   const crosses=point=>(before-point)*(pet.x-point)<=0&&before!==pet.x;
   if(pet.stationCooldown===0){
-    if(pet.level===1&&pet.data.food&&crosses(pet.foodSpot)){
+    if(pet.counterService&&pet.level===1&&pet.data.food&&pet.direction>0&&crosses(pet.counterEntry??.49)){
+      if(pet.joinCounter?.())return;pet.stationCooldown=15;
+    }
+    if(!pet.counterService&&pet.level===1&&pet.data.food&&crosses(pet.foodSpot)){
       if(pet.heldItem&&hasAction(pet.data,'eat'))pet.heldItem=null;
       if(!hasAction(pet.data,'eat')){collectItem(pet);pet.stationCooldown=55;return;}
       pet.x=pet.foodSpot;pet.mode='eat';pet.clock=0;pet.awaitingCounter=!!pet.counterService;pet.counterWait=0;

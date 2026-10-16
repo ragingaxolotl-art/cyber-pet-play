@@ -67,3 +67,12 @@ Build starts are staggered per level (3–21 seconds after rain is noticed); tea
 
 ## Food-house attendant
 Two user-provided 4×4 sprite atlases are mapped in `dist/counter.js`; frame choices and original attribution are in `dist/assets/attendant/README.md`. The attendant stays behind the raised counter, turns using intermediate poses, serves queued favorite-food orders, and returns to a restrained idle. Unconnected gestures are omitted. Pets wait for the handoff before their eating animation and shrinking meal begin. Missing NPC art permits immediate meals. No character/profile data is changed.
+
+
+### Animated board residents and counter queue (v20)
+
+PixelLab API-generated sequences now give both counter hosts breathing/blinking idles, talking, food passing and occasional selfies. Every clip uses a shared exact rest frame at its boundaries. Action selection waits for idle/action completion, with staggered replies and serving priority. The original 4 × 4 sheets remain as a loading fallback. Sources and generation IDs are recorded in dist/assets/npcs/README.md and clips.json.
+
+Food visitors join a physical FIFO queue with artwork-width spacing. Each waits for an individual handoff, walks to a reserved dining space and then eats or stores the food if eating art is missing. Full queues are skipped until a later lap. Food preference and six personality axes moderated by Love select emote-only reactions; no saved stats or friendships change.
+
+One winged unicorn flies between random positions, drops up to five temporary toy props, chooses clear landing places, exchanges personality-sensitive emotes with nearby pets, and takes off again. Pets react when they reach a dropped toy. Flight clips finish their loop before transitions; a newly occupied landing spot causes another takeoff. All NPC schedules, toys and queue state are session-only. No extra sample or test pets are added.

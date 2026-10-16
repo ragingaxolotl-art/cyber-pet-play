@@ -1,0 +1,266 @@
+{
+  "host1": {
+    "talk": {
+      "src": "assets/npcs/host1-talk.png",
+      "count": 9,
+      "job": "0a868b5a-6342-4836-8f61-7b5582cc497d",
+      "duration": 2.4,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/host1-rest.png"
+    },
+    "idle": {
+      "src": "assets/npcs/host1-idle.png",
+      "count": 5,
+      "job": "23e6aa33-5a1a-4d48-b9d6-cb4b660c9299",
+      "duration": 2.4,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        0
+      ],
+      "restSrc": "assets/npcs/host1-rest.png"
+    },
+    "serve": {
+      "src": "assets/npcs/host1-serve.png",
+      "count": 13,
+      "job": "2bb6c7c8-05e2-4177-a19e-ed67b662b810",
+      "duration": 3.2,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        0
+      ],
+      "restSrc": "assets/npcs/host1-rest.png"
+    },
+    "selfie": {
+      "src": "assets/npcs/host1-selfie.png",
+      "count": 17,
+      "job": "0337cba8-4b02-4845-ab84-fa19af534105",
+      "duration": 5,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        0
+      ],
+      "restSrc": "assets/npcs/host1-rest.png"
+    }
+  },
+  "flyer": {
+    "fly": {
+      "src": "assets/npcs/flyer-fly.png",
+      "count": 9,
+      "job": "d600070f-991c-4c9c-aca3-5b20e648d890",
+      "duration": 2.3,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/flyer-rest.png"
+    },
+    "land": {
+      "src": "assets/npcs/flyer-land.png",
+      "count": 9,
+      "job": "afd74551-aa92-4913-9f8a-c48fc6d9e61a",
+      "duration": 2.3,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/flyer-rest.png"
+    },
+    "drop": {
+      "src": "assets/npcs/flyer-drop.png",
+      "count": 13,
+      "job": "8ec4f146-60e3-4e17-bc9a-6322f9eb7e7e",
+      "duration": 2.3,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        0
+      ],
+      "restSrc": "assets/npcs/flyer-rest.png"
+    },
+    "takeoff": {
+      "src": "assets/npcs/flyer-takeoff.png",
+      "count": 9,
+      "job": "5fbd6345-75ef-4b68-81a4-98dbfaf0889f",
+      "duration": 2.3,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/flyer-rest.png"
+    },
+    "talk": {
+      "src": "assets/npcs/flyer-talk.png",
+      "count": 9,
+      "job": "9e55158f-404f-4d93-822d-73b9166f5d55",
+      "duration": 2.4,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/flyer-rest.png"
+    }
+  },
+  "host2": {
+    "talk": {
+      "src": "assets/npcs/host2-talk.png",
+      "count": 9,
+      "job": "5e8785a7-3b43-4d19-8268-3b9afa8003e4",
+      "duration": 2.4,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/host2-rest.png"
+    },
+    "selfie": {
+      "src": "assets/npcs/host2-selfie.png",
+      "count": 17,
+      "job": "984cf42e-e7a9-4c86-9518-d7b0cdc24e71",
+      "duration": 5,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        0
+      ],
+      "restSrc": "assets/npcs/host2-rest.png"
+    },
+    "serve": {
+      "src": "assets/npcs/host2-serve.png",
+      "count": 13,
+      "job": "467abf98-cc61-4c97-9d81-4987b26bcdd4",
+      "duration": 3.2,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        0
+      ],
+      "restSrc": "assets/npcs/host2-rest.png"
+    },
+    "idle": {
+      "src": "assets/npcs/host2-idle.png",
+      "count": 9,
+      "job": "8df65031-9103-46b9-bd98-eb45602d56f3",
+      "duration": 2.4,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        0
+      ],
+      "restSrc": "assets/npcs/host2-rest.png"
+    }
+  }
+}

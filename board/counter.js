@@ -1,3 +1,5 @@
+import {drawHost} from './npc-animation.js?v=21';
+import {advanceCounterQueue} from './counter-queue.js?v=21';
 // Original 4x4, 64px-cell atlases. Coordinates are zero-based; no repainted frames.
 // Front -> three-quarter -> profile bridges the idle and tray clips in both directions.
 export const frames={
@@ -6,8 +8,8 @@ export const frames={
   tray:['serving',0,0,28],reach:['serving',0,1,28],offer:['serving',0,2,29]
 };
 export const serviceClip=[['rest',.18],['turn',.16],['profile',.16],['tray',.24],['reach',.22],['offer',.55],['reach',.22],['tray',.24],['profile',.16],['turn',.16],['rest',.24]];
-export const handoffAt=.18+.16+.16+.24+.22+.55;
-export const serviceDuration=serviceClip.reduce((sum,[,duration])=>sum+duration,0);
+export const handoffAt=1.65;
+export const serviceDuration=3.2;
 export function createCounter(){return {clock:0,idleClock:0,customer:null};}
 export function counterFrame(counter){
   if(!counter.customer){const t=counter.idleClock%7;return t>5.7&&t<6.3?'breath':'rest';}
@@ -16,6 +18,7 @@ export function counterFrame(counter){
   return 'rest';
 }
 export function advanceCounter(counter,pets,dt,ready=true){
+  if(counter.managed){advanceCounterQueue(counter,pets,dt,ready,{handoffAt,serviceDuration});return;}
   const waiting=p=>p.mode==='eat'&&p.awaitingCounter&&p.level===1&&!p.stair;
   // Missing artwork must never strand hungry pets.
   if(!ready){for(const p of pets)if(p.awaitingCounter){p.awaitingCounter=false;p.clock=0;}counter.customer=null;return;}
@@ -32,9 +35,11 @@ export function loadCounterArt(){
   const art={};for(const name of ['idle','serving']){const img=new Image();img.src=`assets/attendant/${name}.png`;art[name]=img;}return art;
 }
 export const counterArtReady=art=>['idle','serving'].every(key=>art[key]?.complete&&art[key]?.naturalWidth===256);
-export function drawCounter(c,w,h,counter,art,foodImages){
+export function drawCounter(c,w,h,counter,art,foodImages,hosts,elapsed=0){
   const x=w*.51,ground=h*.605,size=h*.117,top=ground-h*.122;
-  if(counterArtReady(art)){
+  const animated=hosts&&drawHost(c,w,h,hosts.people[0],hosts.art.host1,.475,elapsed);
+  const second=hosts&&drawHost(c,w,h,hosts.people[1],hosts.art.host2,.545,elapsed);
+  if(!animated&&!second&&counterArtReady(art)){
     const [sheet,row,col,pivot]=frames[counterFrame(counter)];
     c.save();c.imageSmoothingEnabled=false;
     c.drawImage(art[sheet],col*64,row*64,64,64,x-pivot/64*size,top,size,size);c.restore();
@@ -46,9 +51,9 @@ export function drawCounter(c,w,h,counter,art,foodImages){
   for(let i=0;i<5;i++){c.fillStyle='#e9d9b4';c.beginPath();c.ellipse(w*(.45+i*.03),ground-h*.050,w*.009,h*.003,0,0,Math.PI*2);c.fill();}
   const pet=counter.customer,t=counter.clock;
   // Actual preferred food travels from the offered tray to the customer's plate.
-  if(pet&&t>=.96&&t<handoffAt){
-    const image=foodImages.get(pet.data.food?.id),u=Math.max(0,Math.min(1,(t-.96)/.55)),ease=u*u*(3-2*u);
-    const sx=x+size*.28,sy=top+size*.51,ex=pet.x*w,ey=ground-h*.055,s=h*.024;
+  if(pet&&t>=1.10&&t<handoffAt){
+    const image=foodImages.get(pet.data.food?.id),u=Math.max(0,Math.min(1,(t-1.10)/.55)),ease=u*u*(3-2*u);
+    const sx=w*(counter.servingHost===0?.475:.545)+size*.28,sy=top+size*.51,ex=pet.x*w,ey=ground-h*.055,s=h*.024;
     if(image?.complete&&image.naturalWidth)c.drawImage(image,sx+(ex-sx)*ease-s/2,sy+(ey-sy)*ease-Math.sin(u*Math.PI)*h*.018-s/2,s,s);
   }
 }

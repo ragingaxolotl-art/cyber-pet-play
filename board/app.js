@@ -1,24 +1,28 @@
-import {createCounter,advanceCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=20';
-import {advanceHygiene} from './hygiene.js?v=20';
-import {createWash,advanceWash} from './wash.js?v=20';
-import {displayMetrics,sourceScale} from './display.js?v=20';
-import {createCompanions,withResidents} from './companions.js?v=20';
-import {isClassPet} from './profile.js?v=20';
-import {advanceGames,drawGames} from './games.js?v=20';
-import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=20';
-import {chooseItem} from './sharing.js?v=20';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=20';
-import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=20';
-import {favoriteFood} from './food.js?v=20';
-import {drawLandscape,drawWash} from './scenery.js?v=20';
-import {refreshRoster} from './connection.js?v=20';
-import {readBackup} from './backups.js?v=20';
+import {createHosts,loadNpcArt,advanceHosts} from './npc-animation.js?v=21';
+import {createFlyer,advanceFlyer,drawFlyer,drawToys} from './flyer.js?v=21';
+import {prepareCounterQueue} from './counter-queue.js?v=21';
+import {createCounter,advanceCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=21';
+import {advanceHygiene} from './hygiene.js?v=21';
+import {createWash,advanceWash} from './wash.js?v=21';
+import {displayMetrics,sourceScale} from './display.js?v=21';
+import {createCompanions,withResidents} from './companions.js?v=21';
+import {isClassPet} from './profile.js?v=21';
+import {advanceGames,drawGames} from './games.js?v=21';
+import {createWorld,advanceWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=21';
+import {chooseItem} from './sharing.js?v=21';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=21';
+import {stairs,floor,makePet,tick,petFloor,frameIndex,hasAction,animationDuration,interactPets,foodRemaining,advanceTag,advanceInteractions} from './motion.js?v=21';
+import {favoriteFood} from './food.js?v=21';
+import {drawLandscape,drawWash} from './scenery.js?v=21';
+import {refreshRoster} from './connection.js?v=21';
+import {readBackup} from './backups.js?v=21';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 const livingWorld=createWorld(),washHistory=createWash();
 let companions=[];
-const counter=createCounter(),counterArt=loadCounterArt();
+const counter=createCounter(),counterArt=loadCounterArt(),hosts=createHosts(),flyer=createFlyer();
+loadNpcArt(hosts).catch(()=>{});
 
 let width=1600,height=850,mode='class',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
@@ -67,7 +71,7 @@ function petSize(data){return displayMetrics(data,width,height,pets.length);}
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,groundY=(petFloor(pet)-(pet.worldBob||0))*height;
   const metrics=petSize(data),y=groundY+metrics.offsetY;
-  let action=((['game','build'].includes(pet.mode)&&pet.gameMoving)||['walk','wash','seekWash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
+  let action=(pet.counterMoving||(['game','build'].includes(pet.mode)&&pet.gameMoving)||['walk','wash','seekWash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
   if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
   if(!pet.awaitingCounter&&['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
   const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
@@ -89,7 +93,7 @@ function drawPet(pet){
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
 
   }
-  if(pet.emoteTime>0 && !['eat','snack'].includes(pet.mode)){
+  if(pet.emoteTime>0 && (pet.foodReactionTime>0||!['eat','snack'].includes(pet.mode))){
     const ey=y-desired-20*unit,size=38*unit;
     if(!drawFeeling(ctx,pet.emote,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[pet.emote]||'…',x,ey+6*unit);}
 
@@ -104,8 +108,8 @@ function drawPet(pet){
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets){p.counterService=true;p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;tick(p,dt);}advanceCounter(counter,pets,dt,counterArtReady(counterArt));advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceHygiene(pets,dt);advanceGames(pets,dt,elapsed);interactPets(pets);advanceWash(washHistory,pets,dt);}
-  stage();drawCounter(ctx,width,height,counter,counterArt,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
+  if(!paused&&!document.hidden){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;prepareCounterQueue(counter,pets);for(const p of pets)tick(p,dt);advanceHosts(hosts,counter,dt);advanceFlyer(flyer,pets,dt);advanceCounter(counter,pets,dt,counterArtReady(counterArt));advanceTag(pets,dt);advanceInteractions(pets,dt);advanceWorld(livingWorld,pets,dt,elapsed);advanceHygiene(pets,dt);advanceGames(pets,dt,elapsed);interactPets(pets);advanceWash(washHistory,pets,dt);}
+  stage();drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){
