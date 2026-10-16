@@ -1,6 +1,6 @@
-import {freeForActivity} from './activity-state.js?v=30';
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=30';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=30';
+import {freeForActivity} from './activity-state.js?v=31';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=31';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=31';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
 const eligible=p=>freeForActivity(p)&&!(p.gameCooldown>0);
@@ -63,7 +63,7 @@ export function advanceGames(pets,dt,time,schedule){
   if(!neighbors.length)continue;
   const movers=neighbors.filter(active),moving=active(leader)&&movers.length>0,allowed=moving?['tag',...gameKinds]:['copy','favorites'];
   const kind=moving&&!schedule.counts.tag?'tag':chooseGame(leader,schedule.counts,allowed),players=[leader,...(['copy','favorites'].includes(kind)?neighbors:movers).slice(0,kind==='tag'?1:2)];
-  if(startGame(players,kind)){schedule.counts[kind]=(schedule.counts[kind]||0)+1;schedule.lastStarted=time;if(!['copy','favorites'].includes(kind))schedule.lastActiveStarted=time;schedule.next=time+9+leader.random()*7;for(const p of players)p.lastGameInvite=time;break;}
+  if(startGame(players,kind)){schedule.counts[kind]=(schedule.counts[kind]||0)+1;schedule.lastStarted=time;if(!['copy','favorites'].includes(kind))schedule.lastActiveStarted=time;schedule.next=time+(['copy','favorites'].includes(kind)?2:9+leader.random()*7);for(const p of players)p.lastGameInvite=time;break;}
  }
 
 }

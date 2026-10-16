@@ -1,11 +1,11 @@
-import {clipFrameAt} from './clip-timing.js?v=30';
-import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=30';
-import {availablePairs,choosePair} from './host-interactions.js?v=30';
-import {drawFeeling} from './emotes.js?v=30';
+import {clipFrameAt} from './clip-timing.js?v=31';
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=31';
+import {availablePairs,choosePair} from './host-interactions.js?v=31';
+import {drawFeeling} from './emotes.js?v=31';
 export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};
- const response=await fetch('assets/npcs/clips.json?v=30');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
+ const response=await fetch('assets/npcs/clips.json?v=31');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
  for(const [who,clips] of Object.entries(manifest)){
   hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc),targetImage:info.targetSrc?load(info.targetSrc):null};}
  }
@@ -15,7 +15,8 @@ export function advanceHosts(h,c,dt){
  h.clock+=dt;
  // Keep breathing independent of clip resets and stagger the two people.
  for(const [i,p] of h.people.entries()){
-  p.idleClock=(p.idleClock??i*1.3)+dt;
+  p.idleClock=(p.idleClock??i*.43)+dt;
+  p.idlePeriod=3.7+i*.61;
   const resting=!h.pair&&!['walk','turn','serve'].includes(p.action);
   p.idleBlend=Math.max(0,Math.min(1,(p.idleBlend||0)+(resting?1:-1)*dt*4));
  }
@@ -62,8 +63,8 @@ export function advanceHosts(h,c,dt){
 }
 export function hostIdleScale(person){
  // A small breathing bounce, anchored at the shoes; no whole-sprite floating.
- const breath=Math.sin((person.idleClock||0)*Math.PI*2/2.8)*(person.idleBlend||0);
- return {x:1-breath*.009,y:1+breath*.025};
+ const breath=Math.sin((person.idleClock||0)*Math.PI*2/(person.idlePeriod||3.7))*(person.idleBlend||0);
+ return {x:1,y:1+breath*.006};
 }
 export function drawHost(c,w,h,person,clips,x,elapsed){
  const clip=ready(clips?.[person.action])?clips[person.action]:clips?.idle;if(!ready(clip))return false;
