@@ -1,5 +1,6 @@
-import {washThreshold,love,travelSpeed,traitFeeling} from './profile.js?v=26';
-import {stairs,stations,floor,hasAction,addWalkingDirt} from './motion.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {washThreshold,love,travelSpeed,traitFeeling} from './profile.js?v=27';
+import {stairs,stations,floor,hasAction,addWalkingDirt} from './motion.js?v=27';
 export function startWashTrip(p){
  if(!hasAction(p.data,'walking')||p.stair||p.socialGroup||p.playGroup)return false;
  const points=[{x:p.x,level:p.level}];
@@ -23,7 +24,7 @@ export function advanceHygiene(pets,dt){
    }
    continue;
   }
-  if(p.hygieneCooldown>0||p.stair||p.socialGroup||p.playGroup||!['idle','walk'].includes(p.mode))continue;
+  if(p.hygieneCooldown>0||!freeForActivity(p))continue;
   p.hygieneCooldown=10+p.random()*10;
   if(p.cleanliness<washThreshold(p)&&p.random()<.35+.45*love(p))startWashTrip(p);
  }

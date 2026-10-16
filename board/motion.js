@@ -1,19 +1,18 @@
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=26';
-import {makeDirt} from './dirt.js?v=26';
-import {collectItem,friendship} from './sharing.js?v=26';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {resolveAction,aliases} from './pet-animation.js?v=27';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=27';
+import {makeDirt} from './dirt.js?v=27';
+import {collectItem,friendship} from './sharing.js?v=27';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=27';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
 export const floor=(level)=>.86-level*.255;
 export const stations={food:{level:1,left:.43,right:.59},wash:{level:2,left:.34,right:.53}};
-export function hasAction(data,action){
-  const frames=data.config?.animations?.[action];
-  return Array.isArray(frames)&&frames.length>0&&frames.every(name=>data.images?.has(name));
-}
+export function hasAction(data,action){return !!resolveAction(data,action);}
 export function makePet(data,index,count,random=Math.random){
   const level=index%3, perLevel=Math.ceil(count/3);
-  return {data,dirtPattern:makeDirt(),level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:'',heldItem:null,friendships:new Map(),shareCooldown:0};
+  return {data,animationVariant:index,dirtPattern:makeDirt(),level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:'',heldItem:null,friendships:new Map(),shareCooldown:0};
 }
 export function chooseEmote(pet){
   const stats=pet.data.stats||{};
@@ -54,7 +53,7 @@ export function startConversation(a,b,afterTag=false){
   const likes=[a.data.boardLike||a.data.food?.name||'snacks',b.data.boardLike||b.data.food?.name||'snacks'];
   for(const [index,p] of [a,b].entries()){
     const duration=engagementSeconds(p,'talk');
-    p.mode='social';p.clock=0;p.timer=duration;p.socialDuration=duration;p.socialReply=reply[index];p.engagement=1;p.tagGame=null;
+    p.mode='social';p.socialTurn=index;p.clock=0;p.timer=duration;p.socialDuration=duration;p.socialReply=reply[index];p.engagement=1;p.tagGame=null;
     p.socialCooldown=duration+20+p.random()*25;p.direction=p.x<(index===0?b:a).x?1:-1;
     p.emote=love(p)<.5?traitFeeling(p,'sociability'):opening[index];p.socialReply=love(p)<.5?traitFeeling(p,'assertiveness'):reply[index];p.emoteTime=duration;
     p.speech=afterTag?'That was fun!':index===0?'I like '+likes[0]+'!':'What do you like?';
@@ -93,7 +92,7 @@ export function advanceTag(pets,dt){
   }
 }
 export function interactPets(pets){
-  const eligible=p=>!p.stair&&['walk','idle'].includes(p.mode)&&p.socialCooldown<=0&&p.x>.04&&p.x<.96;
+  const eligible=p=>freeForActivity(p)&&p.socialCooldown<=0&&p.x>.04&&p.x<.96;
   for(let level=0;level<3;level++){
     const row=pets.filter(p=>p.level===level&&eligible(p)).sort((a,b)=>a.x-b.x);
     for(let i=0;i<row.length-1;i++){
@@ -115,6 +114,7 @@ export function tick(pet,dt){
   if(walking&&hasAction(pet.data,'walking'))addWalkingDirt(pet,Math.abs(distance(before,pet.x)));
 }
 function tickMotion(pet,dt){
+  pet.unicornGreetingTime=Math.max(0,(pet.unicornGreetingTime||0)-dt);
   pet.foodReactionTime=Math.max(0,(pet.foodReactionTime||0)-dt);
   pet.comfortTime=Math.max(0,(pet.comfortTime||0)-dt);
   pet.shareCooldown=Math.max(0,(pet.shareCooldown||0)-dt);
@@ -131,16 +131,16 @@ function tickMotion(pet,dt){
   if(pet.mode==='idle'&&pet.heldItem&&pet.heldItem.type!=='toy'&&pet.heldTime>75&&hasAction(pet.data,'eat')){
     pet.snackItem=pet.heldItem;pet.mode='snack';pet.clock=0;pet.timer=pet.mealDuration=Math.max(6,animationDuration(pet.data.config,'eat')*2);return;
   }
-  // Artwork capabilities come from successfully decoded frames, never placeholders.
-  if(!hasAction(pet.data,'walking')){
-    pet.mode='idle';pet.stair=null;pet.timer-=dt;
-    if(pet.timer<=0){pet.emote=chooseEmote(pet);pet.emoteTime=3;pet.timer=12+pet.random()*20;}
-    return;
-  }
   if(pet.mode==='eat'){
     if(pet.awaitingCounter)return;
     pet.timer-=dt;
     if(pet.timer<=0||!hasAction(pet.data,'eat')){collectItem(pet);pet.mode='walk';pet.clock=0;pet.timer=20;pet.stationCooldown=55;pet.emote='hearts';pet.emoteTime=3;}
+    return;
+  }
+  // Artwork capabilities come from successfully decoded frames, never placeholders.
+  if(!hasAction(pet.data,'walking')){
+    pet.mode='idle';pet.stair=null;pet.timer-=dt;
+    if(pet.timer<=0){pet.emote=chooseEmote(pet);pet.emoteTime=3;pet.timer=12+pet.random()*20;}
     return;
   }
   const speed=travelSpeed(pet);
@@ -204,6 +204,7 @@ const timingCache=new WeakMap();
 export function frameDurations(config,action){
   let actions=timingCache.get(config);if(!actions){actions=new Map();timingCache.set(config,actions);}
   if(actions.has(action))return actions.get(action);
+  action=config.animations[action]?action:((aliases[action]||[]).find(k=>config.animations[k])||action);
   const valid=value=>Number.isFinite(value)&&value>=.02&&value<=10;
   const fallback=valid(config.animation_speeds?.[action])?config.animation_speeds[action]:valid(config.frame_time)?config.frame_time:.25;
   const frames=config.animations[action]||[],saved=config.animation_frame_times?.[action];
@@ -212,6 +213,7 @@ export function frameDurations(config,action){
 }
 export function animationDuration(config,action){return frameDurations(config,action).reduce((sum,t)=>sum+t,0);}
 export function frameIndex(config,action,seconds){
+  action=config.animations[action]?action:((aliases[action]||[]).find(k=>config.animations[k])||action);
   const durations=frameDurations(config,action),count=durations.length;if(!count)return 0;
   let remaining=Number.isFinite(seconds)?Math.max(0,seconds):0;
   const loop=config.animation_loops?.[action];

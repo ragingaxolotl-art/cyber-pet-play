@@ -1,4 +1,4 @@
-import {isClassPet} from './profile.js?v=26';
+import {isClassPet} from './profile.js?v=27';
 // Only this read-only, random display credential is remembered, never the teacher password.
 const KEY='cyber-pet-board.connection.v1';
 export function rememberConnection(storage,connection){storage.setItem(KEY,JSON.stringify(connection));}
@@ -13,10 +13,10 @@ export async function refreshRoster(items,current,read){
   for(const item of items.filter(isClassPet)){
     const previous=old.get(item.id);let pet;
     try{
-      pet=previous?.backupHash===item.sha256?previous:await read(item);
+      pet=previous?.backupHash===item.sha256&&(previous?.projectionRevision??0)===(item.projectionRevision??0)?previous:await read(item);
       if(!isClassPet(pet)){if(pet!==previous)for(const img of pet.images.values())img.close?.();continue;}
       if(pixels+(pet.pixels||0)>100000000){if(pet!==previous)for(const img of pet.images.values())img.close?.();throw Error('Board memory limit reached.');}
-      pet.boardId=item.id;pet.backupHash=item.sha256;
+      pet.boardId=item.id;pet.backupHash=item.sha256;pet.projectionRevision=item.projectionRevision??0;
     }catch(error){failures.push(`${item.name||'Pet'}: ${error.message}`);pet=previous;}
     if(pet){pixels+=pet.pixels||0;next.push(pet);}
   }

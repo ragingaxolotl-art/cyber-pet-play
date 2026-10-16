@@ -1,6 +1,6 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=26';
-import {friendship,shareItem,itemScore} from './sharing.js?v=26';
-import {foodScore} from './food.js';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=27';
+import {friendship,shareItem,itemScore} from './sharing.js?v=27';
+import {foodScore} from './food.js?v=27';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
 export function rememberFavorite(observer,other){
@@ -10,7 +10,7 @@ export function rememberFavorite(observer,other){
 export function startGesture(a,b,kind,world){
   world.standBeside(a,b);
   const group={players:[a,b],kind,time:0,resolved:false};
-  for(const p of group.players){p.mode='gesture';p.socialGroup=group;p.clock=0;p.socialCooldown=40;p.direction=p===a?Math.sign(b.x-a.x):Math.sign(a.x-b.x);p.displayItem=null;}
+  for(const p of group.players){p.mode='gesture';p.socialGroup=group;p.clock=0;p.socialCooldown=40;p.direction=p===a?Math.sign(b.x-a.x):Math.sign(a.x-b.x);p.displayItem=null;p.offerReaction=null;}
   if(kind==='comfort'){feeling(a,'hearts');feeling(b,'frustrated');}
   else {feeling(a,'question');feeling(b,'thinking');if(kind==='offer')a.displayItem=a.heldItem;}
   return group;
@@ -49,14 +49,14 @@ function finish(group){
 export function advanceSocial(pets,dt,world){
   const present=new Set(pets),groups=new Set(pets.map(p=>p.socialGroup).filter(Boolean));
   for(const g of groups){
-    if(g.players.some(p=>!present.has(p))){finish(g);continue;}
+    if(g.players.some(p=>!present.has(p)||p.socialGroup!==g||!(['learn','offer','comfort'].includes(g.kind)?['gesture']:g.kind==='escort'?['escort','wash']:['together']).includes(p.mode))){finish(g);continue;}
     const [a,b]=g.players;g.time+=dt;
     if(g.kind==='learn'||g.kind==='offer'||g.kind==='comfort'){
       if(g.time>=2&&!g.resolved){
         g.resolved=true;
         if(g.kind==='learn'){rememberFavorite(a,b);rememberFavorite(b,a);b.displayItem=b.data.food;a.displayItem=a.data.food;feeling(a,'hearts',5);feeling(b,'hearts',5);}
         if(g.kind==='comfort'){b.comfortTime=70;feeling(b,'cute',5);feeling(a,'hearts',5);b.friendships??=new Map();b.friendships.set(a.data.id,Math.min(100,friendship(b,a)+2));}
-        if(g.kind==='offer'){feeling(b,itemScore(a.heldItem,b)<=0?(love(b)>.5?'thinking':'frustrated'):'hearts',5);}
+        if(g.kind==='offer'){b.offerReaction=itemScore(a.heldItem,b)<=0?'disliked':'accepted';feeling(b,itemScore(a.heldItem,b)<=0?(love(b)>.5?'thinking':'frustrated'):'hearts',5);}
       }
       if(g.kind==='offer'&&g.time>=4&&!g.transferred){g.transferred=true;const result=shareItem(a,b);if(result){if(result.reaction==='disliked'){a.dislikedGifts??=new Map();if(!a.dislikedGifts.has(b.data.id))a.dislikedGifts.set(b.data.id,new Set());a.dislikedGifts.get(b.data.id).add(result.item.id);}a.displayItem=result.item;feeling(a,result.reaction==='disliked'?(love(a)>.5?'thinking':traitFeeling(a,'generosity')):'hearts',3);feeling(b,result.reaction==='disliked'?(love(b)>.5?'thinking':'frustrated'):'hearts',3);}}
       if(g.time>=7)finish(g);

@@ -1,11 +1,11 @@
-import {clipFrameAt} from './clip-timing.js?v=26';
-import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=26';
-import {availablePairs,choosePair} from './host-interactions.js?v=26';
-import {drawFeeling} from './emotes.js?v=26';
+import {clipFrameAt} from './clip-timing.js?v=27';
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=27';
+import {availablePairs,choosePair} from './host-interactions.js?v=27';
+import {drawFeeling} from './emotes.js?v=27';
 export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};
- const response=await fetch('assets/npcs/clips.json?v=26');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
+ const response=await fetch('assets/npcs/clips.json?v=27');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
  for(const [who,clips] of Object.entries(manifest)){
   hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc),targetImage:info.targetSrc?load(info.targetSrc):null};}
  }
@@ -23,8 +23,9 @@ export function advanceHosts(h,c,dt){
   }
   return;
  }
- if(h.walker||c.customer||c.queue?.length)h.pendingPair=false;
- else if(h.clock>=h.nextPair&&availablePairs(h).length)h.pendingPair=true;
+ if(h.walker||c.customer)h.pendingPair=false;
+ else if(h.clock>=h.nextPair&&h.clock>=(h.pairNotBefore||0)&&availablePairs(h).length&&(!c.queue?.length||h.clock>=h.nextPair+90))h.pendingPair=true;
+ else if(c.queue?.length)h.pendingPair=false;
  const candidate=walkCandidate(h,c);
  const next=c.preferredHost??((c.servingHost||0)^1);c.hostReady=false;
  for(let i=0;i<2;i++){

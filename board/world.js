@@ -1,7 +1,8 @@
-import {splashDirt} from './dirt.js?v=26';
-import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=26';
-import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=26';
-import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {splashDirt} from './dirt.js?v=27';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=27';
+import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=27';
+import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=27';
 export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{level:2,left:.67,right:.97}];
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];
@@ -39,6 +40,7 @@ export function advanceWorld(world,pets,dt,time){
       else {
         p.worldTimer-=dt;
         if(p.mode==='puddle'){p.worldBob=Math.abs(Math.sin(p.clock*5))*.009;if(p.splashCooldown===0){splash(world,p,true);p.splashCooldown=.7;splashDirt(p,.1);p.emote='laughing';p.emoteTime=2;}}
+        if(p.mode==='quiet'&&p.worldTimer<2){p.emote='neutral';p.emoteTime=2;}
         if(p.mode==='watch'){p.direction=butterflyAt(p.level,time)>p.x?1:-1;}
         if(p.mode==='shelter'){p.emote=traitFeeling(p,'sociability');p.emoteTime=2;}
         if(p.mode==='celebrate'){p.emote='hearts';p.emoteTime=2;p.worldBob=moving?Math.abs(Math.sin(p.clock*4))*.004:0;}
@@ -46,7 +48,7 @@ export function advanceWorld(world,pets,dt,time){
       if(['shelter','shelterWait'].includes(p.mode)?!weather.rain:p.worldTimer<=0)finish(p);
       continue;
     }
-    if(p.stair||p.socialGroup||!['idle','walk'].includes(p.mode))continue;
+    if(!freeForActivity(p))continue;
     const canWalk=hasAction(p.data,'walking');
     if(weather.rain&&p.rainSeen!==weather.cycle){
       p.rainSeen=weather.cycle;

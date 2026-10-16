@@ -1,8 +1,9 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=26';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=27';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=27';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
-const eligible=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)&&p.socialCooldown<=0;
+const eligible=p=>freeForActivity(p)&&p.socialCooldown<=0;
 const feeling=(p,e)=>{p.emote=e;p.emoteTime=3;};
 const invitationStates=new WeakMap();
 export function chooseGame(p,counts={},allowed=null){
@@ -16,18 +17,21 @@ export function startGame(players,kind,rematch=0){
  players=[...players].sort((a,b)=>trait(b,'assertiveness')-trait(a,'assertiveness'));
  const center=Math.max(.25,Math.min(.75,players.reduce((n,p)=>n+p.x,0)/players.length));
  const g={players,kind,time:0,center,level:players[0].level,rematch,duration:6+Math.min(...players.map(p=>Math.max(0,Math.min(100,p.data.stats?.energy??100))))*.04+Math.min(...players.map(p=>trait(p,'activity_level')+trait(p,'sociability')+love(p)))*5,target:Math.min(.92,center+.2),propX:center,propY:floor(players[0].level)-.04};
+ if(kind==='race')g.duration=Math.min(45,Math.max(g.duration,...players.map(p=>Math.abs(g.target-p.x)/(travelSpeed(p)*1.3)+2)));
  players.forEach((p,i)=>{p.mode='game';p.playGroup=g;p.clock=0;p.gameOrigin=p.x;p.gameSlot=center+(i-(players.length-1)/2)*.085;p.gameMoving=false;p.socialCooldown=40;feeling(p,i===0?'eager':'question');});return g;
 }
 function move(p,target,dt,multiplier=1){const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*multiplier*dt);p.gameMoving=step>.00001;if(step){p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}}
 function finish(g,allowRematch=true){
- for(const p of g.players){p.playGroup=null;p.gameMoving=false;p.worldBob=0;p.displayItem=null;p.mode='idle';p.timer=2;p.socialCooldown=12+p.random()*8;feeling(p,traitFeeling(p,'sociability'));}
- const sorted=[...g.players].sort((a,b)=>a.x-b.x);for(let i=1;i<sorted.length;i++)if(active(sorted[i-1])&&active(sorted[i]))standBeside(sorted[i-1],sorted[i]);
- if(allowRematch&&!g.rematch&&g.players.every(p=>(p.data.stats?.energy??100)>25)&&g.players[0].random()<trait(g.players[0],'activity_level')*.3)startGame(g.players,g.kind,1);
+ const owned=g.players.filter(p=>p.playGroup===g&&p.mode==='game');
+ for(const p of g.players){if(p.playGroup!==g)continue;p.playGroup=null;if(!owned.includes(p))continue;p.gameMoving=false;p.worldBob=0;p.displayItem=null;p.mode='idle';p.timer=2;p.socialCooldown=12+p.random()*8;feeling(p,traitFeeling(p,'sociability'));}
+ const sorted=[...owned].sort((a,b)=>a.x-b.x);for(let i=1;i<sorted.length;i++)if(active(sorted[i-1])&&active(sorted[i]))standBeside(sorted[i-1],sorted[i]);
+ if(owned.length===g.players.length&&allowRematch&&!g.rematch&&g.players.every(p=>(p.data.stats?.energy??100)>25)&&g.players[0].random()<trait(g.players[0],'activity_level')*.3)startGame(g.players,g.kind,1);
 }
 export function advanceGames(pets,dt,time,schedule){
  const present=new Set(pets),groups=new Set(pets.map(p=>p.playGroup).filter(Boolean));
  for(const g of groups){
   if(g.players.some(p=>!present.has(p)||p.mode!=='game'||p.level!==g.level)||(!['copy','favorites'].includes(g.kind)&&g.players.some(p=>!active(p)))){finish(g,false);continue;}
+  if(g.finishIn!==undefined){g.finishIn-=dt;if(g.finishIn<=0)finish(g);continue;}
   g.time+=dt;const turn=Math.floor(g.time/2),n=g.players.length;
   for(const [i,p] of g.players.entries()){
    p.gameMoving=false;p.worldBob=0;
@@ -41,7 +45,7 @@ export function advanceGames(pets,dt,time,schedule){
    else if(g.kind==='favorites'){p.displayItem=g.time>3?g.players[(i+1)%n].data.food:null;feeling(p,g.time<3?'question':p.knownFavorites?.has(g.players[(i+1)%n].data.id)?'hearts':'thinking');}
   }
   if(g.kind==='ball'||g.kind==='balloon'){const left=g.players[0].gameSlot,right=g.players[n-1].gameSlot;g.propX=left+(right-left)*(.5+.5*Math.sin(g.time*1.4));g.propY=floor(g.level)-(g.kind==='ball'?.012:.11+Math.abs(Math.sin(g.time*1.4))*.035);}
-  if(g.time>=g.duration||(g.kind==='race'&&g.players.every(p=>Math.abs(p.x-g.target)<.003)))finish(g);
+  if(g.time>=g.duration||(g.kind==='race'&&g.players.every(p=>Math.abs(p.x-g.target)<.003))){if(g.kind==='race'&&g.winner===undefined)g.winner=g.players.reduce((best,p,i)=>Math.abs(p.x-g.target)<Math.abs(g.players[best].x-g.target)?i:best,0);g.finishIn=2.5;for(const p of g.players){p.gameMoving=false;p.worldBob=0;}}
  }
  // A board-wide, staggered invitation budget prevents games from monopolizing
  // every free pet. Underused games gain weight, including tag itself.

@@ -1,5 +1,6 @@
-import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=26';
-import {travelSpeed,trait} from './profile.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=27';
+import {travelSpeed,trait} from './profile.js?v=27';
 // Session appetites create purposeful visits; saved fullness is never changed.
 export function startFoodTrip(p){
  if(!p.data.food||!hasAction(p.data,'eat')||!hasAction(p.data,'walking')||p.stair||p.socialGroup||p.playGroup)return false;
@@ -19,6 +20,6 @@ export function advanceMeals(pets,dt){
    else {const target=p.counterEntry??.49;if(target<.04){p.mode='walk';p.timer=5;p.mealDue=20;p.foodTrip=null;continue;}const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*dt);p.direction=Math.sign(delta)||1;p.x+=p.direction*step;addWalkingDirt(p,step);if(Math.abs(p.x-target)<.01&&p.joinCounter?.()){p.foodTrip=null;p.routeFloor=null;}}
    continue;
   }
-  if(p.mealDue===0&&!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)){if(!startFoodTrip(p))p.mealDue=40;}
+  if(p.mealDue===0&&freeForActivity(p)){if(!startFoodTrip(p))p.mealDue=40;}
  }
 }

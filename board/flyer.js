@@ -1,13 +1,14 @@
-import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=26';
-import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=26';
-import {floor} from './motion.js?v=26';
-import {trait,traitFeeling,love} from './profile.js?v=26';
-import {drawFeeling} from './emotes.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=27';
+import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=27';
+import {floor} from './motion.js?v=27';
+import {trait,traitFeeling,love} from './profile.js?v=27';
+import {drawFeeling} from './emotes.js?v=27';
 // One scenery character. Toy props and greetings are session-only, never save data.
 export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'absent',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0,...visitState(random)};}
 const FLIGHT_CYCLE=1.2,TALK_CYCLE=2.4;
 function start(f,state,x,y,duration){if(state==='fly')duration=Math.ceil(duration/FLIGHT_CYCLE)*FLIGHT_CYCLE;if(state==='talk')duration=Math.ceil(duration/TALK_CYCLE)*TALK_CYCLE;f.state=state;f.clock=0;f.duration=duration;f.fromX=f.x;f.fromY=f.y;f.targetX=x;f.targetY=y;f.direction=x===f.x?f.direction:Math.sign(x-f.x);}
-const available=p=>!p.stair&&['walk','idle'].includes(p.mode);
+const available=p=>freeForActivity(p);
 export function advanceFlyer(f,pets,dt,aspect=16/9,time){
  const previousClock=f.clock;f.clock+=dt;f.feelingTime=Math.max(0,f.feelingTime-dt);f.nextDrop-=dt;
  advanceToys(f,pets,dt);
@@ -34,7 +35,7 @@ export function advanceFlyer(f,pets,dt,aspect=16/9,time){
   // A moving pet may have entered the chosen landing spot during descent. Lift off again instead of overlapping.
   if(pets.some(p=>p.level===f.level&&!p.stair&&Math.abs(p.x-f.x)<(p.bodyWidth||.05)/2+.035)){start(f,'takeoff',Math.max(.06,Math.min(.94,f.x+f.direction*.08)),Math.max(.12,f.y-.14),2.3);return;}
   f.landings++;f.greeting=pets.filter(p=>p.level===f.level&&available(p)&&Math.abs(p.x-f.x)<.2).sort((a,b)=>Math.abs(a.x-f.x)-Math.abs(b.x-f.x))[0]||null;
-  f.feeling='hearts';f.feelingTime=5;if(f.greeting){f.direction=Math.sign(f.greeting.x-f.x)||1;f.greeting.emote=love(f.greeting)>.5?(trait(f.greeting,'sociability')>.5?'hearts':'cute'):traitFeeling(f.greeting,'sociability');f.greeting.emoteTime=4;f.greeting.mode='idle';f.greeting.timer=4;f.greeting.clock=0;f.greeting.direction=Math.sign(f.x-f.greeting.x)||1;f.greeting.socialCooldown=8;}
+  f.feeling='hearts';f.feelingTime=5;if(f.greeting){f.direction=Math.sign(f.greeting.x-f.x)||1;f.greeting.emote=love(f.greeting)>.5?(trait(f.greeting,'sociability')>.5?'hearts':'cute'):traitFeeling(f.greeting,'sociability');f.greeting.emoteTime=4;f.greeting.unicornGreetingTime=4;f.greeting.mode='idle';f.greeting.timer=4;f.greeting.clock=0;f.greeting.direction=Math.sign(f.x-f.greeting.x)||1;f.greeting.socialCooldown=8;}
   start(f,'talk',f.x,f.y,4+f.random()*3);
  }else if(f.state==='talk'){f.greeting=null;start(f,'takeoff',Math.max(.06,Math.min(.94,f.x+f.direction*.08)),Math.max(.12,f.y-.14),2.3);}
  else if(f.state==='takeoff')start(f,'fly',.08+f.random()*.84,.13+f.random()*.15,8+f.random()*8);

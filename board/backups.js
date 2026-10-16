@@ -1,3 +1,4 @@
+import {boardActions,aliases} from './pet-animation.js?v=27';
 // Read the existing Godot PetSnapshot ZIP format entirely in browser memory.
 export const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
 const decode=bytes=>new TextDecoder('utf-8',{fatal:true}).decode(bytes);
@@ -37,10 +38,10 @@ export async function readBackup(buffer,expectedHash){
   if(manifest.schema_version!==1||!manifest.files||typeof manifest.character_id!=='string')throw Error('Not a Cyber Pet snapshot.');
   const verified=async name=>{const data=await extract(name);if(await hash(data)!==manifest.files[name])throw Error('Backup file checksum did not match: '+name);return data;};
   const config=JSON.parse(decode(await verified('config.json'))), progress=JSON.parse(decode(await verified('progress.json')));
-  if(!config.animations||!Array.isArray(config.animations.idle)||!config.animations.idle.length)throw Error('This pet has no idle artwork.');
+  if(!config.animations||!aliases.idle.some(a=>Array.isArray(config.animations[a])&&config.animations[a].length))throw Error('This pet has no idle artwork.');
   const images=new Map(),sourceScales=new Map();let pixels=0,sourcePixels=0;
   try{
-    for(const action of ['idle','walking','eat','happy','sad']){
+    for(const action of boardActions){
       const frames=config.animations[action];if(!frames)continue;
       if(!Array.isArray(frames)||frames.length>256)throw Error('Animation has too many frames for the board.');
       for(const name of frames){

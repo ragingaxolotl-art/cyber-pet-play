@@ -1,20 +1,22 @@
-import {stepBoard} from './simulation.js?v=26';
-import {createHosts,loadNpcArt} from './npc-animation.js?v=26';
-import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=26';
-import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=26';
-import {createWash} from './wash.js?v=26';
-import {displayMetrics,sourceScale} from './display.js?v=26';
-import {createCompanions,withResidents} from './companions.js?v=26';
-import {isClassPet} from './profile.js?v=26';
-import {drawGames} from './games.js?v=26';
-import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=26';
-import {chooseItem} from './sharing.js?v=26';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=26';
-import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=26';
-import {favoriteFood} from './food.js?v=26';
-import {drawLandscape,drawWash} from './scenery.js?v=26';
-import {refreshRoster} from './connection.js?v=26';
-import {readBackup} from './backups.js?v=26';
+import {reconcilePets} from './roster-state.js?v=27';
+import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=27';
+import {stepBoard} from './simulation.js?v=27';
+import {createHosts,loadNpcArt} from './npc-animation.js?v=27';
+import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=27';
+import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=27';
+import {createWash} from './wash.js?v=27';
+import {displayMetrics,sourceScale} from './display.js?v=27';
+import {createCompanions,withResidents} from './companions.js?v=27';
+import {isClassPet} from './profile.js?v=27';
+import {drawGames} from './games.js?v=27';
+import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=27';
+import {chooseItem} from './sharing.js?v=27';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=27';
+import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=27';
+import {favoriteFood} from './food.js?v=27';
+import {drawLandscape,drawWash} from './scenery.js?v=27';
+import {refreshRoster} from './connection.js?v=27';
+import {readBackup} from './backups.js?v=27';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -71,11 +73,9 @@ function petSize(data){return displayMetrics(data,width,height,pets.length);}
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,groundY=(petFloor(pet)-(pet.worldBob||0))*height;
   const metrics=petSize(data),y=groundY+metrics.offsetY;
-  let action=(pet.counterMoving||(['toyPlay','game','build'].includes(pet.mode)&&pet.gameMoving)||['seekFood','seekToy','walk','wash','seekWash','tag','together','escort'].includes(pet.mode)||(worldModes.has(pet.mode)&&Math.abs((pet.worldTarget??pet.x)-pet.x)>.002))&&hasAction(data,'walking')?'walking':'idle';
-  if(pet.emoteTime>0 && ['idle','social'].includes(pet.mode) && ['hearts','love','cute','laughing','eager','ok'].includes(pet.emote) && hasAction(data,'happy'))action='happy';
-  if(!pet.awaitingCounter&&['eat','snack'].includes(pet.mode)&&hasAction(data,'eat'))action='eat';
-  const animationClock=action==='eat'?pet.clock%animationDuration(data.config,'eat'):pet.clock;
-  const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations.idle[0]);
+  const action=pet.renderAction||selectPetAction(pet)||resolveAction(data,'idle');
+  const animationClock=['eat','eat_side','jump','jump_side','play_side'].includes(action)?(pet.renderClock||0)%animationDuration(data.config,action):(pet.renderClock||0);
+  const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations[resolveAction(data,'idle')]?.[0]);
   if(!img)return;
   const maxHeight=data.maxHeight,maxWidth=data.maxWidth,bounds=artworkBounds.get(img);
   const original=sourceScale(data,name),size=metrics,desired=size.desired*(pet.mode==='shelter'?(pet.shelterScale||1):1),scale=size.scale*(pet.mode==='shelter'?(pet.shelterScale||1):1),w=bounds.w*original.x*scale,h=bounds.h*original.y*scale;
@@ -93,9 +93,10 @@ function drawPet(pet){
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
 
   }
-  if(pet.emoteTime>0 && (pet.foodReactionTime>0||!['eat','snack'].includes(pet.mode))){
+  const feeling=visibleFeeling(pet);
+  if(feeling && (pet.foodReactionTime>0||!['eat','snack'].includes(pet.mode))){
     const ey=y-desired-20*unit,size=38*unit;
-    if(!drawFeeling(ctx,pet.emote,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[pet.emote]||'…',x,ey+6*unit);}
+    if(!drawFeeling(ctx,feeling,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[feeling]||'…',x,ey+6*unit);}
 
   }
   if(pet.displayItem){
@@ -114,11 +115,10 @@ function render(time){
 }
 function setPets(data,label){
   data=data.filter(isClassPet);if(label==='class')data=withResidents(data,companions);
-  for(const pet of data){pet.food=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.entries()].map(([name,image])=>{const b=measureArtwork(image),s=sourceScale(pet,name);return {h:b.h*s.y,w:b.w*s.x};});pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
+  for(const pet of data){pet.food??=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.entries()].map(([name,image])=>{const b=measureArtwork(image),s=sourceScale(pet,name);return {h:b.h*s.y,w:b.w*s.x};});pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
-  const existing=new Map(pets.map(p=>[p.data,p])),byId=new Map(pets.map(p=>[p.data.boardId||p.data.id,p]));
-  loaded=data;pets=data.map((pet,i)=>{if(existing.has(pet))return existing.get(pet);const fresh=makePet(pet,i,data.length),old=byId.get(pet.boardId||pet.id);if(old){fresh.dirtPattern=old.dirtPattern;fresh.cleanliness=old.cleanliness;fresh.heldItem=old.heldItem;fresh.friendships=old.friendships;fresh.shareCooldown=old.shareCooldown;fresh.heldTime=old.heldTime;fresh.knownFavorites=old.knownFavorites;fresh.dislikedGifts=old.dislikedGifts;fresh.giftFor=old.giftFor;fresh.comfortTime=old.comfortTime;fresh.mealDue=old.mealDue;fresh.toyCooldown=old.toyCooldown;fresh.lastGameInvite=old.lastGameInvite;}return fresh;});mode=label;
+  loaded=data;pets=reconcilePets(data,pets);mode=label;
   $('status').textContent=label==='sample'?'Sample pets':`${data.length} ${data.length===1?'pet':'pets'} together`;
   $('caption').textContent=label==='sample'?`${data.length} sample pets · Jungle kitchen + cloud wash`:`${data.length} Cyber Pets · ${data.filter(p=>!hasAction(p,'walking')).length} resting without movement art · Display only`;
   $('empty').hidden=data.length>0;
@@ -196,7 +196,7 @@ resize();animationRequest=requestAnimationFrame(render);syncDisplay();
 async function startBoard(){
   try{
     const config=await(await fetch('assets/demo.json')).json(),images=new Map();
-    for(const name of new Set(['idle','walking','eat','happy'].flatMap(action=>config.animations[action]||[]))){const image=new Image();image.src='assets/'+name;await image.decode();images.set(name,image);}
+    for(const name of new Set(boardActions.flatMap(action=>config.animations[action]||[]))){const image=new Image();image.src='assets/'+name;await image.decode();images.set(name,image);}
     companions=createCompanions(config,images);await foodReady;setPets([],'class');
   }catch{$('message').textContent='Colorful companions could not load. Reload to retry.';}
   await refreshClass();

@@ -1,7 +1,7 @@
-import {travelSpeed,trait,love} from './profile.js?v=26';
-import {foodScore} from './food.js?v=26';
-import {collectItem} from './sharing.js?v=26';
-import {hasAction,animationDuration} from './motion.js?v=26';
+import {travelSpeed,trait,love} from './profile.js?v=27';
+import {foodScore} from './food.js?v=27';
+import {collectItem} from './sharing.js?v=27';
+import {hasAction,animationDuration} from './motion.js?v=27';
 const FRONT=.49,LEFT=.045,RIGHT=.97,GAP=.014;
 export const queueWidth=p=>Math.max(.018,p.bodyWidth||.055);
 export const queueGap=(a,b)=>(queueWidth(a)+queueWidth(b))/2+GAP;
@@ -45,6 +45,7 @@ export function advanceCounterQueue(c,pets,dt,ready,timing){
  prepareCounterQueue(c,pets);c.idleClock+=dt;
  // Served pets leave toward reserved dining places before the next pet steps up.
  for(const p of c.diners.filter(p=>p.mode==='counterLeave').sort((a,b)=>b.x-a.x)){
+  if(p.counterReceiveTime>0){p.counterReceiveTime=Math.max(0,p.counterReceiveTime-dt);p.counterMoving=false;continue;}
   const ahead=c.diners.filter(q=>q!==p&&q.x>p.x).sort((a,b)=>a.x-b.x)[0];move(p,p.counterSeat,dt,ahead);
   if(Math.abs(p.x-p.counterSeat)<.00001){
    p.counterMoving=false;p.clock=0;p.awaitingCounter=false;
@@ -57,7 +58,7 @@ export function advanceCounterQueue(c,pets,dt,ready,timing){
  if(c.customer){
   c.clock+=dt;
   if(c.customer.awaitingCounter&&(!ready||c.clock>=timing.handoffAt)){
-   const p=c.customer;p.awaitingCounter=false;p.clock=0;p.mode='counterLeave';p.emote=foodReaction(p);p.emoteTime=5;p.foodReactionTime=5;
+   const p=c.customer;p.awaitingCounter=false;p.clock=0;p.mode='counterLeave';p.emote=foodReaction(p);p.emoteTime=5;p.foodReactionTime=5;p.counterReceiveTime=.8;p.counterMoving=false;
    c.queue=c.queue.filter(q=>q!==p);c.diners.push(p);
   }
   if(!ready||c.clock>=timing.serviceDuration){c.customer=null;c.clock=0;c.idleClock=0;}

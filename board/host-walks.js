@@ -1,9 +1,9 @@
-import {clipReady} from './host-interactions.js?v=26';
+import {clipReady} from './host-interactions.js?v=27';
 export const galleryPoses=[['look','hair','delight','lean'],['look','wave','phone','lean']];
 export function walkCandidate(h,c){
- if(h.walker||h.pair||h.pendingPair||c.customer||c.queue?.length||h.clock<(h.nextWalk??18))return null;
+ if(h.walker||h.pair||h.pendingPair||h.clock<(h.nextWalk??18)||((c.customer||c.queue?.length)&&h.clock<(h.nextWalk??18)+45))return null;
  const preferred=h.nextWalker??0;
- for(const i of [preferred,1-preferred]){const clips=h.art['host'+(i+1)];if(clipReady(clips?.walk)&&clipReady(clips?.turn)&&galleryPoses[i].some(a=>clipReady(clips[a])))return i;}
+ for(const i of [preferred,1-preferred]){if(c.customer&&c.servingHost===i)continue;const clips=h.art['host'+(i+1)];if(clipReady(clips?.walk)&&clipReady(clips?.turn)&&galleryPoses[i].some(a=>clipReady(clips[a])))return i;}
  return null;
 }
 export function beginHostWalk(h,index){
@@ -23,5 +23,5 @@ export function advanceHostWalk(h,c,dt){
  if(walk.clock<walk.duration)return;
  const next={turnOut:'out',out:'faceOut',faceOut:'pose',pose:'turnBack',turnBack:'back',back:'faceHome'}[walk.phase];
  if(next){walk.phase=next;walk.clock=0;walk.duration=next==='pose'?clips[walk.pose].duration:['out','back'].includes(next)?3*clips.walk.duration:clips.turn.duration;advanceHostWalk(h,c,0);}
- else {Object.assign(p,{action:'idle',clock:0,offset:0,walkFacing:1,reverseTurn:false,reverseWalk:false,nextBreak:h.clock+8});h.walker=null;h.nextWalk=h.clock+18+h.random()*12;h.nextPair=Math.max(h.nextPair,h.clock+5);}
+ else {Object.assign(p,{action:'idle',clock:0,offset:0,walkFacing:1,reverseTurn:false,reverseWalk:false,nextBreak:h.clock+8});h.walker=null;h.nextWalk=h.clock+18+h.random()*12;h.pairNotBefore=h.clock+5;}
 }

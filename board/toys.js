@@ -1,6 +1,7 @@
-import {foodScore} from './food.js?v=26';
-import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=26';
-import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=26';
+import {freeForActivity} from './activity-state.js?v=27';
+import {foodScore} from './food.js?v=27';
+import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=27';
+import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=27';
 export const ballItem=Object.freeze({id:'unicorn-ball',name:'Ball',type:'toy',sprite:'assets/npcs/toy-ball.svg',tags:[]});
 export const releaseAt=.48, tossDuration=1.56;
 // Sprite coordinates are converted with the viewport aspect, including facing.
@@ -14,7 +15,7 @@ export function releaseBall(f,aspect){
  const position=heldBallPosition(f,aspect),level=[2,1,0].find(l=>floor(l)>position.y+.012)??0;
  f.toys.push({...position,level,vy:-.23,vx:f.direction*.24/aspect,age:0,landed:false,bounces:0,item:f.dropItem||ballItem});f.dropped=true;
 }
-const free=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['walk','idle'].includes(p.mode);
+const free=p=>freeForActivity(p);
 function moveTo(p,target,dt){const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*dt);p.direction=Math.sign(delta)||p.direction||1;p.x+=p.direction*step;p.gameMoving=step>0;addWalkingDirt(p,step);}
 export function chooseDrop(f,pets){
  f.dropCount=(f.dropCount||0)+1;
@@ -61,7 +62,7 @@ export function advanceToys(f,pets,dt){
    if(t.y>=floor(t.level)){t.y=floor(t.level);if(t.bounces++<2&&Math.abs(t.vy)>.05){t.vy*=-.38;t.vx*=.65;}else{t.landed=true;t.vx=0;}}
    continue;
   }
-  if(t.visitor&&(!present.has(t.visitor)||t.visitor.mode!=='seekToy'||!hasAction(t.visitor.data,'walking'))){const p=t.visitor;if(p.mode==='seekToy'){p.mode='idle';p.timer=1;p.toyTarget=null;}t.visitor=null;}
+  if(t.visitor&&(!present.has(t.visitor)||t.visitor.mode!=='seekToy'||t.visitor.toyTarget!==t||!hasAction(t.visitor.data,'walking'))){const p=t.visitor;if(p.mode==='seekToy'&&p.toyTarget===t){p.mode='idle';p.timer=1;p.toyTarget=null;}t.visitor=null;}
   if(!t.visitor&&t.playCooldown===0){
    const candidates=pets.filter(p=>free(p)&&p.level===t.level&&(p.toyCooldown||0)<=0&&hasAction(p.data,'walking')&&Math.abs(p.x-t.x)<.35&&(t.item.type==='toy'||hasAction(p.data,'eat')||!p.heldItem));
    candidates.sort((a,b)=>Math.abs(a.x-t.x)-Math.abs(b.x-t.x));const p=candidates[0];
@@ -70,7 +71,7 @@ export function advanceToys(f,pets,dt){
   const p=t.visitor;if(!p)continue;moveTo(p,t.x,dt);if(Math.abs(p.x-t.x)>.018)continue;
   if(t.item.type==='toy')startToyPlay(t,p,pets);
   else {t.collected=true;t.visitor=null;p.toyTarget=null;p.gameMoving=false;p.toyCooldown=20;
-   if(hasAction(p.data,'eat')){p.snackItem=t.item;p.mode='snack';p.clock=0;p.timer=p.mealDuration=Math.max(8,animationDuration(p.data.config,'eat')*2);p.emote=foodScore(t.item,p.data.foodPreferences)<=0?(love(p)>.5?'thinking':'frustrated'):traitFeeling(p,'generosity');p.emoteTime=3;}
+   if(hasAction(p.data,'eat')){p.snackItem=t.item;p.mode='snack';p.clock=0;p.timer=p.mealDuration=Math.max(8,animationDuration(p.data.config,'eat')*2);p.emote=foodScore(t.item,p.data.foodPreferences)<=0?(love(p)>.5?'thinking':'frustrated'):traitFeeling(p,'generosity');p.emoteTime=3;p.foodReactionTime=3;}
    else {p.heldItem=t.item;p.heldTime=0;p.mode='idle';p.timer=2;}
   }
  }

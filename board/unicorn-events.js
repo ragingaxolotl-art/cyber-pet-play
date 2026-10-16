@@ -1,6 +1,6 @@
-import {floor} from './motion.js?v=26';
-import {hostX} from './host-interactions.js?v=26';
-import {weatherAt,huts} from './world.js?v=26';
+import {floor} from './motion.js?v=27';
+import {hostX} from './host-interactions.js?v=27';
+import {weatherAt,huts} from './world.js?v=27';
 // Seconds, not frame counts. Visits remain brief with several quiet minutes between.
 export const visitSettings={duration:48,variation:12,quiet:240,quietVariation:180,rainChance:.75,rainDelay:5,rainVariation:12,minQuiet:150};
 export function visitState(random){return {age:0,nextVisit:105+random()*90,lastDeparture:-Infinity,visitRemaining:0,visits:0,trail:[],glitter:[],particleClock:0,wasRaining:false,rainChecked:-1,magicAttempted:false};}
@@ -52,7 +52,7 @@ export function advanceMagic(f,pets,hosts,world,dt,time,aspect=16/9){
   for(const p of pets)if(!p.stair&&Math.abs(p.x-spark.x)<.035/aspect&&spark.y>floor(p.level)-.10&&spark.y<floor(p.level))p.sparkleTime=3;
   for(const [i,p] of (hosts?.people||[]).entries())if(Math.abs(hostX(i,aspect,1)/aspect+(p.offset||0)/aspect-spark.x)<.04/aspect&&spark.y>.49&&spark.y<.605)p.sparkleTime=3;
  }
- for(const p of pets)if(p.sparkleTime>0){p.emote='hearts';p.emoteTime=Math.max(p.emoteTime||0,p.sparkleTime);}
+ // Sparkle is a separate reaction layer; food and social outcomes keep priority.
  tryMagicPavilion(f,world,pets,time);
  const target=f.magicTarget;
  if(target&&Math.abs(f.x-(target.hut.left+target.hut.right)/2)<.035&&Math.abs(f.y-(floor(target.level)-.13))<.03){
