@@ -1,7 +1,7 @@
-import {freeForActivity} from './activity-state.js?v=29';
-import {foodScore} from './food.js?v=29';
-import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=29';
-import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=29';
+import {freeForActivity} from './activity-state.js?v=30';
+import {foodScore} from './food.js?v=30';
+import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=30';
+import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=30';
 export const ballItem=Object.freeze({id:'unicorn-ball',name:'Ball',type:'toy',sprite:'assets/npcs/toy-ball.svg',tags:[]});
 export const releaseAt=.48, tossDuration=1.56;
 // Sprite coordinates are converted with the viewport aspect, including facing.

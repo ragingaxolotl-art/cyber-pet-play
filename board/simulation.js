@@ -1,16 +1,16 @@
-import {preserveRecovery} from './activity-state.js?v=29';
-import {advancePetPresentation} from './pet-animation.js?v=29';
-import {advanceMagic} from './unicorn-events.js?v=29';
-import {prepareCounterQueue} from './counter-queue.js?v=29';
-import {advanceCounter} from './counter.js?v=29';
-import {advanceHosts} from './npc-animation.js?v=29';
-import {advanceFlyer} from './flyer.js?v=29';
-import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=29';
-import {advanceMeals} from './meals.js?v=29';
-import {advanceGames} from './games.js?v=29';
-import {advanceWorld} from './world.js?v=29';
-import {advanceHygiene} from './hygiene.js?v=29';
-import {advanceWash} from './wash.js?v=29';
+import {preserveRecovery} from './activity-state.js?v=30';
+import {advancePetPresentation} from './pet-animation.js?v=30';
+import {advanceMagic} from './unicorn-events.js?v=30';
+import {prepareCounterQueue} from './counter-queue.js?v=30';
+import {advanceCounter} from './counter.js?v=30';
+import {advanceHosts} from './npc-animation.js?v=30';
+import {advanceFlyer} from './flyer.js?v=30';
+import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=30';
+import {advanceMeals} from './meals.js?v=30';
+import {advanceGames} from './games.js?v=30';
+import {advanceWorld} from './world.js?v=30';
+import {advanceHygiene} from './hygiene.js?v=30';
+import {advanceWash} from './wash.js?v=30';
 // Keep this exact update order shared by the live board and coexistence tests.
 // Active actions finish first, then care/play invitations, then optional scenery.
 export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){

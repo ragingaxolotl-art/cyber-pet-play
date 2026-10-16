@@ -1,6 +1,6 @@
-import {freeForActivity} from './activity-state.js?v=29';
-import {washThreshold,love,travelSpeed,traitFeeling} from './profile.js?v=29';
-import {stairs,stations,floor,hasAction,addWalkingDirt} from './motion.js?v=29';
+import {freeForActivity} from './activity-state.js?v=30';
+import {washThreshold,love,travelSpeed,traitFeeling} from './profile.js?v=30';
+import {stairs,stations,floor,hasAction,addWalkingDirt} from './motion.js?v=30';
 export function startWashTrip(p){
  if(!hasAction(p.data,'walking')||p.stair||p.socialGroup||p.playGroup)return false;
  const points=[{x:p.x,level:p.level}];
