@@ -11,3 +11,9 @@ The original gallery sheets are retained unchanged. Thirteen movement clips were
 Each action starts and finishes with its character’s exact shared *-rest.png reference (restSrc), instead of subtly different generated endpoint colors. Intermediate motion stays in order. Idle and flying loops finish before changing action. Serving and selfies return through their authored recovery frames. No isolated gallery poses are inserted into these clips. Continuous small breathing displacement persists across human animation transitions.
 
 Humans: idle, talk, serve, selfie. Unicorn: fly, land, takeoff, talk, drop. Cells are 64 × 64, transparent, rendered without smoothing. Asset rights/attribution follow the original user-provided PixelLab artwork; these are not represented as public-domain assets.
+
+## Paired interactions, v21
+
+The existing gallery sheets were inspected again through PixelLab. They contain looks, smiles, gestures and individual phone poses, but no complete paired hug or high-five. Five connected paired sequences were therefore generated using PixelLab animate_image (16 generated frames each, 128 × 64). The reference pair-rest.png packs host1-rest.png at x=0 and host2-rest.png at x=64 without changing either source cell. Both people are animated in one frame, preventing independent hands and body movements from drifting apart.
+
+The pair group in clips.json records talk, laugh, hug, highfive and selfie. Exact original pair-rest.png replaces generated first/last endpoints at playback; intermediate frames preserve order. This version adds no new people and does not change source gallery originals.

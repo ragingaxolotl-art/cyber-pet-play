@@ -1,5 +1,6 @@
-import {drawHost} from './npc-animation.js?v=21';
-import {advanceCounterQueue} from './counter-queue.js?v=21';
+import {drawHostPair,hostX} from './host-interactions.js?v=22';
+import {drawHost} from './npc-animation.js?v=22';
+import {advanceCounterQueue} from './counter-queue.js?v=22';
 // Original 4x4, 64px-cell atlases. Coordinates are zero-based; no repainted frames.
 // Front -> three-quarter -> profile bridges the idle and tray clips in both directions.
 export const frames={
@@ -37,8 +38,9 @@ export function loadCounterArt(){
 export const counterArtReady=art=>['idle','serving'].every(key=>art[key]?.complete&&art[key]?.naturalWidth===256);
 export function drawCounter(c,w,h,counter,art,foodImages,hosts,elapsed=0){
   const x=w*.51,ground=h*.605,size=h*.117,top=ground-h*.122;
-  const animated=hosts&&drawHost(c,w,h,hosts.people[0],hosts.art.host1,.475,elapsed);
-  const second=hosts&&drawHost(c,w,h,hosts.people[1],hosts.art.host2,.545,elapsed);
+  const paired=drawHostPair(c,w,h,hosts,elapsed);
+  const animated=paired||hosts&&drawHost(c,w,h,hosts.people[0],hosts.art.host1,hostX(0,w,h)/w,elapsed);
+  const second=paired||hosts&&drawHost(c,w,h,hosts.people[1],hosts.art.host2,hostX(1,w,h)/w,elapsed);
   if(!animated&&!second&&counterArtReady(art)){
     const [sheet,row,col,pivot]=frames[counterFrame(counter)];
     c.save();c.imageSmoothingEnabled=false;
@@ -53,7 +55,7 @@ export function drawCounter(c,w,h,counter,art,foodImages,hosts,elapsed=0){
   // Actual preferred food travels from the offered tray to the customer's plate.
   if(pet&&t>=1.10&&t<handoffAt){
     const image=foodImages.get(pet.data.food?.id),u=Math.max(0,Math.min(1,(t-1.10)/.55)),ease=u*u*(3-2*u);
-    const sx=w*(counter.servingHost===0?.475:.545)+size*.28,sy=top+size*.51,ex=pet.x*w,ey=ground-h*.055,s=h*.024;
+    const sx=hostX(counter.servingHost??1,w,h)+size*.28,sy=top+size*.51,ex=pet.x*w,ey=ground-h*.055,s=h*.024;
     if(image?.complete&&image.naturalWidth)c.drawImage(image,sx+(ex-sx)*ease-s/2,sy+(ey-sy)*ease-Math.sin(u*Math.PI)*h*.018-s/2,s,s);
   }
 }

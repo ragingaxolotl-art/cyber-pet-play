@@ -76,3 +76,9 @@ PixelLab API-generated sequences now give both counter hosts breathing/blinking 
 Food visitors join a physical FIFO queue with artwork-width spacing. Each waits for an individual handoff, walks to a reserved dining space and then eats or stores the food if eating art is missing. Full queues are skipped until a later lap. Food preference and six personality axes moderated by Love select emote-only reactions; no saved stats or friendships change.
 
 One winged unicorn flies between random positions, drops up to five temporary toy props, chooses clear landing places, exchanges personality-sensitive emotes with nearby pets, and takes off again. Pets react when they reach a dropped toy. Flight clips finish their loop before transitions; a newly occupied landing spot causes another takeoff. All NPC schedules, toys and queue state are session-only. No extra sample or test pets are added.
+
+### Shared host gestures (v21)
+
+The counter hosts now take coordinated breaks: they turn toward each other and converse, laugh together, hug, high-five, and take a shared selfie. The five actions are shuffled without repeating until each has played. A break is requested after 12–24 seconds, starts only with an empty food queue, and waits for both hosts to finish their current poses. An arriving customer cancels a pending break; an already-started 4.5–6.5-second gesture finishes its return before service resumes.
+
+Shared 128 × 64 PixelLab sequences keep both characters’ hands, gaze, approach and recovery synchronized. Each begins and ends on an exact side-by-side composition of their original resting cells. Individual and paired drawing use the same pixel positions at every aspect ratio. The originals and previous solo animation clips remain available; missing shared artwork leaves normal service and idle animation running. No dialogue text or student-save changes.

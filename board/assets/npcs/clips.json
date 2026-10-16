@@ -262,5 +262,52 @@
       ],
       "restSrc": "assets/npcs/host2-rest.png"
     }
+  },
+  "pair": {
+    "laugh": {
+      "src": "assets/npcs/pair-laugh.png",
+      "count": 17,
+      "cellWidth": 128,
+      "cellHeight": 64,
+      "job": "acfec444-bf4d-452b-87e0-7e74c4c823d1",
+      "duration": 4.5,
+      "restSrc": "assets/npcs/pair-rest.png"
+    },
+    "selfie": {
+      "src": "assets/npcs/pair-selfie.png",
+      "count": 17,
+      "cellWidth": 128,
+      "cellHeight": 64,
+      "job": "e3f1d2f6-aee6-4d52-b414-f75fd9a14ed8",
+      "duration": 6.5,
+      "restSrc": "assets/npcs/pair-rest.png"
+    },
+    "talk": {
+      "src": "assets/npcs/pair-talk.png",
+      "count": 17,
+      "cellWidth": 128,
+      "cellHeight": 64,
+      "job": "aefd2b57-1846-4f3d-b274-7b693661162f",
+      "duration": 5,
+      "restSrc": "assets/npcs/pair-rest.png"
+    },
+    "hug": {
+      "src": "assets/npcs/pair-hug.png",
+      "count": 17,
+      "cellWidth": 128,
+      "cellHeight": 64,
+      "job": "5c24e7e7-89ad-4217-ac39-4411aeb057a6",
+      "duration": 6,
+      "restSrc": "assets/npcs/pair-rest.png"
+    },
+    "highfive": {
+      "src": "assets/npcs/pair-highfive.png",
+      "count": 17,
+      "cellWidth": 128,
+      "cellHeight": 64,
+      "job": "9d356dc2-f459-48a3-a2b5-4782d5275ad9",
+      "duration": 5,
+      "restSrc": "assets/npcs/pair-rest.png"
+    }
   }
 }
