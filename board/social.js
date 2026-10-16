@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=23';
-import {friendship,shareItem} from './sharing.js?v=23';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=24';
+import {friendship,shareItem,itemScore} from './sharing.js?v=24';
 import {foodScore} from './food.js';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
@@ -56,7 +56,7 @@ export function advanceSocial(pets,dt,world){
         g.resolved=true;
         if(g.kind==='learn'){rememberFavorite(a,b);rememberFavorite(b,a);b.displayItem=b.data.food;a.displayItem=a.data.food;feeling(a,'hearts',5);feeling(b,'hearts',5);}
         if(g.kind==='comfort'){b.comfortTime=70;feeling(b,'cute',5);feeling(a,'hearts',5);b.friendships??=new Map();b.friendships.set(a.data.id,Math.min(100,friendship(b,a)+2));}
-        if(g.kind==='offer'){feeling(b,foodScore(a.heldItem,b.data.foodPreferences)<=0?(love(b)>.5?'thinking':'frustrated'):'hearts',5);}
+        if(g.kind==='offer'){feeling(b,itemScore(a.heldItem,b)<=0?(love(b)>.5?'thinking':'frustrated'):'hearts',5);}
       }
       if(g.kind==='offer'&&g.time>=4&&!g.transferred){g.transferred=true;const result=shareItem(a,b);if(result){if(result.reaction==='disliked'){a.dislikedGifts??=new Map();if(!a.dislikedGifts.has(b.data.id))a.dislikedGifts.set(b.data.id,new Set());a.dislikedGifts.get(b.data.id).add(result.item.id);}a.displayItem=result.item;feeling(a,result.reaction==='disliked'?(love(a)>.5?'thinking':traitFeeling(a,'generosity')):'hearts',3);feeling(b,result.reaction==='disliked'?(love(b)>.5?'thinking':'frustrated'):'hearts',3);}}
       if(g.time>=7)finish(g);

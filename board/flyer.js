@@ -1,22 +1,15 @@
-import {floor} from './motion.js?v=23';
-import {trait,traitFeeling,love} from './profile.js?v=23';
-import {drawFeeling} from './emotes.js?v=23';
+import {advanceToys,releaseBall,heldBallPosition,drawBall,releaseAt,tossDuration} from './toys.js?v=24';
+import {floor} from './motion.js?v=24';
+import {trait,traitFeeling,love} from './profile.js?v=24';
+import {drawFeeling} from './emotes.js?v=24';
 // One scenery character. Toy props and greetings are session-only, never save data.
 export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'fly',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0};}
 const FLIGHT_CYCLE=1.2,TALK_CYCLE=2.4;
 function start(f,state,x,y,duration){if(state==='fly')duration=Math.ceil(duration/FLIGHT_CYCLE)*FLIGHT_CYCLE;if(state==='talk')duration=Math.ceil(duration/TALK_CYCLE)*TALK_CYCLE;f.state=state;f.clock=0;f.duration=duration;f.fromX=f.x;f.fromY=f.y;f.targetX=x;f.targetY=y;f.direction=x===f.x?f.direction:Math.sign(x-f.x);}
 const available=p=>!p.stair&&['walk','idle'].includes(p.mode);
-export function advanceFlyer(f,pets,dt){
+export function advanceFlyer(f,pets,dt,aspect=16/9){
  const previousClock=f.clock;f.clock+=dt;f.feelingTime=Math.max(0,f.feelingTime-dt);f.nextDrop-=dt;
- for(const toy of f.toys){
-  toy.age+=dt;if(!toy.landed){toy.vy+=dt*.18;toy.y=Math.min(floor(toy.level),toy.y+toy.vy*dt);toy.landed=toy.y>=floor(toy.level);}
-  else if(!toy.played){
-   const visitor=pets.find(p=>p.level===toy.level&&available(p)&&Math.abs(p.x-toy.x)<.045);
-   if(visitor){toy.played=true;toy.age=Math.max(toy.age,25);visitor.emote=traitFeeling(visitor,'curiosity');visitor.emoteTime=4;toy.bounce=1;}
-  }
-  toy.bounce=Math.max(0,(toy.bounce||0)-dt);
- }
- f.toys=f.toys.filter(t=>t.age<32);
+ advanceToys(f,pets,dt);
  if(f.greeting&&!pets.includes(f.greeting)){f.greeting=null;f.feeling='thinking';}
  const u=Math.min(1,f.clock/f.duration),ease=u*u*(3-2*u);
  if(['fly','land','takeoff'].includes(f.state)){
@@ -24,12 +17,9 @@ export function advanceFlyer(f,pets,dt){
   if(f.state==='fly')f.y+=Math.sin(u*Math.PI*2)*.018;
  }
  if(f.state==='fly'&&f.nextDrop<=0&&f.toys.length<5&&Math.floor(previousClock/FLIGHT_CYCLE)!==Math.floor(f.clock/FLIGHT_CYCLE)){
-  f.resume={x:f.targetX,y:f.targetY};start(f,'drop',f.x,f.y,2.5);f.dropped=false;return;
+  f.resume={x:f.targetX,y:f.targetY};start(f,'drop',f.x,f.y,tossDuration);f.dropped=false;return;
  }
- if(f.state==='drop'&&f.clock>=1.25&&!f.dropped){
-  const level=[2,1,0].find(l=>floor(l)>f.y+.025)??0;
-  f.toys.push({x:f.x,y:f.y,level,vy:0,age:0,landed:false,kind:Math.floor(f.random()*3),played:false});f.dropped=true;
- }
+ if(f.state==='drop'&&f.clock>=releaseAt&&!f.dropped){const clock=f.clock;f.clock=releaseAt;releaseBall(f,aspect);f.clock=clock;}
  if(u<1)return;
  if(f.state==='drop'){f.nextDrop=16+f.random()*22;start(f,'fly',f.resume.x,f.resume.y,5+f.random()*4);return;}
  if(f.state==='fly'){
@@ -52,12 +42,7 @@ export function drawFlyer(c,w,h,f,art,elapsed){
  const index=f.state==='fly'||f.state==='talk'?Math.min(clip.count-1,Math.floor((f.clock%(f.state==='fly'?FLIGHT_CYCLE:TALK_CYCLE))/(f.state==='fly'?FLIGHT_CYCLE:TALK_CYCLE)*clip.count)):Math.min(clip.count-1,Math.floor(f.clock/f.duration*clip.count));
  const resting=(index===0||index===clip.count-1)&&clip.restImage?.complete&&clip.restImage.naturalWidth,image=resting?clip.restImage:clip.image,sx=resting?0:(clip.frames?.[index]??index)*64;
  const size=h*.105,y=f.y*h;c.save();c.imageSmoothingEnabled=false;c.translate(f.x*w,y);c.scale(f.direction,1);c.drawImage(image,sx,0,64,64,-size/2,-size,size,size);c.restore();
+ if(f.state==='drop'&&!f.dropped){const ball=heldBallPosition(f,w/h);drawBall(c,ball.x*w,ball.y*h,h*.017);}
  if(f.feelingTime>0)drawFeeling(c,f.feeling,elapsed,f.x*w,y-size-h*.025,h*.04);
 }
-export function drawToys(c,w,h,f){
- for(const t of f.toys){const size=h*.017,x=t.x*w,y=t.y*h-Math.sin((t.bounce||0)*Math.PI)*h*.035;c.save();c.globalAlpha=Math.min(1,(32-t.age)/3);c.translate(x,y-size/2);c.rotate(t.landed?(t.bounce||0)*5:t.age*2);c.fillStyle=['#ef9bc0','#6ddacb','#edcf6b'][t.kind];
-  if(t.kind===0){c.beginPath();c.arc(0,0,size/2,0,Math.PI*2);c.fill();c.strokeStyle='#fff5d7';c.lineWidth=2;c.beginPath();c.moveTo(-size/2,0);c.lineTo(size/2,0);c.stroke();}
-  else if(t.kind===1){c.fillRect(-size/2,-size/2,size,size);c.fillStyle='#fff5d7';c.fillRect(-size/5,-size/5,size*.4,size*.4);}
-  else {c.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=size*(i%2?.23:.55);c.lineTo(Math.cos(a)*r,Math.sin(a)*r);}c.closePath();c.fill();}c.restore();
- }
-}
+export function drawToys(c,w,h,f){for(const t of f.toys)drawBall(c,t.x*w,t.y*h,h*.017);}

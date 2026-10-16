@@ -30,3 +30,9 @@ Eight PixelLab API clips (64 × 64, eight generated frames each) add two relaxed
 - host2-phone: same idle sheet, column 1 row 3.
 
 The *-target.png cells are copied exactly from those gallery sheets. Manifest targetSrc/targetFrame pins the peak pose to that exact source image. frames maps the generated entrance, a short target hold, and its reverse return; count is playback-frame count while atlasCount is the stored image count. Walking loops share the original resting cell at either end; no source gallery sheet was changed. Generation job IDs are retained per clip.
+
+## Leaning, blink timing and independent ball, v23
+
+Four additional PixelLab API generations retain the user-selected identities. host1-lean reaches gallery:1792110043319 column 3 row 2; host2-lean reaches gallery:1792109160483 column 3 row 1. Exact gallery targets replace the peak frame; reverse entrance frames return smoothly to the exact original rest cell. Leaning occurs both at the counter and during alternating walks. The previous white-shirt idle remains available as an occasional sleepy break; host2-blink is the separate quick blink loop with 2.8 seconds of open-eye rest.
+
+clips.json frameDurations separates deliberate holds from 8.33 fps gestures and 10 fps walking. Serving keeps its 3.2-second customer window and 1.65-second food handoff, with a held offer pose. Sleep intentionally remains slower. New flyer-toss has an empty hoof: toys.js draws the ball independently across the sprite boundary, anchors it to the hoof, then releases its bouncing trajectory. The toy-ball.svg is original simple vector artwork matching the independent canvas ball; it is a session-only item for pickup and sharing, excluded from eating. Original atlases are retained unchanged.

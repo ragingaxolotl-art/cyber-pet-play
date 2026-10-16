@@ -1,4 +1,4 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=23';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=24';
 import {foodScore} from './food.js';
 // One carried item and directional friendships belong only to this board session.
 export function chooseItem(pet,foods,random=pet.random){
@@ -15,9 +15,10 @@ export function collectItem(pet){
   pet.heldItem=gift?gift[1]:pet.data.food;pet.giftFor=gift?gift[0]:null;pet.heldTime=0;return true;
 }
 export function friendship(pet,other){return pet.friendships?.get(other.data.id)??50;}
+export const itemScore=(item,pet)=>item?.type==='toy'?.5+2*trait(pet,'activity_level')+1.5*trait(pet,'curiosity'):foodScore(item,pet.data.foodPreferences);
 export function shareItem(giver,recipient){
   if(!giver.heldItem||recipient.heldItem||giver.shareCooldown>0||recipient.shareCooldown>0)return null;
-  const item=giver.heldItem,score=foodScore(item,recipient.data.foodPreferences);
+  const item=giver.heldItem,score=itemScore(item,recipient);
   // Zero includes a hated taste with no stronger favorite-tag match.
   const reaction=score<=0?'disliked':score>=3?'liked':'neutral';
   const change=reaction==='disliked'?-3:reaction==='liked'?4:1;

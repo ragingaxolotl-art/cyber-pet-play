@@ -4,7 +4,7 @@
       "src": "assets/npcs/host1-talk.png",
       "count": 9,
       "job": "0a868b5a-6342-4836-8f61-7b5582cc497d",
-      "duration": 2.4,
+      "duration": 1.32,
       "frames": [
         0,
         1,
@@ -16,13 +16,24 @@
         7,
         0
       ],
-      "restSrc": "assets/npcs/host1-rest.png"
+      "restSrc": "assets/npcs/host1-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "idle": {
       "src": "assets/npcs/host1-idle.png",
       "count": 5,
       "job": "23e6aa33-5a1a-4d48-b9d6-cb4b660c9299",
-      "duration": 2.4,
+      "duration": 3.1,
       "frames": [
         0,
         1,
@@ -30,7 +41,14 @@
         3,
         0
       ],
-      "restSrc": "assets/npcs/host1-rest.png"
+      "restSrc": "assets/npcs/host1-rest.png",
+      "frameDurations": [
+        2.8,
+        0.075,
+        0.075,
+        0.075,
+        0.075
+      ]
     },
     "serve": {
       "src": "assets/npcs/host1-serve.png",
@@ -52,13 +70,28 @@
         11,
         0
       ],
-      "restSrc": "assets/npcs/host1-rest.png"
+      "restSrc": "assets/npcs/host1-rest.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.93,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.95
+      ]
     },
     "selfie": {
       "src": "assets/npcs/host1-selfie.png",
       "count": 17,
       "job": "0337cba8-4b02-4845-ab84-fa19af534105",
-      "duration": 5,
+      "duration": 3.06,
       "frames": [
         0,
         1,
@@ -78,14 +111,33 @@
         15,
         0
       ],
-      "restSrc": "assets/npcs/host1-rest.png"
+      "restSrc": "assets/npcs/host1-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.9,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "look": {
       "src": "assets/npcs/host1-look.png",
       "count": 21,
       "atlasCount": 9,
       "job": "0d0f2184-3b65-4e7a-bb6f-d23696608c21",
-      "duration": 4.2,
+      "duration": 2.92,
       "restSrc": "assets/npcs/host1-rest.png",
       "frames": [
         0,
@@ -111,22 +163,56 @@
         0
       ],
       "targetFrame": 8,
-      "targetSrc": "assets/npcs/host1-look-target.png"
+      "targetSrc": "assets/npcs/host1-look-target.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ]
     },
     "walk": {
       "src": "assets/npcs/host1-walk.png",
       "count": 9,
       "atlasCount": 9,
       "job": "645a0e0b-18bf-4529-bdc1-d849190ceb24",
-      "duration": 1.2,
-      "restSrc": "assets/npcs/host1-rest.png"
+      "duration": 0.9,
+      "restSrc": "assets/npcs/host1-rest.png",
+      "frameDurations": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
     },
     "delight": {
       "src": "assets/npcs/host1-delight.png",
       "count": 21,
       "atlasCount": 9,
       "job": "5bb14018-7808-4809-94e1-a9401d1aa9c1",
-      "duration": 4.2,
+      "duration": 2.92,
       "restSrc": "assets/npcs/host1-rest.png",
       "frames": [
         0,
@@ -152,14 +238,37 @@
         0
       ],
       "targetFrame": 8,
-      "targetSrc": "assets/npcs/host1-delight-target.png"
+      "targetSrc": "assets/npcs/host1-delight-target.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ]
     },
     "hair": {
       "src": "assets/npcs/host1-hair.png",
       "count": 21,
       "atlasCount": 9,
       "job": "ff43f1d9-d77c-42ac-9315-8b0c9da27fb1",
-      "duration": 4.2,
+      "duration": 2.92,
       "restSrc": "assets/npcs/host1-rest.png",
       "frames": [
         0,
@@ -185,7 +294,78 @@
         0
       ],
       "targetFrame": 8,
-      "targetSrc": "assets/npcs/host1-hair-target.png"
+      "targetSrc": "assets/npcs/host1-hair-target.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "lean": {
+      "src": "assets/npcs/host1-lean.png",
+      "count": 17,
+      "atlasCount": 9,
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "targetFrame": 8,
+      "targetSrc": "assets/npcs/host1-lean-target.png",
+      "restSrc": "assets/npcs/host1-rest.png",
+      "job": "ff46f8db-1ec6-4c98-b930-f355aead64f6",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        1.0,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ],
+      "duration": 2.92
     }
   },
   "flyer": {
@@ -226,26 +406,11 @@
       "restSrc": "assets/npcs/flyer-rest.png"
     },
     "drop": {
-      "src": "assets/npcs/flyer-drop.png",
+      "src": "assets/npcs/flyer-toss.png",
       "count": 13,
-      "job": "8ec4f146-60e3-4e17-bc9a-6322f9eb7e7e",
-      "duration": 2.3,
-      "frames": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        0
-      ],
-      "restSrc": "assets/npcs/flyer-rest.png"
+      "duration": 1.56,
+      "restSrc": "assets/npcs/flyer-rest.png",
+      "job": "474ae4bb-2a07-4d53-8ea8-146c9b040629"
     },
     "takeoff": {
       "src": "assets/npcs/flyer-takeoff.png",
@@ -289,7 +454,7 @@
       "src": "assets/npcs/host2-talk.png",
       "count": 9,
       "job": "5e8785a7-3b43-4d19-8268-3b9afa8003e4",
-      "duration": 2.4,
+      "duration": 1.32,
       "frames": [
         0,
         1,
@@ -301,13 +466,24 @@
         7,
         0
       ],
-      "restSrc": "assets/npcs/host2-rest.png"
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "selfie": {
       "src": "assets/npcs/host2-selfie.png",
       "count": 17,
       "job": "984cf42e-e7a9-4c86-9518-d7b0cdc24e71",
-      "duration": 5,
+      "duration": 3.06,
       "frames": [
         0,
         1,
@@ -327,7 +503,26 @@
         15,
         0
       ],
-      "restSrc": "assets/npcs/host2-rest.png"
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.9,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "serve": {
       "src": "assets/npcs/host2-serve.png",
@@ -349,9 +544,225 @@
         11,
         0
       ],
-      "restSrc": "assets/npcs/host2-rest.png"
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.93,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.95
+      ]
     },
     "idle": {
+      "src": "assets/npcs/host2-blink.png",
+      "count": 5,
+      "duration": 3.1,
+      "frameDurations": [
+        2.8,
+        0.075,
+        0.075,
+        0.075,
+        0.075
+      ],
+      "restSrc": "assets/npcs/host2-rest.png",
+      "job": "af065dd5-24a8-46b2-9e59-4aa8c855dca1"
+    },
+    "walk": {
+      "src": "assets/npcs/host2-walk.png",
+      "count": 9,
+      "atlasCount": 9,
+      "job": "2737f528-91f8-4b68-b0b1-84028af4429a",
+      "duration": 0.9,
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frameDurations": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    "phone": {
+      "src": "assets/npcs/host2-phone.png",
+      "count": 21,
+      "atlasCount": 9,
+      "job": "46413284-2a06-44ae-80f0-4b6157e43d8b",
+      "duration": 2.92,
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        8,
+        8,
+        8,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "targetFrame": 8,
+      "targetSrc": "assets/npcs/host2-phone-target.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "look": {
+      "src": "assets/npcs/host2-look.png",
+      "count": 21,
+      "atlasCount": 9,
+      "job": "ae5e52cc-5449-4d8f-b6d4-c672dc8867d3",
+      "duration": 2.92,
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        8,
+        8,
+        8,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "targetFrame": 8,
+      "targetSrc": "assets/npcs/host2-look-target.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "wave": {
+      "src": "assets/npcs/host2-wave.png",
+      "count": 21,
+      "atlasCount": 9,
+      "job": "da719736-8bfc-46f1-9516-ef737888b607",
+      "duration": 2.92,
+      "restSrc": "assets/npcs/host2-rest.png",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        8,
+        8,
+        8,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+        0
+      ],
+      "targetFrame": 8,
+      "targetSrc": "assets/npcs/host2-wave-target.png",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "sleep": {
       "src": "assets/npcs/host2-idle.png",
       "count": 9,
       "job": "8df65031-9103-46b9-bd98-eb45602d56f3",
@@ -369,21 +780,10 @@
       ],
       "restSrc": "assets/npcs/host2-rest.png"
     },
-    "walk": {
-      "src": "assets/npcs/host2-walk.png",
-      "count": 9,
+    "lean": {
+      "src": "assets/npcs/host2-lean.png",
+      "count": 17,
       "atlasCount": 9,
-      "job": "2737f528-91f8-4b68-b0b1-84028af4429a",
-      "duration": 1.2,
-      "restSrc": "assets/npcs/host2-rest.png"
-    },
-    "phone": {
-      "src": "assets/npcs/host2-phone.png",
-      "count": 21,
-      "atlasCount": 9,
-      "job": "46413284-2a06-44ae-80f0-4b6157e43d8b",
-      "duration": 4.2,
-      "restSrc": "assets/npcs/host2-rest.png",
       "frames": [
         0,
         1,
@@ -393,10 +793,6 @@
         5,
         6,
         7,
-        8,
-        8,
-        8,
-        8,
         8,
         7,
         6,
@@ -408,73 +804,29 @@
         0
       ],
       "targetFrame": 8,
-      "targetSrc": "assets/npcs/host2-phone-target.png"
-    },
-    "look": {
-      "src": "assets/npcs/host2-look.png",
-      "count": 21,
-      "atlasCount": 9,
-      "job": "ae5e52cc-5449-4d8f-b6d4-c672dc8867d3",
-      "duration": 4.2,
+      "targetSrc": "assets/npcs/host2-lean-target.png",
       "restSrc": "assets/npcs/host2-rest.png",
-      "frames": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        8,
-        8,
-        8,
-        8,
-        7,
-        6,
-        5,
-        4,
-        3,
-        2,
-        1,
-        0
+      "job": "bff3e032-0461-47bc-8742-d6fb0fe1e968",
+      "frameDurations": [
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        1.0,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12
       ],
-      "targetFrame": 8,
-      "targetSrc": "assets/npcs/host2-look-target.png"
-    },
-    "wave": {
-      "src": "assets/npcs/host2-wave.png",
-      "count": 21,
-      "atlasCount": 9,
-      "job": "da719736-8bfc-46f1-9516-ef737888b607",
-      "duration": 4.2,
-      "restSrc": "assets/npcs/host2-rest.png",
-      "frames": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        8,
-        8,
-        8,
-        8,
-        7,
-        6,
-        5,
-        4,
-        3,
-        2,
-        1,
-        0
-      ],
-      "targetFrame": 8,
-      "targetSrc": "assets/npcs/host2-wave-target.png"
+      "duration": 2.92
     }
   },
   "pair": {
@@ -484,8 +836,27 @@
       "cellWidth": 128,
       "cellHeight": 64,
       "job": "acfec444-bf4d-452b-87e0-7e74c4c823d1",
-      "duration": 4.5,
-      "restSrc": "assets/npcs/pair-rest.png"
+      "duration": 2.28,
+      "restSrc": "assets/npcs/pair-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "selfie": {
       "src": "assets/npcs/pair-selfie.png",
@@ -493,8 +864,27 @@
       "cellWidth": 128,
       "cellHeight": 64,
       "job": "e3f1d2f6-aee6-4d52-b414-f75fd9a14ed8",
-      "duration": 6.5,
-      "restSrc": "assets/npcs/pair-rest.png"
+      "duration": 3.06,
+      "restSrc": "assets/npcs/pair-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.9,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "talk": {
       "src": "assets/npcs/pair-talk.png",
@@ -502,8 +892,27 @@
       "cellWidth": 128,
       "cellHeight": 64,
       "job": "aefd2b57-1846-4f3d-b274-7b693661162f",
-      "duration": 5,
-      "restSrc": "assets/npcs/pair-rest.png"
+      "duration": 2.28,
+      "restSrc": "assets/npcs/pair-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "hug": {
       "src": "assets/npcs/pair-hug.png",
@@ -511,8 +920,27 @@
       "cellWidth": 128,
       "cellHeight": 64,
       "job": "5c24e7e7-89ad-4217-ac39-4411aeb057a6",
-      "duration": 6,
-      "restSrc": "assets/npcs/pair-rest.png"
+      "duration": 3.06,
+      "restSrc": "assets/npcs/pair-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.9,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     },
     "highfive": {
       "src": "assets/npcs/pair-highfive.png",
@@ -520,8 +948,27 @@
       "cellWidth": 128,
       "cellHeight": 64,
       "job": "9d356dc2-f459-48a3-a2b5-4782d5275ad9",
-      "duration": 5,
-      "restSrc": "assets/npcs/pair-rest.png"
+      "duration": 2.28,
+      "restSrc": "assets/npcs/pair-rest.png",
+      "frameDurations": [
+        0.24,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.12,
+        0.24
+      ]
     }
   }
 }

@@ -1,10 +1,11 @@
-import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=23';
-import {availablePairs,choosePair} from './host-interactions.js?v=23';
-import {drawFeeling} from './emotes.js?v=23';
+import {clipFrameAt} from './clip-timing.js?v=24';
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=24';
+import {availablePairs,choosePair} from './host-interactions.js?v=24';
+import {drawFeeling} from './emotes.js?v=24';
 export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};
- const response=await fetch('assets/npcs/clips.json?v=23');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
+ const response=await fetch('assets/npcs/clips.json?v=24');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
  for(const [who,clips] of Object.entries(manifest)){
   hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc),targetImage:info.targetSrc?load(info.targetSrc):null};}
  }
@@ -40,7 +41,7 @@ export function advanceHosts(h,c,dt){
    if(c.queue?.length){if(i===next)c.hostReady=true;else if(h.clock>s.nextBreak&&ready(clips.talk)){s.action='talk';s.nextBreak=h.clock+9;s.feeling='cute';}}
    else if(s.reply||h.clock>s.nextBreak){
     // Alternate short, staggered conversations and occasional selfies, never interrupt service.
-    s.breaks=(s.breaks||0)+1;const replying=s.reply;s.reply=false;s.action=!replying&&s.breaks%3===0&&ready(clips.selfie)?'selfie':'talk';if(s.action==='talk'&&!replying)h.people[1-i].reply=true;s.feeling=s.action==='talk'?'hearts':'';s.nextBreak=h.clock+13+i*5;
+    s.breaks=(s.breaks||0)+1;const replying=s.reply;s.reply=false;s.action=!replying&&s.breaks%7===0&&ready(clips.sleep)?'sleep':!replying&&s.breaks%2===0&&ready(clips.lean)?'lean':!replying&&s.breaks%3===0&&ready(clips.selfie)?'selfie':'talk';if(s.action==='talk'&&!replying)h.people[1-i].reply=true;s.feeling=s.action==='talk'?'hearts':'';s.nextBreak=h.clock+13+i*5;
    }
   }
  }
@@ -53,7 +54,7 @@ export function advanceHosts(h,c,dt){
 }
 export function drawHost(c,w,h,person,clips,x,elapsed){
  const clip=ready(clips?.[person.action])?clips[person.action]:clips?.idle;if(!ready(clip))return false;
- const duration=clip.duration||2.4;let index=Math.min(clip.count-1,Math.floor(Math.min(1,person.clock/duration)*clip.count));
+ let index=clipFrameAt(clip,person.clock);
  if(person.action==='walk'&&person.reverseWalk)index=clip.count-1-index;
  const frame=clip.frames?.[index]??index;
  // A shared, continuous breathing phase carries across every action without a transform reset.

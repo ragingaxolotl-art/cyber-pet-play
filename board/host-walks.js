@@ -1,5 +1,5 @@
-import {clipReady} from './host-interactions.js?v=23';
-export const galleryPoses=[['look','hair','delight'],['look','wave','phone']];
+import {clipReady} from './host-interactions.js?v=24';
+export const galleryPoses=[['look','hair','delight','lean'],['look','wave','phone','lean']];
 export function walkCandidate(h,c){
  if(h.walker||h.pair||h.pendingPair||c.customer||c.queue?.length||h.clock<(h.nextWalk??18))return null;
  const preferred=h.nextWalker??0;

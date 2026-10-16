@@ -1,7 +1,7 @@
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=23';
-import {makeDirt} from './dirt.js?v=23';
-import {collectItem,friendship} from './sharing.js?v=23';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=23';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=24';
+import {makeDirt} from './dirt.js?v=24';
+import {collectItem,friendship} from './sharing.js?v=24';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=24';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -128,7 +128,7 @@ function tickMotion(pet,dt){
     if(pet.timer<=0){pet.heldItem=null;pet.mode='idle';pet.timer=2;pet.clock=0;pet.emote='hearts';pet.emoteTime=3;}
     return;
   }
-  if(pet.mode==='idle'&&pet.heldItem&&pet.heldTime>75&&hasAction(pet.data,'eat')){
+  if(pet.mode==='idle'&&pet.heldItem&&pet.heldItem.type!=='toy'&&pet.heldTime>75&&hasAction(pet.data,'eat')){
     pet.mode='snack';pet.clock=0;pet.timer=pet.mealDuration=Math.max(6,animationDuration(pet.data.config,'eat')*2);return;
   }
   // Artwork capabilities come from successfully decoded frames, never placeholders.
@@ -169,7 +169,7 @@ function tickMotion(pet,dt){
       if(pet.joinCounter?.())return;pet.stationCooldown=15;
     }
     if(!pet.counterService&&pet.level===1&&pet.data.food&&crosses(pet.foodSpot)){
-      if(pet.heldItem&&hasAction(pet.data,'eat'))pet.heldItem=null;
+      if(pet.heldItem?.type!=='toy'&&hasAction(pet.data,'eat'))pet.heldItem=null;
       if(!hasAction(pet.data,'eat')){collectItem(pet);pet.stationCooldown=55;return;}
       pet.x=pet.foodSpot;pet.mode='eat';pet.clock=0;pet.awaitingCounter=!!pet.counterService;pet.counterWait=0;
       pet.timer=Math.max(6,animationDuration(pet.data.config,'eat')*2);pet.mealDuration=pet.timer;
