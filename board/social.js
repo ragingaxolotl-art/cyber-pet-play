@@ -1,6 +1,6 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=27';
-import {friendship,shareItem,itemScore} from './sharing.js?v=27';
-import {foodScore} from './food.js?v=27';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=28';
+import {friendship,shareItem,itemScore} from './sharing.js?v=28';
+import {foodScore} from './food.js?v=28';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
 export function rememberFavorite(observer,other){

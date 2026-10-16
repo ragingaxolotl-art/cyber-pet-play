@@ -1,4 +1,4 @@
-import {isClassPet} from './profile.js?v=27';
+import {isClassPet} from './profile.js?v=28';
 // Only this read-only, random display credential is remembered, never the teacher password.
 const KEY='cyber-pet-board.connection.v1';
 export function rememberConnection(storage,connection){storage.setItem(KEY,JSON.stringify(connection));}

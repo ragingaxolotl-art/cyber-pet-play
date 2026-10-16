@@ -1,18 +1,27 @@
-import {freeForActivity} from './activity-state.js?v=27';
-import {resolveAction,aliases} from './pet-animation.js?v=27';
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=27';
-import {makeDirt} from './dirt.js?v=27';
-import {collectItem,friendship} from './sharing.js?v=27';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=27';
+import {freeForActivity} from './activity-state.js?v=28';
+import {resolveAction,aliases} from './pet-animation.js?v=28';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=28';
+import {makeDirt} from './dirt.js?v=28';
+import {collectItem,friendship} from './sharing.js?v=28';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=28';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
 export const floor=(level)=>.86-level*.255;
 export const stations={food:{level:1,left:.43,right:.59},wash:{level:2,left:.34,right:.53}};
 export function hasAction(data,action){return !!resolveAction(data,action);}
+// Leave the entire food hut frontage clear, including padding for sprite bodies.
+// Use both sides so idle-only uploads do not become permanent counter obstacles.
+export function startingX(index,count){
+  const level=index%3, rank=Math.floor(index/3);
+  const slots=Math.max(1,Math.ceil((count-level)/3));
+  const fraction=(rank+.5)/slots;
+  if(level!==stations.food.level)return fraction;
+  return fraction<.5?.06+fraction*2*.27:.68+(fraction-.5)*2*.26;
+}
 export function makePet(data,index,count,random=Math.random){
-  const level=index%3, perLevel=Math.ceil(count/3);
-  return {data,animationVariant:index,dirtPattern:makeDirt(),level,x:(Math.floor(index/3)+.5)/perLevel,direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:'',heldItem:null,friendships:new Map(),shareCooldown:0};
+  const level=index%3;
+  return {data,animationVariant:index,dirtPattern:makeDirt(),level,x:startingX(index,count),direction:index%2?1:-1,mode:'idle',timer:1+random()*5,clock:0,cooldown:0,emote:'',emoteTime:0,stair:null,random,stationCooldown:0,foodSpot:.45+(index%5)*.03,cleanliness:data.cleanliness??.35,washProgress:0,mealDuration:0,socialCooldown:3+random()*8,socialDuration:0,socialReply:'',heldItem:null,friendships:new Map(),shareCooldown:0};
 }
 export function chooseEmote(pet){
   const stats=pet.data.stats||{};
