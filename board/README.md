@@ -56,3 +56,8 @@ The public projection now retains only validated display.pet_scale (0.01–16) a
 
 ### Wash coverage fix (v17)
 Cleaning and water effects follow physical presence in the top-floor wash, after all movement systems run. Tag, games, shared walks, construction travel and station cooldowns no longer bypass cleaning. Crossing distance plus time under water removes dirt; standing under water also cleans. Other floors, stairs and screen-wrap jumps do not count.
+
+
+### Rain and self-care decisions (v18)
+Pets seek the cloud wash from any level using stairs when session cleanliness falls below their personality threshold. Activity, curiosity and bravery weight enjoyment of mud; familiar/restful/cautious profiles tend to prefer cleanliness. Love moderates anxious fussiness versus postponing care, without making mud play inherently negative. Wash trips respect movement artwork, existing groups and jobs, with cooldowns; incidental water still cleans everyone.
+Shelter construction begins only during rain. Pets wanting cover and friendly/helpful pets join; a per-rain decision prevents repeated recruitment rolls from eventually forcing everyone to build. Pets wanting shelter can wait for a roof or join construction. Finished shelter-seekers huddle; helpers who enjoy rain can return outside. Once rain ends and occupants leave, workers dismantle full or unfinished huts. More helpers still work faster in cartoon smoke. All decisions remain session-only and emote-based.

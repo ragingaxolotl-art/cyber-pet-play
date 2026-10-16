@@ -1,18 +1,21 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=17';
-import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=17';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,shelterHelpChance} from './profile.js?v=18';
+import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=18';
 export const createBuildings=()=>Array.from({length:3},()=>({phase:'bare',progress:0,workers:[],lastBuildCycle:-1,recruitAt:0,dust:0}));
-const available=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)&&hasAction(p.data,'walking');
+const available=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk','shelterWait'].includes(p.mode)&&hasAction(p.data,'walking');
 export function workRate(helpers){return Math.max(0,helpers)/18;}
-function release(building,rain){for(const p of building.workers){p.buildingJob=null;p.worldBob=0;p.mode=rain&&building.phase==='ready'?'shelter':'idle';p.timer=2;p.worldTimer=60;p.socialCooldown=15;p.worldCooldown=15;p.emote='hearts';p.emoteTime=4;}building.workers=[];}
+function release(building,rain){for(const p of building.workers){p.buildingJob=null;p.worldBob=0;p.mode=rain&&building.phase==='ready'&&p.rainWantsShelter?'shelter':'idle';p.timer=2;p.worldTimer=60;p.socialCooldown=15;p.worldCooldown=15;p.emote='hearts';p.emoteTime=4;}building.workers=[];}
 export function advanceConstruction(world,pets,dt,time,huts,weather){
  const present=new Set(pets);
  for(const [level,b] of world.buildings.entries()){
   b.dust=Math.max(0,b.dust-dt);b.workers=b.workers.filter(p=>{if(present.has(p)&&p.mode==='build'&&hasAction(p.data,'walking'))return true;if(p.mode==='build'){p.mode='idle';p.timer=2;p.buildingJob=null;p.worldBob=0;}return false;});
-  if(b.phase==='bare'&&time%240>=5&&time%240<100&&b.lastBuildCycle!==weather.cycle){b.phase='building';b.lastBuildCycle=weather.cycle;}
-  if(b.phase==='ready'&&!weather.rain&&time%240>110&&!pets.some(p=>p.level===level&&p.mode==='shelter'))b.phase='dismantling';
+  if(b.phase==='bare'&&weather.rain){b.phase='building';b.lastBuildCycle=weather.cycle;}
+  if(['ready','building'].includes(b.phase)&&!weather.rain&&!pets.some(p=>p.level===level&&p.mode==='shelter')){if(b.progress>0)b.phase='dismantling';else{b.phase='bare';release(b,false);}}
   if(b.phase==='dismantling'&&weather.rain)b.phase='building';
   if(!['building','dismantling'].includes(b.phase))continue;
-  if(time>=b.recruitAt){b.recruitAt=time+2;for(const p of pets){if(b.workers.length>=6)break;if(p.level!==level||!available(p)||p.random()>expression(p).cooperation)continue;p.mode='build';p.buildingJob=b;p.clock=0;p.emote='eager';p.emoteTime=4;b.workers.push(p);}}
+  if(time>=b.recruitAt){b.recruitAt=time+2;for(const p of pets){if(b.workers.length>=6)break;if(p.level!==level||!available(p))continue;
+   const needsRoof=wantsRainShelter(p,weather.cycle),key=weather.cycle+':'+b.phase;
+   if(p.buildDecisionKey!==key){p.buildDecisionKey=key;p.willHelpBuild=needsRoof||p.random()<shelterHelpChance(p);}
+   if(!p.willHelpBuild)continue;p.mode='build';p.buildingJob=b;p.clock=0;p.emote='eager';p.emoteTime=4;b.workers.push(p);}}
   const hut=huts[level],span=hut.right-hut.left;let helpers=0;
   b.workers.forEach((p,i)=>{const target=hut.left+.03+(span-.06)*(i+.5)/b.workers.length;p.worldTarget=target;const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*dt);p.gameMoving=step>.00001;
    if(Math.abs(delta)>.003){p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}else{helpers++;p.worldBob=Math.abs(Math.sin(p.clock*9+i))*.004;p.emote='sweat';p.emoteTime=2;}

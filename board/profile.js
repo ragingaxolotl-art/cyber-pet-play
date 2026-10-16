@@ -27,3 +27,12 @@ export function traitFeeling(p,key){
  return (pairs[key]||['thinking','cute'])[high?1:0];
 }
 export function isClassPet(data){return !data.isSample&&!/\b(?:test[\s_-]*(?:char(?:acter)?s?|pets?)|demo[\s_-]*(?:characters?|pets?)|anonymous[\s_-]*fixture)\b/i.test(data.name||'');}
+
+// Enjoying mud is a preference, not a bad trait. Love moderates fussiness/neglect.
+export const mudEnjoyment=p=>.4*trait(p,'activity_level')+.35*trait(p,'curiosity')+.25*trait(p,'bravery');
+export function washThreshold(p){const tidy=1-mudEnjoyment(p);return .18+.6*tidy+.12*(1-love(p))*(2*tidy-1);}
+export function wantsRainShelter(p,cycle){
+ if(p.rainWishCycle!==cycle){p.rainWishCycle=cycle;p.rainWantsShelter=p.random()<.2+.8*(1-mudEnjoyment(p));}
+ return p.rainWantsShelter;
+}
+export function shelterHelpChance(p){return .1+.5*love(p)+.25*trait(p,'generosity')+.15*trait(p,'sociability');}

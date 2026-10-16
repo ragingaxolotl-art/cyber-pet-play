@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=17';
-import {friendship,shareItem} from './sharing.js?v=17';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=18';
+import {friendship,shareItem} from './sharing.js?v=18';
 import {foodScore} from './food.js';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
@@ -36,7 +36,7 @@ export function trySocial(a,b,world){
   for(const [helper,other] of [[a,b],[b,a]]){
     const generous=expression(helper).giving,care=expression(helper).help;
     if((other.data.stats?.happiness??100)<=35&&!(other.comfortTime>0)&&helper.random()<care*.9){startGesture(helper,other,'comfort',world);return true;}
-    if(other.cleanliness<.35&&friendship(helper,other)>=50&&helper.random()<care*.35&&startTogether(helper,other,'escort',world))return true;
+    if(other.cleanliness<Math.min(.35,washThreshold(other))&&friendship(helper,other)>=50&&helper.random()<care*.35&&startTogether(helper,other,'escort',world))return true;
     if((love(helper)<.5||(helper.data.stats?.fullness??100)>20)&&helper.heldItem&&(!helper.giftFor||helper.giftFor===other.data.id)&&!helper.dislikedGifts?.get(other.data.id)?.has(helper.heldItem.id)&&!other.heldItem&&helper.shareCooldown<=0&&other.shareCooldown<=0&&helper.random()<.05+generous*.8){startGesture(helper,other,'offer',world);return true;}
   }
   if(a.random()<(.2+trait(a,'curiosity')*.35)*(.35+love(a)*.65)){startGesture(a,b,'learn',world);return true;}
