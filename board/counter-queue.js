@@ -1,7 +1,7 @@
-import {travelSpeed,trait,love} from './profile.js?v=24';
-import {foodScore} from './food.js?v=24';
-import {collectItem} from './sharing.js?v=24';
-import {hasAction,animationDuration} from './motion.js?v=24';
+import {travelSpeed,trait,love} from './profile.js?v=25';
+import {foodScore} from './food.js?v=25';
+import {collectItem} from './sharing.js?v=25';
+import {hasAction,animationDuration} from './motion.js?v=25';
 const FRONT=.49,LEFT=.045,RIGHT=.97,GAP=.014;
 export const queueWidth=p=>Math.max(.018,p.bodyWidth||.055);
 export const queueGap=(a,b)=>(queueWidth(a)+queueWidth(b))/2+GAP;
@@ -30,9 +30,9 @@ export function prepareCounterQueue(c,pets){
  }
 }
 function seat(c,p){
- let x=RIGHT-queueWidth(p)/2;
- for(const other of c.diners)x=Math.min(x,(other.counterSeat??other.x)-queueGap(p,other));
- return x-queueWidth(p)/2>.56?x:null;
+ let x=.58+queueWidth(p)/2;
+ for(const other of [...c.diners].sort((a,b)=>(a.counterSeat??a.x)-(b.counterSeat??b.x))){const place=other.counterSeat??other.x;if(Math.abs(place-x)<queueGap(p,other))x=place+queueGap(p,other);}
+ return x+queueWidth(p)/2<RIGHT?x:null;
 }
 function move(p,target,dt,blocker){
  const before=p.x;

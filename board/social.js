@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=24';
-import {friendship,shareItem,itemScore} from './sharing.js?v=24';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=25';
+import {friendship,shareItem,itemScore} from './sharing.js?v=25';
 import {foodScore} from './food.js';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;

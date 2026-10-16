@@ -1,7 +1,7 @@
-import {splashDirt} from './dirt.js?v=24';
-import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=24';
-import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=24';
-import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=24';
+import {splashDirt} from './dirt.js?v=25';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=25';
+import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=25';
+import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=25';
 export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{level:2,left:.67,right:.97}];
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];
@@ -57,6 +57,8 @@ export function advanceWorld(world,pets,dt,time){
     if(p.worldCooldown>0)continue;
     if(weather.celebrate){beginWorld(p,'celebrate',canWalk?.46+trait(p,'sociability')*.13:p.x,5+trait(p,'sociability')*8);continue;}
     if(weather.rustle){beginWorld(p,'startle',canWalk&&trait(p,'bravery')>.6?(love(p)>.5?.58:puddles[p.level].x):p.x,4);p.emote=traitFeeling(p,'bravery');p.worldTimer=3+expression(p).caution*(1-love(p))*7;continue;}
+    // Leave genuine free time for meals, play and social invitations.
+    p.worldCooldown=15+p.random()*20;if(p.random()>.5)continue;
     const pick=p.random(),curious=trait(p,'curiosity');
     if(canWalk&&pick<mudEnjoyment(p)*.18)beginWorld(p,'puddle',puddles[p.level].x,5);
     else if(pick<.22+curious*.30){beginWorld(p,'watch',p.x,5+curious*7);p.emote='question';}

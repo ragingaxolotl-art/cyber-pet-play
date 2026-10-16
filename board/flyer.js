@@ -1,7 +1,7 @@
-import {advanceToys,releaseBall,heldBallPosition,drawBall,releaseAt,tossDuration} from './toys.js?v=24';
-import {floor} from './motion.js?v=24';
-import {trait,traitFeeling,love} from './profile.js?v=24';
-import {drawFeeling} from './emotes.js?v=24';
+import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=25';
+import {floor} from './motion.js?v=25';
+import {trait,traitFeeling,love} from './profile.js?v=25';
+import {drawFeeling} from './emotes.js?v=25';
 // One scenery character. Toy props and greetings are session-only, never save data.
 export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'fly',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0};}
 const FLIGHT_CYCLE=1.2,TALK_CYCLE=2.4;
@@ -17,7 +17,7 @@ export function advanceFlyer(f,pets,dt,aspect=16/9){
   if(f.state==='fly')f.y+=Math.sin(u*Math.PI*2)*.018;
  }
  if(f.state==='fly'&&f.nextDrop<=0&&f.toys.length<5&&Math.floor(previousClock/FLIGHT_CYCLE)!==Math.floor(f.clock/FLIGHT_CYCLE)){
-  f.resume={x:f.targetX,y:f.targetY};start(f,'drop',f.x,f.y,tossDuration);f.dropped=false;return;
+  f.resume={x:f.targetX,y:f.targetY};start(f,'drop',f.x,f.y,tossDuration);f.dropped=false;chooseDrop(f,pets);return;
  }
  if(f.state==='drop'&&f.clock>=releaseAt&&!f.dropped){const clock=f.clock;f.clock=releaseAt;releaseBall(f,aspect);f.clock=clock;}
  if(u<1)return;
@@ -37,12 +37,12 @@ export function advanceFlyer(f,pets,dt,aspect=16/9){
  }else if(f.state==='talk'){f.greeting=null;start(f,'takeoff',Math.max(.06,Math.min(.94,f.x+f.direction*.08)),Math.max(.12,f.y-.14),2.3);}
  else if(f.state==='takeoff')start(f,'fly',.08+f.random()*.84,.13+f.random()*.15,8+f.random()*8);
 }
-export function drawFlyer(c,w,h,f,art,elapsed){
+export function drawFlyer(c,w,h,f,art,elapsed,images){
  const clip=art.flyer?.[f.state]||art.flyer?.fly;if(!clip?.image?.complete||!clip.image.naturalWidth)return;
  const index=f.state==='fly'||f.state==='talk'?Math.min(clip.count-1,Math.floor((f.clock%(f.state==='fly'?FLIGHT_CYCLE:TALK_CYCLE))/(f.state==='fly'?FLIGHT_CYCLE:TALK_CYCLE)*clip.count)):Math.min(clip.count-1,Math.floor(f.clock/f.duration*clip.count));
  const resting=(index===0||index===clip.count-1)&&clip.restImage?.complete&&clip.restImage.naturalWidth,image=resting?clip.restImage:clip.image,sx=resting?0:(clip.frames?.[index]??index)*64;
  const size=h*.105,y=f.y*h;c.save();c.imageSmoothingEnabled=false;c.translate(f.x*w,y);c.scale(f.direction,1);c.drawImage(image,sx,0,64,64,-size/2,-size,size,size);c.restore();
- if(f.state==='drop'&&!f.dropped){const ball=heldBallPosition(f,w/h);drawBall(c,ball.x*w,ball.y*h,h*.017);}
+ if(f.state==='drop'&&!f.dropped){const ball=heldBallPosition(f,w/h);drawDroppedItem(c,ball.x*w,ball.y*h,h*.022,f.dropItem,images);}
  if(f.feelingTime>0)drawFeeling(c,f.feeling,elapsed,f.x*w,y-size-h*.025,h*.04);
 }
-export function drawToys(c,w,h,f){for(const t of f.toys)drawBall(c,t.x*w,t.y*h,h*.017);}
+export function drawToys(c,w,h,f,images){for(const t of f.toys)drawDroppedItem(c,t.x*w,t.y*h,h*.022,t.item,images);}
