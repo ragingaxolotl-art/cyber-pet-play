@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,shelterHelpChance} from './profile.js?v=25';
-import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=25';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,shelterHelpChance} from './profile.js?v=26';
+import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=26';
 export const createBuildings=(random=Math.random)=>Array.from({length:3},()=>({random,startAt:Infinity,dismantleAt:Infinity,rainCycle:-1,dryCycle:-1,phase:'bare',progress:0,workers:[],lastBuildCycle:-1,recruitAt:0,dust:0}));
 const available=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk','shelterWait'].includes(p.mode)&&hasAction(p.data,'walking');
 export function workRate(helpers){return Math.max(0,helpers)/18;}
@@ -8,6 +8,7 @@ export function advanceConstruction(world,pets,dt,time,huts,weather){
  const present=new Set(pets);
  for(const [level,b] of world.buildings.entries()){
   b.dust=Math.max(0,b.dust-dt);b.workers=b.workers.filter(p=>{if(present.has(p)&&p.mode==='build'&&hasAction(p.data,'walking'))return true;if(p.mode==='build'){p.mode='idle';p.timer=2;p.buildingJob=null;p.worldBob=0;}return false;});
+  if(b.phase==='magic'){b.magicRemaining=Math.max(0,b.magicRemaining-dt);b.progress=Math.min(b.progress,b.magicRemaining/3);b.dust=.9;if(b.magicRemaining===0){b.phase='bare';b.progress=0;b.startAt=Infinity;b.dust=1.5;}continue;}
   if(weather.rain&&b.rainCycle!==weather.cycle){b.rainCycle=weather.cycle;b.startAt=time+3+level*4+b.random()*10;b.dismantleAt=Infinity;b.dryCycle=-1;}
   if(!weather.rain&&b.progress>0&&b.dryCycle!==weather.cycle){b.dryCycle=weather.cycle;b.dismantleAt=time+8+level*5+b.random()*18;}
   if(b.phase==='bare'&&weather.rain&&time>=b.startAt){b.phase='building';b.lastBuildCycle=weather.cycle;}

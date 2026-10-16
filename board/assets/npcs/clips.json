@@ -27,7 +27,19 @@
         0.12,
         0.12,
         0.24
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62
     },
     "idle": {
       "src": "assets/npcs/host1-idle.png",
@@ -48,7 +60,15 @@
         0.075,
         0.075,
         0.075
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62
     },
     "serve": {
       "src": "assets/npcs/host1-serve.png",
@@ -85,7 +105,23 @@
         0.12,
         0.12,
         0.95
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62
     },
     "selfie": {
       "src": "assets/npcs/host1-selfie.png",
@@ -130,7 +166,27 @@
         0.12,
         0.12,
         0.24
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62
     },
     "look": {
       "src": "assets/npcs/host1-look.png",
@@ -186,7 +242,20 @@
         0.12,
         0.12,
         0.12
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62,
+      "targetFeet": 62
     },
     "walk": {
       "src": "assets/npcs/host1-profile-walk.png",
@@ -205,7 +274,19 @@
         0.1
       ],
       "restSrc": "assets/npcs/host1-profile.png",
-      "job": "e666d692-dbb9-4cdb-b9fe-35066c36fb90"
+      "job": "e666d692-dbb9-4cdb-b9fe-35066c36fb90",
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        61,
+        61,
+        62,
+        62
+      ],
+      "restFeet": 62
     },
     "delight": {
       "src": "assets/npcs/host1-delight.png",
@@ -261,7 +342,20 @@
         0.12,
         0.12,
         0.12
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62,
+      "targetFeet": 62
     },
     "hair": {
       "src": "assets/npcs/host1-hair.png",
@@ -317,7 +411,20 @@
         0.12,
         0.12,
         0.12
-      ]
+      ],
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62,
+      "targetFeet": 62
     },
     "lean": {
       "src": "assets/npcs/host1-lean.png",
@@ -365,7 +472,20 @@
         0.12,
         0.12
       ],
-      "duration": 2.92
+      "duration": 2.92,
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62,
+      "targetFeet": 62
     },
     "turn": {
       "src": "assets/npcs/host1-turn.png",
@@ -389,7 +509,20 @@
       ],
       "targetFrame": 8,
       "targetSrc": "assets/npcs/host1-profile.png",
-      "job": "1739b11f-327b-4299-b71f-1571290ed9b9"
+      "job": "1739b11f-327b-4299-b71f-1571290ed9b9",
+      "feet": [
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62,
+        62
+      ],
+      "restFeet": 62,
+      "targetFeet": 62
     }
   },
   "flyer": {
@@ -501,7 +634,19 @@
         0.12,
         0.12,
         0.24
-      ]
+      ],
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63
     },
     "selfie": {
       "src": "assets/npcs/host2-selfie.png",
@@ -546,7 +691,27 @@
         0.12,
         0.12,
         0.24
-      ]
+      ],
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63
     },
     "serve": {
       "src": "assets/npcs/host2-serve.png",
@@ -583,7 +748,23 @@
         0.12,
         0.12,
         0.95
-      ]
+      ],
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63
     },
     "idle": {
       "src": "assets/npcs/host2-blink.png",
@@ -597,7 +778,15 @@
         0.075
       ],
       "restSrc": "assets/npcs/host2-rest.png",
-      "job": "af065dd5-24a8-46b2-9e59-4aa8c855dca1"
+      "job": "af065dd5-24a8-46b2-9e59-4aa8c855dca1",
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63
     },
     "walk": {
       "src": "assets/npcs/host2-profile-walk.png",
@@ -616,7 +805,19 @@
         0.1
       ],
       "restSrc": "assets/npcs/host2-profile.png",
-      "job": "c1a5e9ef-2488-473d-bbb6-861c27a536e4"
+      "job": "c1a5e9ef-2488-473d-bbb6-861c27a536e4",
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        62,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63
     },
     "phone": {
       "src": "assets/npcs/host2-phone.png",
@@ -672,7 +873,20 @@
         0.12,
         0.12,
         0.12
-      ]
+      ],
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63,
+      "targetFeet": 63
     },
     "look": {
       "src": "assets/npcs/host2-look.png",
@@ -728,7 +942,20 @@
         0.12,
         0.12,
         0.12
-      ]
+      ],
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63,
+      "targetFeet": 63
     },
     "wave": {
       "src": "assets/npcs/host2-wave.png",
@@ -784,7 +1011,20 @@
         0.12,
         0.12,
         0.12
-      ]
+      ],
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        62
+      ],
+      "restFeet": 63,
+      "targetFeet": 62
     },
     "sleep": {
       "src": "assets/npcs/host2-idle.png",
@@ -802,7 +1042,19 @@
         7,
         0
       ],
-      "restSrc": "assets/npcs/host2-rest.png"
+      "restSrc": "assets/npcs/host2-rest.png",
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63
     },
     "lean": {
       "src": "assets/npcs/host2-lean.png",
@@ -850,7 +1102,20 @@
         0.12,
         0.12
       ],
-      "duration": 2.92
+      "duration": 2.92,
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63,
+      "targetFeet": 63
     },
     "turn": {
       "src": "assets/npcs/host2-turn.png",
@@ -874,7 +1139,20 @@
       ],
       "targetFrame": 8,
       "targetSrc": "assets/npcs/host2-profile.png",
-      "job": "500fe4b0-ddc9-4fc6-be20-3dcbbdfc1406"
+      "job": "500fe4b0-ddc9-4fc6-be20-3dcbbdfc1406",
+      "feet": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "restFeet": 63,
+      "targetFeet": 63
     }
   },
   "pair": {

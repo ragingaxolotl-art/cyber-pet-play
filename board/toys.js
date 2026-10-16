@@ -1,18 +1,18 @@
-import {foodScore} from './food.js?v=25';
-import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=25';
-import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=25';
+import {foodScore} from './food.js?v=26';
+import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=26';
+import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=26';
 export const ballItem=Object.freeze({id:'unicorn-ball',name:'Ball',type:'toy',sprite:'assets/npcs/toy-ball.svg',tags:[]});
-export const releaseAt=.72, tossDuration=1.56;
+export const releaseAt=.48, tossDuration=1.56;
 // Sprite coordinates are converted with the viewport aspect, including facing.
 export function heldBallPosition(f,aspect=16/9){
- const anchors=[[47,52],[47,52],[48,49],[51,47],[57,45],[57,49],[57,49]];
- const frame=Math.min(6,Math.max(0,f.clock/.12)),i=Math.floor(frame),a=anchors[i],b=anchors[Math.min(6,i+1)],u=frame-i;
+ const anchors=[[48,51],[48,51],[49,48],[53,46],[58,45]];
+ const frame=Math.min(4,Math.max(0,f.clock/.12)),i=Math.floor(frame),a=anchors[i],b=anchors[Math.min(4,i+1)],u=frame-i;
  const px=a[0]+(b[0]-a[0])*u+4,py=a[1]+(b[1]-a[1])*u;
  return {x:f.x+f.direction*(.105/aspect)*(px/64-.5),y:f.y+.105*(py/64-1)+.022/2};
 }
 export function releaseBall(f,aspect){
  const position=heldBallPosition(f,aspect),level=[2,1,0].find(l=>floor(l)>position.y+.012)??0;
- f.toys.push({...position,level,vy:-.10,vx:f.direction*.10/aspect,age:0,landed:false,bounces:0,item:f.dropItem||ballItem});f.dropped=true;
+ f.toys.push({...position,level,vy:-.23,vx:f.direction*.24/aspect,age:0,landed:false,bounces:0,item:f.dropItem||ballItem});f.dropped=true;
 }
 const free=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['walk','idle'].includes(p.mode);
 function moveTo(p,target,dt){const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*dt);p.direction=Math.sign(delta)||p.direction||1;p.x+=p.direction*step;p.gameMoving=step>0;addWalkingDirt(p,step);}
@@ -48,7 +48,7 @@ export function advanceToys(f,pets,dt){
   if(t.play){
    const g=t.play;
    if(g.players.some(p=>!present.has(p)||p.mode!=='toyPlay'||p.level!==t.level||!hasAction(p.data,'walking'))){endPlay(t,present);continue;}
-   for(const p of g.players){moveTo(p,p.toySlot,dt);p.direction=t.x>p.x?1:-1;p.emote=love(p)>.5?'laughing':traitFeeling(p,'activity_level');p.emoteTime=2;}
+   for(const p of g.players){moveTo(p,p.toySlot,dt);if(!p.gameMoving)p.direction=t.x>p.x?1:-1;p.emote=love(p)>.5?'laughing':traitFeeling(p,'activity_level');p.emoteTime=2;}
    if(g.players.some(p=>Math.abs(p.x-p.toySlot)>.004)){t.x=g.players[0].x;t.y=floor(t.level);continue;}
    g.time+=dt;
    const u=.5+.5*Math.sin(g.time*2.4);t.x=g.players.length===2?g.center+(u-.5)*g.gap:g.center+Math.sin(g.time*2.4)*.025;

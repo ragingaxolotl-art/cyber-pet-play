@@ -1,11 +1,11 @@
-import {clipFrameAt} from './clip-timing.js?v=25';
-import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=25';
-import {availablePairs,choosePair} from './host-interactions.js?v=25';
-import {drawFeeling} from './emotes.js?v=25';
+import {clipFrameAt} from './clip-timing.js?v=26';
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=26';
+import {availablePairs,choosePair} from './host-interactions.js?v=26';
+import {drawFeeling} from './emotes.js?v=26';
 export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};
- const response=await fetch('assets/npcs/clips.json?v=25');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
+ const response=await fetch('assets/npcs/clips.json?v=26');if(!response.ok)throw Error('NPC art unavailable');const manifest=await response.json();
  for(const [who,clips] of Object.entries(manifest)){
   hosts.art[who]={};for(const [action,info] of Object.entries(clips)){hosts.art[who][action]={...info,image:load(info.src),restImage:load(info.restSrc),targetImage:info.targetSrc?load(info.targetSrc):null};}
  }
@@ -57,9 +57,9 @@ export function drawHost(c,w,h,person,clips,x,elapsed){
  let index=clipFrameAt(clip,person.clock);
  if(person.action==='turn'&&person.reverseTurn)index=clip.count-1-index;
  const frame=clip.frames?.[index]??index;
- // A shared, continuous breathing phase carries across every action without a transform reset.
+ // Keep counter poses aligned; ease onto the shoe baseline while stepping outside.
  const resting=(clip.restAt?clip.restAt.includes(index):(index===0||index===clip.count-1))&&ready({image:clip.restImage}),target=frame===clip.targetFrame&&ready({image:clip.targetImage}),image=resting?clip.restImage:target?clip.targetImage:clip.image,sx=resting||target?0:frame*64;
- const size=h*.122,top=h*(.605-.125)+Math.sin(elapsed*2.1)*h*.0007;c.save();c.imageSmoothingEnabled=false;const center=Math.max(size/2,Math.min(w-size/2,x*w+(person.offset||0)*h)),mirror=['walk','turn'].includes(person.action)&&person.walkFacing===-1&&!(person.action==='turn'&&resting);c.translate(center,top);c.scale(mirror?-1:1,1);c.drawImage(image,sx,0,64,64,-size/2,0,size,size);c.restore();
- if(person.feeling)drawFeeling(c,person.feeling,elapsed,x*w,top-h*.025,h*.029);
+ const size=h*.122,feet=resting?clip.restFeet:target?clip.targetFeet:clip.feet?.[frame],groundBlend=Math.min(1,Math.abs(person.offset||0)/.10),homeTop=h*(.605-.125),groundTop=h*.605-(feet??63)/64*size,top=homeTop+(groundTop-homeTop)*groundBlend;c.save();c.imageSmoothingEnabled=false;const center=Math.max(size/2,Math.min(w-size/2,x*w+(person.offset||0)*h)),mirror=['walk','turn'].includes(person.action)&&(person.action==='walk'?(person.travelFacing??person.walkFacing):person.walkFacing)===-1&&!(person.action==='turn'&&resting);c.translate(center,top);c.scale(mirror?-1:1,1);c.drawImage(image,sx,0,64,64,-size/2,0,size,size);c.restore();
+ if(person.sparkleTime>0||person.feeling)drawFeeling(c,person.sparkleTime>0?'hearts':person.feeling,elapsed,center,top-h*.025,h*.029);
  return true;
 }

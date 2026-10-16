@@ -1,5 +1,5 @@
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=25';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=25';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=26';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=26';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
 const eligible=p=>!p.stair&&!p.socialGroup&&!p.playGroup&&['idle','walk'].includes(p.mode)&&p.socialCooldown<=0;
@@ -36,7 +36,7 @@ export function advanceGames(pets,dt,time,schedule){
    else if(g.kind==='hide'){const hideX=Math.max(.08,Math.min(.92,g.center+(i%2?1:-1)*(.08+i*.03)));if(i>0)move(p,hideX,dt);else if(g.time>4)move(p,g.players[1+Math.floor((g.time-4)/5)%(n-1)].x,dt);else feeling(p,'thinking');if(i===0&&g.players.some((other,j)=>j>0&&Math.abs(other.x-p.x)<.035))feeling(p,traitFeeling(p,'sociability'));}
    else if(g.kind==='freeze'){const frozen=g.time%5>3;p.worldBob=frozen?0:Math.abs(Math.sin(g.time*6+i))*.007;feeling(p,frozen?'silence':'laughing');}
    else if(g.kind==='copy'){const emotes=['eager','question','cute','laughing'];feeling(p,emotes[Math.max(0,turn-(i?1:0))%4]);}
-   else if(g.kind==='ball'||g.kind==='balloon'){move(p,p.gameSlot,dt);p.direction=p.x<g.propX?1:-1;if(Math.abs(p.x-g.propX)<.035)feeling(p,'eager');}
+   else if(g.kind==='ball'||g.kind==='balloon'){move(p,p.gameSlot,dt);if(!p.gameMoving)p.direction=p.x<g.propX?1:-1;if(Math.abs(p.x-g.propX)<.035)feeling(p,'eager');}
    else if(g.kind==='treasure'){move(p,Math.max(.08,Math.min(.92,g.target-i*.07)),dt);feeling(p,Math.abs(p.x-g.target)<.04?'eager':'question');}
    else if(g.kind==='favorites'){p.displayItem=g.time>3?g.players[(i+1)%n].data.food:null;feeling(p,g.time<3?'question':p.knownFavorites?.has(g.players[(i+1)%n].data.id)?'hearts':'thinking');}
   }

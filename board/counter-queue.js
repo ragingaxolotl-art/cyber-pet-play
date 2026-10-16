@@ -1,7 +1,7 @@
-import {travelSpeed,trait,love} from './profile.js?v=25';
-import {foodScore} from './food.js?v=25';
-import {collectItem} from './sharing.js?v=25';
-import {hasAction,animationDuration} from './motion.js?v=25';
+import {travelSpeed,trait,love} from './profile.js?v=26';
+import {foodScore} from './food.js?v=26';
+import {collectItem} from './sharing.js?v=26';
+import {hasAction,animationDuration} from './motion.js?v=26';
 const FRONT=.49,LEFT=.045,RIGHT=.97,GAP=.014;
 export const queueWidth=p=>Math.max(.018,p.bodyWidth||.055);
 export const queueGap=(a,b)=>(queueWidth(a)+queueWidth(b))/2+GAP;

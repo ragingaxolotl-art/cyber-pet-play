@@ -1,18 +1,20 @@
-import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=25';
-import {floor} from './motion.js?v=25';
-import {trait,traitFeeling,love} from './profile.js?v=25';
-import {drawFeeling} from './emotes.js?v=25';
+import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=26';
+import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=26';
+import {floor} from './motion.js?v=26';
+import {trait,traitFeeling,love} from './profile.js?v=26';
+import {drawFeeling} from './emotes.js?v=26';
 // One scenery character. Toy props and greetings are session-only, never save data.
-export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'fly',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0};}
+export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'absent',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0,...visitState(random)};}
 const FLIGHT_CYCLE=1.2,TALK_CYCLE=2.4;
 function start(f,state,x,y,duration){if(state==='fly')duration=Math.ceil(duration/FLIGHT_CYCLE)*FLIGHT_CYCLE;if(state==='talk')duration=Math.ceil(duration/TALK_CYCLE)*TALK_CYCLE;f.state=state;f.clock=0;f.duration=duration;f.fromX=f.x;f.fromY=f.y;f.targetX=x;f.targetY=y;f.direction=x===f.x?f.direction:Math.sign(x-f.x);}
 const available=p=>!p.stair&&['walk','idle'].includes(p.mode);
-export function advanceFlyer(f,pets,dt,aspect=16/9){
+export function advanceFlyer(f,pets,dt,aspect=16/9,time){
  const previousClock=f.clock;f.clock+=dt;f.feelingTime=Math.max(0,f.feelingTime-dt);f.nextDrop-=dt;
  advanceToys(f,pets,dt);
+ if(!advanceVisit(f,dt,time))return;
  if(f.greeting&&!pets.includes(f.greeting)){f.greeting=null;f.feeling='thinking';}
  const u=Math.min(1,f.clock/f.duration),ease=u*u*(3-2*u);
- if(['fly','land','takeoff'].includes(f.state)){
+ if(['fly','leave','land','takeoff'].includes(f.state)){
   f.x=f.fromX+(f.targetX-f.fromX)*ease;f.y=f.fromY+(f.targetY-f.fromY)*ease;
   if(f.state==='fly')f.y+=Math.sin(u*Math.PI*2)*.018;
  }
@@ -38,8 +40,9 @@ export function advanceFlyer(f,pets,dt,aspect=16/9){
  else if(f.state==='takeoff')start(f,'fly',.08+f.random()*.84,.13+f.random()*.15,8+f.random()*8);
 }
 export function drawFlyer(c,w,h,f,art,elapsed,images){
+ drawMagic(c,w,h,f,elapsed);if(f.state==='absent')return;
  const clip=art.flyer?.[f.state]||art.flyer?.fly;if(!clip?.image?.complete||!clip.image.naturalWidth)return;
- const index=f.state==='fly'||f.state==='talk'?Math.min(clip.count-1,Math.floor((f.clock%(f.state==='fly'?FLIGHT_CYCLE:TALK_CYCLE))/(f.state==='fly'?FLIGHT_CYCLE:TALK_CYCLE)*clip.count)):Math.min(clip.count-1,Math.floor(f.clock/f.duration*clip.count));
+ const index=['fly','leave','talk'].includes(f.state)?Math.min(clip.count-1,Math.floor((f.clock%(f.state==='talk'?TALK_CYCLE:FLIGHT_CYCLE))/(f.state==='talk'?TALK_CYCLE:FLIGHT_CYCLE)*clip.count)):Math.min(clip.count-1,Math.floor(f.clock/f.duration*clip.count));
  const resting=(index===0||index===clip.count-1)&&clip.restImage?.complete&&clip.restImage.naturalWidth,image=resting?clip.restImage:clip.image,sx=resting?0:(clip.frames?.[index]??index)*64;
  const size=h*.105,y=f.y*h;c.save();c.imageSmoothingEnabled=false;c.translate(f.x*w,y);c.scale(f.direction,1);c.drawImage(image,sx,0,64,64,-size/2,-size,size,size);c.restore();
  if(f.state==='drop'&&!f.dropped){const ball=heldBallPosition(f,w/h);drawDroppedItem(c,ball.x*w,ball.y*h,h*.022,f.dropItem,images);}
