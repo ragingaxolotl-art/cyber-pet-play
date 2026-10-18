@@ -10,7 +10,7 @@ import {createWash} from './wash.js?v=personality1';
 import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement,artworkDirection} from './display.js?v=34';
 import {createCompanions,withResidents} from './companions.js?v=31';
 import {isClassPet} from './profile.js?v=31';
-import {drawGames} from './games.js?v=personality1';
+import {drawGames} from './games.js?v=development1';
 import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=personality1';
 import {chooseItem} from './sharing.js?v=personality1';
 import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=31';
@@ -18,7 +18,7 @@ import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foo
 import {favoriteFood} from './food.js?v=31';
 import {drawLandscape,drawWash} from './scenery.js?v=personality1';
 import {refreshRoster} from './connection.js?v=31';
-import {readBackup} from './backups.js?v=personality1';
+import {readBackup} from './backups.js?v=development1';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;

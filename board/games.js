@@ -1,3 +1,4 @@
+import {developmentWeight,developmentPersistence,developmentReaction} from './development.js?v=development1';
 import {freeForActivity} from './activity-state.js?v=31';
 import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=31';
 import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=personality1';
@@ -7,7 +8,7 @@ const eligible=p=>freeForActivity(p)&&!(p.gameCooldown>0);
 const feeling=(p,e)=>{p.emote=e;p.emoteTime=3;};
 const invitationStates=new WeakMap();
 export function chooseGame(p,counts={},allowed=null){
- const choices=[['tag',.8+trait(p,'activity_level')],['hide',.3+trait(p,'curiosity')],['follow',.3+trait(p,'sociability')],['race',.2+trait(p,'activity_level')],['freeze',.4],['copy',.5+trait(p,'sociability')],['ball',.5],['balloon',.4+trait(p,'activity_level')],['treasure',.3+trait(p,'curiosity')],['favorites',.3+trait(p,'generosity')]].filter(([kind])=>!allowed||allowed.includes(kind)).map(([kind,weight])=>[kind,weight/(1+(counts[kind]||0))**2]);
+ const choices=[['tag',.8+trait(p,'activity_level')],['hide',.3+trait(p,'curiosity')],['follow',.3+trait(p,'sociability')],['race',.2+trait(p,'activity_level')],['freeze',.4],['copy',.5+trait(p,'sociability')],['ball',.5],['balloon',.4+trait(p,'activity_level')],['treasure',.3+trait(p,'curiosity')],['favorites',.3+trait(p,'generosity')]].filter(([kind])=>!allowed||allowed.includes(kind)).map(([kind,weight])=>[kind,weight*developmentWeight(p,kind)/(1+(counts[kind]||0))**2]);
  const least=Math.min(...choices.map(([kind])=>counts[kind]||0)),fresh=choices.filter(([kind])=>(counts[kind]||0)===least);
  let n=p.random()*fresh.reduce((s,c)=>s+c[1],0);for(const [kind,w] of fresh){n-=w;if(n<=0)return kind;}return 'copy';
 }
@@ -18,12 +19,13 @@ export function startGame(players,kind,rematch=0){
  const center=Math.max(.25,Math.min(.75,players.reduce((n,p)=>n+p.x,0)/players.length));
  const g={players,kind,time:0,center,level:players[0].level,rematch,duration:6+Math.min(...players.map(p=>Math.max(0,Math.min(100,p.data.stats?.energy??100))))*.04+Math.min(...players.map(p=>trait(p,'activity_level')+trait(p,'sociability')+love(p)))*5,target:Math.min(.92,center+.2),propX:center,propY:floor(players[0].level)-.04};
  if(kind==='race')g.duration=Math.min(45,Math.max(g.duration,...players.map(p=>Math.abs(g.target-p.x)/(travelSpeed(p)*1.3)+2)));
+ g.duration*=1+Math.min(...players.map(developmentPersistence));
  players.forEach((p,i)=>{p.mode='game';p.playGroup=g;p.clock=0;p.gameOrigin=p.x;p.gameSlot=center+(i-(players.length-1)/2)*.085;p.gameMoving=false;p.socialCooldown=40;feeling(p,i===0?'eager':'question');});return g;
 }
 function move(p,target,dt,multiplier=1){const delta=target-p.x,step=Math.min(Math.abs(delta),travelSpeed(p)*multiplier*dt);p.gameMoving=step>.00001;if(step){p.direction=Math.sign(delta);p.x+=p.direction*step;addWalkingDirt(p,step);}}
 function finish(g,allowRematch=true){
  const owned=g.players.filter(p=>p.playGroup===g&&p.mode==='game');
- for(const p of g.players){if(p.playGroup!==g)continue;p.playGroup=null;if(!owned.includes(p))continue;p.gameMoving=false;p.worldBob=0;p.displayItem=null;p.mode='idle';p.timer=2;p.socialCooldown=12+p.random()*8;p.gameCooldown=18+p.random()*12;feeling(p,traitFeeling(p,'sociability'));}
+ for(const p of g.players){if(p.playGroup!==g)continue;p.playGroup=null;if(!owned.includes(p))continue;p.gameMoving=false;p.worldBob=0;p.displayItem=null;p.mode='idle';p.timer=2;p.socialCooldown=12+p.random()*8;p.gameCooldown=18+p.random()*12;feeling(p,developmentReaction(p,traitFeeling(p,'sociability')));}
  const sorted=[...owned].sort((a,b)=>a.x-b.x);for(let i=1;i<sorted.length;i++)if(active(sorted[i-1])&&active(sorted[i]))standBeside(sorted[i-1],sorted[i]);
  if(owned.length===g.players.length&&allowRematch&&!g.rematch&&g.players.every(p=>(p.data.stats?.energy??100)>25)&&g.players[0].random()<trait(g.players[0],'activity_level')*.3)startGame(g.players,g.kind,1);
 }
@@ -38,7 +40,7 @@ export function advanceGames(pets,dt,time,schedule){
    p.gameMoving=false;p.worldBob=0;
    if(g.kind==='race'){move(p,g.target,dt,1.3);if(Math.abs(p.x-g.target)<.003){if(g.winner===undefined)g.winner=i;feeling(p,i===g.winner?'eager':love(p)>=.5?'hearts':'frustrated');}}
    else if(g.kind==='follow'){move(p,Math.max(.08,Math.min(.92,g.center+Math.sin(g.time*.22)*.16-i*.075)),dt);}
-   else if(g.kind==='hide'){const hideX=Math.max(.08,Math.min(.92,g.center+(i%2?1:-1)*(.08+i*.03)));if(i>0)move(p,hideX,dt);else if(g.time>4)move(p,g.players[1+Math.floor((g.time-4)/5)%(n-1)].x,dt);else feeling(p,'thinking');if(i===0&&g.players.some((other,j)=>j>0&&Math.abs(other.x-p.x)<.035))feeling(p,traitFeeling(p,'sociability'));}
+   else if(g.kind==='hide'){const hideX=Math.max(.08,Math.min(.92,g.center+(i%2?1:-1)*(.08+i*.03)));if(i>0)move(p,hideX,dt);else if(g.time>4)move(p,g.players[1+Math.floor((g.time-4)/5)%(n-1)].x,dt);else feeling(p,'thinking');if(i===0&&g.players.some((other,j)=>j>0&&Math.abs(other.x-p.x)<.035))feeling(p,developmentReaction(p,traitFeeling(p,'sociability')));}
    else if(g.kind==='freeze'){const frozen=g.time%5>3;p.worldBob=frozen?0:Math.abs(Math.sin(g.time*6+i))*.007;feeling(p,frozen?'silence':'laughing');}
    else if(g.kind==='copy'){const emotes=['eager','question','cute','laughing'];feeling(p,emotes[Math.max(0,turn-(i?1:0))%4]);}
    else if(g.kind==='ball'||g.kind==='balloon'){move(p,p.gameSlot,dt);if(!p.gameMoving)p.direction=p.x<g.propX?1:-1;if(Math.abs(p.x-g.propX)<.035)feeling(p,'eager');}
