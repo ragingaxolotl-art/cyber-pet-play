@@ -1,6 +1,6 @@
 import {freeForActivity} from './activity-state.js?v=31';
 import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=31';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=31';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=personality1';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
 const eligible=p=>freeForActivity(p)&&!(p.gameCooldown>0);

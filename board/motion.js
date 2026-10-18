@@ -1,9 +1,9 @@
 import {freeForActivity} from './activity-state.js?v=31';
-import {resolveAction,aliases} from './pet-animation.js?v=31';
+import {resolveAction,aliases} from './pet-animation.js?v=personality1';
 import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=31';
 import {makeDirt} from './dirt.js?v=31';
-import {collectItem,friendship} from './sharing.js?v=31';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=31';
+import {collectItem,friendship} from './sharing.js?v=personality1';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=personality1';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -28,7 +28,7 @@ export function chooseEmote(pet){
   if(stats.health<=15)return 'crying';
   if(stats.energy<=12)return 'sleepy';
   if(stats.fullness<=12)return 'drooling';
-  if(stats.happiness<=35&&!(pet.comfortTime>0))return 'frustrated';
+  if(stats.happiness+(pet.personalityMood||0)<=35&&!(pet.comfortTime>0))return 'frustrated';
   const keys=['activity_level','generosity','bravery','curiosity','sociability','assertiveness'];
   return traitFeeling(pet,keys[Math.min(5,Math.floor(pet.random()*keys.length))]);
 }

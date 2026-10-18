@@ -24,7 +24,7 @@ export function petIsMoving(p){
 }
 export function selectPetAction(p){
  const data=p.data,choose=(...keys)=>keys.flatMap(k=>aliases[k]||[k]).find(k=>hasFrames(data,k)),feeling=visibleFeeling(p);
- const lowMood=(data.stats?.happiness??50)<=35&&!(p.comfortTime>0),mood=negativeFeelings.has(feeling)?(feeling==='frustrated'&&(data.love??50)<50?'angry':'sad'):positiveFeelings.has(feeling)?'happy':lowMood?((data.love??50)<35&&(data.personality?.assertiveness??50)>65?'angry':'sad'):null;
+ const lowMood=(data.stats?.happiness??50)+(p.personalityMood||0)<=35&&!(p.comfortTime>0),mood=negativeFeelings.has(feeling)?(feeling==='frustrated'&&(data.love??50)<50?'angry':'sad'):positiveFeelings.has(feeling)?'happy':lowMood?((data.love??50)<35&&(data.personality?.assertiveness??50)>65?'angry':'sad'):null;
  const restDirection=['front','side','back'][((p.animationVariant||0)+(p.idleVisits||0))%3];
  const posture=mode=>mood?[`${mood}_${mode}_side`,`${mood}_${mode}_front`,`${mood}_${mode}_back`,...(mood==='sad'?[mode==='walking'?'sad_walking':'sad_idle']:[])]:[];
  if(['eat','snack'].includes(p.mode)&&!p.awaitingCounter)return choose('eat','idle');

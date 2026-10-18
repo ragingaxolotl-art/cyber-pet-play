@@ -1,7 +1,7 @@
 import {freeForActivity} from './activity-state.js?v=31';
-import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=31';
-import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=31';
-import {floor} from './motion.js?v=31';
+import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=personality1';
+import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=personality1';
+import {floor} from './motion.js?v=personality1';
 import {trait,traitFeeling,love} from './profile.js?v=31';
 import {drawFeeling} from './emotes.js?v=31';
 // One scenery character. Toy props and greetings are session-only, never save data.

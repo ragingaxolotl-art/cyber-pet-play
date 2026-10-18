@@ -1,5 +1,5 @@
 import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=31';
-import {friendship,shareItem,itemScore} from './sharing.js?v=31';
+import {friendship,shareItem,itemScore} from './sharing.js?v=personality1';
 import {foodScore} from './food.js?v=31';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
@@ -35,7 +35,7 @@ export function trySocial(a,b,world){
   // Comfort and cleaning take precedence over games; neither changes game saves.
   for(const [helper,other] of [[a,b],[b,a]]){
     const generous=expression(helper).giving,care=expression(helper).help;
-    if((other.data.stats?.happiness??100)<=35&&!(other.comfortTime>0)&&helper.random()<care*.9){startGesture(helper,other,'comfort',world);return true;}
+    if((other.data.stats?.happiness??100)+(other.personalityMood||0)<=35&&!(other.comfortTime>0)&&helper.random()<care*.9){startGesture(helper,other,'comfort',world);return true;}
     if(other.cleanliness<Math.min(.35,washThreshold(other))&&friendship(helper,other)>=50&&helper.random()<care*.35&&startTogether(helper,other,'escort',world))return true;
     if((love(helper)<.5||(helper.data.stats?.fullness??100)>20)&&helper.heldItem&&(!helper.giftFor||helper.giftFor===other.data.id)&&!helper.dislikedGifts?.get(other.data.id)?.has(helper.heldItem.id)&&!other.heldItem&&helper.shareCooldown<=0&&other.shareCooldown<=0&&helper.random()<.05+generous*.8){startGesture(helper,other,'offer',world);return true;}
   }

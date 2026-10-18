@@ -1,5 +1,5 @@
 import {freeForActivity} from './activity-state.js?v=31';
-import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=31';
+import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=personality1';
 import {travelSpeed,trait} from './profile.js?v=31';
 // Session appetites create purposeful visits; saved fullness is never changed.
 export function startFoodTrip(p){

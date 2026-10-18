@@ -26,7 +26,16 @@ export function shareItem(giver,recipient){
   giver.shareCooldown=recipient.shareCooldown=60;
   giver.emote=traitFeeling(giver,'generosity');
   recipient.emote=recipient.socialReply=reaction==='disliked'?(love(recipient)>.5?'thinking':'frustrated'):'hearts';
-  if(reaction!=='disliked'){recipient.heldItem=item;recipient.heldTime=0;giver.heldItem=null;}
+  if(reaction!=='disliked'){
+    recipient.heldItem=item;recipient.heldTime=0;giver.heldItem=null;
+    // A successful gift has a bounded emotional payoff for generous pets.
+    // Session-only: never edit the backed-up profile, wallet or food inventory.
+    giver.generosityRecipients??=new Set();
+    if(!giver.generosityRecipients.has(recipient.data.id)){
+      const gain=Math.min(2*Math.max(0,(trait(giver,'generosity')-.6)/.4),6-(giver.personalityMood||0));
+      if(gain>0){giver.personalityMood=(giver.personalityMood||0)+gain;giver.generosityRecipients.add(recipient.data.id);giver.emoteTime=5;}
+    }
+  }
   return {reaction,change,item};
 }
 export function trySharing(a,b){
