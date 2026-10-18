@@ -1,3 +1,4 @@
+import {hydrationChoice} from './hydration.js?v=nutrition1';
 import {installSharingChoice} from './sharing-choice.js?v=personality1';
 import {reconcilePets} from './roster-state.js?v=personality1';
 import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=personality1';
@@ -122,6 +123,11 @@ function setPets(data,label){
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
   loaded=data;pets=reconcilePets(data,pets);mode=label;
+  for(const p of pets)p.chooseHydration=()=>{
+   const item=hydrationChoice(p,foods);if(!item){p.hydrationRetry=60;return;}
+   p.data.food=item;p.hydrationMeal=true;p.speech='A refreshing snack after play!';
+   if(!foodImages.has(item.id)){const image=new Image();image.src=item.sprite;foodImages.set(item.id,image);}
+  };
   $('status').textContent=label==='sample'?'Sample pets':`${data.length} ${data.length===1?'pet':'pets'} together`;
   $('caption').textContent=label==='sample'?`${data.length} sample pets · Jungle kitchen + cloud wash`:`${data.length} Cyber Pets · ${data.filter(p=>!hasAction(p,'walking')).length} resting without movement art · Display only`;
   $('empty').hidden=data.length>0;

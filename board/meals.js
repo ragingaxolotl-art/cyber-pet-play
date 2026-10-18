@@ -1,9 +1,11 @@
+import {advanceHydration} from './hydration.js?v=nutrition1';
 import {freeForActivity} from './activity-state.js?v=31';
 import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=personality1';
 import {travelSpeed,trait} from './profile.js?v=31';
 // Session appetites create purposeful visits; saved fullness is never changed.
 export function startFoodTrip(p){
  if(!p.data.food||!hasAction(p.data,'eat')||!hasAction(p.data,'walking')||p.stair||p.socialGroup||p.playGroup)return false;
+ p.chooseHydration?.();
  const points=[{x:p.x,level:p.level}];
  if(p.level===0){const s=stairs[0];points.push({x:s.a,level:0},{x:s.b,level:1});}
  if(p.level===2){const s=stairs[1];points.push({x:s.b,level:2},{x:s.a,level:1});}
@@ -11,6 +13,9 @@ export function startFoodTrip(p){
 }
 export function advanceMeals(pets,dt){
  for(const [index,p] of pets.entries()){
+  advanceHydration(p,dt);
+  p.hydrationRetry=Math.max(0,(p.hydrationRetry||0)-dt);
+  if((p.hydrationEffort||0)>=30&&!p.hydrationRetry&&p.chooseHydration&&freeForActivity(p))p.mealDue=Math.min(p.mealDue??0,5);
   p.mealDue=Math.max(0,(p.mealDue??(8+index*7))-dt);
   if(['eat','snack','counterQueue','counterLeave'].includes(p.mode)){p.mealDue=100+60*(1-trait(p,'activity_level'));continue;}
   if(p.mode==='seekFood'){
