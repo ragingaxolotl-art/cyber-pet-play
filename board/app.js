@@ -5,7 +5,7 @@ import {createHosts,loadNpcArt} from './npc-animation.js?v=31';
 import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=31';
 import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=31';
 import {createWash} from './wash.js?v=31';
-import {displayMetrics,sourceScale} from './display.js?v=32';
+import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement} from './display.js?v=33';
 import {createCompanions,withResidents} from './companions.js?v=31';
 import {isClassPet} from './profile.js?v=31';
 import {drawGames} from './games.js?v=31';
@@ -79,8 +79,9 @@ function drawPet(pet){
   if(!img)return;
   const maxHeight=data.maxHeight,maxWidth=data.maxWidth,bounds=artworkBounds.get(img);
   const original=sourceScale(data,name),size=metrics,desired=size.desired*(pet.mode==='shelter'?(pet.shelterScale||1):1),scale=size.scale*(pet.mode==='shelter'?(pet.shelterScale||1):1),w=bounds.w*original.x*scale,h=bounds.h*original.y*scale;
+  const placement=framePlacement(frameCoordinates(bounds,img,original),data.artworkEnvelope,scale);
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
-  ctx.save();ctx.translate(x,y);ctx.scale(pet.direction,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,-w/2,-h,w,h);ctx.restore();
+  ctx.save();ctx.translate(x,y);ctx.scale(pet.direction,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
@@ -104,7 +105,7 @@ function drawPet(pet){
     if(!image){image=new Image();image.src=pet.displayItem.sprite;foodImages.set(pet.displayItem.id,image);}
     const size=desired*.5;if(image.complete&&image.naturalWidth)ctx.drawImage(image,x-size/2,y-desired-65*unit-size/2,size,size);
   }
-  drawDirt(img,bounds,x,y,w,h,pet.direction,1-pet.cleanliness,pet.dirtPattern);
+  drawDirt(img,bounds,x+pet.direction*(placement.x+w/2),y+placement.y+h,w,h,pet.direction,1-pet.cleanliness,pet.dirtPattern);
 
 }
 function render(time){
@@ -115,7 +116,7 @@ function render(time){
 }
 function setPets(data,label){
   data=data.filter(isClassPet);if(label==='class')data=withResidents(data,companions);
-  for(const pet of data){pet.food??=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.entries()].map(([name,image])=>{const b=measureArtwork(image),s=sourceScale(pet,name);return {h:b.h*s.y,w:b.w*s.x};});pet.maxHeight=Math.max(...bounds.map(b=>b.h));pet.maxWidth=Math.max(...bounds.map(b=>b.w));}
+  for(const pet of data){pet.food??=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.entries()].map(([name,image])=>{const b=measureArtwork(image),s=sourceScale(pet,name);return frameCoordinates(b,image,s);});pet.artworkEnvelope=animationEnvelope(bounds);pet.maxHeight=pet.artworkEnvelope.bottom-pet.artworkEnvelope.top;pet.maxWidth=pet.artworkEnvelope.right-pet.artworkEnvelope.left;}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
   loaded=data;pets=reconcilePets(data,pets);mode=label;

@@ -13,3 +13,15 @@ export function displayMetrics(data,width,height,count){
  return {scale,desired:data.maxHeight*scale,offsetY:valid(data.config?.display?.pet_y_offset,-2048,2048,0)*unit};
 }
 export const sourceScale=(data,name)=>data.sourceScales?.get(name)||{x:1,y:1};
+
+// Measure every frame in its original canvas coordinates. A shared anchor keeps
+// authored hops and sideways sway instead of pinning each opaque crop to the floor.
+export function frameCoordinates(bounds,image,original={x:1,y:1}){
+ return {left:(bounds.x-image.width/2)*original.x,right:(bounds.x+bounds.w-image.width/2)*original.x,top:(bounds.y-image.height)*original.y,bottom:(bounds.y+bounds.h-image.height)*original.y};
+}
+export function animationEnvelope(frames){
+ return {left:Math.min(...frames.map(f=>f.left)),right:Math.max(...frames.map(f=>f.right)),top:Math.min(...frames.map(f=>f.top)),bottom:Math.max(...frames.map(f=>f.bottom))};
+}
+export function framePlacement(frame,envelope,scale){
+ return {x:(frame.left-(envelope.left+envelope.right)/2)*scale,y:(frame.top-envelope.bottom)*scale,w:(frame.right-frame.left)*scale,h:(frame.bottom-frame.top)*scale};
+}
