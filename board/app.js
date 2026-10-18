@@ -5,7 +5,7 @@ import {createHosts,loadNpcArt} from './npc-animation.js?v=31';
 import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=31';
 import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=31';
 import {createWash} from './wash.js?v=31';
-import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement} from './display.js?v=33';
+import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement,artworkDirection} from './display.js?v=34';
 import {createCompanions,withResidents} from './companions.js?v=31';
 import {isClassPet} from './profile.js?v=31';
 import {drawGames} from './games.js?v=31';
@@ -79,9 +79,10 @@ function drawPet(pet){
   if(!img)return;
   const maxHeight=data.maxHeight,maxWidth=data.maxWidth,bounds=artworkBounds.get(img);
   const original=sourceScale(data,name),size=metrics,desired=size.desired*(pet.mode==='shelter'?(pet.shelterScale||1):1),scale=size.scale*(pet.mode==='shelter'?(pet.shelterScale||1):1),w=bounds.w*original.x*scale,h=bounds.h*original.y*scale;
+  const facing=artworkDirection(data.config,action,pet.direction);
   const placement=framePlacement(frameCoordinates(bounds,img,original),data.artworkEnvelope,scale);
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
-  ctx.save();ctx.translate(x,y);ctx.scale(pet.direction,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
+  ctx.save();ctx.translate(x,y);ctx.scale(facing,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
@@ -105,7 +106,7 @@ function drawPet(pet){
     if(!image){image=new Image();image.src=pet.displayItem.sprite;foodImages.set(pet.displayItem.id,image);}
     const size=desired*.5;if(image.complete&&image.naturalWidth)ctx.drawImage(image,x-size/2,y-desired-65*unit-size/2,size,size);
   }
-  drawDirt(img,bounds,x+pet.direction*(placement.x+w/2),y+placement.y+h,w,h,pet.direction,1-pet.cleanliness,pet.dirtPattern);
+  drawDirt(img,bounds,x+facing*(placement.x+w/2),y+placement.y+h,w,h,facing,1-pet.cleanliness,pet.dirtPattern);
 
 }
 function render(time){

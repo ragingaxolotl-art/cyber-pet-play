@@ -25,3 +25,8 @@ export function animationEnvelope(frames){
 export function framePlacement(frame,envelope,scale){
  return {x:(frame.left-(envelope.left+envelope.right)/2)*scale,y:(frame.top-envelope.bottom)*scale,w:(frame.right-frame.left)*scale,h:(frame.bottom-frame.top)*scale};
 }
+
+export function artworkDirection(config,action,direction){
+ if(action?.endsWith('_front')||action?.endsWith('_back'))return 1;
+ return direction*(config.animation_facing?.[action]==='left'?-1:1);
+}
