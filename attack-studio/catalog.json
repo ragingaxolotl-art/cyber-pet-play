@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "attacks": [
+    {
+      "id": "earthquake",
+      "name": "Earthquake",
+      "required_animation": "ground_slam_side",
+      "description": "Strike the ground with your Ground Slam animation.",
+      "tags": "earth, area, slam"
+    },
+    {
+      "id": "summon_below",
+      "name": "Summon Below",
+      "required_animation": "down_summon_side",
+      "description": "Call a power from below using Down Summon.",
+      "tags": "summon, below"
+    },
+    {
+      "id": "sky_summon",
+      "name": "Sky Summon",
+      "required_animation": "up_summon_side",
+      "description": "Call a power from above using Up Summon.",
+      "tags": "summon, above"
+    }
+  ]
+}

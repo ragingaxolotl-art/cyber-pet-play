@@ -1,0 +1,4 @@
+CraftPix.net — user-supplied free prototype character packs 1, 2 and 3.
+License: https://craftpix.net/file-licenses/ (Freebie Products).
+Integrated, view-only animation references. Never inserted into student artwork or artwork exports.
+Full original packs retained separately on the SSD; only selected sprite strips are bundled.
