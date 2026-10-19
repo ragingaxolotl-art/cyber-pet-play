@@ -1,5 +1,6 @@
+import {installSavedRewards} from './saved-rewards.js?v=rewards1';
 import {hydrationChoice} from './hydration.js?v=nutrition1';
-import {installSharingChoice} from './sharing-choice.js?v=personality1';
+import {installSharingChoice} from './sharing-choice.js?v=rewards1';
 import {reconcilePets} from './roster-state.js?v=personality1';
 import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=personality1';
 import {stepBoard} from './simulation.js?v=personality1';
@@ -212,4 +213,5 @@ async function startBoard(){
 }
 $('caption').textContent='Loading backed-up class pets automatically';startBoard();
 
-installSharingChoice(()=>pets);
+const savedRewards=installSavedRewards(()=>pets);
+installSharingChoice(()=>pets,pet=>savedRewards.sharing(pet));
