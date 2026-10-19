@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script id="cpp-audio-lifecycle">/* Keep Web Audio and the browser game's frame loop together across tab changes. */
+(() => {
+  if (window.__cppAudioLifecycle) return;
+  window.__cppAudioLifecycle = true;
+  const contexts = new Set();
+  let background = document.hidden || !document.hasFocus();
+  function reconcile(record) {
+    record.pending = record.pending.catch(() => {}).then(async () => {
+      if (record.context.state === 'closed') { contexts.delete(record); return; }
+      if (background) {
+        if (record.context.state !== 'suspended') await record.suspend();
+      } else if (record.wanted && record.context.state !== 'running') {
+        await record.resume();
+      }
+    }).catch(() => {
+      // Autoplay may require the next click/key press; preserve the requested state.
+    });
+    return record.pending;
+  }
+  function refresh() {
+    background = document.hidden || !document.hasFocus();
+    for (const record of contexts) reconcile(record);
+  }
+  for (const name of ['AudioContext', 'webkitAudioContext']) {
+    const NativeContext = window[name];
+    if (!NativeContext) continue;
+    window[name] = new Proxy(NativeContext, {
+      construct(Target, args, NewTarget) {
+        const context = Reflect.construct(Target, args, NewTarget);
+        const record = {
+          context, resume: context.resume.bind(context), suspend: context.suspend.bind(context),
+          wanted: context.state === 'running', pending: Promise.resolve()
+        };
+        contexts.add(record);
+        context.resume = () => { record.wanted = true; return reconcile(record); };
+        context.suspend = () => {
+          record.wanted = false;
+          record.pending = record.pending.catch(() => {}).then(() => record.suspend()).catch(() => {});
+          return record.pending;
+        };
+        context.addEventListener('statechange', () => {
+          if (context.state === 'closed') contexts.delete(record);
+          else if (context.state === 'running' && background) reconcile(record);
+        });
+        if (background) reconcile(record);
+        return context;
+      }
+    });
+  }
+  document.addEventListener('visibilitychange', refresh);
+  window.addEventListener('blur', () => {
+    background = true;
+    for (const record of contexts) reconcile(record);
+  });
+  window.addEventListener('focus', refresh);
+  window.addEventListener('pageshow', refresh);
+  window.addEventListener('pagehide', () => {
+    background = true;
+    for (const record of contexts) reconcile(record);
+  });
+  window.addEventListener('pointerdown', refresh, true);
+  window.addEventListener('keydown', refresh, true);
+})();
+</script><base href="https://ragingaxolotl-art.github.io/cyber-pet-play/versions/2026-10-11-strength-stack/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+<title>Cyber Pet Project</title>
+<style>
+html, body, #canvas {
+margin: 0;
+padding: 0;
+border: 0;
+}
+
+body {
+color: white;
+background-color: black;
+overflow: hidden;
+touch-action: none;
+}
+
+#canvas {
+display: block;
+}
+
+#canvas:focus {
+outline: none;
+}
+
+#status, #status-splash, #status-progress {
+position: absolute;
+left: 0;
+right: 0;
+}
+
+#status, #status-splash {
+top: 0;
+bottom: 0;
+}
+
+#status {
+background-color: #242424;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+visibility: hidden;
+}
+
+#status-splash {
+max-height: 100%;
+max-width: 100%;
+margin: auto;
+}
+
+#status-splash.show-image--false {
+display: none;
+}
+
+#status-splash.fullsize--true {
+height: 100%;
+width: 100%;
+object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+image-rendering: pixelated;
+}
+
+#status-progress, #status-notice {
+display: none;
+}
+
+#status-progress {
+bottom: 10%;
+width: 50%;
+margin: 0 auto;
+}
+
+#status-notice {
+background-color: #5b3943;
+border-radius: 0.5rem;
+border: 1px solid #9b3943;
+color: #e0e0e0;
+font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+line-height: 1.3;
+margin: 0 2rem;
+overflow: hidden;
+padding: 1rem;
+text-align: center;
+z-index: 1;
+}
+</style>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="../2026-09-30-4acbcf1/index.icon.png" />
+<link rel="apple-touch-icon" href="../2026-09-30-4acbcf1/index.apple-touch-icon.png"/>
+
+</head>
+<body>
+<canvas id="canvas">
+Your browser does not support the canvas tag.
+</canvas>
+
+<noscript>
+Your browser does not support JavaScript.
+</noscript>
+
+<div id="status">
+<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="../2026-09-30-4acbcf1/index.png" alt="">
+<progress id="status-progress"></progress>
+<div id="status-notice"></div>
+</div>
+
+<script>// Lossless browser delivery. Only this cache contains public game assets;
+// pet saves, accounts and classroom publications are never read or evicted here.
+(() => {
+  const nativeFetch = window.fetch.bind(window);
+  const CACHE = 'cpp-verified-game-assets-v1';
+  const LIMIT = 192 * 1024 * 1024;
+  const pending = new Map();
+  const hex = bytes => Array.from(new Uint8Array(bytes), n => n.toString(16).padStart(2, '0')).join('');
+  const hash = async bytes => hex(await crypto.subtle.digest('SHA-256', bytes));
+  // Track actual transferred bytes, including cache reads, across startup files.
+  let startupDisplay;
+  function showStartup(meta) {
+    if (startupDisplay || !document.createElement) return;
+    const items = new Map();
+    for (const [name, item] of Object.entries(meta.assets)) {
+      items.set(item.sha256, {item, label:name === 'index.wasm' ? 'Game engine' : 'Main menu and pet tools', loaded:0, done:false});
+    }
+    if (meta.delivery_policy === 'activities-first') (meta.startup || []).forEach((digest, index) => {
+      const item = meta.deliveries[digest];
+      if (item) items.set(digest, {item, label:item.label || (meta.startup_groups?.[index] || 'Activity artwork').replace(/[-_]/g,' '), loaded:0, done:false});
+    });
+    const panel = document.createElement('div');
+    panel.style.cssText = 'position:fixed;bottom:8%;left:5%;width:90%;box-sizing:border-box;text-align:center;color:white;background:#163451;padding:16px;border-radius:12px;z-index:1000;font:16px sans-serif';
+    const label = document.createElement('div');
+    label.textContent = 'Getting your game ready…';
+    const bar = document.createElement('progress');
+    bar.max = 100; bar.value = 0;
+    bar.setAttribute('aria-label','Game download progress');
+    bar.style.cssText = 'display:block;width:100%;height:22px;margin:10px 0;accent-color:#63d9f5';
+    const detail = document.createElement('div');
+    panel.appendChild(label); panel.appendChild(bar); panel.appendChild(detail);
+    document.body.appendChild(panel);
+    startupDisplay = {items, panel, label, bar, detail};
+  }
+  function reportStartup(item, loaded, phase, done = false) {
+    const display = startupDisplay;
+    const entry = display?.items.get(item.sha256);
+    if (!entry || entry.done) return;
+    entry.loaded = Math.max(entry.loaded, loaded); entry.done = done;
+    let total = 0, received = 0, complete = 0;
+    for (const value of display.items.values()) {
+      const size = value.item.encoding === 'gzip' && typeof DecompressionStream === 'undefined' ? value.item.size : value.item.encoded_size;
+      total += size; received += Math.min(value.loaded, size);
+      if (value.done) complete++;
+    }
+    const percent = Math.min(99, Math.floor(received / Math.max(1,total) * 100));
+    display.bar.value = percent;
+    display.label.textContent = phase + ' ' + entry.label + '…';
+    display.detail.textContent = percent + '% · ' + (received/1000000).toFixed(1) + ' / ' + (total/1000000).toFixed(1) + ' MB · Please keep this tab open';
+    if (complete === display.items.size) { display.bar.value = 100; display.panel.remove(); }
+  }
+  let metadataPromise;
+  let cacheWrites = Promise.resolve();
+  async function metadata() {
+    if (!metadataPromise) metadataPromise = (async () => {
+      const response = await nativeFetch("https://raw.githubusercontent.com/ragingaxolotl-art/cyber-pet-play/c8f39860d410f7292bd3593921e2cf7793821821/manifests/b403040b58c85b384b901dfffc40fbeaf0984d02124b391428688e370f0a9aa3.json");
+      if (!response.ok) throw Error('Game download details are unavailable. Please refresh.');
+      const bytes = await response.arrayBuffer();
+      if (await hash(bytes) !== "b403040b58c85b384b901dfffc40fbeaf0984d02124b391428688e370f0a9aa3") throw Error('Game download details failed verification.');
+      const value = JSON.parse(new TextDecoder().decode(bytes));
+      window.cppAssetBaseUrl = value.base;
+      showStartup(value);
+      return value;
+    })().catch(error => { metadataPromise = null; throw error; });
+    return metadataPromise;
+  }
+  async function checked(bytes, digest, size) {
+    if (bytes.byteLength !== size || await hash(bytes) !== digest) throw Error('Game download failed verification. Please retry.');
+    return bytes;
+  }
+  async function fetchBytes(base, digest, size, item) {
+    reportStartup(item,0,'Checking saved');
+    const key = new URL('_verified-assets/'+digest, location.origin+'/cyber-pet-play/').href;
+    let cache;
+    try {
+      cache = await caches.open(CACHE);
+      const saved = await cache.match(key);
+      if (saved) {
+        try { return await checked(await saved.arrayBuffer(),digest,size); }
+        catch { await cache.delete(key); }
+      }
+    } catch { cache = null; } // Private browsing/storage refusal must not prevent play.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(),40000);
+    let bytes;
+    try {
+      const response = await nativeFetch(base+digest+'.bin',{signal:controller.signal});
+      if (!response.ok) throw Error('Game download interrupted. Please retry.');
+      reportStartup(item,0,'Downloading');
+      if (response.body) {
+        const reader = response.body.getReader();
+        const chunks = []; let received = 0;
+        while (true) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          chunks.push(value); received += value.byteLength;
+          reportStartup(item,received,'Downloading');
+        }
+        bytes = await new Blob(chunks).arrayBuffer();
+      } else bytes = await response.arrayBuffer();
+      reportStartup(item,size,'Checking');
+      bytes = await checked(bytes,digest,size);
+    } finally { clearTimeout(timer); }
+    if (cache) {
+      cacheWrites = cacheWrites.then(async () => {
+      try {
+        // Insertion order provides bounded FIFO eviction. Only our asset cache
+        // is touched, and deleting an entry cannot delete a pet's saved data.
+        const keys = await cache.keys(); let total = 0; const sizes = [];
+        for (const request of keys) {
+          const response = await cache.match(request);
+          const count = Number(response?.headers.get('Content-Length')) || 0;
+          sizes.push(count); total += count;
+        }
+        while (keys.length && total+size > LIMIT) { total -= sizes.shift(); await cache.delete(keys.shift()); }
+        if (size <= LIMIT) await cache.put(key,new Response(bytes,{headers:{'Content-Length':String(size)}}));
+      } catch { /* Quota/cache failures fall back to verified network bytes. */ }
+      });
+      await cacheWrites;
+    }
+    return bytes;
+  }
+  async function deliver(item, base) {
+    if (!pending.has(item.sha256)) pending.set(item.sha256,(async () => {
+      const gzip = item.encoding === 'gzip' && typeof DecompressionStream !== 'undefined';
+      const digest = item.encoding === 'gzip' && !gzip ? item.fallback : item.encoded_sha256;
+      const size = item.encoding === 'gzip' && !gzip ? item.size : item.encoded_size;
+      let bytes = await fetchBytes(base,digest,size,item);
+      reportStartup(item,size,'Preparing');
+      if (gzip) bytes = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+      const verified = await checked(bytes,item.sha256,item.size);
+      reportStartup(item,size,'Ready:',true);
+      return verified;
+    })().catch(error => {
+      if (startupDisplay?.items.has(item.sha256)) startupDisplay.label.textContent = error.message;
+      throw error;
+    }).finally(() => pending.delete(item.sha256)));
+    return pending.get(item.sha256);
+  }
+  // Only the explicit activity-first policy enables startup downloads. Old
+  // speculative manifests remain demand-only. Additional maps never prefetch.
+  let startupPromise;
+  const preparedPacks = new Map();
+  window.cppStartupPrepared = false;
+  async function prepareStartup(meta) {
+    if (meta.delivery_policy !== 'activities-first') return;
+    if (!startupPromise) startupPromise = (async () => {
+      const queue = [...new Set(meta.startup || [])];
+      try {
+        const results = await Promise.allSettled(Array.from({length:Math.min(3,queue.length)},async () => {
+          while (queue.length) {
+            const digest = queue.shift();
+            const item = meta.deliveries[digest];
+            if (!item) throw Error('Startup game content is missing. Please refresh.');
+            // Retain verified bytes until Godot mounts them, including when
+            // persistent browser storage is refused or full.
+            preparedPacks.set(digest,await deliver(item,meta.base));
+
+          }
+        }));
+        const failure = results.find(result => result.status === 'rejected');
+        if (failure) throw failure.reason;
+        window.cppStartupPrepared = true;
+      } catch (error) {
+        if (startupDisplay) startupDisplay.label.textContent = error.message;
+        throw error;
+      }
+    })().catch(error => { startupPromise = null; preparedPacks.clear(); throw error; });
+    await startupPromise;
+  }
+  window.fetch = async (input, options) => {
+    const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, document.baseURI);
+    // Limit interception to Godot pack/engine requests and our pinned asset root.
+    const name = ['index.pck','index.wasm'].find(name => url.href === new URL(name,document.baseURI).href);
+    const looksOptional = /\/[a-f0-9]{64}\.bin$/.test(url.pathname);
+    if (!name && !looksOptional) return nativeFetch(input,options);
+    const meta = await metadata();
+    const digest = url.pathname.split('/').pop().replace('.bin','');
+    const item = name ? meta.assets[name] : (url.href === meta.base+digest+'.bin' ? meta.deliveries[digest] : null);
+    if (!item) return nativeFetch(input,options);
+    const signal = options?.signal || (typeof Request !== 'undefined' && input instanceof Request ? input.signal : undefined);
+    signal?.throwIfAborted();
+    const bytes = preparedPacks.has(item.sha256) ? preparedPacks.get(item.sha256) : await deliver(item,meta.base);
+    if (!name) preparedPacks.delete(item.sha256);
+    if (name === 'index.pck') await prepareStartup(meta);
+    signal?.throwIfAborted();
+    return new Response(bytes,{headers:{'Content-Type':name === 'index.wasm' ? 'application/wasm' : 'application/octet-stream','Content-Length':String(item.size)}});
+  };
+})();
+</script>
+<script src="../2026-10-08-d05b853/index.js" integrity="sha256-M8lMsxdfMzO4Lio75ejob3eYbwqiBCsWMfY2ek5btro="></script>
+<script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":9508220,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+const statusOverlay = document.getElementById('status');
+const statusProgress = document.getElementById('status-progress');
+const statusNotice = document.getElementById('status-notice');
+
+let initializing = true;
+let statusMode = '';
+
+function setStatusMode(mode) {
+if (statusMode === mode || !initializing) {
+return;
+}
+if (mode === 'hidden') {
+statusOverlay.remove();
+initializing = false;
+return;
+}
+statusOverlay.style.visibility = 'visible';
+statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+statusMode = mode;
+}
+
+function setStatusNotice(text) {
+while (statusNotice.lastChild) {
+statusNotice.removeChild(statusNotice.lastChild);
+}
+const lines = text.split('\n');
+lines.forEach((line) => {
+statusNotice.appendChild(document.createTextNode(line));
+statusNotice.appendChild(document.createElement('br'));
+});
+}
+
+function displayFailureNotice(err) {
+console.error(err);
+if (err instanceof Error) {
+setStatusNotice(err.message);
+} else if (typeof err === 'string') {
+setStatusNotice(err);
+} else {
+setStatusNotice('An unknown error occurred.');
+}
+setStatusMode('notice');
+initializing = false;
+}
+
+const missing = Engine.getMissingFeatures({
+threads: GODOT_THREADS_ENABLED,
+});
+
+if (missing.length !== 0) {
+if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+let serviceWorkerRegistrationPromise;
+try {
+serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+} catch (err) {
+serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+}
+// There's a chance that installing the service worker would fix the issue
+Promise.race([
+serviceWorkerRegistrationPromise.then((registration) => {
+if (registration != null) {
+return Promise.reject(new Error('Service worker already exists.'));
+}
+return registration;
+}).then(() => engine.installServiceWorker()),
+// For some reason, `getRegistration()` can stall
+new Promise((resolve) => {
+setTimeout(() => resolve(), 2000);
+}),
+]).then(() => {
+// Reload if there was no error.
+window.location.reload();
+}).catch((err) => {
+console.error('Error while registering service worker:', err);
+});
+} else {
+// Display the message as usual
+const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+displayFailureNotice(missingMsg + missing.join('\n'));
+}
+} else {
+setStatusMode('progress');
+engine.startGame({
+'onProgress': function (current, total) {
+if (current > 0 && total > 0) {
+statusProgress.value = current;
+statusProgress.max = total;
+} else {
+statusProgress.removeAttribute('value');
+statusProgress.removeAttribute('max');
+}
+},
+}).then(() => {
+setStatusMode('hidden');
+}, displayFailureNotice);
+}
+}());
+</script>
+</body>
+</html>
+
