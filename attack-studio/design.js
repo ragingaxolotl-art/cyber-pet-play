@@ -154,3 +154,11 @@ $('moveHitbox').onclick=()=>{editMode='hitbox';$('showBoxes').checked=true;draw(
 $('moveEffect').onclick=()=>{editMode='effect';$('showBoxes').checked=true;draw();status('Select a layer, then drag its crosshair.');};
 $('clearPath').onclick=()=>{delete attack().motionPath;pathDraft=null;editMode='hitbox';changed();status('Path cleared.');};
 $('markContact').onclick=()=>{const scale=statsFor(attacker).timing;const startup=Math.round(frame/scale);if(startup>180){status('Impact must fit within 180 authored startup frames. Scrub earlier or shorten the path.');return;}attack().startup=startup;changed();renderSettings();status('Impact begins at simulation frame '+simulation.timing.startup+'. Pre-impact loops release here.');};
+
+// Viewer size is a display preference, independent of saved attack definitions.
+const viewerSize=document.getElementById('viewerSize');
+if(viewerSize){
+ try{const saved=Number(localStorage.getItem('cyber-pet-viewer-size'));if(saved>=18&&saved<=48)viewerSize.value=saved;}catch{}
+ const resizeViewer=()=>{document.documentElement.style.setProperty('--viewer-height',viewerSize.value+'dvh');try{localStorage.setItem('cyber-pet-viewer-size',viewerSize.value);}catch{}};
+ viewerSize.oninput=resizeViewer;resizeViewer();
+}

@@ -39,10 +39,10 @@
 .editor-scroll > .panel { min-width: 0; margin: 0 0 16px; }
 .preview-details > summary { color: var(--mint); }
 @media (min-width: 761px) {
-  html, body { height: 100%; overflow: hidden; }
-  body { display: flex; flex-direction: column; }
+  html:has(.layout), body:has(.layout) { height: 100%; overflow: hidden; }
+  body:has(.layout) { display: flex; flex-direction: column; }
   header { flex: none; padding-block: 12px; }
-  main { display: flex; flex-direction: column; min-height: 0; width: 100%; flex: 1; padding-block: 12px; }
+  body:has(.layout) main { display: flex; flex-direction: column; min-height: 0; width: 100%; flex: 1; padding-block: 8px; }
   .intro { flex: none; margin-bottom: 12px; }
   .intro h1 { font-size: 26px; }
   .layout { flex: 1; min-height: 0; align-items: stretch; }
@@ -72,3 +72,32 @@
 }
 
 #bankSource,#bankList{width:100%}dialog{color:#edf3fa;background:#19212b;border:1px solid #455569;border-radius:12px;max-width:540px}dialog::backdrop{background:#0009}.frame-tile input{width:100%}.frame-tile label{margin-top:6px}
+
+/* Compact studio chrome; galleries retain normal document scrolling. */
+body:has(.layout) .intro { display: none; }
+body:has(.layout) header { padding: 6px 16px; gap: 6px 14px; }
+body:has(.layout) header nav { gap: 5px; }
+body:has(.layout) header nav a { margin-right: 4px; font-size: 11px; }
+body:has(.layout) header button { padding: 6px 8px; }
+body:has(.layout) footer { display: none; }
+@media (min-width: 761px) {
+  .preview { padding: 8px; }
+  .preview .stageTitle h2 { font-size: 15px; margin-bottom: 2px; }
+  .preview .legend { margin: 3px 0; }
+  .preview .playback { margin: 4px 0; }
+  #arena { width: min(100%, calc(24dvh * 2)); }
+  body:has(.layout) #status { padding: 4px 8px; margin-top: 4px; font-size: 11px; }
+}
+@media (min-width: 761px) and (max-height: 500px) {
+  html:has(.layout), body:has(.layout) { height: auto; overflow: auto; }
+  body:has(.layout) .layout { min-height: 520px; }
+  .editor-scroll { min-height: 220px; max-height: 320px; }
+}
+
+.viewer-size { margin-left:auto; margin-right:12px; gap:6px; }
+.viewer-size input { width:90px; accent-color:var(--mint); padding:0; }
+body:has(.layout) #arena { width:min(100%, calc(var(--viewer-height,28dvh) * 2)); }
+@media (min-width:761px) {
+ .preview { flex-shrink:1; min-height:0; overflow:auto; max-height:calc(100% - 150px); }
+ .editor-scroll { flex-shrink:0; min-height:150px; }
+}
