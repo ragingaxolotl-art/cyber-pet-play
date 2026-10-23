@@ -1,6 +1,5 @@
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
-const ENDPOINT='https://api.github.com/repos/ragingaxolotl-art/cyber-pet-play/contents/attack-studio/attack-bank.json';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}
 export function validateBank(bank,validate){
  if(bank?.format!=='cyber-pet-attack-bank'||bank.version!==1||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
@@ -16,49 +15,57 @@ export function saveToBank(bank,attack,validate){
 }
 export function encodeBank(bank){const bytes=new TextEncoder().encode(JSON.stringify(bank,null,2));let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);return btoa(binary);}
 export function decodeBank(content){return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(content.replace(/\s/g,'')),c=>c.charCodeAt(0))));}
-export function createGitHubBank(validate,request=fetch){
- let token='';
- const headers=()=>({Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(token?{Authorization:'Bearer '+token}:{})});
- async function read(){
-  const response=await request(ENDPOINT+'?ref=main',{headers:headers(),cache:'no-store'});
-  if(response.status===404)return {bank:emptyBank(),sha:null};
-  if(!response.ok)throw Error('GitHub bank could not load ('+response.status+'). Check the connection and try again.');
-  const file=await response.json();if(file.type!=='file'||file.encoding!=='base64'||file.size>1000000)throw Error('Unsupported GitHub bank file.');
-  return {bank:validateBank(decodeBank(file.content),validate),sha:file.sha};
+export const SESSION_KEY='cyber-pet-attack-classroom-session-v1';
+const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site/attack-bank';
+export function createClassroomBank(validate,request=fetch){
+ let session=null;
+ const headers=()=>({'Content-Type':'application/json',...(session?{'X-Attack-Bank-Session':session.token}:{})});
+ async function call(path='',options={}){
+  const response=await request(API+path,{cache:'no-store',...options,headers:{...headers(),...options.headers}});
+  const data=await response.json();if(!response.ok){if(response.status===401)session=null;const error=Error(data.error||'Classroom saving is unavailable. Your local copy is safe.');error.status=response.status;throw error;}return data;
  }
- return {connect(value){token=value.trim();},disconnect(){token='';},connected:()=>Boolean(token),read,
- async write(bank,sha){
-  if(!token)throw Error('Connect GitHub before saving to the shared bank.');
-  validateBank(bank,validate);
-  const content=encodeBank(bank);if(content.length>1300000)throw Error('The shared bank is too large.');
-  const response=await request(ENDPOINT,{method:'PUT',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({message:'Save attack bank',branch:'main',content,...(sha?{sha}:{})})});
-  if(response.status===409||response.status===422)throw Error('The bank changed while saving. Refresh the bank and save again; your local copy is safe.');
-  if(!response.ok)throw Error('GitHub did not save ('+response.status+'). Check repository access; your local copy is safe.');
-  return response.json();
- }};
+ return {
+  restore(value){session=value&&/^[a-f0-9]{64}$/.test(value.token)&&value.expires>Date.now()/1000?value:null;},
+  connected:()=>!!session&&session.expires>Date.now()/1000,
+  async connect(password){session=await call('/connect',{method:'POST',headers:{'X-Teacher-Password':password}});return session;},
+  async disconnect(){try{if(session)await call('/disconnect',{method:'POST'});}finally{session=null;}},
+  async read(){const data=await call();validateBank(data.bank,validate);return data;},
+  async write(bank,revision){validateBank(bank,validate);return call('',{method:'PUT',body:JSON.stringify({bank,revision})});}
+ };
 }
 export function installAttackBank({current,validate,status,open}){
- const $=id=>document.getElementById(id),remote=createGitHubBank(validate);let bank=emptyBank(),busy=false;
+ const $=id=>document.getElementById(id),remote=createClassroomBank(validate);let bank=emptyBank(),busy=false,pendingSave=false;
+ try{remote.restore(JSON.parse(localStorage.getItem(SESSION_KEY)||'null'));}catch{}
  const message=text=>{$('bankStatus').textContent=text;status(text);};
  function local(){const raw=localStorage.getItem(BANK_KEY);return raw?validateBank(JSON.parse(raw),validate):emptyBank();}
- function render(){const selected=$('bankList').value;$('bankList').replaceChildren();for(const a of bank.attacks){const option=document.createElement('option');option.value=a.id;option.textContent=a.name;$('bankList').append(option);}if(bank.attacks.some(a=>a.id===selected))$('bankList').value=selected;$('openAttack').disabled=busy||!bank.attacks.length;}
- async function task(action){if(busy)return;busy=true;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){message(e.message);}finally{busy=false;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
- async function refresh(){bank=emptyBank();render();bank=$('bankSource').value==='github'?(await remote.read()).bank:local();render();message(`${bank.attacks.length} saved attacks · ${$('bankSource').value==='github'?'GitHub shared bank':'this browser'}.`);}
+ function render(){const selected=$('bankList').value;$('bankList').replaceChildren();for(const a of bank.attacks){const option=document.createElement('option');option.value=a.id;option.textContent=a.name;$('bankList').append(option);}if(bank.attacks.some(a=>a.id===selected))$('bankList').value=selected;$('openAttack').disabled=busy||!bank.attacks.length;$('connectBank').textContent=remote.connected()?'Teacher connection':'Teacher sign in';}
+ async function task(action){if(busy)return;busy=true;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){if(e.status===401)localStorage.removeItem(SESSION_KEY);message(e.message);}finally{busy=false;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
+ function signIn(){ $('bankPassword').value='';$('bankConnection').showModal(); }
+ async function refresh(){
+  if($('bankSource').value==='classroom'&&!remote.connected()){bank=local();render();message('Sign in with your teacher password for classroom saves. Showing local recovery copies.');return;}
+  bank=emptyBank();render();bank=$('bankSource').value==='classroom'?(await remote.read()).bank:local();render();message(`${bank.attacks.length} saved attacks · ${$('bankSource').value==='classroom'?'classroom bank':'this browser'}.`);
+ }
+ async function save(){
+  const attack=structuredClone(current());validate(attack);
+  const localBank=saveToBank(local(),attack,validate);localStorage.setItem(BANK_KEY,JSON.stringify(localBank));
+  if($('bankSource').value==='classroom'){
+   if(!remote.connected()){pendingSave=true;bank=localBank;message('Recovery copy saved on this device. Sign in to finish saving to the classroom bank.');signIn();return;}
+   let latest;try{latest=await remote.read();}catch(e){if(e.status===401){localStorage.removeItem(SESSION_KEY);pendingSave=true;signIn();}throw e;}
+   const previous=bank.attacks.find(a=>a.id===attack.id),now=latest.bank.attacks.find(a=>a.id===attack.id);
+   if(now&&JSON.stringify(now)!==JSON.stringify(previous)&&!confirm('This attack changed on another device. Replace it with your current version?')){message('Saved locally; classroom attack was not replaced.');return;}
+   const next=saveToBank(latest.bank,attack,validate);await remote.write(next,latest.revision);bank=next;message('Saved '+attack.name+' to the classroom bank and this device.');
+  }else{bank=localBank;message('Saved '+attack.name+' on this device.');}
+  render();$('bankList').value=attack.id;
+ }
  $('bankSource').onchange=()=>task(refresh);$('refreshBank').onclick=()=>task(refresh);
  $('openAttack').onclick=()=>task(async()=>{const saved=bank.attacks.find(a=>a.id===$('bankList').value);if(saved&&open(structuredClone(saved)))message('Opened '+saved.name+' from the attack bank.');});
- $('saveAttack').onclick=()=>task(async()=>{
-  const attack=structuredClone(current());validate(attack);
-  // Keep a local recovery copy even if GitHub is unavailable. Never clear the workspace dirty flag here.
-  const localBank=saveToBank(local(),attack,validate);localStorage.setItem(BANK_KEY,JSON.stringify(localBank));
-  if($('bankSource').value==='github'){
-   if(!remote.connected()){message('Saved locally. Connect GitHub, then press Save attack again to share it.');$('bankConnection').showModal();return;}
-   const latest=await remote.read(),previous=bank.attacks.find(a=>a.id===attack.id),now=latest.bank.attacks.find(a=>a.id===attack.id);
-   if(now&&JSON.stringify(now)!==JSON.stringify(previous)&&!confirm('This attack changed in GitHub since it was loaded. Replace it with your current version?')){message('Saved locally; shared attack was not replaced.');return;}
-   const next=saveToBank(latest.bank,attack,validate);await remote.write(next,latest.sha);bank=next;message('Saved '+attack.name+' to GitHub and this browser.');
-  }else{bank=localBank;message('Saved '+attack.name+' in this browser. Select it in the bank and press Open attack anytime.');}
-  render();$('bankList').value=attack.id;
+ $('saveAttack').onclick=()=>task(save);
+ $('connectBank').onclick=()=>{pendingSave=false;signIn();};
+ $('bankConnection').addEventListener('close',()=>{
+  const action=$('bankConnection').returnValue,password=$('bankPassword').value;$('bankPassword').value='';
+  if(action==='disconnect')task(async()=>{pendingSave=false;localStorage.removeItem(SESSION_KEY);await remote.disconnect();await refresh();});
+  else if(action==='connect'&&password)task(async()=>{const session=await remote.connect(password);if($('rememberBank').checked)localStorage.setItem(SESSION_KEY,JSON.stringify(session));else localStorage.removeItem(SESSION_KEY);$('bankSource').value='classroom';if(pendingSave){pendingSave=false;await save();}else await refresh();});
+  else pendingSave=false;
  });
- $('connectBank').onclick=()=>{$('bankToken').value='';$('bankConnection').showModal();};
- $('bankConnection').addEventListener('close',()=>{const action=$('bankConnection').returnValue,value=$('bankToken').value;$('bankToken').value='';if(action==='disconnect'){remote.disconnect();message('GitHub disconnected. Saved attacks are unchanged.');}else if(action==='connect'&&value.trim()){remote.connect(value);$('bankSource').value='github';task(refresh);}});
  task(refresh);
 }
