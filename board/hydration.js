@@ -1,4 +1,4 @@
-import {foodScore} from './food.js?v=31';
+import {foodScore} from './food.js?v=friendship1';
 // A board-only appetite, never a saved nutrient/stat or pantry mutation.
 export function advanceHydration(p,dt){
  if(!Number.isFinite(dt)||dt<=0)return;

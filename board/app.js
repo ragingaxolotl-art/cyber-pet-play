@@ -1,29 +1,32 @@
-import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=health-release1';
-import {installSavedRewards} from './saved-rewards.js?v=rewards1';
-import {hydrationChoice} from './hydration.js?v=nutrition1';
-import {installSharingChoice} from './sharing-choice.js?v=rewards1';
-import {reconcilePets} from './roster-state.js?v=health-release1';
-import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=health-release1';
-import {stepBoard} from './simulation.js?v=health-release1';
-import {createHosts,loadNpcArt} from './npc-animation.js?v=31';
-import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=health-release1';
-import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=personality1';
-import {createWash} from './wash.js?v=personality1';
-import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement,artworkDirection} from './display.js?v=34';
-import {createCompanions,withResidents} from './companions.js?v=31';
-import {isClassPet} from './profile.js?v=31';
-import {drawGames} from './games.js?v=development1';
-import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=personality1';
-import {chooseItem} from './sharing.js?v=personality1';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=31';
-import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=health-release1';
-import {favoriteFood} from './food.js?v=31';
-import {drawLandscape,drawWash} from './scenery.js?v=personality1';
-import {refreshRoster} from './connection.js?v=31';
-import {readBackup} from './backups.js?v=health-release1';
+import {drawSpeech} from './friendships.js?v=friendship1';
+import {installFriendships} from './friendship-panel.js?v=friendship1';
+import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=friendship1';
+import {installSavedRewards} from './saved-rewards.js?v=friendship1';
+import {hydrationChoice} from './hydration.js?v=friendship1';
+import {installSharingChoice} from './sharing-choice.js?v=friendship1';
+import {reconcilePets} from './roster-state.js?v=friendship1';
+import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=friendship1';
+import {stepBoard} from './simulation.js?v=friendship1';
+import {createHosts,loadNpcArt} from './npc-animation.js?v=friendship1';
+import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=friendship1';
+import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=friendship1';
+import {createWash} from './wash.js?v=friendship1';
+import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement,artworkDirection} from './display.js?v=friendship1';
+import {createCompanions,withResidents} from './companions.js?v=friendship1';
+import {isClassPet} from './profile.js?v=friendship1';
+import {drawGames} from './games.js?v=friendship1';
+import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=friendship1';
+import {chooseItem} from './sharing.js?v=friendship1';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=friendship1';
+import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=friendship1';
+import {favoriteFood} from './food.js?v=friendship1';
+import {drawLandscape,drawWash} from './scenery.js?v=friendship1';
+import {refreshRoster} from './connection.js?v=friendship1';
+import {readBackup} from './backups.js?v=friendship1';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
+const friendships=installFriendships(()=>pets);
 const livingWorld=createWorld(),washHistory=createWash();
 let companions=[];
 const counter=createCounter(),counterArt=loadCounterArt(),hosts=createHosts(),flyer=createFlyer();
@@ -114,11 +117,12 @@ function drawPet(pet){
   ctx.save();ctx.globalAlpha=healthVisual.alpha;ctx.filter=`grayscale(${healthVisual.gray})`;
   drawDirt(img,bounds,x+facing*(placement.x+w/2),y+placement.y+h,w,h,facing,1-pet.cleanliness,pet.dirtPattern);ctx.restore();
   drawHealth(ctx,pet,x,groundY,desired);
+  drawSpeech(ctx,pet,x,y-desired-44*unit,unit,width);
 
 }
 function render(time){
   const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));}
+  if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}
   stage();drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed,foodImages);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
@@ -127,7 +131,7 @@ function setPets(data,label){
   for(const pet of data){pet.food??=chooseItem({data:pet,random:Math.random},foods);pet.boardLike=pet.food?.name;if(pet.food&&!foodImages.has(pet.food.id)){const image=new Image();image.src=pet.food.sprite;foodImages.set(pet.food.id,image);}const bounds=[...pet.images.entries()].map(([name,image])=>{const b=measureArtwork(image),s=sourceScale(pet,name);return frameCoordinates(b,image,s);});pet.artworkEnvelope=animationEnvelope(bounds);pet.maxHeight=pet.artworkEnvelope.bottom-pet.artworkEnvelope.top;pet.maxWidth=pet.artworkEnvelope.right-pet.artworkEnvelope.left;}
   const keep=new Set(data.flatMap(p=>[...p.images.values()]));
   for(const p of loaded)for(const image of p.images.values())if(!keep.has(image))image.close?.();
-  loaded=data;pets=reconcilePets(data,pets);mode=label;
+  loaded=data;pets=reconcilePets(data,pets);mode=label;friendships.hydrate();
   for(const p of pets)p.chooseHydration=()=>{
    const item=hydrationChoice(p,foods);if(!item){p.hydrationRetry=60;return;}
    p.data.food=item;p.hydrationMeal=true;p.speech='A refreshing snack after play!';

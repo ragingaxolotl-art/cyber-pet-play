@@ -1,5 +1,5 @@
-import {shareItem} from './sharing.js?v=personality1';
-import {freeForActivity as free} from './activity-state.js?v=31';
+import {shareItem} from './sharing.js?v=friendship1';
+import {freeForActivity as free} from './activity-state.js?v=friendship1';
 export function sharingChoices(pets){
  const choices=[];
  for(const giver of pets)for(const recipient of pets){

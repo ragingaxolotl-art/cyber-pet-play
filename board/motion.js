@@ -1,9 +1,10 @@
-import {freeForActivity} from './activity-state.js?v=31';
-import {resolveAction,aliases} from './pet-animation.js?v=health-release1';
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=31';
-import {makeDirt} from './dirt.js?v=31';
-import {collectItem,friendship} from './sharing.js?v=personality1';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=personality1';
+import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=friendship1';
+import {freeForActivity} from './activity-state.js?v=friendship1';
+import {resolveAction,aliases} from './pet-animation.js?v=friendship1';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=friendship1';
+import {makeDirt} from './dirt.js?v=friendship1';
+import {collectItem,friendship} from './sharing.js?v=friendship1';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=friendship1';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -68,7 +69,7 @@ export function startConversation(a,b,afterTag=false){
     p.speech=afterTag?'That was fun!':index===0?'I like '+likes[0]+'!':'What do you like?';
     p.speechReply=index===0?'What about you?':'I like '+likes[1]+'!';
   }
-
+  beginFriendshipConversation(a,b,afterTag);
 }
 export function startTag(a,b){
   if(!hasAction(a.data,'walking')||!hasAction(b.data,'walking'))return false;
@@ -236,4 +237,4 @@ export function frameIndex(config,action,seconds){
 }
 
 export const socialWorld=()=>({standBeside,hasAction,tuning,stairs,stations,floor,addWalkingDirt,travelSpeed});
-export function advanceInteractions(pets,dt){advanceSocial(pets,dt,socialWorld());}
+export function advanceInteractions(pets,dt){advanceSocial(pets,dt,socialWorld());advanceFriendships(pets,dt);}

@@ -1,4 +1,4 @@
-import {stations,floor} from './motion.js?v=health-release1';
+import {stations,floor} from './motion.js?v=friendship1';
 // Run after every movement system: games, jobs and cooldowns cannot bypass water.
 export const createWash=()=>new WeakMap();
 export function advanceWash(history,pets,dt){

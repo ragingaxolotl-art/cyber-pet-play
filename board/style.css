@@ -3,3 +3,5 @@
 .check{display:flex;align-items:center;gap:8px}.crowd{display:flex;align-items:center;gap:10px}.crowd label{margin:0}.crowd select{background:#21354d;color:#f2efe7;padding:8px;border:1px solid #56708e;border-radius:6px}dialog{max-height:90dvh;overflow:auto}@media(min-width:2200px){header{min-height:120px;padding:25px 45px}.brand{font-size:24px}.subtitle{font-size:18px}.tools button{font-size:20px;padding:15px 22px}#status{font-size:18px}footer{min-height:60px;font-size:17px}.location{font-size:16px;padding:13px 20px}.mark{font-size:48px}footer>span:last-child{font-size:14px}}
 
 #exit-fullscreen{display:none;position:fixed;top:14px;right:14px;z-index:10;background:#14243ac9;min-height:44px}:root:fullscreen #exit-fullscreen{display:block}
+
+#friendship-panel{max-height:85vh;overflow:auto}#friendship-panel h2{font-size:1rem;margin-top:20px}#friendship-panel select{max-width:100%;padding:8px}#friendship-panel meter{width:100%;height:12px}#friendship-panel .friend-close{float:right}#friendship-panel button{margin:4px}#friendship-panel input{max-width:100%}

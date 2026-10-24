@@ -1,7 +1,7 @@
-import {advanceHydration} from './hydration.js?v=nutrition1';
-import {freeForActivity} from './activity-state.js?v=31';
-import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=health-release1';
-import {travelSpeed,trait} from './profile.js?v=31';
+import {advanceHydration} from './hydration.js?v=friendship1';
+import {freeForActivity} from './activity-state.js?v=friendship1';
+import {hasAction,stairs,floor,addWalkingDirt} from './motion.js?v=friendship1';
+import {travelSpeed,trait} from './profile.js?v=friendship1';
 // Session appetites create purposeful visits; saved fullness is never changed.
 export function startFoodTrip(p){
  if(!p.data.food||!hasAction(p.data,'eat')||!hasAction(p.data,'walking')||p.stair||p.socialGroup||p.playGroup)return false;

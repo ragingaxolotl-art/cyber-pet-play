@@ -1,8 +1,8 @@
-import {freeForActivity} from './activity-state.js?v=31';
-import {splashDirt} from './dirt.js?v=31';
-import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=31';
-import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=personality1';
-import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=health-release1';
+import {freeForActivity} from './activity-state.js?v=friendship1';
+import {splashDirt} from './dirt.js?v=friendship1';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=friendship1';
+import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=friendship1';
+import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=friendship1';
 export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{level:2,left:.67,right:.97}];
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];

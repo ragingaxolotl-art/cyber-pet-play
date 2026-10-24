@@ -1,7 +1,7 @@
-import {freeForActivity} from './activity-state.js?v=31';
-import {floor,hasAction} from './motion.js?v=health-release1';
-import {travelSpeed} from './profile.js?v=31';
-import {contagious,grantUnicornPotion} from './health.js?v=health-release1';
+import {freeForActivity} from './activity-state.js?v=friendship1';
+import {floor,hasAction} from './motion.js?v=friendship1';
+import {travelSpeed} from './profile.js?v=friendship1';
+import {contagious,grantUnicornPotion} from './health.js?v=friendship1';
 // Outbreak visits are separate from ordinary toy visits. All supplies are session-only gifts.
 export const unicornCareSettings={deliveryChance:.2,arrivalBase:.30,extraInfected:.05,arrivalGrowth:0.05,rollSeconds:60,quietReset:30,visitLimit:180,handoffSeconds:2.4};
 const ill=p=>!!p.health?.conditions.length;
