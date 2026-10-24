@@ -82,7 +82,8 @@ export function simulate(a,attacker,target,options={}){
   self.evading=active&&a.payload==='dodge'&&self.hp>0;
   if(self.evading&&f===tm.startup)event(f,'Dodge window opened.');
   if(self.blocking&&f===tm.startup)event(f,'Block window opened.');
-  if(incomingDamage>0&&f===incomingFrame){const blocked=self.blocking&&facing===side,evaded=self.evading;const damage=hurt(self,Math.round(incomingDamage*(evaded?0:blocked?1-a.blockPercent/100:1)));event(f,`${evaded?'Incoming attack evaded':blocked?'Incoming attack blocked':'Incoming attack hit'}: ${damage} damage to attacker.`);}
+  if(incomingDamage>0&&f===incomingFrame&&f<other.stun)event(f,'Incoming attack interrupted — opponent is stunned.');
+  if(incomingDamage>0&&f===incomingFrame&&f>=other.stun){const blocked=self.blocking&&facing===side,evaded=self.evading;const damage=hurt(self,Math.round(incomingDamage*(evaded?0:blocked?1-a.blockPercent/100:1)));event(f,`${evaded?'Incoming attack evaded':blocked?'Incoming attack blocked':'Incoming attack hit'}: ${damage} damage to attacker.`);}
   if(!['block','dodge'].includes(a.payload)&&active&&contact&&hits<a.hitLimit&&f-lastHit>=a.hitInterval&&recipient.hp>0){
    hits++;lastHit=f;let amount=magnitude(a,attacker);
    const guarding=['damage','push'].includes(a.payload)&&options.guard&&a.blockable&&a.delivery!=='self';
