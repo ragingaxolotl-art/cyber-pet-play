@@ -15,12 +15,18 @@ export function visualFrame(effect,visual,frame,impact){
   const prefix=times.slice(0,start).reduce((a,b)=>a+b,0),loop=times.slice(start,end+1).reduce((a,b)=>a+b,0),after=prefix+loop;
   if(frame>=impact)elapsed=after+Math.max(0,frame-Math.max(impact,visual.start))*1000/60*visual.rate;
   else if(elapsed>=prefix)elapsed=prefix+(elapsed-prefix)%loop;
- }else if(effect.loop)elapsed%=total;
+ }else if(visual.loop??effect.loop)elapsed%=total;
  if(elapsed>=total)return -1;
  for(let i=0;i<times.length;i++){if(elapsed<times[i])return i;elapsed-=times[i];}return -1;
 }
 export function visualEnd(effect,visual,impact){
  const times=(visual.frames||effect.times.map((_,i)=>i)).map(i=>effect.times[i]??effect.times[0]);
  if(visual.loopUntilImpact){const end=Math.min(times.length,Math.max(visual.loopStart||1,visual.loopEnd||times.length));return Math.max(impact,visual.start)+times.slice(end).reduce((a,b)=>a+b,0)*60/1000/visual.rate;}
- return effect.loop?0:visual.start+times.reduce((a,b)=>a+b,0)*60/1000/visual.rate;
+ return (visual.loop??effect.loop)?0:visual.start+times.reduce((a,b)=>a+b,0)*60/1000/visual.rate;
+}
+
+// Optional authored fade smooths art whose source sequence has no transparent tail.
+export function visualOpacity(effect,visual,frame,impact){
+ const fade=visual.fadeOutFrames||0,end=visualEnd(effect,visual,impact);
+ return !fade||!Number.isFinite(end)||end===0?1:Math.max(0,Math.min(1,(end-frame)/fade));
 }
