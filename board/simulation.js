@@ -1,18 +1,18 @@
-import {advanceOutbreaks} from './outbreaks.js?v=outbreak1';
-import {advanceHealth} from './health.js?v=outbreak1';
-import {preserveRecovery} from './activity-state.js?v=outbreak1';
-import {advancePetPresentation} from './pet-animation.js?v=outbreak1';
-import {advanceMagic} from './unicorn-events.js?v=outbreak1';
-import {prepareCounterQueue} from './counter-queue.js?v=outbreak1';
-import {advanceCounter} from './counter.js?v=outbreak1';
-import {advanceHosts} from './npc-animation.js?v=outbreak1';
-import {advanceFlyer} from './flyer.js?v=outbreak1';
-import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=outbreak1';
-import {advanceMeals} from './meals.js?v=outbreak1';
-import {advanceGames} from './games.js?v=outbreak1';
-import {advanceWorld} from './world.js?v=outbreak1';
-import {advanceHygiene} from './hygiene.js?v=outbreak1';
-import {advanceWash} from './wash.js?v=outbreak1';
+import {advanceOutbreaks} from './outbreaks.js?v=height1';
+import {advanceHealth} from './health.js?v=height1';
+import {preserveRecovery} from './activity-state.js?v=height1';
+import {advancePetPresentation} from './pet-animation.js?v=height1';
+import {advanceMagic} from './unicorn-events.js?v=height1';
+import {prepareCounterQueue} from './counter-queue.js?v=height1';
+import {advanceCounter} from './counter.js?v=height1';
+import {advanceHosts} from './npc-animation.js?v=height1';
+import {advanceFlyer} from './flyer.js?v=height1';
+import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=height1';
+import {advanceMeals} from './meals.js?v=height1';
+import {advanceGames} from './games.js?v=height1';
+import {advanceWorld} from './world.js?v=height1';
+import {advanceHygiene} from './hygiene.js?v=height1';
+import {advanceWash} from './wash.js?v=height1';
 // Keep this exact update order shared by the live board and coexistence tests.
 // Active actions finish first, then care/play invitations, then optional scenery.
 export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){

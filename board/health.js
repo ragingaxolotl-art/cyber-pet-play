@@ -1,8 +1,8 @@
-import {bestBoardMedicine} from './care-medicines.js?v=outbreak1';
-import {sanitizeConditions} from './condition-data.js?v=outbreak1';
-import {trait,love,travelSpeed} from './profile.js?v=outbreak1';
-import {freeForActivity} from './activity-state.js?v=outbreak1';
-import {resolveAction} from './pet-animation.js?v=outbreak1';
+import {bestBoardMedicine} from './care-medicines.js?v=height1';
+import {sanitizeConditions} from './condition-data.js?v=height1';
+import {trait,love,travelSpeed} from './profile.js?v=height1';
+import {freeForActivity} from './activity-state.js?v=height1';
+import {resolveAction} from './pet-animation.js?v=height1';
 // Seconds of board play, not real medical guidance or persistent health changes.
 export const healthTuning={contactRadius:.085,avoidRadius:.15,exposureMinimum:8,exposureRange:16,doseSeconds:6};
 export const contagious=new Set(['glitch_fever','parasite_spore_fan','static_mites']);
