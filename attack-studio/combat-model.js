@@ -44,7 +44,7 @@ export function validateDesign(p,ids){
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  const unique=new Set();for(const a of p.attacks){validateAttack(a,ids);if(unique.has(a.id))fail('Duplicate attack ID.');unique.add(a.id);}return p;
 }
-export function validateSandbox(o){if(!o||typeof o.guard!=='boolean'||![1,-1].includes(o.facing)||![1,-1].includes(o.targetSide))fail('Invalid test scenario.');for(const [key,min,max] of [['distance',0,160],['resistance',-50,75],['selfHP',.05,1],['targetHP',.05,1],['energy',0,1]])num(o,key,min,max);for(const [key,min,max] of [['incomingDamage',0,500],['incomingFrame',0,1800]])if(o[key]!==undefined)num(o,key,min,max,true);}
+export function validateSandbox(o){if(!o||typeof o.guard!=='boolean'||![1,-1].includes(o.facing)||![1,-1].includes(o.targetSide))fail('Invalid test scenario.');for(const [key,min,max] of [['distance',0,245],['resistance',-50,75],['selfHP',.05,1],['targetHP',.05,1],['energy',0,1]])num(o,key,min,max);for(const [key,min,max] of [['incomingDamage',0,500],['incomingFrame',0,1800],['targetHeight',0,60]])if(o[key]!==undefined)num(o,key,min,max,true);}
 export function statsFor(s){if(!s||typeof s!=='object')fail('Missing test stats.');for(const k of STATS)num(s,k,0,99,true);const b=BALANCE;return {maxHP:b.baseHP+b.hpPerStamina*s.stamina,maxEnergy:b.baseEnergy+b.energyPerStamina*s.stamina,timing:1-b.maxSpeedReduction*s.speed/b.statCap,cost:1-b.maxFocusCostReduction*s.focus/b.statCap,guard:b.baseGuardReduction+b.maxFocusGuardBonus*s.focus/b.statCap,support:1+b.maxCharismaShieldBonus*s.charisma/b.statCap,resistance:1-b.maxFocusStatusReduction*s.focus/b.statCap};}
 export function timing(a,s){const scale=statsFor(s).timing;return {startup:Math.round(a.startup*scale),active:a.active,recovery:Math.round(a.recovery*scale),cooldown:a.cooldown};}
 export function magnitude(a,s){if(['push','block'].includes(a.payload))return 0;return Math.round((a.base+a.coefficient*s[a.scaling])*(a.payload==='shield'?statsFor(s).support:1));}
@@ -54,7 +54,7 @@ export function simulate(a,attacker,target,options={}){
  validateAttack(a);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
  const distance=options.distance??100,side=options.targetSide===-1?-1:1;
  let self={hp:Math.round(av.maxHP*(options.selfHP??.6)),maxHP:av.maxHP,energy:Math.round(av.maxEnergy*(options.energy??1)),shield:0,shieldUntil:0,x:0,stun:0,y:0};
- let other={hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,shieldUntil:0,x:side*distance,stun:0,y:0};
+ let other={hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,shieldUntil:0,x:side*distance,stun:0,y:-(options.targetHeight??0)};
  const cost=Math.ceil(a.cost*av.cost),events=[],frames=[],statuses=[];let hits=0,lastHit=-Infinity,flight=null;
  const incomingDamage=options.incomingDamage??0,incomingFrame=options.incomingFrame??30;num({incomingDamage},'incomingDamage',0,500);num({incomingFrame},'incomingFrame',0,1800,true);
  const end=Math.max(a.motionPath?.length?(a.pathDuration||60):0,incomingDamage?incomingFrame:0,tm.startup+tm.active+a.flightFrames,tm.startup+tm.active+tm.recovery,tm.startup+tm.active+(a.status==='none'?0:a.statusDuration),tm.startup+tm.active+(a.payload==='shield'?a.shieldDuration:0));
@@ -66,7 +66,7 @@ export function simulate(a,attacker,target,options={}){
   if(flight){
    const t=clamp((f-flight.start)/a.flightFrames,0,1),who=flight.who;
    who.x=flight.x+facing*(a.pushAxis==='y'?0:a.knockback)*t;
-   who.y=-4*(a.pushAxis==='x'?0:a.launchHeight)*t*(1-t);
+   who.y=(flight.y||0)*(1-t)-4*(a.pushAxis==='x'?0:a.launchHeight)*t*(1-t);
    if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');flight.wall=true;}}
    if(t===1){who.y=0;if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
@@ -84,8 +84,8 @@ export function simulate(a,attacker,target,options={}){
    if(a.payload==='damage'){
     amount=Math.round(amount*(1-clamp(options.resistance??0,-50,75)/100)*(guarding?1-tv.guard:1));
     event(f,`${guarding?'Blocked hit':'Hit'} ${hits}: ${hurt(recipient,amount)} damage.`);
-    if(!guarding){flight={who:recipient,x:recipient.x,start:f,wall:false};recipient.stun=Math.max(recipient.stun,f+a.hitstun);}
-   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(!guarding)flight={who:recipient,x:recipient.x,start:f,wall:false};}
+    if(!guarding){flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};recipient.stun=Math.max(recipient.stun,f+a.hitstun);}
+   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(!guarding)flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};}
    else if(a.payload==='heal')event(f,`Healed ${heal(recipient,amount)} HP.`);
    else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=f+a.shieldDuration;event(f,`Shield: ${amount} HP (refresh; does not stack).`);}
    else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${recipient.energy-old} energy.`);}
