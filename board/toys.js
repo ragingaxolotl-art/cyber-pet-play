@@ -1,6 +1,6 @@
 import {freeForActivity} from './activity-state.js?v=31';
 import {foodScore} from './food.js?v=31';
-import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=personality1';
+import {floor,hasAction,animationDuration,addWalkingDirt} from './motion.js?v=health-release1';
 import {traitFeeling,trait,love,willing,travelSpeed} from './profile.js?v=31';
 export const ballItem=Object.freeze({id:'unicorn-ball',name:'Ball',type:'toy',sprite:'assets/npcs/toy-ball.svg',tags:[]});
 export const releaseAt=.48, tossDuration=1.56;

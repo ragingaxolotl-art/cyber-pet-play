@@ -1,5 +1,5 @@
 import {freeForActivity} from './activity-state.js?v=31';
-import {resolveAction,aliases} from './pet-animation.js?v=personality1';
+import {resolveAction,aliases} from './pet-animation.js?v=health-release1';
 import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=31';
 import {makeDirt} from './dirt.js?v=31';
 import {collectItem,friendship} from './sharing.js?v=personality1';
@@ -130,7 +130,7 @@ function tickMotion(pet,dt){
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
   pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
   if(pet.heldItem)pet.heldTime=(pet.heldTime||0)+dt;
-  if(['seekFood','seekToy','toyPlay','counterQueue','counterLeave','seekWash','shelterWait','game','build','tag','gesture','together','escort','shelter','puddle','watch','explore','celebrate','quiet','startle'].includes(pet.mode))return;
+  if(['clinicWalk','quarantine','medicine','avoidSick','seekFood','seekToy','toyPlay','counterQueue','counterLeave','seekWash','shelterWait','game','build','tag','gesture','together','escort','shelter','puddle','watch','explore','celebrate','quiet','startle'].includes(pet.mode))return;
   if(pet.mode==='social'){pet.timer-=dt;pet.engagement=Math.max(0,pet.timer/pet.socialDuration);if(pet.timer<pet.socialDuration/2){pet.emote=pet.socialReply;pet.speech=pet.speechReply;}if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emote='thinking';pet.emoteTime=2;pet.speech='';}return;}
   if(pet.mode==='snack'){
     pet.timer-=dt;

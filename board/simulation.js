@@ -1,11 +1,12 @@
+import {advanceHealth} from './health.js?v=health-release1';
 import {preserveRecovery} from './activity-state.js?v=31';
-import {advancePetPresentation} from './pet-animation.js?v=personality1';
-import {advanceMagic} from './unicorn-events.js?v=personality1';
+import {advancePetPresentation} from './pet-animation.js?v=health-release1';
+import {advanceMagic} from './unicorn-events.js?v=health-release1';
 import {prepareCounterQueue} from './counter-queue.js?v=personality1';
 import {advanceCounter} from './counter.js?v=personality1';
 import {advanceHosts} from './npc-animation.js?v=31';
-import {advanceFlyer} from './flyer.js?v=personality1';
-import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=personality1';
+import {advanceFlyer} from './flyer.js?v=health-release1';
+import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=health-release1';
 import {advanceMeals} from './meals.js?v=nutrition1';
 import {advanceGames} from './games.js?v=development1';
 import {advanceWorld} from './world.js?v=personality1';
@@ -17,6 +18,7 @@ export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){
  const {counter,hosts,flyer,livingWorld,washHistory}=scene;
  const run=fn=>{const before=new Map(pets.map(p=>[p,p.mode]));fn();preserveRecovery(pets,before);};
  for(const p of pets)p.decisionCooldown=Math.max(0,(p.decisionCooldown||0)-dt);
+ advanceHealth(pets,dt);
  prepareCounterQueue(counter,pets);run(()=>{for(const p of pets)tick(p,dt);});
  advanceHosts(hosts,counter,dt);run(()=>advanceFlyer(flyer,pets,dt,aspect,time));run(()=>advanceCounter(counter,pets,dt,artReady));
  run(()=>advanceTag(pets,dt));run(()=>advanceInteractions(pets,dt));

@@ -8,6 +8,7 @@ const negativeFeelings=new Set(['crying','frustrated']);
 const critical=p=>p.foodReactionTime>0||p.mode==='gesture'||p.mode==='social'||p.mode==='startle';
 export function visibleFeeling(p){
  if(p.emoteTime>0&&critical(p))return p.emote;
+ if(p.health?.conditions.length)return p.mode==='medicine'?'ok':p.health.conditions[0].family==='fatigue'?'sleepy':p.health.conditions[0].family==='injury'?'crying':p.health.conditions[0].family==='stress'?'question':'sweat';
  if(p.sparkleTime>0&&!['eat','snack','counterQueue','counterLeave','seekFood','seekWash','wash','build'].includes(p.mode))return 'hearts';
  return p.emoteTime>0?p.emote:'';
 }
@@ -17,7 +18,7 @@ function verticalTravel(p){
  return r?.points?.[r.segment+1]?Math.sign(r.points[r.segment+1].level-r.points[r.segment].level):0;
 }
 export function petIsMoving(p){
- if(p.counterMoving)return true;
+ if(p.mode==='clinicWalk'||p.mode==='avoidSick'||p.counterMoving)return true;
  if(['toyPlay','game','build'].includes(p.mode))return !!p.gameMoving;
  if(['seekFood','seekToy','walk','wash','seekWash','tag','together','escort'].includes(p.mode))return true;
  return ['shelter','shelterWait','puddle','watch','explore','celebrate','quiet','startle'].includes(p.mode)&&Math.abs((p.worldTarget??p.x)-p.x)>.002;
@@ -27,6 +28,8 @@ export function selectPetAction(p){
  const lowMood=(data.stats?.happiness??50)+(p.personalityMood||0)<=35&&!(p.comfortTime>0),mood=negativeFeelings.has(feeling)?(feeling==='frustrated'&&(data.love??50)<50?'angry':'sad'):positiveFeelings.has(feeling)?'happy':lowMood?((data.love??50)<35&&(data.personality?.assertiveness??50)>65?'angry':'sad'):null;
  const restDirection=['front','side','back'][((p.animationVariant||0)+(p.idleVisits||0))%3];
  const posture=mode=>mood?[`${mood}_${mode}_side`,`${mood}_${mode}_front`,`${mood}_${mode}_back`,...(mood==='sad'?[mode==='walking'?'sad_walking':'sad_idle']:[])]:[];
+ if(p.mode==='medicine')return choose('receive_side','sit_side','idle');
+ if(p.mode==='quarantine')return choose('sit_side','tired','idle');
  if(['eat','snack'].includes(p.mode)&&!p.awaitingCounter)return choose('eat','idle');
  if(petIsMoving(p)&&resolveAction(data,'walking')){
   const vertical=verticalTravel(p),direction=vertical>0?'back':vertical<0?'front':'side';

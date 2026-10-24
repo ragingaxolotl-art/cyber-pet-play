@@ -1,7 +1,8 @@
+import {advanceUnicornCare,drawUnicornCare} from './unicorn-care.js?v=health-release1';
 import {freeForActivity} from './activity-state.js?v=31';
-import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=personality1';
+import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=health-release1';
 import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=personality1';
-import {floor} from './motion.js?v=personality1';
+import {floor} from './motion.js?v=health-release1';
 import {trait,traitFeeling,love} from './profile.js?v=31';
 import {drawFeeling} from './emotes.js?v=31';
 // One scenery character. Toy props and greetings are session-only, never save data.
@@ -12,6 +13,7 @@ const available=p=>freeForActivity(p);
 export function advanceFlyer(f,pets,dt,aspect=16/9,time){
  const previousClock=f.clock;f.clock+=dt;f.feelingTime=Math.max(0,f.feelingTime-dt);f.nextDrop-=dt;
  advanceToys(f,pets,dt);
+ if(advanceUnicornCare(f,pets,dt))return;
  if(!advanceVisit(f,dt,time))return;
  if(f.greeting&&!pets.includes(f.greeting)){f.greeting=null;f.feeling='thinking';}
  const u=Math.min(1,f.clock/f.duration),ease=u*u*(3-2*u);
@@ -41,7 +43,7 @@ export function advanceFlyer(f,pets,dt,aspect=16/9,time){
  else if(f.state==='takeoff')start(f,'fly',.08+f.random()*.84,.13+f.random()*.15,8+f.random()*8);
 }
 export function drawFlyer(c,w,h,f,art,elapsed,images){
- drawMagic(c,w,h,f,elapsed);if(f.state==='absent')return;
+ drawUnicornCare(c,w,h,f);drawMagic(c,w,h,f,elapsed);if(f.state==='absent')return;
  const clip=art.flyer?.[f.state]||art.flyer?.fly;if(!clip?.image?.complete||!clip.image.naturalWidth)return;
  const index=['fly','leave','talk'].includes(f.state)?Math.min(clip.count-1,Math.floor((f.clock%(f.state==='talk'?TALK_CYCLE:FLIGHT_CYCLE))/(f.state==='talk'?TALK_CYCLE:FLIGHT_CYCLE)*clip.count)):Math.min(clip.count-1,Math.floor(f.clock/f.duration*clip.count));
  const resting=(index===0||index===clip.count-1)&&clip.restImage?.complete&&clip.restImage.naturalWidth,image=resting?clip.restImage:clip.image,sx=resting?0:(clip.frames?.[index]??index)*64;

@@ -1,4 +1,4 @@
-import {floor} from './motion.js?v=personality1';
+import {floor} from './motion.js?v=health-release1';
 import {hostX} from './host-interactions.js?v=31';
 import {weatherAt,huts} from './world.js?v=personality1';
 // Seconds, not frame counts. Visits remain brief with several quiet minutes between.
@@ -25,6 +25,7 @@ export function advanceVisit(f,dt,time=f.age+dt){
  return true;
 }
 export function tryMagicPavilion(f,world,pets,time){
+ if(f.careVisit)return;
  if(!world||f.magicAttempted||f.state!=='fly'||f.clock<1)return;
  f.magicAttempted=true;if(weatherAt(time).rain||f.random()>=.35)return;
  const choices=world.buildings.map((b,level)=>({b,level,hut:huts[level]})).filter(({b,level,hut})=>b.phase==='ready'&&!b.workers.length&&!pets.some(p=>p.level===level&&(p.mode==='shelter'||p.mode==='build'||p.x>hut.left-.03&&p.x<hut.right+.03)));

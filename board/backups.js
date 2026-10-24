@@ -1,5 +1,6 @@
+import {readConditions} from './condition-data.js?v=health-release1';
 import {readDevelopment} from './development.js?v=development1';
-import {boardActions,aliases} from './pet-animation.js?v=personality1';
+import {boardActions,aliases} from './pet-animation.js?v=health-release1';
 // Read the existing Godot PetSnapshot ZIP format entirely in browser memory.
 export const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
 const decode=bytes=>new TextDecoder('utf-8',{fatal:true}).decode(bytes);
@@ -59,6 +60,6 @@ export async function readBackup(buffer,expectedHash){
       }
     }
     const cleanliness=Number(progress.stats?.cleanliness);
-    return {id:manifest.character_id,name:String(config.name||'Cyber Pet').slice(0,60),config,images,sourceScales,stats:progress.stats||{},development:readDevelopment(progress),speed:progress.skills?.levels?.speed,love:progress.bond?.love,personality:progress.personality||config.starter_traits?.personality||{},foodPreferences:progress.food_preferences||config.starter_traits?.food_preferences||{},cleanliness:Number.isFinite(cleanliness)?Math.max(0,Math.min(1,cleanliness/100)):.35,pixels};
+    return {id:manifest.character_id,name:String(config.name||'Cyber Pet').slice(0,60),config,images,sourceScales,stats:progress.stats||{},development:readDevelopment(progress),conditions:await readConditions(progress,manifest.character_id),speed:progress.skills?.levels?.speed,love:progress.bond?.love,personality:progress.personality||config.starter_traits?.personality||{},foodPreferences:progress.food_preferences||config.starter_traits?.food_preferences||{},cleanliness:Number.isFinite(cleanliness)?Math.max(0,Math.min(1,cleanliness/100)):.35,pixels};
   }catch(error){for(const image of images.values())image.close?.();throw error;}
 }

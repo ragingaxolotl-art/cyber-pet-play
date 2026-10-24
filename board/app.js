@@ -1,11 +1,12 @@
+import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=health-release1';
 import {installSavedRewards} from './saved-rewards.js?v=rewards1';
 import {hydrationChoice} from './hydration.js?v=nutrition1';
 import {installSharingChoice} from './sharing-choice.js?v=rewards1';
-import {reconcilePets} from './roster-state.js?v=personality1';
-import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=personality1';
-import {stepBoard} from './simulation.js?v=personality1';
+import {reconcilePets} from './roster-state.js?v=health-release1';
+import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=health-release1';
+import {stepBoard} from './simulation.js?v=health-release1';
 import {createHosts,loadNpcArt} from './npc-animation.js?v=31';
-import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=personality1';
+import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=health-release1';
 import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=personality1';
 import {createWash} from './wash.js?v=personality1';
 import {displayMetrics,sourceScale,frameCoordinates,animationEnvelope,framePlacement,artworkDirection} from './display.js?v=34';
@@ -15,11 +16,11 @@ import {drawGames} from './games.js?v=development1';
 import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=personality1';
 import {chooseItem} from './sharing.js?v=personality1';
 import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=31';
-import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=personality1';
+import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=health-release1';
 import {favoriteFood} from './food.js?v=31';
 import {drawLandscape,drawWash} from './scenery.js?v=personality1';
 import {refreshRoster} from './connection.js?v=31';
-import {readBackup} from './backups.js?v=development1';
+import {readBackup} from './backups.js?v=health-release1';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
@@ -32,7 +33,7 @@ loadNpcArt(hosts).catch(()=>{});
 let width=1600,height=850,mode='class',busy=false;
 const artworkBounds=new WeakMap(),foodImages=new Map();
 const landscape=document.createElement('canvas');let landscapeDirty=true,showNames=true,foods=[];
-loadEmotes().catch(()=>{});
+loadEmotes().catch(()=>{});loadConditionArt().catch(()=>{});
 const foodReady=fetch('assets/foods.json').then(r=>{if(!r.ok)throw Error('Food catalog is unavailable.');return r.json();}).then(data=>{foods=data;}).catch(()=>{$('caption').textContent='Food catalog unavailable; wandering and cloud wash remain available.';});
 function measureArtwork(image){
   if(artworkBounds.has(image))return artworkBounds.get(image);
@@ -85,7 +86,8 @@ function drawPet(pet){
   const facing=artworkDirection(data.config,action,pet.direction);
   const placement=framePlacement(frameCoordinates(bounds,img,original),data.artworkEnvelope,scale);
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
-  ctx.save();ctx.translate(x,y);ctx.scale(facing,1);if(data.tint)ctx.filter=`hue-rotate(${data.tint}deg)`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
+  const healthVisual=conditionVisual(pet,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
+  ctx.save();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=healthVisual.alpha;ctx.filter=`hue-rotate(${data.tint||0}deg) grayscale(${healthVisual.gray})`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
@@ -109,7 +111,9 @@ function drawPet(pet){
     if(!image){image=new Image();image.src=pet.displayItem.sprite;foodImages.set(pet.displayItem.id,image);}
     const size=desired*.5;if(image.complete&&image.naturalWidth)ctx.drawImage(image,x-size/2,y-desired-65*unit-size/2,size,size);
   }
-  drawDirt(img,bounds,x+facing*(placement.x+w/2),y+placement.y+h,w,h,facing,1-pet.cleanliness,pet.dirtPattern);
+  ctx.save();ctx.globalAlpha=healthVisual.alpha;ctx.filter=`grayscale(${healthVisual.gray})`;
+  drawDirt(img,bounds,x+facing*(placement.x+w/2),y+placement.y+h,w,h,facing,1-pet.cleanliness,pet.dirtPattern);ctx.restore();
+  drawHealth(ctx,pet,x,groundY,desired);
 
 }
 function render(time){
