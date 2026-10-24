@@ -19995,6 +19995,573 @@
         ],
         "pathDuration": 60
       }
+    },
+    {
+      "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/block_side/1",
+      "revision": 1,
+      "attack": {
+        "id": "attack_c896533d2d314931a35274a54f9fc3b5",
+        "name": "Cracked Wall",
+        "notes": "Individually tuned setup. All stats, hitboxes, paths and animation settings remain editable.",
+        "tags": [],
+        "poseImpact": 0,
+        "poseTiming": "synced",
+        "poseFinish": "stand",
+        "pushAxis": "both",
+        "blockPercent": 100,
+        "launchHeight": 0,
+        "flightFrames": 36,
+        "wallSlam": false,
+        "floorSlam": false,
+        "motion": "block_side",
+        "element": "ice",
+        "delivery": "self",
+        "payload": "block",
+        "base": 0,
+        "scaling": "stamina",
+        "coefficient": 0,
+        "startup": 26,
+        "active": 48,
+        "recovery": 20,
+        "cooldown": 100,
+        "cost": 13,
+        "hitLimit": 1,
+        "hitInterval": 22,
+        "knockback": 0,
+        "hitstun": 0,
+        "blockable": true,
+        "projectileSpeed": 3,
+        "box": {
+          "x": 10,
+          "y": -67,
+          "w": 39,
+          "h": 65
+        },
+        "visuals": [
+          {
+            "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/block_side/1",
+            "x": 0,
+            "y": -6,
+            "scale": 1.7,
+            "start": 0,
+            "rate": 1,
+            "frames": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18
+            ],
+            "loopUntilImpact": false,
+            "loop": false,
+            "fadeOutFrames": 10
+          }
+        ],
+        "status": "none",
+        "statusPower": 2,
+        "statusDuration": 90,
+        "statusInterval": 30,
+        "shieldDuration": 240,
+        "impactTrigger": "timed",
+        "motionPath": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "pathDuration": 70
+      }
+    },
+    {
+      "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/block_side/2",
+      "revision": 1,
+      "attack": {
+        "id": "attack_1b686b20100146adad27510de8dd137c",
+        "name": "Crystal Shield",
+        "notes": "Individually tuned setup. All stats, hitboxes, paths and animation settings remain editable.",
+        "tags": [],
+        "poseImpact": 0,
+        "poseTiming": "synced",
+        "poseFinish": "stand",
+        "pushAxis": "both",
+        "blockPercent": 90,
+        "launchHeight": 0,
+        "flightFrames": 36,
+        "wallSlam": false,
+        "floorSlam": false,
+        "motion": "block_side",
+        "element": "ice",
+        "delivery": "self",
+        "payload": "block",
+        "base": 0,
+        "scaling": "stamina",
+        "coefficient": 0,
+        "startup": 22,
+        "active": 52,
+        "recovery": 18,
+        "cooldown": 85,
+        "cost": 10,
+        "hitLimit": 1,
+        "hitInterval": 22,
+        "knockback": 0,
+        "hitstun": 0,
+        "blockable": true,
+        "projectileSpeed": 3,
+        "box": {
+          "x": 14,
+          "y": -69,
+          "w": 24,
+          "h": 69
+        },
+        "visuals": [
+          {
+            "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/block_side/2",
+            "x": 0,
+            "y": -6,
+            "scale": 1.4,
+            "start": 0,
+            "rate": 1,
+            "frames": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18
+            ],
+            "loopUntilImpact": false,
+            "loop": false,
+            "fadeOutFrames": 10
+          }
+        ],
+        "status": "none",
+        "statusPower": 2,
+        "statusDuration": 90,
+        "statusInterval": 30,
+        "shieldDuration": 240,
+        "impactTrigger": "timed",
+        "motionPath": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "pathDuration": 70
+      }
+    },
+    {
+      "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/block_side/3",
+      "revision": 1,
+      "attack": {
+        "id": "attack_5f9ddb0a61294971ae2da22663bf890f",
+        "name": "Frost Lattice",
+        "notes": "Individually tuned setup. All stats, hitboxes, paths and animation settings remain editable.",
+        "tags": [],
+        "poseImpact": 0,
+        "poseTiming": "synced",
+        "poseFinish": "stand",
+        "pushAxis": "both",
+        "blockPercent": 95,
+        "launchHeight": 0,
+        "flightFrames": 36,
+        "wallSlam": false,
+        "floorSlam": false,
+        "motion": "block_side",
+        "element": "ice",
+        "delivery": "self",
+        "payload": "block",
+        "base": 0,
+        "scaling": "stamina",
+        "coefficient": 0,
+        "startup": 26,
+        "active": 48,
+        "recovery": 24,
+        "cooldown": 110,
+        "cost": 12,
+        "hitLimit": 1,
+        "hitInterval": 22,
+        "knockback": 0,
+        "hitstun": 0,
+        "blockable": true,
+        "projectileSpeed": 3,
+        "box": {
+          "x": 8,
+          "y": -62,
+          "w": 40,
+          "h": 62
+        },
+        "visuals": [
+          {
+            "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/block_side/3",
+            "x": 0,
+            "y": -6,
+            "scale": 1.6,
+            "start": 0,
+            "rate": 1,
+            "frames": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18
+            ],
+            "loopUntilImpact": false,
+            "loop": false,
+            "fadeOutFrames": 10
+          }
+        ],
+        "status": "none",
+        "statusPower": 2,
+        "statusDuration": 90,
+        "statusInterval": 30,
+        "shieldDuration": 240,
+        "impactTrigger": "timed",
+        "motionPath": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "pathDuration": 70
+      }
+    },
+    {
+      "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/channel_power_side/1",
+      "revision": 1,
+      "attack": {
+        "id": "attack_a50e2bf96bcf4c0eab64a4c502f9f0e0",
+        "name": "Needle Stream",
+        "notes": "Individually tuned setup. All stats, hitboxes, paths and animation settings remain editable.",
+        "tags": [],
+        "poseImpact": 0,
+        "poseTiming": "synced",
+        "poseFinish": "stand",
+        "pushAxis": "both",
+        "blockPercent": 100,
+        "launchHeight": 0,
+        "flightFrames": 36,
+        "wallSlam": false,
+        "floorSlam": false,
+        "motion": "channel_power_side",
+        "element": "ice",
+        "delivery": "area",
+        "payload": "damage",
+        "base": 8,
+        "scaling": "intelligence",
+        "coefficient": 0.2,
+        "startup": 8,
+        "active": 76,
+        "recovery": 26,
+        "cooldown": 180,
+        "cost": 24,
+        "hitLimit": 4,
+        "hitInterval": 22,
+        "knockback": 0,
+        "hitstun": 10,
+        "blockable": true,
+        "projectileSpeed": 3,
+        "box": {
+          "x": 0,
+          "y": -48,
+          "w": 92,
+          "h": 40
+        },
+        "visuals": [
+          {
+            "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/channel_power_side/1",
+            "x": 45,
+            "y": -6,
+            "scale": 1.5,
+            "start": 0,
+            "rate": 1,
+            "frames": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19
+            ],
+            "loopUntilImpact": false,
+            "loop": false,
+            "fadeOutFrames": 10
+          }
+        ],
+        "status": "none",
+        "statusPower": 2,
+        "statusDuration": 90,
+        "statusInterval": 30,
+        "shieldDuration": 240,
+        "impactTrigger": "timed",
+        "motionPath": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "pathDuration": 70
+      }
+    },
+    {
+      "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/channel_power_side/2",
+      "revision": 1,
+      "attack": {
+        "id": "attack_29226b707b994bfeb3ffb0d9694c9e92",
+        "name": "Frost Seam",
+        "notes": "Individually tuned setup. All stats, hitboxes, paths and animation settings remain editable.",
+        "tags": [],
+        "poseImpact": 0,
+        "poseTiming": "synced",
+        "poseFinish": "stand",
+        "pushAxis": "both",
+        "blockPercent": 100,
+        "launchHeight": 0,
+        "flightFrames": 36,
+        "wallSlam": false,
+        "floorSlam": false,
+        "motion": "channel_power_side",
+        "element": "ice",
+        "delivery": "area",
+        "payload": "damage",
+        "base": 7,
+        "scaling": "intelligence",
+        "coefficient": 0.2,
+        "startup": 8,
+        "active": 76,
+        "recovery": 28,
+        "cooldown": 150,
+        "cost": 22,
+        "hitLimit": 4,
+        "hitInterval": 22,
+        "knockback": 0,
+        "hitstun": 10,
+        "blockable": true,
+        "projectileSpeed": 3,
+        "box": {
+          "x": 0,
+          "y": -28,
+          "w": 90,
+          "h": 28
+        },
+        "visuals": [
+          {
+            "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/channel_power_side/2",
+            "x": 45,
+            "y": -6,
+            "scale": 1.4,
+            "start": 0,
+            "rate": 1,
+            "frames": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19
+            ],
+            "loopUntilImpact": false,
+            "loop": false,
+            "fadeOutFrames": 10
+          }
+        ],
+        "status": "none",
+        "statusPower": 2,
+        "statusDuration": 90,
+        "statusInterval": 30,
+        "shieldDuration": 240,
+        "impactTrigger": "timed",
+        "motionPath": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "pathDuration": 70
+      }
+    },
+    {
+      "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/channel_power_side/3",
+      "revision": 1,
+      "attack": {
+        "id": "attack_99d409925692414aa92652f96e94d513",
+        "name": "Branching Beam",
+        "notes": "Individually tuned setup. All stats, hitboxes, paths and animation settings remain editable.",
+        "tags": [],
+        "poseImpact": 0,
+        "poseTiming": "synced",
+        "poseFinish": "stand",
+        "pushAxis": "both",
+        "blockPercent": 100,
+        "launchHeight": 0,
+        "flightFrames": 36,
+        "wallSlam": false,
+        "floorSlam": false,
+        "motion": "channel_power_side",
+        "element": "ice",
+        "delivery": "area",
+        "payload": "damage",
+        "base": 10,
+        "scaling": "intelligence",
+        "coefficient": 0.2,
+        "startup": 8,
+        "active": 76,
+        "recovery": 24,
+        "cooldown": 140,
+        "cost": 28,
+        "hitLimit": 4,
+        "hitInterval": 22,
+        "knockback": 0,
+        "hitstun": 10,
+        "blockable": true,
+        "projectileSpeed": 3,
+        "box": {
+          "x": 0,
+          "y": -45,
+          "w": 92,
+          "h": 34
+        },
+        "visuals": [
+          {
+            "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/ice/channel_power_side/3",
+            "x": 45,
+            "y": -6,
+            "scale": 1.4,
+            "start": 0,
+            "rate": 1,
+            "frames": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19
+            ],
+            "loopUntilImpact": false,
+            "loop": false,
+            "fadeOutFrames": 10
+          }
+        ],
+        "status": "none",
+        "statusPower": 2,
+        "statusDuration": 90,
+        "statusInterval": 30,
+        "shieldDuration": 240,
+        "impactTrigger": "timed",
+        "motionPath": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "pathDuration": 70
+      }
     }
   ]
 }
