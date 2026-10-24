@@ -3,7 +3,7 @@ import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261024
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261024-reviewed18';
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261024-reviewed18';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261024-reviewed18';
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261024-reviewed18';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261024-contact-pose';
 import {installAttackBank} from './attack-bank.js?v=20261024-reviewed18';
 import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261024-reviewed18';
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
@@ -77,7 +77,7 @@ function mannequin(x,color){ctx.fillStyle=color;ctx.fillRect(x-8,-58,16,16);ctx.
 function draw(){if(!simulation)return;const state=simulation.frames[frame],a=attack(),tm=simulation.timing,total=(simulation.impactFrame??simulation.frames.length)+tm.active+tm.recovery,motionFrame=simulation.contactMode&&simulation.impactFrame!==null?Math.min(frame,simulation.impactFrame):frame,path=pathSample(a,motionFrame);ctx.clearRect(0,0,960,480);ctx.fillStyle='#101a26';ctx.fillRect(0,0,960,480);ctx.save();ctx.translate(150,375);ctx.scale(3,3);ctx.imageSmoothingEnabled=false;
  ctx.strokeStyle='#213142';ctx.lineWidth=.3;for(let x=-50;x<=270;x+=16){ctx.beginPath();ctx.moveTo(x,-120);ctx.lineTo(x,28);ctx.stroke();}for(let y=-112;y<=32;y+=16){ctx.beginPath();ctx.moveTo(-50,y);ctx.lineTo(270,y);ctx.stroke();}ctx.strokeStyle='#586b81';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-50,0);ctx.lineTo(270,0);ctx.stroke();
  const route=pathDraft||a.motionPath;if(route?.length){ctx.strokeStyle='#63d7ed';ctx.lineWidth=1;ctx.setLineDash([3,2]);ctx.beginPath();route.forEach((p,i)=>i?ctx.lineTo(p.x*options.facing,p.y):ctx.moveTo(p.x*options.facing,p.y));ctx.stroke();ctx.setLineDash([]);}
- const pose=posePlayback(a,library.examples[a.motion]?.count||1,frame,tm),standing=pose.finished&&a.poseFinish==='stand';
+ const pose=posePlayback(a,library.examples[a.motion]?.count||1,frame,tm,simulation.contactMode?(simulation.impactFrame??Infinity):undefined),standing=pose.finished&&a.poseFinish==='stand';
  const reference=standing?(library.examples.ready_side||library.examples[a.motion]):library.examples[a.motion];
  const poseOrder=standing?null:a.poseFrames,poseCount=poseOrder?.length||reference?.count||1,progress=standing?.1:(pose.index+.01)/poseCount;
 
