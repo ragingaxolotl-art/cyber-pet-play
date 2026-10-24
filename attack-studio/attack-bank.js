@@ -33,7 +33,7 @@ export function createClassroomBank(validate,request=fetch){
   async write(bank,revision){validateBank(bank,validate);return call('',{method:'PUT',body:JSON.stringify({bank,revision})});}
  };
 }
-export function installAttackBank({current,validate,status,open}){
+export function installAttackBank({current,currentMany=()=>[current()],validate,status,open}){
  const $=id=>document.getElementById(id),remote=createClassroomBank(validate);let bank=emptyBank(),busy=false,pendingSave=false;
  try{remote.restore(JSON.parse(localStorage.getItem(SESSION_KEY)||'null'));}catch{}
  const message=text=>{$('bankStatus').textContent=text;status(text);};
@@ -46,19 +46,19 @@ export function installAttackBank({current,validate,status,open}){
   bank=emptyBank();render();bank=$('bankSource').value==='classroom'?(await remote.read()).bank:local();render();message(`${bank.attacks.length} saved attacks · ${$('bankSource').value==='classroom'?'classroom bank':'this browser'}.`);
  }
  async function save(){
-  const attack=structuredClone(current());validate(attack);
-  const localBank=saveToBank(local(),attack,validate);localStorage.setItem(BANK_KEY,JSON.stringify(localBank));
+  const attack=structuredClone(current()),attacks=structuredClone(currentMany());for(const item of attacks)validate(item);
+  const localBank=saveManyToBank(local(),attacks,validate);localStorage.setItem(BANK_KEY,JSON.stringify(localBank));
   if($('bankSource').value==='classroom'){
    if(!remote.connected()){pendingSave=true;bank=localBank;message('Recovery copy saved on this device. Sign in to finish saving to the classroom bank.');signIn();return;}
    let latest;try{latest=await remote.read();}catch(e){if(e.status===401){localStorage.removeItem(SESSION_KEY);pendingSave=true;signIn();}throw e;}
-   const previous=bank.attacks.find(a=>a.id===attack.id),now=latest.bank.attacks.find(a=>a.id===attack.id);
-   if(now&&JSON.stringify(now)!==JSON.stringify(previous)&&!confirm('This attack changed on another device. Replace it with your current version?')){message('Saved locally; classroom attack was not replaced.');return;}
-   const next=saveToBank(latest.bank,attack,validate);await remote.write(next,latest.revision);bank=next;message('Saved '+attack.name+' to the classroom bank and this device.');
-  }else{bank=localBank;message('Saved '+attack.name+' on this device.');}
+   const conflicts=attacks.filter(item=>{const previous=bank.attacks.find(a=>a.id===item.id),now=latest.bank.attacks.find(a=>a.id===item.id);return now&&JSON.stringify(now)!==JSON.stringify(previous);});
+   if(conflicts.length&&!confirm(`${conflicts.length} saved attack(s) changed on another device. Replace them with the current versions?`)){message('Saved locally; classroom attack was not replaced.');return;}
+   const next=saveManyToBank(latest.bank,attacks,validate);await remote.write(next,latest.revision);bank=next;message('Saved '+(attacks.length>1?attacks.length+' linked reskins':attack.name)+' to the classroom bank and this device.');
+  }else{bank=localBank;message('Saved '+(attacks.length>1?attacks.length+' linked reskins':attack.name)+' on this device.');}
   render();$('bankList').value=attack.id;
  }
  $('bankSource').onchange=()=>task(refresh);$('refreshBank').onclick=()=>task(refresh);
- $('openAttack').onclick=()=>task(async()=>{const saved=bank.attacks.find(a=>a.id===$('bankList').value);if(saved&&open(structuredClone(saved)))message('Opened '+saved.name+' from the attack bank.');});
+ $('openAttack').onclick=()=>task(async()=>{const saved=bank.attacks.find(a=>a.id===$('bankList').value);if(saved&&open(structuredClone(saved),saved.reskinGroupId?structuredClone(bank.attacks.filter(a=>a.reskinGroupId===saved.reskinGroupId)):[]))message('Opened '+saved.name+' from the attack bank.');});
  $('saveAttack').onclick=()=>task(save);
  $('connectBank').onclick=()=>{pendingSave=false;signIn();};
  $('bankConnection').addEventListener('close',()=>{
@@ -68,4 +68,8 @@ export function installAttackBank({current,validate,status,open}){
   else pendingSave=false;
  });
  task(refresh);
+}
+
+export function saveManyToBank(bank,attacks,validate){
+ let next=bank;for(const attack of attacks)next=saveToBank(next,attack,validate);return next;
 }
