@@ -2,7 +2,7 @@ import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups
 import {pathSample,visualFrame,visualEnd as effectEnd} from './attack-motion.js?v=20261024-auto-skins';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261024-auto-skins';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261024-auto-skins';
-import {installAttackBank} from './attack-bank.js?v=20261024-auto-skins';
+import {installAttackBank} from './attack-bank.js?v=20261024-storage';
 import {BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261024-auto-skins';
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
