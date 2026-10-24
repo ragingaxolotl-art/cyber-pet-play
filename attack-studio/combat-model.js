@@ -1,5 +1,5 @@
-import {pathSample} from './attack-motion.js?v=20261023-motion-bank';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261023-motion-bank';
+import {pathSample} from './attack-motion.js';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -22,7 +22,7 @@ export function validateAttack(a,ids){
  for(const [k,min,max] of [['startup',0,180],['active',1,300],['recovery',0,180],['cooldown',0,900],['hitLimit',1,10],['hitInterval',1,300],['hitstun',0,120],['statusDuration',1,900],['statusInterval',1,300],['shieldDuration',1,900]])num(a,k,min,max,true);
  for(const [key,value] of Object.entries({launchHeight:0,flightFrames:36,wallSlam:false,floorSlam:false}))a[key]??=value;
  a.pushAxis??='both';a.blockPercent??=100;if(!['x','y','both'].includes(a.pushAxis))fail('Invalid push axis.');num(a,'blockPercent',0,100);
- num(a,'launchHeight',0,500);if(a.projectileStart!==undefined)num(a,'projectileStart',0,180,true);num(a,'flightFrames',1,120,true);
+ num(a,'launchHeight',0,500);if(a.impactTrigger!==undefined&&!['timed','contact'].includes(a.impactTrigger))fail('Invalid impact trigger.');if(a.projectileStart!==undefined)num(a,'projectileStart',0,180,true);num(a,'flightFrames',1,120,true);
  if(typeof a.wallSlam!=='boolean'||typeof a.floorSlam!=='boolean')fail('Invalid collision settings.');
  a.poseTiming??='synced';a.poseFinish??='stand';
  if(!['synced','custom'].includes(a.poseTiming)||!['stand','hold'].includes(a.poseFinish))fail('Invalid attacker playback setting.');
@@ -57,7 +57,9 @@ export function simulate(a,attacker,target,options={}){
  let other={hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,shieldUntil:0,x:side*distance,stun:0,y:-(options.targetHeight??0)};
  const cost=Math.ceil(a.cost*av.cost),events=[],frames=[],statuses=[];let hits=0,lastHit=-Infinity,flight=null;
  const incomingDamage=options.incomingDamage??0,incomingFrame=options.incomingFrame??30;num({incomingDamage},'incomingDamage',0,500);num({incomingFrame},'incomingFrame',0,1800,true);
- const end=Math.max(a.motionPath?.length?(a.pathDuration||60):0,incomingDamage?incomingFrame:0,tm.startup+tm.active+a.flightFrames,tm.startup+tm.active+tm.recovery,tm.startup+tm.active+(a.status==='none'?0:a.statusDuration),tm.startup+tm.active+(a.payload==='shield'?a.shieldDuration:0));
+ const contactMode=a.impactTrigger==='contact'&&a.delivery!=='self'&&a.payload!=='block';let impactFrame=null;const contactDeadline=tm.startup+600;
+ let end=Math.max(a.motionPath?.length?(a.pathDuration||60):0,incomingDamage?incomingFrame:0,tm.startup+tm.active+a.flightFrames,tm.startup+tm.active+tm.recovery,tm.startup+tm.active+(a.status==='none'?0:a.statusDuration),tm.startup+tm.active+(a.payload==='shield'?a.shieldDuration:0));
+ const normalEnd=end;if(contactMode)end=Math.max(end,contactDeadline);
  const cast=self.energy>=cost;if(cast)self.energy-=cost;else events.push({frame:0,text:'Not enough energy — attack did not start.'});
  function event(frame,text){events.push({frame,text});}
  function heal(who,n){const old=who.hp;who.hp=Math.min(who.maxHP,who.hp+n);return who.hp-old;}
@@ -71,13 +73,14 @@ export function simulate(a,attacker,target,options={}){
    if(t===1){who.y=0;if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
   for(const who of [self,other])if(who.shield&&f>=who.shieldUntil){who.shield=0;event(f,'Shield expired.');}
-  const active=cast&&f>=tm.startup&&f<tm.startup+tm.active;
+  const box=worldBox(a,contactMode&&impactFrame!==null?Math.min(f,impactFrame):f,attacker,facing),targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
+  const recipient=a.delivery==='self'?self:other;
+  const contact=a.delivery==='self'||shapeHitsRectangle(box,targetBox);
+  if(contactMode&&cast&&impactFrame===null&&f>=tm.startup&&f<=contactDeadline&&contact&&recipient.hp>0){impactFrame=f;end=Math.max(normalEnd,f+tm.active+Math.max(tm.recovery,a.flightFrames,a.status==='none'?0:a.statusDuration,a.payload==='shield'?a.shieldDuration:0));event(f,'Impact triggered by opponent contact.');}
+  const active=cast&&(contactMode?impactFrame!==null&&f>=impactFrame&&f<impactFrame+tm.active:f>=tm.startup&&f<tm.startup+tm.active);
   self.blocking=active&&a.payload==='block'&&self.hp>0;
   if(self.blocking&&f===tm.startup)event(f,'Block window opened.');
   if(incomingDamage>0&&f===incomingFrame){const blocked=self.blocking&&facing===side;const damage=hurt(self,Math.round(incomingDamage*(blocked?1-a.blockPercent/100:1)));event(f,`${blocked?'Incoming attack blocked':'Incoming attack hit'}: ${damage} damage to attacker.`);}
-  const box=worldBox(a,f,attacker,facing),targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
-  const recipient=a.delivery==='self'?self:other;
-  const contact=a.delivery==='self'||shapeHitsRectangle(box,targetBox);
   if(a.payload!=='block'&&active&&contact&&hits<a.hitLimit&&f-lastHit>=a.hitInterval&&recipient.hp>0){
    hits++;lastHit=f;let amount=magnitude(a,attacker);
    const guarding=['damage','push'].includes(a.payload)&&options.guard&&a.blockable&&a.delivery!=='self';
@@ -105,8 +108,8 @@ export function simulate(a,attacker,target,options={}){
   const modifiers=statuses.filter(s=>f>=s.start&&f<s.end).map(s=>({recipient:s.who===self?'self':'target',kind:s.kind,power:s.power,remaining:s.end-f}));
   frames.push({frame:f,active,box,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
  }
- if(cast&&!hits&&a.payload!=='block')event(tm.startup+tm.active,'Miss — no hitbox contact during the active window.');
- return {frames,events,cost,timing:tm,power:magnitude(a,attacker),nextCast:Math.max(tm.startup+tm.active+tm.recovery,a.cooldown),cast};
+ if(cast&&!hits&&a.payload!=='block')event(contactMode?contactDeadline:tm.startup+tm.active,contactMode?'Miss — no opponent contact before travel timeout.':'Miss — no hitbox contact during the active window.');
+ return {frames,events,cost,impactFrame:contactMode?impactFrame:tm.startup,contactMode,timing:tm,power:magnitude(a,attacker),nextCast:Math.max((contactMode?(impactFrame??contactDeadline):tm.startup)+tm.active+tm.recovery,a.cooldown),cast};
 }
 export function effectFrame(effect,elapsedMs){
  if(elapsedMs<0)return -1;const total=effect.times.reduce((a,b)=>a+b,0);
