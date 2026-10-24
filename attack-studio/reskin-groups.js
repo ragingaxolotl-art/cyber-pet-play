@@ -32,3 +32,9 @@ export function createReskinGroup(attacks,source,effect,effects,newId){
  return [...attacks.map(a=>a.id===source.id?base:a),...members.filter(a=>a.id!==source.id)];
 }
 export function groupMembers(attacks,source){return source.reskinGroupId?attacks.filter(a=>a.reskinGroupId===source.reskinGroupId):[source];}
+
+export function ensureReskinGroup(attacks,source,effects,newId){
+ if(source.reskinGroupId)return attacks;
+ const effect=source.visuals.map(v=>effects.find(e=>e.id===v.effectId)).find(e=>matchingReskins(e,effects).length>1);
+ return effect?createReskinGroup(attacks,source,effect,effects,newId):attacks;
+}
