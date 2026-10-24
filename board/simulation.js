@@ -1,24 +1,25 @@
-import {advanceHealth} from './health.js?v=friendship1';
-import {preserveRecovery} from './activity-state.js?v=friendship1';
-import {advancePetPresentation} from './pet-animation.js?v=friendship1';
-import {advanceMagic} from './unicorn-events.js?v=friendship1';
-import {prepareCounterQueue} from './counter-queue.js?v=friendship1';
-import {advanceCounter} from './counter.js?v=friendship1';
-import {advanceHosts} from './npc-animation.js?v=friendship1';
-import {advanceFlyer} from './flyer.js?v=friendship1';
-import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=friendship1';
-import {advanceMeals} from './meals.js?v=friendship1';
-import {advanceGames} from './games.js?v=friendship1';
-import {advanceWorld} from './world.js?v=friendship1';
-import {advanceHygiene} from './hygiene.js?v=friendship1';
-import {advanceWash} from './wash.js?v=friendship1';
+import {advanceOutbreaks} from './outbreaks.js?v=outbreak1';
+import {advanceHealth} from './health.js?v=outbreak1';
+import {preserveRecovery} from './activity-state.js?v=outbreak1';
+import {advancePetPresentation} from './pet-animation.js?v=outbreak1';
+import {advanceMagic} from './unicorn-events.js?v=outbreak1';
+import {prepareCounterQueue} from './counter-queue.js?v=outbreak1';
+import {advanceCounter} from './counter.js?v=outbreak1';
+import {advanceHosts} from './npc-animation.js?v=outbreak1';
+import {advanceFlyer} from './flyer.js?v=outbreak1';
+import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=outbreak1';
+import {advanceMeals} from './meals.js?v=outbreak1';
+import {advanceGames} from './games.js?v=outbreak1';
+import {advanceWorld} from './world.js?v=outbreak1';
+import {advanceHygiene} from './hygiene.js?v=outbreak1';
+import {advanceWash} from './wash.js?v=outbreak1';
 // Keep this exact update order shared by the live board and coexistence tests.
 // Active actions finish first, then care/play invitations, then optional scenery.
 export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){
  const {counter,hosts,flyer,livingWorld,washHistory}=scene;
  const run=fn=>{const before=new Map(pets.map(p=>[p,p.mode]));fn();preserveRecovery(pets,before);};
  for(const p of pets)p.decisionCooldown=Math.max(0,(p.decisionCooldown||0)-dt);
- advanceHealth(pets,dt);
+ advanceHealth(pets,dt);advanceOutbreaks(scene,pets,dt);
  prepareCounterQueue(counter,pets);run(()=>{for(const p of pets)tick(p,dt);});
  advanceHosts(hosts,counter,dt);run(()=>advanceFlyer(flyer,pets,dt,aspect,time));run(()=>advanceCounter(counter,pets,dt,artReady));
  run(()=>advanceTag(pets,dt));run(()=>advanceInteractions(pets,dt));

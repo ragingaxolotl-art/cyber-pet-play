@@ -1,4 +1,4 @@
-import {makePet,hasAction} from './motion.js?v=friendship1';
+import {makePet,hasAction} from './motion.js?v=outbreak1';
 // Keep object identity, place and session relationships when an uploaded backup changes.
 export function reconcilePets(data,current){
  const byId=new Map(current.map(p=>[p.data.boardId||p.data.id,p]));

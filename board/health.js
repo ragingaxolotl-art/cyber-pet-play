@@ -1,8 +1,8 @@
-import {bestBoardMedicine} from './care-medicines.js?v=friendship1';
-import {sanitizeConditions} from './condition-data.js?v=friendship1';
-import {trait,love,travelSpeed} from './profile.js?v=friendship1';
-import {freeForActivity} from './activity-state.js?v=friendship1';
-import {resolveAction} from './pet-animation.js?v=friendship1';
+import {bestBoardMedicine} from './care-medicines.js?v=outbreak1';
+import {sanitizeConditions} from './condition-data.js?v=outbreak1';
+import {trait,love,travelSpeed} from './profile.js?v=outbreak1';
+import {freeForActivity} from './activity-state.js?v=outbreak1';
+import {resolveAction} from './pet-animation.js?v=outbreak1';
 // Seconds of board play, not real medical guidance or persistent health changes.
 export const healthTuning={contactRadius:.085,avoidRadius:.15,exposureMinimum:8,exposureRange:16,doseSeconds:6};
 export const contagious=new Set(['glitch_fever','parasite_spore_fan','static_mites']);
@@ -132,4 +132,10 @@ export function grantUnicornPotion(p,outbreakIds){
  h.potionProtection=new Set([...(h.potionProtection||[]),...outbreakIds]);
  for(const c of h.conditions){h.immune.add(c.id);h.recovered++;}
  h.conditions=[];h.exposure.clear();h.dose=0;p.unicornCare=false;finish(p);p.emote='hearts';p.emoteTime=5;
+}
+
+// Ambient outbreaks only change the board's health state, never the uploaded save.
+export function seedBoardDisease(p,condition){
+ if(!contagious.has(condition.id)||p.health?.conditions.length||p.unicornCare||p.health?.immune.has(condition.id)||p.health?.potionProtection?.has(condition.id))return false;
+ const h=p.health??=newHealth();h.conditions.push({...condition,severity:1});h.age=0;h.dose=0;h.isolated=false;p.emote='sweat';p.emoteTime=3;return true;
 }
