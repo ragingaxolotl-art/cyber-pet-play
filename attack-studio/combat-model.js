@@ -22,7 +22,7 @@ export function validateAttack(a,ids){
  for(const [k,min,max] of [['startup',0,180],['active',1,300],['recovery',0,180],['cooldown',0,900],['hitLimit',1,10],['hitInterval',1,300],['hitstun',0,120],['statusDuration',1,900],['statusInterval',1,300],['shieldDuration',1,900]])num(a,k,min,max,true);
  for(const [key,value] of Object.entries({launchHeight:0,flightFrames:36,wallSlam:false,floorSlam:false}))a[key]??=value;
  a.pushAxis??='both';a.blockPercent??=100;if(!['x','y','both'].includes(a.pushAxis))fail('Invalid push axis.');num(a,'blockPercent',0,100);
- num(a,'launchHeight',0,80);num(a,'flightFrames',1,120,true);
+ num(a,'launchHeight',0,500);num(a,'flightFrames',1,120,true);
  if(typeof a.wallSlam!=='boolean'||typeof a.floorSlam!=='boolean')fail('Invalid collision settings.');
  a.poseTiming??='synced';a.poseFinish??='stand';
  if(!['synced','custom'].includes(a.poseTiming)||!['stand','hold'].includes(a.poseFinish))fail('Invalid attacker playback setting.');
