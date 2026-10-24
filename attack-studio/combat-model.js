@@ -22,7 +22,7 @@ export function validateAttack(a,ids){
  for(const [k,min,max] of [['startup',0,180],['active',1,300],['recovery',0,180],['cooldown',0,900],['hitLimit',1,10],['hitInterval',1,300],['hitstun',0,120],['statusDuration',1,900],['statusInterval',1,300],['shieldDuration',1,900]])num(a,k,min,max,true);
  for(const [key,value] of Object.entries({launchHeight:0,flightFrames:36,wallSlam:false,floorSlam:false}))a[key]??=value;
  a.pushAxis??='both';a.blockPercent??=100;if(!['x','y','both'].includes(a.pushAxis))fail('Invalid push axis.');num(a,'blockPercent',0,100);
- num(a,'launchHeight',0,500);num(a,'flightFrames',1,120,true);
+ num(a,'launchHeight',0,500);if(a.projectileStart!==undefined)num(a,'projectileStart',0,180,true);num(a,'flightFrames',1,120,true);
  if(typeof a.wallSlam!=='boolean'||typeof a.floorSlam!=='boolean')fail('Invalid collision settings.');
  a.poseTiming??='synced';a.poseFinish??='stand';
  if(!['synced','custom'].includes(a.poseTiming)||!['stand','hold'].includes(a.poseFinish))fail('Invalid attacker playback setting.');
@@ -48,7 +48,7 @@ export function validateSandbox(o){if(!o||typeof o.guard!=='boolean'||![1,-1].in
 export function statsFor(s){if(!s||typeof s!=='object')fail('Missing test stats.');for(const k of STATS)num(s,k,0,99,true);const b=BALANCE;return {maxHP:b.baseHP+b.hpPerStamina*s.stamina,maxEnergy:b.baseEnergy+b.energyPerStamina*s.stamina,timing:1-b.maxSpeedReduction*s.speed/b.statCap,cost:1-b.maxFocusCostReduction*s.focus/b.statCap,guard:b.baseGuardReduction+b.maxFocusGuardBonus*s.focus/b.statCap,support:1+b.maxCharismaShieldBonus*s.charisma/b.statCap,resistance:1-b.maxFocusStatusReduction*s.focus/b.statCap};}
 export function timing(a,s){const scale=statsFor(s).timing;return {startup:Math.round(a.startup*scale),active:a.active,recovery:Math.round(a.recovery*scale),cooldown:a.cooldown};}
 export function magnitude(a,s){if(['push','block'].includes(a.payload))return 0;return Math.round((a.base+a.coefficient*s[a.scaling])*(a.payload==='shield'?statsFor(s).support:1));}
-export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-tm.startup)*a.projectileSpeed:0;return {x:facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x,y:a.box.y+path.y,w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing};}
+export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-Math.round((a.projectileStart??a.startup)*statsFor(s).timing))*a.projectileSpeed:0;return {x:facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x,y:a.box.y+path.y,w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing};}
 export const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 export function simulate(a,attacker,target,options={}){
  validateAttack(a);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
@@ -118,3 +118,18 @@ export function effectFrame(effect,elapsedMs){
 export function validateSequence(sequence){if(sequence!==undefined&&(!Array.isArray(sequence)||!sequence.length||sequence.length>300||sequence.some(n=>!Number.isInteger(n)||n<0||n>=300)))fail('Use 1–300 source frames numbered 1–300.');}
 export function orderedEffect(effect,sequence){return sequence?{...effect,times:sequence.map(i=>effect.times[i]??effect.times[0])}:effect;}
 export function moveFrame(sequence,from,to){const result=[...sequence];const [item]=result.splice(from,1);result.splice(to,0,item);return result;}
+
+// Find a representable damage-start frame against the opponent's initial hurtbox.
+export function markOpponentImpact(attack,stats,options={}){
+ if(attack.delivery==='self'||attack.payload==='block')throw Error('Choose an attack that contacts the opponent.');
+ const candidate=structuredClone(attack),scale=statsFor(stats).timing;
+ if(candidate.delivery==='projectile'&&!candidate.motionPath?.length)candidate.projectileStart??=candidate.startup;
+ const x=(options.targetSide===-1?-1:1)*(options.distance??100),y=-(options.targetHeight??0),targetBox={x:x-14,y:y-60,w:28,h:60};
+ for(let startup=0;startup<=180;startup++){
+  const frame=Math.round(startup*scale);
+  if(shapeHitsRectangle(worldBox(candidate,frame,stats,options.facing===-1?-1:1),targetBox)){
+   candidate.startup=startup;validateAttack(candidate);return {attack:candidate,frame};
+  }
+ }
+ throw Error('The attack does not reach the opponent hitbox within 180 startup frames. Move the target or adjust the attack hitbox or path, then try again.');
+}
