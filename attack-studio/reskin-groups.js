@@ -1,6 +1,9 @@
 // A linked family shares behavior; each member keeps its own identity and artwork.
 export function familyKey(effect){return ['reskin','detailed-reskin'].includes(effect?.collection)?`${effect.collection}:${effect.slot}:${effect.variant}`:null;}
 export function matchingReskins(effect,effects){const key=familyKey(effect);return key?effects.filter(e=>familyKey(e)===key).sort((a,b)=>a.element.localeCompare(b.element)):[];}
+// Map entry/contact/recovery separately when both artworks name an impact frame.
+function impactIndex(effect){const n=effect.impact-1;return Number.isInteger(n)&&n>0&&n<effect.times.length-1?n:null;}
+function phaseFrame(phase,last,impact){return Math.round(phase<=.5?phase*2*impact:impact+(phase-.5)*2*(last-impact));}
 function mappedVisuals(source,element,effects){
  const byId=new Map(effects.map(e=>[e.id,e]));
  return source.visuals.map(v=>{const effect=byId.get(v.effectId),key=familyKey(effect);if(!key)return structuredClone(v);
@@ -9,9 +12,14 @@ function mappedVisuals(source,element,effects){
  const sequence=v.frames||effect.times.map((_,i)=>i),last=Math.max(1,effect.times.length-1);
  // Retain normalized positions across 12/16-frame skins, avoiding round-trip drift.
  const positions=Array.isArray(v.reskinPositions)&&v.reskinPositions.length===sequence.length&&v.reskinPositions.every((p,i)=>Number.isFinite(p)&&p>=0&&p<=1&&Math.round(p*last)===sequence[i])?v.reskinPositions:sequence.map(i=>i/last);
- const frames=positions.map(p=>Math.round(p*(replacement.times.length-1)));
+ const sourceImpact=impactIndex(effect),targetImpact=impactIndex(replacement);
+ let phases;
+ if(sourceImpact!==null&&targetImpact!==null){
+  phases=Array.isArray(v.reskinPhases)&&v.reskinPhases.length===sequence.length&&v.reskinPhases.every((p,i)=>Number.isFinite(p)&&p>=0&&p<=1&&phaseFrame(p,last,sourceImpact)===sequence[i])?v.reskinPhases:sequence.map(i=>i <= sourceImpact ? .5*i/sourceImpact : .5+.5*(i-sourceImpact)/(last-sourceImpact));
+ }
+ const frames=phases?phases.map(p=>phaseFrame(p,replacement.times.length-1,targetImpact)):positions.map(p=>Math.round(p*(replacement.times.length-1)));
  const sourceMs=sequence.reduce((sum,i)=>sum+(effect.times[i]||80),0),targetMs=frames.reduce((sum,i)=>sum+replacement.times[i],0);
- return {...structuredClone(v),effectId:replacement.id,frames,reskinPositions:[...positions],rate:Math.max(.25,Math.min(4,v.rate*targetMs/sourceMs))};});
+ return {...structuredClone(v),effectId:replacement.id,frames,reskinPositions:[...positions],reskinPhases:phases?[...phases]:undefined,rate:Math.max(.25,Math.min(4,v.rate*targetMs/sourceMs))};});
 }
 export function updateReskinMember(source,target,effects){
  const copy=structuredClone(source);
