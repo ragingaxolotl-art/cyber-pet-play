@@ -1,3 +1,4 @@
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261025-reactions';
 import {connectTreeEditor} from './skill-tree-editor.js';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261024-reviewed18';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261024-reviewed18';
@@ -6,7 +7,7 @@ import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './att
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261024-reviewed18';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261024-contact-pose';
 import {installAttackBank} from './attack-bank.js?v=20261024-reviewed18';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261024-stun-interrupt';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261025-reactions';
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
 let library,effectMap,ids,reviewedSetups=new Map(),project={format:'cyber-pet-combat-design',version:1,attacks:[freshAttack()]},selected=project.attacks[0].id;
@@ -67,11 +68,12 @@ function resizeHandles(box){return [{kind:'width',x:box.x+box.w,y:box.y+box.h/2}
 
 // Crop transparent padding and pin the example to its feet. Empty poses hold a visible pose.
 const poseBounds=new Map();
-function sprite(reference,x,face,progress,sequence=null){
+function sprite(reference,x,face,progress,sequence=null,wallPosition=null){
  if(!reference)return false;const image=img(reference.url);if(!image.complete||!image.naturalWidth)return false;
  let bounds=poseBounds.get(reference.url);
  if(!bounds){bounds=[];const c=document.createElement('canvas');c.width=c.height=128;const cx=c.getContext('2d',{willReadFrequently:true});for(let f=0;f<reference.count;f++){cx.clearRect(0,0,128,128);cx.drawImage(image,f*128,0,128,128,0,0,128,128);const data=cx.getImageData(0,0,128,128).data;let left=128,top=128,right=-1,bottom=-1;for(let y=0;y<128;y++)for(let px=0;px<128;px++)if(data[(y*128+px)*4+3]){left=Math.min(left,px);right=Math.max(right,px);top=Math.min(top,y);bottom=Math.max(bottom,y);}bounds.push(right<0||bottom-top<12||(/(?:^|\/)Ground_Slam\.png(?:\?|$)/.test(reference.url)&&f>=9)?null:{f,left,top,w:right-left+1,h:bottom-top+1});}poseBounds.set(reference.url,bounds);}
  const order=sequence||Array.from({length:reference.count},(_,i)=>i);const n=order[Math.min(order.length-1,Math.floor(progress*order.length))];const b=bounds[n]||bounds.slice(0,n+1).reverse().find(Boolean)||bounds.find(Boolean);if(!b)return false;const scale=Math.min(1,80/b.w,100/b.h);
+ if(wallPosition!==null)x+=fitReactionX(wallPosition,b.w*scale)-wallPosition;
  ctx.save();ctx.translate(x,0);ctx.scale(face,1);ctx.drawImage(image,b.f*128+b.left,b.top,b.w,b.h,-b.w*scale/2,-b.h*scale,b.w*scale,b.h*scale);ctx.restore();return true;
 }
 function mannequin(x,color){ctx.fillStyle=color;ctx.fillRect(x-8,-58,16,16);ctx.fillRect(x-12,-40,24,27);ctx.fillRect(x-11,-13,8,13);ctx.fillRect(x+3,-13,8,13);}
@@ -82,8 +84,10 @@ function draw(){if(!simulation)return;const state=simulation.frames[frame],a=att
  const reference=standing?(library.examples.ready_side||library.examples[a.motion]):library.examples[a.motion];
  const poseOrder=standing?null:a.poseFrames,poseCount=poseOrder?.length||reference?.count||1,progress=standing?.1:(pose.index+.01)/poseCount;
 
- ctx.save();ctx.translate(0,state.target.y||0);if(!sprite(library.examples.ready_side,state.target.x,-options.targetSide,.1))mannequin(state.target.x,'#7b9bbd');ctx.restore();
- if(a.wallSlam){ctx.strokeStyle='#8a9bb0';ctx.strokeRect(options.targetSide*220,-100,4,100);}
+ const reaction=targetReaction(state.target,frame,{guard:options.guard});
+ ctx.save();ctx.translate(state.target.x+reaction.offsetX,(state.target.y||0)-32);ctx.rotate(reaction.angle*Math.PI/180);ctx.translate(0,32);
+ if(!sprite(library.examples[reaction.pose]||library.examples.ready_side,0,-options.targetSide,reaction.progress,reaction.sequence,a.wallSlam&&!state.target.reactionInFlight?state.target.x+reaction.offsetX:null))mannequin(0,'#7b9bbd');ctx.restore();
+ if(a.wallSlam){ctx.strokeStyle='#8a9bb0';ctx.strokeRect(options.targetSide*234+(options.targetSide<0?-4:0),-100,4,100);}
  for(const e of simulation.events.filter(e=>frame>=e.frame&&frame<e.frame+12&&e.text.includes('smash!'))){ctx.strokeStyle='#ffda90';ctx.lineWidth=2;ctx.beginPath();ctx.arc(state.target.x,e.text.startsWith('Floor')?-3:(state.target.y||0)-30,8+(frame-e.frame),0,Math.PI*2);ctx.stroke();}
  a.visuals.forEach((v,index)=>{const e=effectMap.get(v.effectId);if(!e||!simulation.cast)return;const fi=!v.loopUntilImpact&&(v.loop??e.loop)&&frame>=total?-1:visualFrame(e,v,frame,simulation.impactFrame??Infinity);const travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,motionFrame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0;const x=(v.x+travel+path.x)*options.facing,y=v.y+path.y;
  if(fi>=0){const source=v.frames?.[fi]??fi;const image=img(e.sheet||e.frames[source]);if(image.complete&&image.naturalWidth){ctx.save();ctx.globalAlpha=visualOpacity(e,v,frame,simulation.impactFrame??Infinity);ctx.translate(x,y);ctx.scale(options.facing,1);ctx.rotate((v.followPath&&a.motionPath?.length?Math.atan2(path.dy,path.dx):0)-(v.forwardAngle||0)*Math.PI/180);ctx.scale(v.scale*(v.stretchX??1),v.scale*(v.stretchY??1));const [w,h]=e.canvas,[ax,ay]=e.anchor;if(e.sheet)ctx.drawImage(image,source%e.columns*w,Math.floor(source/e.columns)*h,w,h,-ax,-ay,w,h);else ctx.drawImage(image,-ax,-ay,w,h);ctx.restore();}}
@@ -97,7 +101,7 @@ function draw(){if(!simulation)return;const state=simulation.frames[frame],a=att
  function hpbar(x,y,w,who,color){ctx.fillStyle='#293645';ctx.fillRect(x,y,w,7);ctx.fillStyle=color;ctx.fillRect(x,y,w*who.hp/who.maxHP,7);ctx.fillStyle='#edf3fa';ctx.fillText(`${Math.round(who.hp)} / ${who.maxHP} HP${who.shield?' + '+who.shield+' shield':''}`,x,y-8);}
  hpbar(24,35,250,state.self,'#b7f3ce');hpbar(686,35,250,state.target,'#78b9ff');
  $('timeline').value=frame;$('phase').textContent=`${frame}f · ${(frame/60).toFixed(2)}s · ${!simulation.cast?'NO ENERGY':frame<tm.startup?'STARTUP':simulation.contactMode&&(simulation.impactFrame===null||frame<simulation.impactFrame)?'WAITING FOR CONTACT':state.active?'ACTIVE':frame<total?'RECOVERY':'AFTER EFFECTS'}`;
- const mods=state.modifiers.map(m=>`${m.recipient} ${m.kind}${['slow','haste','weaken'].includes(m.kind)?' '+m.power+'%':''} ${m.remaining}f`).join(' · ');$('liveState').textContent=`Energy: ${state.self.energy} · Target ${state.target.hp===0?'KO':state.target.stun>frame?'stunned '+(state.target.stun-frame)+'f':'ready'}${mods?' · '+mods:''}`;$('play').textContent=playing?'Ⅱ Pause':'▶ Test attack';
+ const mods=state.modifiers.map(m=>`${m.recipient} ${m.kind}${['slow','haste','weaken'].includes(m.kind)?' '+m.power+'%':''} ${m.remaining}f`).join(' · ');$('liveState').textContent=`Energy: ${state.self.energy} · Target ${reaction.label}${mods?' · '+mods:''}`;$('play').textContent=playing?'Ⅱ Pause':'▶ Test attack';
 }
 function statsUI(parent,obj){for(const stat of STATS){const row=document.createElement('label');row.className='stat';row.textContent=stat;const input=document.createElement('input');input.type='range';input.min=0;input.max=99;input.value=obj[stat];input.setAttribute('aria-label',(parent.id==='attackerStats'?'Attacker ':'Target ')+stat);const out=document.createElement('output');out.textContent=obj[stat];input.oninput=()=>{obj[stat]=Number(input.value);out.textContent=input.value;playing=false;mark();recompute();};row.append(input,out);parent.append(row);}}
 function installSandbox(){options.targetHeight??=0;options.incomingDamage??=0;options.incomingFrame??=30;for(const id of ['attackerStats','targetStats','sandbox'])$(id).replaceChildren();statsUI($('attackerStats'),attacker);statsUI($('targetStats'),target);const s=$('sandbox'),change=()=>{playing=false;mark();recompute();};for(const [key,title,min,max,step] of [['incomingDamage','Incoming test damage (0 = off)',0,500,1],['incomingFrame','Incoming test hit frame',0,1800,1],['distance','Target distance (px)',0,245,1],['targetHeight','Target height above floor (px)',0,60,1],['resistance','Target element resistance %',-50,75,1],['selfHP','Attacker starting HP fraction',0.05,1,.05],['targetHP','Target starting HP fraction',0.05,1,.05],['energy','Starting energy fraction',0,1,.05]])field(s,title,options,key,'number',null,min,max,step,change);

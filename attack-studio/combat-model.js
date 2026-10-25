@@ -63,14 +63,19 @@ export function simulate(a,attacker,target,options={}){
  const cast=self.energy>=cost;if(cast)self.energy-=cost;else events.push({frame:0,text:'Not enough energy — attack did not start.'});
  function event(frame,text){events.push({frame,text});}
  function heal(who,n){const old=who.hp;who.hp=Math.min(who.maxHP,who.hp+n);return who.hp-old;}
+ function startReaction(who,f){
+  who.reactionHitFrame=f;who.reactionDirection=facing;who.reactionWallFrame=null;who.reactionLandFrame=null;
+  who.reactionLaunched=(a.pushAxis!=='x'&&a.launchHeight>0)||who.y<0;who.reactionInFlight=true;who.reactionFlightFrames=a.flightFrames;who.reactionKnockedDown=false;
+  end=Math.max(end,f+Math.max(18,a.hitstun));
+ }
  function hurt(who,n){const absorb=Math.min(who.shield,n);who.shield-=absorb;const damage=Math.min(who.hp,n-absorb);who.hp-=damage;return damage;}
  for(let f=0;f<=end;f++){
   if(flight){
    const t=clamp((f-flight.start)/a.flightFrames,0,1),who=flight.who;
    who.x=flight.x+facing*(a.pushAxis==='y'?0:a.knockback)*t;
    who.y=(flight.y||0)*(1-t)-4*(a.pushAxis==='x'?0:a.launchHeight)*t*(1-t);
-   if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');flight.wall=true;}}
-   if(t===1){who.y=0;if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
+   if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');flight.wall=true;who.reactionWallFrame=f;}}
+   if(t===1){who.y=0;who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
   for(const who of [self,other])if(who.shield&&f>=who.shieldUntil){who.shield=0;event(f,'Shield expired.');}
   const box=worldBox(a,contactMode&&impactFrame!==null?Math.min(f,impactFrame):f,attacker,facing),targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
@@ -90,8 +95,9 @@ export function simulate(a,attacker,target,options={}){
    if(a.payload==='damage'){
     amount=Math.round(amount*(1-clamp(options.resistance??0,-50,75)/100)*(guarding?1-tv.guard:1));
     event(f,`${guarding?'Blocked hit':'Hit'} ${hits}: ${hurt(recipient,amount)} damage.`);
-    if(!guarding){flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};recipient.stun=Math.max(recipient.stun,f+a.hitstun);}
-   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(!guarding)flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};}
+    if(guarding)recipient.reactionGuardFrame=f;
+    if(!guarding){startReaction(recipient,f);flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};recipient.stun=Math.max(recipient.stun,f+a.hitstun);}
+   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(guarding)recipient.reactionGuardFrame=f;if(!guarding){startReaction(recipient,f);flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};}}
    else if(a.payload==='heal')event(f,`Healed ${heal(recipient,amount)} HP.`);
    else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=f+a.shieldDuration;event(f,`Shield: ${amount} HP (refresh; does not stack).`);}
    else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${recipient.energy-old} energy.`);}
