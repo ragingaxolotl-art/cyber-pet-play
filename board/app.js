@@ -1,3 +1,4 @@
+import {frameSteps,renderSize,petFilter} from './render-budget.js?v=performance42';
 import {stableArtwork,stableFrame} from './stable-artwork.js?v=height1';
 import {drawSpeech} from './friendships.js?v=height1';
 import {installFriendships} from './friendship-panel.js?v=height1';
@@ -49,15 +50,24 @@ function measureArtwork(image){
   artworkBounds.set(image,bounds);surface.width=surface.height=1;return bounds;
 }
 const backdrop=new Image();backdrop.src='assets/location.png';
+let resizePending=true;
+function requestResize(){resizePending=true;}
 function resize(){
-  const box=canvas.getBoundingClientRect();width=Math.max(1,box.width);height=Math.max(1,box.height);
-  // Native pixels up to a 4K pixel budget, including high-DPI laptop mirroring.
-  const ratio=Math.min(devicePixelRatio||1,Math.sqrt(3840*2160/Math.max(1,width*height)));
-  canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);
-  landscape.width=canvas.width;landscape.height=canvas.height;landscapeDirty=true;
+  resizePending=false;
+  const box=canvas.getBoundingClientRect(),w=Math.max(1,box.width),h=Math.max(1,box.height);
+  const target=renderSize(w,h,devicePixelRatio||1);
+  if(width===w&&height===h&&canvas.width===target.width&&canvas.height===target.height)return;
+  width=w;height=h;
+  if(canvas.width!==target.width)canvas.width=target.width;
+  if(canvas.height!==target.height)canvas.height=target.height;
+  ctx.setTransform(canvas.width/width,0,0,canvas.height/height,0,0);
+  if(landscape.width!==canvas.width)landscape.width=canvas.width;
+  if(landscape.height!==canvas.height)landscape.height=canvas.height;
+  landscapeDirty=true;
 }
 backdrop.onload=()=>{landscapeDirty=true;};
-new ResizeObserver(resize).observe(canvas);
+new ResizeObserver(requestResize).observe(canvas);
+canvas.addEventListener('contextrestored',()=>{ctx.setTransform(canvas.width/width,0,0,canvas.height/height,0,0);landscapeDirty=true;requestResize();});
 function roundRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
 function stage(){
   if(landscapeDirty){const painter=landscape.getContext('2d');painter.setTransform(landscape.width/width,0,0,landscape.height/height,0,0);drawLandscape(painter,width,height,backdrop);landscapeDirty=false;}
@@ -91,7 +101,7 @@ function drawPet(pet){
   const placement=framePlacement(stableFrame(data,action,name,bounds,img),data.artworkEnvelope,scale),w=placement.w,h=placement.h;
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
   const healthVisual=conditionVisual(pet,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
-  ctx.save();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=healthVisual.alpha;ctx.filter=`hue-rotate(${data.tint||0}deg) grayscale(${healthVisual.gray})`;ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
+  ctx.save();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=healthVisual.alpha;ctx.filter=petFilter(data.tint||0,healthVisual.gray);ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
@@ -115,15 +125,16 @@ function drawPet(pet){
     if(!image){image=new Image();image.src=pet.displayItem.sprite;foodImages.set(pet.displayItem.id,image);}
     const size=desired*.5;if(image.complete&&image.naturalWidth)ctx.drawImage(image,x-size/2,y-desired-65*unit-size/2,size,size);
   }
-  ctx.save();ctx.globalAlpha=healthVisual.alpha;ctx.filter=`grayscale(${healthVisual.gray})`;
+  ctx.save();ctx.globalAlpha=healthVisual.alpha;ctx.filter=petFilter(0,healthVisual.gray);
   drawDirt(img,bounds,x+facing*(placement.x+w/2),y+placement.y+h,w,h,facing,1-pet.cleanliness,pet.dirtPattern);ctx.restore();
   drawHealth(ctx,pet,x,groundY,desired);
   drawSpeech(ctx,pet,x,y-desired-44*unit,unit,width);
 
 }
 function render(time){
-  const dt=previous?Math.min((time-previous)/1000,.05):0;previous=time;
-  if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}
+  if(resizePending)resize();
+  const steps=frameSteps(previous?(time-previous)/1000:0);previous=time;
+  if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){for(const dt of steps){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}}
   stage();drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed,foodImages);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   animationRequest=requestAnimationFrame(render);
 }
@@ -153,7 +164,7 @@ function syncDisplay(){
   document.body.classList.remove('board-mode');
   $('fullscreen').textContent=full?'Exit full screen':'Full screen ↗';
   $('fullscreen').setAttribute('aria-pressed',String(full));
-  previous=0;requestAnimationFrame(()=>{resize();requestAnimationFrame(resize);});
+  requestResize();
 }
 async function toggleFullscreen(){
   if(fullscreenBusy)return;fullscreenBusy=true;
