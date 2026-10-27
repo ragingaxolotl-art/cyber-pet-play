@@ -10,7 +10,7 @@ export function displayMetrics(data,width,height,count){
  const maxHeight=Math.max(1,Number.isFinite(data.maxHeight)?data.maxHeight:1);
  const maxWidth=Math.max(1,Number.isFinite(data.maxWidth)?data.maxWidth:maxHeight);
  const scale=Math.min(requestedScale,slot*1.5/maxHeight,Math.min(width*.14,slot*1.8)/maxWidth);
- return {scale,desired:data.maxHeight*scale,offsetY:valid(data.config?.display?.pet_y_offset,-2048,2048,0)*unit};
+ return {scale,desired:data.maxHeight*scale,offsetY:valid(data.config?.display?.pet_y_offset,-2048,2048,0)*unit*(scale/requestedScale)};
 }
 export const sourceScale=(data,name)=>data.sourceScales?.get(name)||{x:1,y:1};
 
