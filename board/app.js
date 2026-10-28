@@ -23,9 +23,11 @@ import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=height1';
 import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=height1';
 import {favoriteFood} from './food.js?v=height1';
 import {drawLandscape,drawWash} from './scenery.js?v=height1';
-import {refreshRoster} from './connection.js?v=height1';
+import {refreshRoster} from './connection.js?v=foundling44';
+import {drawFoundling,foundlingNameplate} from './foundling.js?v=foundling44';
 import {readBackup} from './backups.js?v=height1';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
+const medalHoverAreas=[];let medalPointer=null;
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 const friendships=installFriendships(()=>pets);
@@ -87,6 +89,11 @@ function drawDirt(img,bounds,x,y,w,h,direction,amount,pattern){
   d.globalCompositeOperation='source-over';
   ctx.save();ctx.translate(x,y);ctx.scale(direction,1);ctx.drawImage(dirtLayer,-w/2,-h,w,h);ctx.restore();
 }
+function updateMedalHover(){
+  canvas.title=medalPointer&&medalHoverAreas.some(r=>medalPointer.x>=r.x&&medalPointer.x<=r.x+r.w&&medalPointer.y>=r.y&&medalPointer.y<=r.y+r.h)?'founding ribbon for starting the world':'';
+}
+canvas.addEventListener('pointermove',event=>{const box=canvas.getBoundingClientRect();medalPointer={x:(event.clientX-box.left)*width/box.width,y:(event.clientY-box.top)*height/box.height};updateMedalHover();});
+canvas.addEventListener('pointerleave',()=>{medalPointer=null;updateMedalHover();});
 function petSize(data){return displayMetrics(data,width,height,pets.length);}
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,groundY=(petFloor(pet)-(pet.worldBob||0))*height;
@@ -105,8 +112,11 @@ function drawPet(pet){
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
-    const label=data.name.length>16?data.name.slice(0,15)+'…':data.name,lw=ctx.measureText(label).width+12*unit;
-    roundRect(x-lw/2,y+10*unit,lw,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x,y+font+11*unit);
+    const label=data.name.length>16?data.name.slice(0,15)+'…':data.name;
+    const plate=foundlingNameplate(data.config.creation_record,ctx.measureText(label).width,font,unit);
+    roundRect(x-plate.width/2,y+10*unit,plate.width,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x+plate.labelOffset,y+font+11*unit);
+    if(plate.medalWidth>0)medalHoverAreas.push({x:x+plate.medalCenterOffset-plate.medalWidth/2,y:y+10*unit+plate.medalTop,w:plate.medalWidth,h:plate.medalHeight});
+    drawFoundling(ctx,data.config.creation_record,x+plate.medalCenterOffset,y+10*unit+plate.medalTop,plate.medalWidth,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
   if(!pet.awaitingCounter&&['eat','snack'].includes(pet.mode)&&data.food){
     const meal=pet.mode==='snack'?(pet.snackItem||pet.heldItem):data.food;
@@ -135,7 +145,9 @@ function render(time){
   if(resizePending)resize();
   const steps=frameSteps(previous?(time-previous)/1000:0);previous=time;
   if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){for(const dt of steps){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}}
+  medalHoverAreas.length=0;
   stage();drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed,foodImages);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
+  updateMedalHover();
   animationRequest=requestAnimationFrame(render);
 }
 function setPets(data,label){
