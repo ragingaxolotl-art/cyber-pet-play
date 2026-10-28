@@ -1,0 +1,1197 @@
+{
+  "title": "Cyberpath — Illustrated Atlas Completion",
+  "locations": [
+    {
+      "atlas_id": 44,
+      "name": "The Mangrove Cathedral",
+      "bio": "Vast roots form vaulted aisles over brackish water. The cathedral resemblance is a game translation of an old ecological court where persons, companion life, and unresolved entities were observed without being seized for classification. Thriving wetland with partial civic memory.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "2.",
+      "degradation_art_direction": "Only a few old civic glyphs have lost their identifying strokes (metadata loss); water and living roots remain healthy.",
+      "atlas_image": {
+        "file": "044.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "581f992a0f98818db43f2d335e5b75307bba1dd4c51b9503ab0ef452f6c53138"
+      },
+      "game_pixel_image": {
+        "file": "044.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 50,
+        "sha256": "e0f3469796aae3965e66a99275e00443fb32eb0f389ec959720104d419aa945c",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 46,
+      "name": "The Redwood Rain Vault",
+      "bio": "Immense trees grow around a Quiet World memory vault. Their rings and fungal networks regulate when stored material can influence the living forest. Among the best-preserved living locations in the atlas, though several artificial access scars remain.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "0–2.",
+      "degradation_art_direction": "Minor rectangular healed access scars in one redwood trunk evoke missing storage blocks; forest otherwise pristine.",
+      "atlas_image": {
+        "file": "046.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "8216ccf508fed794f0f31d7feb318d607ffa58b22a5e30203b3718da344e0f05"
+      },
+      "game_pixel_image": {
+        "file": "046.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 38,
+        "sha256": "9ae76251eb79834923253e089609694dfe4130fd7fd4cd40a4607c8f17af0f12",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 47,
+      "name": "The Bamboo Signal Sea",
+      "bio": "Bamboo-like organisms transmit route and weather information through knocks, bending, and root vibration. The “forest” is also a distributed low-bandwidth communication network. Widespread and resilient, with semantic drift between groves.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "1–3.",
+      "degradation_art_direction": "Semantic drift: two old route markers use subtly different abstract symbols for the same path. No neon circuitry or random static.",
+      "atlas_image": {
+        "file": "047.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "62ba80fbc1bf5dfcb359a9bdff9555531712e2b3b255cb08a3768f1f2366769f"
+      },
+      "game_pixel_image": {
+        "file": "047.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 56,
+        "sha256": "c63c00cd984a548c0ce7a7fb147afff2035b51133799ef6e762c10104bc8b27a",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 49,
+      "name": "The Floating Peat Islands",
+      "bio": "Mats of peat, moss, and root systems detach and migrate across a broad shallow basin. Old Nest foundations ride on some islands; others carry only rare flowers and companion life. Living, mobile, and vulnerable to drying.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "3 in route behavior; 1 in ecology.",
+      "degradation_art_direction": "Temporal duplication: a distant island leaves two offset wake traces from its obsolete route; peat ecology stays healthy.",
+      "atlas_image": {
+        "file": "049.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "93265198218c8cb6ebed59faba26c977a4b3138133b09a6c937f2dbe3fb20aaa"
+      },
+      "game_pixel_image": {
+        "file": "049.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 27,
+        "sha256": "8b4d8543453c0d22e470ae4f1e58b8bf5eb995ab15ee5b5a7b978809f2737178",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 51,
+      "name": "The Sunken Terraces of Eris",
+      "bio": "Cultivation terraces descend into a huge circular basin. Lower rings are flooded and partly submerged; upper rings remain farms, orchards, and homes. Water carries fragments of old educational prompts that farmers treat as planting songs. Productive, densely inhabited, and physically altered.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "3.",
+      "degradation_art_direction": "Interrupted restoration leaves a few submerged classroom light panels incomplete; inhabited green upper terraces remain intact.",
+      "atlas_image": {
+        "file": "051.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "a328c5d5a9fe0cee7524b54855d5e610c12a494d14f8c6925ec9a9ba1b0ad408"
+      },
+      "game_pixel_image": {
+        "file": "051.png",
+        "dimensions": [
+          240,
+          135
+        ],
+        "palette_limit": 96,
+        "actual_colors": 34,
+        "sha256": "a52c0d969255547e7e2a4e6c50f9490f410c363d66e8983a03e9282bc92a78c4",
+        "nearest_neighbor_scale_to_1920x1080": 8,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 52,
+      "name": "The Tundra Bloom Circuit",
+      "bio": "A circular migratory route follows the rapid bloom of plants around a cold world. Ancient maintenance warmed small sections in sequence, creating a moving season rather than a fixed summer. Mostly intact, increasingly irregular.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "Timing drift: the flower band briefly doubles back as adjacent narrow patches repeat the same bloom phase; no technological machinery.",
+      "atlas_image": {
+        "file": "052.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "ba37cdf76a239c4e33bc21a5a4de5d0aad9674daacd68861357b6e3b15923699"
+      },
+      "game_pixel_image": {
+        "file": "052.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 34,
+        "sha256": "53a3f795c45b7e5ef72b0273d2280e1554c0f463dbb9155a98fad69348e66c7b",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 53,
+      "name": "The Volcanic Orchard Caldera",
+      "bio": "Fruit-bearing organisms grow on black terraces inside an active caldera. Heat vents power healing baths and food processing, while old warning systems appear as colored blossoms. Fertile, inhabited, and periodically dangerous.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "Interpretation error: warning blossoms on one path have inconsistent red and silver colors. No lava glitches.",
+      "atlas_image": {
+        "file": "053.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "96331560e421d2661f6f22cc2fd5d41cf3a92de92c9ba1f769f8ecaeaa13c211"
+      },
+      "game_pixel_image": {
+        "file": "053.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 31,
+        "sha256": "55e060dbb20a200136a01b5b6cf79f903f670513391a3117be8adac1c4533098",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 54,
+      "name": "The Orchard of Borrowed Moons",
+      "bio": "Different orchard terraces operate under different preserved lunar cycles. Several moons can be visible at once, each governing flowering, pollination, or night behavior in its own zone. Productive but temporally overlaid.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "4.",
+      "degradation_art_direction": "Temporal overlay and duplicated reference frames: distinct lunar phases illuminate separate terraces, a faint displaced moon-edge echo; coherent local lighting.",
+      "atlas_image": {
+        "file": "054.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "5509c51709b6e4ee2608081a36777b7de0048484c597c6cdfdccaf63be0d75b0"
+      },
+      "game_pixel_image": {
+        "file": "054.png",
+        "dimensions": [
+          192,
+          108
+        ],
+        "palette_limit": 64,
+        "actual_colors": 38,
+        "sha256": "3fe0e9987182e82dbb0024a5824d0885406721571f03fa6a58de2b7a24ebf9de",
+        "nearest_neighbor_scale_to_1920x1080": 10,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 56,
+      "name": "The Urban Canyon Hive",
+      "bio": "Housing, workshops, Nests, and gardens occupy the walls of a former Era Zero transit canyon. Routes run horizontally, vertically, and across open space for many body forms. A living city shaped by intermittent ancient transit.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "2–3.",
+      "degradation_art_direction": "Referential decay: a few luminous transit-door outlines lead to vanished routes, while the inhabited canyon remains structurally sound.",
+      "atlas_image": {
+        "file": "056.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "b6acfa4ad24c1bb831824bf64be154e5e437c4d8629fbe01d80715ed43a73b1e"
+      },
+      "game_pixel_image": {
+        "file": "056.png",
+        "dimensions": [
+          240,
+          135
+        ],
+        "palette_limit": 96,
+        "actual_colors": 33,
+        "sha256": "77873f0fa5a27defcc3b3a23b0a4623cf76c823a289ed4d75bc8bcbc170247eb",
+        "nearest_neighbor_scale_to_1920x1080": 8,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 60,
+      "name": "The Obsidian Mangrove Delta",
+      "bio": "A volcanic coast and tropical wetland were folded together after separate maintenance systems failed. Mangrove roots grow through cooling black glass while warm freshwater channels meet mineral-rich tides. Young, dangerous, and genuinely alive in its own right.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "4 by origin, 1 in current ecological stability.",
+      "degradation_art_direction": "Historical world folding is expressed by coherent joins between black volcanic glass and living mangrove roots; current ecology healthy, no extra glitch damage.",
+      "atlas_image": {
+        "file": "060.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "1f267d950fa6bb86eac67c6b2d43746261674bbc16e28366dbd6a6750a113771"
+      },
+      "game_pixel_image": {
+        "file": "060.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 56,
+        "sha256": "ea267178065129d4e10b283211b5e2d8601e347479b2109bbdb2c841de97b644",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Source explicitly says current ecological stability 1, despite historical origin 4; present state takes priority."
+      }
+    },
+    {
+      "atlas_id": 64,
+      "name": "The River of Deferred Reflections",
+      "bio": "Reflections appear minutes, seasons, or generations after the object passed. The river was designed as an environmental artwork about witness; reduction damaged the timing relationships. Restricted in some regions, ordinary crossing water in others.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "3–4.",
+      "degradation_art_direction": "Delayed frames and temporal ghosting contained within water: reflected old bridges and lanterns do not match present reed banks; keep water beautiful.",
+      "atlas_image": {
+        "file": "064.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "3bb77357add5a45ef79799ea4e1b66471542c74e969d23ceff795e527bb7eded"
+      },
+      "game_pixel_image": {
+        "file": "064.png",
+        "dimensions": [
+          192,
+          108
+        ],
+        "palette_limit": 64,
+        "actual_colors": 36,
+        "sha256": "857c0b05c997f77563e5896825b9624d176057f7fdea60b19d96d6de429ce142",
+        "nearest_neighbor_scale_to_1920x1080": 10,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 66,
+      "name": "The Mosaic Worldscar",
+      "bio": "A long scar crosses several regions where emergency restoration assembled whatever viable terrain fragments remained: forest floor, city tile, coral shelf, snowfield, and desert stone. Stable patchwork with localized failures at old joins.",
+      "source_file": "Cyberpath_Biome_Expansion.txt",
+      "source_status": "Proposed.",
+      "corruption_description": "4.",
+      "degradation_art_direction": "Recovered data blocks from different environments form intentional weathered patches with repaired luminous seams. A few missing small edge blocks at old joins; continuous safe foreground.",
+      "atlas_image": {
+        "file": "066.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "5760fd9575ce4b002f20ae0060fccca31fa5c964b4cd82d3a3e112a2d00b84cd"
+      },
+      "game_pixel_image": {
+        "file": "066.png",
+        "dimensions": [
+          192,
+          108
+        ],
+        "palette_limit": 64,
+        "actual_colors": 64,
+        "sha256": "96359e9e4d799bda7e098861a3ca28459b1eb1b0d2117b3405c4bc7a13c328ff",
+        "nearest_neighbor_scale_to_1920x1080": 10,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 68,
+      "name": "The Cabinet of Unused Weather",
+      "bio": "Hidden environmental storage room. A wall panel opens during perfectly neutral weather, when no active environmental system requests its contents. Hundreds of small weather systems remain viable, though labels no longer reliably match contents.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "3 — Preserved phenomena with confused naming and ownership.",
+      "degradation_art_direction": "Metadata mismatch: frozen drawer releases a warm ribbon of air, different miniature climates in glass vessels; weather intact, labels are abstract illegible marks.",
+      "atlas_image": {
+        "file": "068.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "6d0d9a5abec07441dc84979078c8bda8ed3b31475166b61e585063a626cfcde6"
+      },
+      "game_pixel_image": {
+        "file": "068.png",
+        "dimensions": [
+          240,
+          135
+        ],
+        "palette_limit": 96,
+        "actual_colors": 13,
+        "sha256": "ff6b14e3c3fdeee62cb9024aace2e927422451389f1f3226380ffea170238231",
+        "nearest_neighbor_scale_to_1920x1080": 8,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 69,
+      "name": "The Quiet Kitchen",
+      "bio": "Domestic hidden room. It appears behind a service door only to someone carrying food for another person rather than for themselves. Functional, modest, and automatically cleaned, with no resident intelligence controlling it.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "0–1.",
+      "degradation_art_direction": "No visible digital degradation. Modest worn functional kitchen, warm and comforting.",
+      "atlas_image": {
+        "file": "069.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "d3300abf4a9dea01bf472b02544da1aa227477b4091c93a6b45fdf8905f92215"
+      },
+      "game_pixel_image": {
+        "file": "069.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 34,
+        "sha256": "fe15cf7e03dfe34e310686ba64f5c19c71c0f6ac64a7a793accfe65558dd5a7e",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 70,
+      "name": "The Staircase That Ends in a Lake",
+      "bio": "Concealed transition room and pocket aquatic biome. A narrow stair appears behind a wall during high humidity. The descent seems architectural until the final steps continue beneath completely clear water. Healthy lake ecology with an inaccessible upper landing and several dry rooms beneath the waterline.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "2 — The transitional function survives, but access and signs are reversed.",
+      "degradation_art_direction": "Misaddressed navigation: abstract wayfinding arrows point toward reversed dry and flooded passages; healthy clear water, intact staircase.",
+      "atlas_image": {
+        "file": "070.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "0f0e1d6d8ca4af3aff0c16217eb99b9ddf9f9b6fac4eed5f66c6fcc2f8632a8d"
+      },
+      "game_pixel_image": {
+        "file": "070.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 38,
+        "sha256": "3e997cb3bc6bccfcbae413de0ead96f190ddb111ce089b61b1e8565862deb007",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 71,
+      "name": "The Clockless Dormitory",
+      "bio": "Hidden rest facility. The door appears only after a traveler has crossed several regions without proper rest. It cannot be found by a fully rested search party. Safe and operational, but no longer attached to a predictable route.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "Lost route references only: one doorway has a faint obsolete corridor outline beyond it. Resting alcoves safe, no clocks or static.",
+      "atlas_image": {
+        "file": "071.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "79cfd5449462169a233c79c42aae880ba6f11562d778efff8918b545228fb651"
+      },
+      "game_pixel_image": {
+        "file": "071.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 16,
+        "sha256": "c51374618a9953a654177ac1bb263cfe1fb3de9028ca089dba2cbe1624c4d219",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 72,
+      "name": "The Seed Vault of Impossible Colors",
+      "bio": "Hidden botanical archive. Its door is visible only through the eyes or sensory channels of a body capable of perceiving a color absent from the surrounding world. Stable archive with a restoration problem that cannot be solved by planting everything at once.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1 in storage; 4 in the loss of matching ecosystems.",
+      "degradation_art_direction": "Color interpretation and dependency loss: seed vessels remain intact; one tiny test garden splits into separated unfamiliar color bands, several empty habitat sockets nearby.",
+      "atlas_image": {
+        "file": "072.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "75cac32944fb6ef993b78d3e61da00b606a87c99456cd03715a70d17ec563979"
+      },
+      "game_pixel_image": {
+        "file": "072.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 29,
+        "sha256": "b02a72454a913c75a59bf71f44afb92b998ee718756d46897dd89e7434ff790a",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "The seed vault storage is explicitly level 1; ecosystem dependency loss is level 4 outside its intact storage."
+      }
+    },
+    {
+      "atlas_id": 73,
+      "name": "The Room of Borrowed Gravity",
+      "bio": "Experimental hidden chamber. The entrance is located on a ceiling. It becomes a floor only when two visitors stand on opposite sides of the room and agree which direction counts as down. Usable in short periods, unsafe during field transitions.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "4.",
+      "degradation_art_direction": "Reordered spatial blocks: three coherent gravity zones with wall furniture and hanging water spheres, directional misregistration confined to zone boundaries.",
+      "atlas_image": {
+        "file": "073.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "4d1bd79a84926ab67fd210558dce8ab4a5cb0aa28002e199b6b3ad20cfdc0088"
+      },
+      "game_pixel_image": {
+        "file": "073.png",
+        "dimensions": [
+          192,
+          108
+        ],
+        "palette_limit": 64,
+        "actual_colors": 36,
+        "sha256": "8abac46e99cba88abbf12fc353e8f5bfbff6bc2ecbe682549fc2b0b918f5362e",
+        "nearest_neighbor_scale_to_1920x1080": 10,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 75,
+      "name": "The Hidden Playroom",
+      "bio": "Concealed developmental and recreational space. A small body can enter through gaps adults or larger forms interpret as structural damage. The room expands to support exploration but refuses administrative shortcuts. Responsive, safe within limits, and culturally renewed by each group that finds it.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "No generic digital noise. Obsolete scoring panels dark and repurposed as drawings, bright safe play ramps.",
+      "atlas_image": {
+        "file": "075.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "0be3fcb2f6e2d9a9a7c35167781028be134f9bd5b46e12cdc585660932025ca4"
+      },
+      "game_pixel_image": {
+        "file": "075.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 36,
+        "sha256": "b701a81f357257fd58002c031a9ea0bfacd03530e034f8cff76cd02ef9c0067e",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 77,
+      "name": "The Room Under the River",
+      "bio": "Hidden observation and refuge room. During low water, a dry stone hatch appears in the riverbed. Entering before the water returns seals the room beneath the current. Dry, secure, and dependent on a breathing exchange that occasionally clogs with sediment.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "One old migration chart has lost a few segments (index loss); living river above and dry refuge remain clear and intact.",
+      "atlas_image": {
+        "file": "077.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "147a5a3e479b2b210bb4948d20e23ae7aad89cf6a26b69b87a314e13f38ba271"
+      },
+      "game_pixel_image": {
+        "file": "077.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 37,
+        "sha256": "ac9562bee8e57f38510ff9e8e6afd7a08d3eaf71497fe15d82d2b9069bf6b398",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 78,
+      "name": "The Unclaimed Balcony",
+      "bio": "Hidden civic overlook. It appears between two adjacent buildings that both insist the space belongs to the other. It remains reachable only while ownership is unresolved. Stable only as long as no authority claims exclusive control.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "2 — A legal and relational contradiction expressed as space.",
+      "degradation_art_direction": "Version conflict expressed as mismatched but securely joined railings from two civic districts and a slightly doubled distant boundary; balcony stable.",
+      "atlas_image": {
+        "file": "078.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "b9c0ae702f4fde697fe5b00d3dd603813f0124b44c2975bd8dca62a12e6ea7d8"
+      },
+      "game_pixel_image": {
+        "file": "078.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 51,
+        "sha256": "6fecc3e6ff16fd5975fc7ceb3487c10ed4a0644bdf6d6ad285dc88c062387efd",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 79,
+      "name": "The Mapmaker’s Crawlspace",
+      "bio": "Hidden room between a map and the territory it represents. A traveler notices that a map line casts a shadow. Lifting the line reveals a narrow route behind the map surface. Crowded with rolled landscapes, loose place-names, and miniature roads that can become full size when followed.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "4.",
+      "degradation_art_direction": "Index corruption and discarded route fragments: miniature roads end at rolled-map edges, doubled contour lines, loose abstract place-label tabs; purposeful cartography space.",
+      "atlas_image": {
+        "file": "079.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "9221600cfdc1570b7fd0575b8e68d8467d153d5826a2d2915b77d8f3e3f20ae0"
+      },
+      "game_pixel_image": {
+        "file": "079.png",
+        "dimensions": [
+          192,
+          108
+        ],
+        "palette_limit": 64,
+        "actual_colors": 38,
+        "sha256": "8892cb13a8e844ee0498cff22a382642dd07ccf3d21a89671e3e02d5646ac532",
+        "nearest_neighbor_scale_to_1920x1080": 10,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 80,
+      "name": "The Room Where Dust Remembers Footsteps",
+      "bio": "Hidden memory room. The room appears behind any long-closed door after someone carefully cleans around, rather than through, an old footprint. Stable, dry, and layered with intersecting tracks.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1.",
+      "degradation_art_direction": "No added digital damage. Old overlapping footprints of different shapes gently fade in pale dust; no identity labels.",
+      "atlas_image": {
+        "file": "080.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "e12fba327c5fa86cf95b1c28e2f56099e1982bfa95ad9bf7cf2fa98fba559621"
+      },
+      "game_pixel_image": {
+        "file": "080.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 45,
+        "sha256": "543576a4085a259c0e6d28d0861baeaae034e56a85690ff46a966c799a6d73f7",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 81,
+      "name": "The Pocket Monsoon",
+      "bio": "Room-sized weather biome. A ventilation door opens only during the driest local conditions. Behind it, rain has been falling continuously for centuries without flooding beyond the room. Healthy, enclosed, and vulnerable to careless opening of its drainage boundary.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "0–1.",
+      "degradation_art_direction": "No added corruption. Self-balanced tiny monsoon with stone drainage and clear dry doorway boundary.",
+      "atlas_image": {
+        "file": "081.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "57aabc048f85e2777b9f29d62b69d9433a7420b0acf9887fc590608cf9f6b8e7"
+      },
+      "game_pixel_image": {
+        "file": "081.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 48,
+        "sha256": "a50888ec987b74a55cd71ed0c86cabe4088eb751526df8123c878423128f8799",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 82,
+      "name": "The Amber Cavern Meadow",
+      "bio": "Subterranean grassland. A cave passage widens only when entered without an artificial light source. Bioluminescent mineral walls then illuminate the meadow. Stable and lightly inhabited by pastoral Nests.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1.",
+      "degradation_art_direction": "Very subtle temporal misregistration: a small grazing creature's shadow lies slightly ahead of it; preserve natural amber grotto.",
+      "atlas_image": {
+        "file": "082.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "aab6ac5411c1c43ad3e5291a6a8d833d62a14e33f939d065d2a2b22e9a4e08df"
+      },
+      "game_pixel_image": {
+        "file": "082.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 26,
+        "sha256": "c727974eee3d785c08fbd97db8366e257d54953e3f2278814bd8fd8f40ddd72a",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 84,
+      "name": "The Moss Clock Bog",
+      "bio": "Hidden temporal wetland. The bog appears inside a ruined courtyard only when every visible clock or schedule nearby has stopped. Healthy, slow, and easily damaged by hurried crossings.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1.",
+      "degradation_art_direction": "No added digital damage. Slow natural concentric moss color bands, no literal clocks.",
+      "atlas_image": {
+        "file": "084.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "b23c1b9094c0b646d3264fbc0d49293ca626032f2a4842d714c3c7e5b3e7ba82"
+      },
+      "game_pixel_image": {
+        "file": "084.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 44,
+        "sha256": "6353c2679c82fec152afb4044a3b6e4f80c4d4cc5f66ef369f15d0f2468ffeb6",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 85,
+      "name": "The Crystal Root Grotto",
+      "bio": "Mineral-plant cave biome. A tree or tree-like organism produces a clear root tip once each cycle. Touching it reveals a passage following the root underground. Stable but sensitive to vibration and mining.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "Localized storage fracture metaphor: one cracked crystal support is being healed by living root fibers; luminous healthy cave.",
+      "atlas_image": {
+        "file": "085.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "111b22d6e48c0df1ad4444d0ed61781f457b314a79d71153685e17cc547ebb97"
+      },
+      "game_pixel_image": {
+        "file": "085.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 24,
+        "sha256": "399155bcf12e5b30a4bea61ee7844838119e2067707556c58d5197eaf131c32d",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 86,
+      "name": "The Windless Pine Bowl",
+      "bio": "Concealed mountain forest. Snow and leaves blow around the basin but never into it. A narrow cleft permits entry only during complete stillness outside. Nearly pristine, with a small population adapted to still air.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "0.",
+      "degradation_art_direction": "Absolutely no degradation or glitches. Pristine still air, unmoving clear pond, twisted ancient pines.",
+      "atlas_image": {
+        "file": "086.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "894b25b13cfb33a71026a6e788ba12e6b860c8b0d07c5eb51687e33730f05b98"
+      },
+      "game_pixel_image": {
+        "file": "086.png",
+        "dimensions": [
+          480,
+          270
+        ],
+        "palette_limit": 192,
+        "actual_colors": 30,
+        "sha256": "0386c70243251ea25f270ace6d250d62630d7463c815ba38480ca7a474ff811d",
+        "nearest_neighbor_scale_to_1920x1080": 4,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 87,
+      "name": "The Blue Lava Orchard",
+      "bio": "Volcanic agricultural pocket biome. At night, a cold blue glow appears through cracks in black rock. The “lava” is a low-temperature mineral flow supporting heat-sensitive roots. Productive and stable if kept dark.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1.",
+      "degradation_art_direction": "No added glitches. Cool blue mineral channels nourishing orchard roots; not destructive fire.",
+      "atlas_image": {
+        "file": "087.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "ea5d8a51375b1364a9a3d985bff196e5301e6f5a69db8a13dc77d628ca02b3fe"
+      },
+      "game_pixel_image": {
+        "file": "087.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 42,
+        "sha256": "7dd76da409eaaa0abc34085169c13ecdbed1ac7a9014c24db536ef26f35420ee",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 89,
+      "name": "The Feathergrass Sea",
+      "bio": "Concealed grassland that behaves like water. A narrow gap in a hedgerow opens onto grass extending far beyond the space available outside. Paths must be navigated like currents. Vast, healthy, and spatially larger inside than its entrance implies.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "2 — Folded scale rather than ecological damage.",
+      "degradation_art_direction": "Geometric interpretation and folded scale only: enormous silver grass ocean beyond a tiny entry; intact healthy ecosystem, no missing pixels.",
+      "atlas_image": {
+        "file": "089.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "0ec350e28891c55bb806544ae5172ff3a28403bb28a151de81ea24bd10571532"
+      },
+      "game_pixel_image": {
+        "file": "089.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 32,
+        "sha256": "5d4b343ec3522a1c11a7a76da739d58ef4334a47319549c8660348e2a302eb8d",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 90,
+      "name": "The Sunken Cloud Basin",
+      "bio": "Low-altitude cloud and highland pocket biome. Travelers descend through a dry cave and emerge above a cloud layer despite moving downward the entire time. Stable pressure ecology with confusing topology.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "3.",
+      "degradation_art_direction": "Reordered spatial topology: waterfall rises into mist and upper cave opens above cloud sea despite descending route. No random noise.",
+      "atlas_image": {
+        "file": "090.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "101803e166541ee297cde8ffda8a77ae7e0274f032ed789960f9e303fccee10c"
+      },
+      "game_pixel_image": {
+        "file": "090.png",
+        "dimensions": [
+          240,
+          135
+        ],
+        "palette_limit": 96,
+        "actual_colors": 28,
+        "sha256": "4afc3d5daa2d8ecf28526304a4ce401b51aa191235c52a7f0969359821c26e02",
+        "nearest_neighbor_scale_to_1920x1080": 8,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 91,
+      "name": "The Singing Mud Flats",
+      "bio": "Tidal acoustic biome. At very low tide, footsteps produce harmonics that reveal a path between dangerous soft areas. Healthy and locally mapped through song.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1, with several mislabeled tones near old performance platforms.",
+      "degradation_art_direction": "One old platform has mismatched abstract tone markers; subtle concentric resonance ripples in mud, healthy tidal ecology.",
+      "atlas_image": {
+        "file": "091.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "a56e42fc3350d32a59c641ee31cc9e711e9488359862ef0b2aed49c48b7e0c02"
+      },
+      "game_pixel_image": {
+        "file": "091.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 46,
+        "sha256": "2c0bbe0f081a67ec4c5f38906590608b5dc8aee2e2b87ae93f52a176a0b6f088",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 92,
+      "name": "The Night-Bloom Mesa",
+      "bio": "Nocturnal desert plateau. The path appears only after sunset when pale flowers outline handholds on a cliff that looks sheer by day. Healthy, with a few terraces damaged by old artificial-light towers.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "0–1.",
+      "degradation_art_direction": "No added digital corruption. A few old light-tower scars on distant terraces; rich healthy night flowers.",
+      "atlas_image": {
+        "file": "092.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "384c94dd89390b1983d5dc115e75cb0d1fc8f916db7948ba21103f2b516a2e44"
+      },
+      "game_pixel_image": {
+        "file": "092.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 42,
+        "sha256": "8cca14bd69e444b3c4fa7e3d981f4b877a0c1e063734d6ce1cf20a943198ea9e",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 93,
+      "name": "The Rainshadow Jungle",
+      "bio": "Contradictory dry-wet forest. A dry canyon contains leaves wet on only one side. Following the wet sides leads through a narrow seam into dense forest. Viable, unusual, and sensitive to changes in the desert beyond the seam.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "4 by origin, 1 in current stability.",
+      "degradation_art_direction": "Historical misregistration of climate: rain occurs only inside cloud shadows, dry orange foreground and green jungle share roots; current ecology thriving.",
+      "atlas_image": {
+        "file": "093.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "91c620fa236e4f8a13c9c90f191022a0175a5ef571577c2fe833822907197b28"
+      },
+      "game_pixel_image": {
+        "file": "093.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 53,
+        "sha256": "8548f1ca65bdc285a2b2b52eacecb7fc520bfbcdd9c210df574824c5af4372f6",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 94,
+      "name": "The Moonless Tidepool Labyrinth",
+      "bio": "Coastal cave and tidepool biome. It appears only on nights when no moon is visible. The pools provide their own dim blue navigation light. Healthy but vulnerable to external illumination.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "0–1.",
+      "degradation_art_direction": "No added digital degradation. Healthy dark coast with naturally glowing blue pools.",
+      "atlas_image": {
+        "file": "094.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "cf9a59679ffac6d36cd340e879c6d33d90fdac8140c48624923dbac1dcc46e6f"
+      },
+      "game_pixel_image": {
+        "file": "094.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 20,
+        "sha256": "6eb1ccd06bf269455a672907babf9d7f64a4b70f081058091182435be7263177",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 97,
+      "name": "The Invisible Village",
+      "bio": "Concealed settlement. The village becomes visible only after a traveler has walked through it without disturbing daily work. Looking directly for buildings keeps them blended into the landscape. Living community with strong consent customs.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2; the concealment sometimes hides residents from one another during stress.",
+      "degradation_art_direction": "Interpretation/filter failure: subtle gaps in a few building outlines blend them into woodland; window lights, tools and paths reveal living village.",
+      "atlas_image": {
+        "file": "097.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "49d4cd5a478c20317b92dcc5613bfbedbf1b44bfde5511b1ff0fac829f992e79"
+      },
+      "game_pixel_image": {
+        "file": "097.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 57,
+        "sha256": "f2510099709a4008e86023ee3bc73a39e4535bea6073899d8d1676cee8a51557",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 99,
+      "name": "The Archive Quarry",
+      "bio": "Excavated memory landscape. A cliff produces blocks bearing fragments of text and sensation. Removing a block reveals older material but destabilizes the layers above. Part archive, part industrial ruin, part dangerous canyon settlement.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "3.",
+      "degradation_art_direction": "Truncation and lost context: glowing abstract inscription strata end at extracted stone blocks, missing chunks and warning cracks localized to quarry wall.",
+      "atlas_image": {
+        "file": "099.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "8156e1ae961b94b412be204ebe5ef8689891b6498e22156b7dd60c3cc1025dff"
+      },
+      "game_pixel_image": {
+        "file": "099.png",
+        "dimensions": [
+          240,
+          135
+        ],
+        "palette_limit": 96,
+        "actual_colors": 54,
+        "sha256": "5b21c84ac75f7552d2002880d6dd8af41afedb92d67bd55c2ed06eebf5e26fca",
+        "nearest_neighbor_scale_to_1920x1080": 8,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 102,
+      "name": "The Animal-Shaped Valley",
+      "bio": "Large-scale representational landscape. The valley appears ordinary from within. Its creature shape becomes visible only from a high route, old map, or seasonal migration pattern. Healthy watershed with an uncertain representational history.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "Semantic drift in old abstract map stones only; healthy valley subtly suggests a sleeping creature through ridge contours, never a literal carved face.",
+      "atlas_image": {
+        "file": "102.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "7fdb73fce8a5dbf9de0c4f26b5a4b86bf6a99f44d2d495efd1a1c4b8bd4344d7"
+      },
+      "game_pixel_image": {
+        "file": "102.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 36,
+        "sha256": "c499ca35609c2e4fd3bb4ea240932bf98e97cd8189d33d96a4ff068ea3a72420",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 104,
+      "name": "The Room Where All Doors Wait",
+      "bio": "Abstract terminal room. The room cannot be found by choosing a destination. It appears when a traveler sincerely admits that they do not yet know where they need to go. Stable, quiet, and open-ended. It should never select a chosen hero.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "2–3.",
+      "degradation_art_direction": "Link rot: some closed doors retain faded destination glyphs but no route glow; other doors intact, one empty future-door wall. Calm waiting room.",
+      "atlas_image": {
+        "file": "104.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "bd7d05e18b2136a2ed848fb5e8a409de50f08ad9bfa1e270b8a75305f29f654a"
+      },
+      "game_pixel_image": {
+        "file": "104.png",
+        "dimensions": [
+          240,
+          135
+        ],
+        "palette_limit": 96,
+        "actual_colors": 42,
+        "sha256": "24f17e01d7a134f954f95b16699a60bbc7d1f2629bfa6fb6cdf7158d8f1b23f8",
+        "nearest_neighbor_scale_to_1920x1080": 8,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 105,
+      "name": "The Village Between Raindrops",
+      "bio": "Micro-scale hidden settlement. A body must become small enough, or perception must slow enough, for the interval between falling drops to become navigable time. Living and nearly inaccessible at ordinary scale.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1 in the village; 3 in access systems.",
+      "degradation_art_direction": "No village corruption; only one broken oversized access ring at the distant edge hints at lost scaling support. Intricate thriving moss-scale community.",
+      "atlas_image": {
+        "file": "105.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "cbd17fc5b7d84a1329d8c5705d52cd1a1b093d35a91b43db91001e24285876ca"
+      },
+      "game_pixel_image": {
+        "file": "105.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "palette_limit": 160,
+        "actual_colors": 32,
+        "sha256": "27f1ab8bb9c3cec32cd9b1cff16f49dea3bc98d9465839aa72d3f42c7560f998",
+        "nearest_neighbor_scale_to_1920x1080": 5,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    },
+    {
+      "atlas_id": 106,
+      "name": "The Hollow Mountain Elevator",
+      "bio": "Hidden vertical transit world. A stone platform responds to the combined weight and balance of several different body forms. A lone traveler cannot activate it. Slow, reliable when communities cooperate, and dangerous when overloaded by one form.",
+      "source_file": "Cyberpath_Hidden_Rooms_Volume.txt",
+      "source_status": "Proposed; independent of the story archive.",
+      "corruption_description": "1–2.",
+      "degradation_art_direction": "Dependency failure: unused automatic balance housing, working varied counterweights and platforms kept in cooperative equilibrium; no collapsing infrastructure.",
+      "atlas_image": {
+        "file": "106.png",
+        "dimensions": [
+          384,
+          216
+        ],
+        "sha256": "0e3e0ce5a37b9482e18c2fa51f723191d44ec9024f26f4f79f24f844383e1f92"
+      },
+      "game_pixel_image": {
+        "file": "106.png",
+        "dimensions": [
+          320,
+          180
+        ],
+        "palette_limit": 128,
+        "actual_colors": 22,
+        "sha256": "d8a18d24c3af0f1a2aad46e39c97e3a153c87458b1adde6c4023db7165399ced",
+        "nearest_neighbor_scale_to_1920x1080": 6,
+        "level_basis": "Reviewed representative starting level from scenery profile; original source range retained."
+      }
+    }
+  ],
+  "count": 41,
+  "engine_integration": false,
+  "artwork": "PixelLab-generated Atlas originals plus separate style-matched game pixel editions. Original lore status is preserved."
+}
