@@ -28,7 +28,7 @@ export function selectPetAction(p){
  const lowMood=(data.stats?.happiness??50)+(p.personalityMood||0)<=35&&!(p.comfortTime>0),mood=negativeFeelings.has(feeling)?(feeling==='frustrated'&&(data.love??50)<50?'angry':'sad'):positiveFeelings.has(feeling)?'happy':lowMood?((data.love??50)<35&&(data.personality?.assertiveness??50)>65?'angry':'sad'):null;
  const restDirection=['front','side','back'][((p.animationVariant||0)+(p.idleVisits||0))%3];
  const posture=mode=>mood?[`${mood}_${mode}_side`,`${mood}_${mode}_front`,`${mood}_${mode}_back`,...(mood==='sad'?[mode==='walking'?'sad_walking':'sad_idle']:[])]:[];
- if(p.mode==='medicine')return choose('receive_side','sit_side','idle');
+ if(p.mode==='medicine'||p.mode==='clinicRecover')return choose('receive_side','sit_side','idle');
  if(p.mode==='quarantine')return choose('sit_side','tired','idle');
  if(['eat','snack'].includes(p.mode)&&!p.awaitingCounter)return choose('eat','idle');
  if(petIsMoving(p)&&resolveAction(data,'walking')){

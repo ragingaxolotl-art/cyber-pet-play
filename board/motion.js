@@ -1,10 +1,10 @@
-import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=control45';
-import {freeForActivity} from './activity-state.js?v=height1';
-import {resolveAction,aliases} from './pet-animation.js?v=height1';
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=height1';
-import {makeDirt} from './dirt.js?v=height1';
-import {collectItem,friendship} from './sharing.js?v=height1';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=height1';
+import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=care46';
+import {freeForActivity} from './activity-state.js?v=care46';
+import {resolveAction,aliases} from './pet-animation.js?v=care46';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=care46';
+import {makeDirt} from './dirt.js?v=care46';
+import {collectItem,friendship} from './sharing.js?v=care46';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=care46';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};
@@ -131,7 +131,7 @@ function tickMotion(pet,dt){
   pet.clock+=dt;pet.cooldown=Math.max(0,pet.cooldown-dt);pet.emoteTime=Math.max(0,pet.emoteTime-dt);
   pet.stationCooldown=Math.max(0,pet.stationCooldown-dt);pet.socialCooldown=Math.max(0,pet.socialCooldown-dt);
   if(pet.heldItem)pet.heldTime=(pet.heldTime||0)+dt;
-  if(['clinicWalk','quarantine','medicine','avoidSick','seekFood','seekToy','toyPlay','counterQueue','counterLeave','seekWash','shelterWait','game','build','tag','gesture','together','escort','shelter','puddle','watch','explore','celebrate','quiet','startle'].includes(pet.mode))return;
+  if(['clinicRecover','clinicWalk','quarantine','medicine','avoidSick','seekFood','seekToy','toyPlay','counterQueue','counterLeave','seekWash','shelterWait','game','build','tag','gesture','together','escort','shelter','puddle','watch','explore','celebrate','quiet','startle'].includes(pet.mode))return;
   if(pet.mode==='social'){pet.timer-=dt;pet.engagement=Math.max(0,pet.timer/pet.socialDuration);if(pet.timer<pet.socialDuration/2){pet.emote=pet.socialReply;pet.speech=pet.speechReply;}if(pet.timer<=0){pet.mode='idle';pet.timer=1;pet.clock=0;pet.emote='thinking';pet.emoteTime=2;pet.speech='';}return;}
   if(pet.mode==='snack'){
     pet.timer-=dt;

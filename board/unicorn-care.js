@@ -1,8 +1,8 @@
-import {controls} from './control-state.js';
-import {freeForActivity} from './activity-state.js?v=height1';
-import {floor,hasAction} from './motion.js?v=height1';
-import {travelSpeed} from './profile.js?v=height1';
-import {contagious,grantUnicornPotion} from './health.js?v=control45';
+import {controls} from './control-state.js?v=care46';
+import {freeForActivity} from './activity-state.js?v=care46';
+import {floor,hasAction} from './motion.js?v=care46';
+import {travelSpeed} from './profile.js?v=care46';
+import {contagious,grantUnicornPotion} from './health.js?v=care46';
 // Outbreak visits are separate from ordinary toy visits. All supplies are session-only gifts.
 export const unicornCareSettings={deliveryChance:.2,arrivalBase:.30,extraInfected:.05,arrivalGrowth:0.05,rollSeconds:60,quietReset:30,visitLimit:180,handoffSeconds:2.4};
 const ill=p=>!!p.health?.conditions.length;
@@ -64,7 +64,7 @@ function choosePatient(f,pets){
  const p=options[0];if(!p)return false;
  visit.target=p;visit.wait=0;p.unicornCare=true;p.health.isolated=true;
  if(f.careTent?.ready&&p.level===0&&hasAction(p.data,'walking')){
-  visit.phase='clinic';p.mode='clinicWalk';p.clock=0;p.clinicTarget=f.careTent.x+.065;p.emote='ok';p.emoteTime=5;
+  visit.phase='clinic';p.mode='clinicWalk';p.clock=0;p.clinicTarget=f.careTent.x;p.emote='ok';p.emoteTime=5;
   flyTo(f,f.careTent.x,floor(0),3.6);
  }else{
   p.mode='medicine';p.clock=0;visit.phase='travel';
@@ -91,7 +91,7 @@ export function advanceUnicornCare(f,pets,dt){
  if(visit.phase==='setup'){
   if(f.clock>=f.duration){f.careTent.ready=true;visit.phase='choose';f.state='talk';f.clock=0;}
  }else if(visit.phase==='choose'){
-  if(!choosePatient(f,pets)&&!pets.some(p=>ill(p)&&!visit.served.has(p)))leave(f);
+  if(!choosePatient(f,pets)&&!pets.some(p=>ill(p)&&!visit.served.has(p))&&(!f.careTent||visit.age>=(visit.lastTreatment||0)+6))leave(f);
  }else if(visit.phase==='travel'){
   if(f.clock>=f.duration)arrive(f,visit.target);
  }else if(visit.phase==='clinic'){
@@ -99,19 +99,51 @@ export function advanceUnicornCare(f,pets,dt){
   if(!hasAction(patient.data,'walking')||visit.wait>25){patient.mode='medicine';visit.phase='travel';flyTo(f,Math.max(.03,Math.min(.97,patient.x+.07)),floor(patient.level)-.012,2.4);}
   else {const delta=patient.clinicTarget-patient.x;patient.direction=Math.sign(delta)||1;patient.x+=patient.direction*Math.min(Math.abs(delta),travelSpeed(patient)*dt);if(Math.abs(delta)<.005&&f.clock>=f.duration)arrive(f,patient);}
  }else if(visit.phase==='handoff'&&f.clock>=unicornCareSettings.handoffSeconds){
-  grantUnicornPotion(visit.target,o.ids);visit.served.add(visit.target);visit.visits++;f.potionsDelivered=(f.potionsDelivered||0)+1;visit.target=null;visit.phase='choose';f.feeling='hearts';f.feelingTime=4;
+  grantUnicornPotion(visit.target,o.ids);if(f.careTent?.ready){visit.target.mode='clinicRecover';visit.target.clinicRecovery=2.4;}visit.lastTreatment=visit.age;visit.served.add(visit.target);visit.visits++;f.potionsDelivered=(f.potionsDelivered||0)+1;visit.target=null;visit.phase='choose';f.feeling='hearts';f.feelingTime=4;
  }
  return true;
 }
-export function drawUnicornCare(ctx,w,h,f){
+export function drawUnicornTent(ctx,w,h,f){
  const tent=f.careTent;
  if(tent?.ready){
   const x=tent.x*w,y=floor(tent.level)*h,s=h*.11;
   ctx.save();ctx.fillStyle='#263a59';ctx.fillRect(x-s*.65,y-s*.7,s*1.3,s*.7);ctx.fillStyle='#b3eee2';ctx.beginPath();ctx.moveTo(x-s*.8,y-s*.7);ctx.lineTo(x,y-s*1.35);ctx.lineTo(x+s*.8,y-s*.7);ctx.closePath();ctx.fill();ctx.fillStyle='#7456ab';ctx.fillRect(x-s*.1,y-s*.55,s*.2,s*.4);ctx.fillRect(x-s*.24,y-s*.42,s*.48,s*.14);ctx.fillStyle='#edfdf8';ctx.textAlign='center';ctx.font=`600 ${Math.max(9,h*.015)}px system-ui`;ctx.fillText('POTION POP-UP',x,y-s*1.5);ctx.restore();
  }
+}
+export function drawUnicornCare(ctx,w,h,f){
  const visit=f.careVisit;
  if(visit?.phase==='handoff'&&visit.target){
   const t=Math.min(1,f.clock/unicornCareSettings.handoffSeconds),p=visit.target,x=(f.x+(p.x-f.x)*t)*w,y=(f.y-.045)*h;
   ctx.save();ctx.fillStyle='#c1f8ee';ctx.fillRect(x-4,y-10,8,12);ctx.fillStyle='#a880dd';ctx.fillRect(x-3,y-14,6,4);ctx.restore();
+ }
+}
+
+// Check physical presence after every movement system, just like the cloud wash.
+// Do not interrupt owned games or social actions to award incidental care.
+export function advanceTentContact(f,pets,dt,previous,aspect=16/9){
+ if(!(dt>0))return;
+ const tent=f.careTent,visit=f.careVisit;if(!tent?.ready||!visit)return;
+ const halfWidth=.11*.65/aspect,ids=f.careOutbreak?.ids||new Set();
+ if(!ids.size)return;
+ for(const p of pets){
+  if(p.stair||p.level!==tent.level||p.unicornCare||visit.served.has(p))continue;
+  const before=previous.get(p),left=tent.x-halfWidth,right=tent.x+halfWidth;
+  const standing=p.x>=left&&p.x<=right;
+  const crossing=before&&!before.stair&&before.level===p.level&&Math.abs(p.x-before.x)<.5&&Math.max(p.x,before.x)>=left&&Math.min(p.x,before.x)<=right;
+  if(!standing&&!crossing)continue;
+  if(!ill(p)&&[...ids].every(id=>p.health?.potionProtection?.has(id)))continue;
+  const canPause=available(p);
+  grantUnicornPotion(p,ids,{preserveActivity:true});
+  if(canPause){p.mode='clinicRecover';p.clinicRecovery=2.4;p.clock=0;}
+  visit.served.add(p);visit.lastTreatment=visit.age;visit.visits++;f.potionsDelivered=(f.potionsDelivered||0)+1;
+ }
+}
+export function advanceClinicRecovery(pets,dt){
+ if(!(dt>0))return;
+ for(const p of pets){
+  p.healingTime=Math.max(0,(p.healingTime||0)-dt);
+  if(p.mode!=='clinicRecover')continue;
+  p.clinicRecovery=Math.max(0,(p.clinicRecovery||0)-dt);
+  if(!p.clinicRecovery){p.mode=hasAction(p.data,'walking')?'walk':'idle';p.clock=0;p.timer=4;p.decisionCooldown=3;}
  }
 }

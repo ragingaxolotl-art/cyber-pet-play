@@ -1,34 +1,37 @@
-import {controls,adjustedMetrics,keyOf} from './control-state.js';
-import {createCommandRunner,pollControls} from './control-events.js';
-import {installBoardTeacher} from './board-teacher.js';
-import {frameSteps,renderSize,petFilter} from './render-budget.js?v=performance42';
-import {stableArtwork,stableFrame} from './stable-artwork.js?v=height1';
-import {drawSpeech} from './friendships.js?v=control45';
-import {installFriendships} from './friendship-panel.js?v=height1';
-import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=control45';
-import {installSavedRewards} from './saved-rewards.js?v=height1';
-import {hydrationChoice} from './hydration.js?v=height1';
-import {installSharingChoice} from './sharing-choice.js?v=height1';
-import {reconcilePets} from './roster-state.js?v=height1';
-import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=height1';
-import {stepBoard} from './simulation.js?v=control45';
-import {createHosts,loadNpcArt} from './npc-animation.js?v=height1';
-import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=height1';
-import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=height1';
-import {createWash} from './wash.js?v=height1';
-import {displayMetrics,framePlacement,artworkDirection} from './display.js?v=placement43';
-import {createCompanions,withResidents} from './companions.js?v=height1';
-import {isClassPet} from './profile.js?v=height1';
-import {drawGames} from './games.js?v=height1';
-import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=control45';
-import {chooseItem} from './sharing.js?v=height1';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=control45';
-import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=height1';
-import {favoriteFood} from './food.js?v=height1';
-import {drawLandscape,drawWash} from './scenery.js?v=height1';
-import {refreshRoster} from './connection.js?v=foundling44';
-import {drawFoundling,foundlingNameplate} from './foundling.js?v=foundling44';
-import {readBackup} from './backups.js?v=height1';
+import {personalEmoteTime} from './pet-emote-time.js?v=care46';
+import {potionNameplate,drawPotionBadge,drawHealing} from './potion-badge.js?v=care46';
+import {drawUnicornTent} from './unicorn-care.js?v=care46';
+import {controls,adjustedMetrics,keyOf} from './control-state.js?v=care46';
+import {createCommandRunner,pollControls} from './control-events.js?v=care46';
+import {installBoardTeacher} from './board-teacher.js?v=care46';
+import {frameSteps,renderSize,petFilter} from './render-budget.js?v=care46';
+import {stableArtwork,stableFrame} from './stable-artwork.js?v=care46';
+import {drawSpeech} from './friendships.js?v=care46';
+import {installFriendships} from './friendship-panel.js?v=care46';
+import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=care46';
+import {installSavedRewards} from './saved-rewards.js?v=care46';
+import {hydrationChoice} from './hydration.js?v=care46';
+import {installSharingChoice} from './sharing-choice.js?v=care46';
+import {reconcilePets} from './roster-state.js?v=care46';
+import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=care46';
+import {stepBoard} from './simulation.js?v=care46';
+import {createHosts,loadNpcArt} from './npc-animation.js?v=care46';
+import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=care46';
+import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=care46';
+import {createWash} from './wash.js?v=care46';
+import {displayMetrics,framePlacement,artworkDirection} from './display.js?v=care46';
+import {createCompanions,withResidents} from './companions.js?v=care46';
+import {isClassPet} from './profile.js?v=care46';
+import {drawGames} from './games.js?v=care46';
+import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=care46';
+import {chooseItem} from './sharing.js?v=care46';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=care46';
+import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=care46';
+import {favoriteFood} from './food.js?v=care46';
+import {drawLandscape,drawWash} from './scenery.js?v=care46';
+import {refreshRoster} from './connection.js?v=care46';
+import {drawFoundling,foundlingNameplate} from './foundling.js?v=care46';
+import {readBackup} from './backups.js?v=care46';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site';
 const medalHoverAreas=[];let medalPointer=null;
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
@@ -121,8 +124,9 @@ function drawPet(pet){
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
     const label=data.name.length>16?data.name.slice(0,15)+'…':data.name;
-    const plate=foundlingNameplate(data.config.creation_record,ctx.measureText(label).width,font,unit);
+    const plate=potionNameplate(foundlingNameplate(data.config.creation_record,ctx.measureText(label).width,font,unit),pet,font,unit);
     roundRect(x-plate.width/2,y+10*unit,plate.width,font+7*unit,4*unit,'#172a43df');ctx.fillStyle='#f5f0e5';ctx.fillText(label,x+plate.labelOffset,y+font+11*unit);
+    drawPotionBadge(ctx,x+plate.potionCenterOffset,y+10*unit+(font+7*unit-plate.potionSize)/2,plate.potionSize);
     if(plate.medalWidth>0)medalHoverAreas.push({x:x+plate.medalCenterOffset-plate.medalWidth/2,y:y+10*unit+plate.medalTop,w:plate.medalWidth,h:plate.medalHeight});
     drawFoundling(ctx,data.config.creation_record,x+plate.medalCenterOffset,y+10*unit+plate.medalTop,plate.medalWidth,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
@@ -135,7 +139,7 @@ function drawPet(pet){
   const feeling=pet.teacherEmoteUntil>elapsed?pet.teacherEmote:visibleFeeling(pet);
   if(feeling && (pet.foodReactionTime>0||!['eat','snack'].includes(pet.mode))){
     const ey=y-desired-20*unit,size=38*unit;
-    if(!drawFeeling(ctx,feeling,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[feeling]||'…',x,ey+6*unit);}
+    if(!drawFeeling(ctx,feeling,personalEmoteTime(pet,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches),x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[feeling]||'…',x,ey+6*unit);}
 
   }
   if(pet.displayItem){
@@ -146,6 +150,7 @@ function drawPet(pet){
   ctx.save();ctx.globalAlpha=healthVisual.alpha;ctx.filter=petFilter(0,healthVisual.gray);
   drawDirt(img,bounds,x+facing*(placement.x+w/2),y+placement.y+h,w,h,facing,1-pet.cleanliness,pet.dirtPattern);ctx.restore();
   drawHealth(ctx,pet,x,groundY,desired);
+  drawHealing(ctx,pet,x,y,desired);
   drawSpeech(ctx,pet,x,y-desired-44*unit,unit,width);
 
 }
@@ -154,7 +159,7 @@ function render(time){
   const steps=frameSteps(previous?(time-previous)/1000:0);previous=time;
   if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){for(const dt of steps){elapsed+=dt;commandRunner.run(simulation,pets,elapsed);for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}}
   medalHoverAreas.length=0;teacher.areas.length=0;
-  stage();drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed,foodImages);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
+  stage();drawUnicornTent(ctx,width,height,flyer);drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed,foodImages);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   updateMedalHover();
   animationRequest=requestAnimationFrame(render);
 }

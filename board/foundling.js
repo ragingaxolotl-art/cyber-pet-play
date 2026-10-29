@@ -1,4 +1,4 @@
-import {creationRecord} from './character-birth.js';
+import {creationRecord} from './character-birth.js?v=care46';
 let atlas;
 export function foundlingNameplate(record,labelWidth,font,unit){
  const eligible=creationRecord(record,{legacy:true}).foundling;

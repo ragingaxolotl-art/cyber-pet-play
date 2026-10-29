@@ -1,8 +1,8 @@
-import {bestBoardMedicine} from './care-medicines.js?v=height1';
-import {sanitizeConditions} from './condition-data.js?v=height1';
-import {trait,love,travelSpeed} from './profile.js?v=height1';
-import {freeForActivity} from './activity-state.js?v=height1';
-import {resolveAction} from './pet-animation.js?v=height1';
+import {bestBoardMedicine} from './care-medicines.js?v=care46';
+import {sanitizeConditions} from './condition-data.js?v=care46';
+import {trait,love,travelSpeed} from './profile.js?v=care46';
+import {freeForActivity} from './activity-state.js?v=care46';
+import {resolveAction} from './pet-animation.js?v=care46';
 // Seconds of board play, not real medical guidance or persistent health changes.
 export const healthTuning={contactRadius:.085,avoidRadius:.15,exposureMinimum:8,exposureRange:16,doseSeconds:6};
 export const contagious=new Set(['glitch_fever','parasite_spore_fan','static_mites']);
@@ -100,23 +100,19 @@ export function conditionVisual(p,seconds,reducedMotion=false){
  }
  return {gray,alpha};
 }
-export function healthLabel(p){
- const c=p.health?.conditions[0];
- if(!c)return p.mode==='avoidSick'?'Giving space':p.health?.potionProtection?.size?'Potion shield':'';
- const stage=c.severity<=1?'Mild':c.severity<=2?'Moderate':'Severe';
- return `${conditionNames[c.id]} · ${stage} · ${p.unicornCare?'Unicorn potion':p.mode==='medicine'?(c.medicine?.label||'Receiving care'):p.mode==='quarantine'?'Quarantine':contagious.has(c.id)?'Contagious':'Not contagious'}`;
-}
+// Kept for callers; detailed health sentences are no longer drawn on the board.
+export function healthLabel(p){return '';}
 // Small personal care boundary follows stationary characters too; no walk art is required.
 export function drawHealth(ctx,p,x,y,size){
- const label=healthLabel(p);if(!label)return;
+ if(!p.health?.conditions.length)return;
  ctx.save();
- if(p.health?.potionProtection?.size){ctx.strokeStyle='#d8b7ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-size*.6,y-24);ctx.lineTo(x-size*.6+7,y-27);ctx.lineTo(x-size*.6+14,y-24);ctx.lineTo(x-size*.6+12,y-14);ctx.lineTo(x-size*.6+7,y-9);ctx.lineTo(x-size*.6+2,y-14);ctx.closePath();ctx.stroke();}
+
  const c=p.health?.conditions[0],fallback={digestive:'queasy_bubbles',stress:'phase_drift',injury:'injury_bruise'};
  const icon=c&&conditionArt.get(c.id)||conditionArt.get(fallback[c?.family]);if(icon){const scale=c.severity<=1?20:c.severity<=2?26:32;ctx.imageSmoothingEnabled=false;ctx.drawImage(icon,x+size*.5,y-size*.7,scale,scale);}
  const swirl=conditionArt.get('confused_swirl');if(swirl&&c?.severity>2&&['stress','infection'].includes(c.family))ctx.drawImage(swirl,x-16,y-size-35,32,32);
  if(p.health?.isolated){ctx.strokeStyle='#83e5df';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.ellipse(x,y,Math.max(22,size*.65),8,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
  if(p.mode==='medicine'){ctx.fillStyle='#b3f4ed';ctx.fillRect(x+size*.45,y-24,9,16);ctx.fillStyle='#eefcf9';ctx.fillRect(x+size*.45+1,y-28,7,4);}
- ctx.font='600 10px system-ui';ctx.textAlign='center';const width=ctx.measureText(label).width+10;ctx.fillStyle='#172a43ec';ctx.fillRect(x-width/2,y+37,width,16);ctx.fillStyle='#e0fff8';ctx.fillText(label,x,y+48);ctx.restore();
+ ctx.restore();
 }
 
 const conditionArt=new Map();
@@ -126,12 +122,12 @@ export async function loadConditionArt(){
 
 // One delivered magical board potion clears the patient's current conditions and shields
 // against the contagious variants in this outbreak. A different future disease can still occur.
-export function grantUnicornPotion(p,outbreakIds){
- const h=p.health;if(!h)return;
+export function grantUnicornPotion(p,outbreakIds,{preserveActivity=false}={}){
+ const h=p.health??=newHealth();
  for(const id of outbreakIds)h.immune.add(id);
  h.potionProtection=new Set([...(h.potionProtection||[]),...outbreakIds]);
  for(const c of h.conditions){h.immune.add(c.id);h.recovered++;}
- h.conditions=[];h.exposure.clear();h.dose=0;p.unicornCare=false;finish(p);p.emote='hearts';p.emoteTime=5;
+ h.conditions=[];h.exposure.clear();h.dose=0;h.isolated=false;p.unicornCare=false;if(!preserveActivity)finish(p);p.healingTime=2.4;p.emote='hearts';p.emoteTime=5;
 }
 
 // Ambient outbreaks only change the board's health state, never the uploaded save.

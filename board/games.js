@@ -1,7 +1,7 @@
-import {developmentWeight,developmentPersistence,developmentReaction} from './development.js?v=height1';
-import {freeForActivity} from './activity-state.js?v=height1';
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=height1';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=height1';
+import {developmentWeight,developmentPersistence,developmentReaction} from './development.js?v=care46';
+import {freeForActivity} from './activity-state.js?v=care46';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=care46';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=care46';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
 const eligible=p=>freeForActivity(p)&&!(p.gameCooldown>0);

@@ -1,5 +1,5 @@
-import {trait,love} from './profile.js?v=height1';
-import {hasFrames} from './pet-animation.js?v=height1';
+import {trait,love} from './profile.js?v=care46';
+import {hasFrames} from './pet-animation.js?v=care46';
 export const FRIENDSHIP_SAVE_SECONDS=900;
 export const identity=p=>p.data.boardId||p.data.id;
 export const closeness=(p,other)=>p.friendships?.get(identity(other))??50;

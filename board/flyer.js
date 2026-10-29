@@ -1,10 +1,10 @@
-import {advanceUnicornCare,drawUnicornCare} from './unicorn-care.js?v=control45';
-import {freeForActivity} from './activity-state.js?v=height1';
-import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=control45';
-import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=height1';
-import {floor} from './motion.js?v=height1';
-import {trait,traitFeeling,love} from './profile.js?v=height1';
-import {drawFeeling} from './emotes.js?v=control45';
+import {advanceUnicornCare,drawUnicornCare} from './unicorn-care.js?v=care46';
+import {freeForActivity} from './activity-state.js?v=care46';
+import {visitState,advanceVisit,drawMagic} from './unicorn-events.js?v=care46';
+import {advanceToys,releaseBall,heldBallPosition,drawDroppedItem,chooseDrop,releaseAt,tossDuration} from './toys.js?v=care46';
+import {floor} from './motion.js?v=care46';
+import {trait,traitFeeling,love} from './profile.js?v=care46';
+import {drawFeeling} from './emotes.js?v=care46';
 // One scenery character. Toy props and greetings are session-only, never save data.
 export function createFlyer(random=Math.random){return {random,x:.12,y:.18,fromX:.12,fromY:.18,targetX:.8,targetY:.2,state:'absent',clock:0,duration:12,direction:1,toys:[],nextDrop:7,landings:0,greeting:null,feeling:'',feelingTime:0,...visitState(random)};}
 const FLIGHT_CYCLE=1.2,TALK_CYCLE=2.4;
