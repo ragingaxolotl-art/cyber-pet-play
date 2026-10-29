@@ -1,3 +1,4 @@
+import {controlledWeather} from './control-state.js';
 import {freeForActivity} from './activity-state.js?v=height1';
 import {splashDirt} from './dirt.js?v=height1';
 import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=height1';
@@ -7,7 +8,7 @@ export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{l
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];
 export const worldModes=new Set(['shelterWait','shelter','puddle','watch','explore','celebrate','quiet','startle']);
-export function weatherAt(time){const phase=time%240;return {rain:phase>=30&&phase<90,celebrate:phase>=150&&phase<168,rustle:phase>=110&&phase<116,cycle:Math.floor(time/240)};}
+export function weatherAt(time){const phase=time%240;return controlledWeather(time,{rain:phase>=30&&phase<90,celebrate:phase>=150&&phase<168,rustle:phase>=110&&phase<116,cycle:Math.floor(time/240)});}
 export const butterflyAt=(level,time)=>.40+.16*Math.sin(time*.08+level*2);
 export function beginWorld(p,kind,target,duration=10){p.mode=kind;p.worldTarget=target;p.worldTimer=duration;p.clock=0;p.socialCooldown=duration+10;p.emote=kind==='quiet'?'sleepy':kind==='puddle'?'eager':kind==='shelter'?'sweat':kind==='startle'?'question':'thinking';p.emoteTime=4;}
 function finish(p){p.mode='idle';p.timer=2;p.clock=0;p.worldCooldown=20+p.random()*25;p.shelterScale=1;p.worldBob=0;p.socialCooldown=8;}

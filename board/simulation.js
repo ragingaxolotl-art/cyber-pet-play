@@ -1,8 +1,9 @@
+import {controls} from './control-state.js';
 import {advanceOutbreaks} from './outbreaks.js?v=height1';
-import {advanceHealth} from './health.js?v=height1';
+import {advanceHealth} from './health.js?v=control45';
 import {preserveRecovery} from './activity-state.js?v=height1';
 import {advancePetPresentation} from './pet-animation.js?v=height1';
-import {advanceMagic} from './unicorn-events.js?v=height1';
+import {advanceMagic} from './unicorn-events.js?v=control45';
 import {prepareCounterQueue} from './counter-queue.js?v=height1';
 import {advanceCounter} from './counter.js?v=height1';
 import {advanceHosts} from './npc-animation.js?v=height1';
@@ -10,7 +11,7 @@ import {advanceFlyer} from './flyer.js?v=height1';
 import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=height1';
 import {advanceMeals} from './meals.js?v=height1';
 import {advanceGames} from './games.js?v=height1';
-import {advanceWorld} from './world.js?v=height1';
+import {advanceWorld} from './world.js?v=control45';
 import {advanceHygiene} from './hygiene.js?v=height1';
 import {advanceWash} from './wash.js?v=height1';
 // Keep this exact update order shared by the live board and coexistence tests.
@@ -19,7 +20,7 @@ export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){
  const {counter,hosts,flyer,livingWorld,washHistory}=scene;
  const run=fn=>{const before=new Map(pets.map(p=>[p,p.mode]));fn();preserveRecovery(pets,before);};
  for(const p of pets)p.decisionCooldown=Math.max(0,(p.decisionCooldown||0)-dt);
- advanceHealth(pets,dt);advanceOutbreaks(scene,pets,dt);
+ advanceHealth(pets,dt,controls.settings.diseases);if(controls.settings.diseases)advanceOutbreaks(scene,pets,dt);
  prepareCounterQueue(counter,pets);run(()=>{for(const p of pets)tick(p,dt);});
  advanceHosts(hosts,counter,dt);run(()=>advanceFlyer(flyer,pets,dt,aspect,time));run(()=>advanceCounter(counter,pets,dt,artReady));
  run(()=>advanceTag(pets,dt));run(()=>advanceInteractions(pets,dt));

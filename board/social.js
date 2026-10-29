@@ -1,4 +1,4 @@
-import {changeFriendship} from './friendships.js?v=height1';
+import {changeFriendship} from './friendships.js?v=control45';
 import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=height1';
 import {friendship,shareItem,itemScore} from './sharing.js?v=height1';
 import {foodScore} from './food.js?v=height1';

@@ -1,6 +1,7 @@
+import {controls} from './control-state.js';
 import {floor} from './motion.js?v=height1';
 import {hostX} from './host-interactions.js?v=height1';
-import {weatherAt,huts} from './world.js?v=height1';
+import {weatherAt,huts} from './world.js?v=control45';
 // Seconds, not frame counts. Visits remain brief with several quiet minutes between.
 export const visitSettings={duration:48,variation:12,quiet:240,quietVariation:180,rainChance:.75,rainDelay:5,rainVariation:12,minQuiet:150};
 export function visitState(random){return {age:0,nextVisit:105+random()*90,lastDeparture:-Infinity,visitRemaining:0,visits:0,trail:[],glitter:[],particleClock:0,wasRaining:false,rainChecked:-1,magicAttempted:false};}
@@ -15,7 +16,7 @@ export function advanceVisit(f,dt,time=f.age+dt){
   if(f.state==='absent'&&f.age-f.lastDeparture>=visitSettings.minQuiet&&f.random()<visitSettings.rainChance)f.nextVisit=Math.min(f.nextVisit,f.age+visitSettings.rainDelay+f.random()*visitSettings.rainVariation);
  }
  f.wasRaining=weather.rain;
- if(f.state==='absent'){if(f.age<f.nextVisit)return false;enter(f);return true;}
+ if(f.state==='absent'){if((!controls.settings.unicorn&&!f.manualVisit)||f.age<f.nextVisit)return false;f.manualVisit=false;enter(f);return true;}
  if(f.state==='leave'&&f.clock>=f.duration){f.state='absent';f.lastDeparture=f.age;f.nextVisit=f.age+visitSettings.quiet+f.random()*visitSettings.quietVariation;f.greeting=null;f.feelingTime=0;return false;}
  f.visitRemaining-=dt;
  // Finish a throw, greeting or landing before the final departure.

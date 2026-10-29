@@ -84,12 +84,12 @@ function avoid(p,pets,dt){
  const h=p.health??=newHealth();h.avoiding+=dt;
  if(h.avoiding>=preference.avoidanceDelay&&freeForActivity(p)&&resolveAction(p.data,'walking')){p.mode='avoidSick';p.clock=0;h.avoidTime=0;p.emote='thinking';p.emoteTime=5;}
 }
-export function advanceHealth(pets,dt){
+export function advanceHealth(pets,dt,spreadEnabled=true){
  if(!Number.isFinite(dt)||dt<=0)return;
  // Large time jumps are discarded, just as the board's render loop discards suspended time.
  dt=Math.min(dt,.25);
  for(const p of pets)syncHealth(p);
- advanceContagion(pets,dt);
+ if(spreadEnabled)advanceContagion(pets,dt);
  for(const p of pets){care(p,dt);avoid(p,pets,dt);}
 }
 export function conditionVisual(p,seconds,reducedMotion=false){

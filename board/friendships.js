@@ -37,9 +37,9 @@ export function conversationKind(a,b){
 export function beginFriendshipConversation(a,b,afterTag=false){
  const kind=afterTag?'friendly':conversationKind(a,b),g={players:[a,b],kind,time:0,resolved:false};
  for(const p of g.players)p.friendshipConversation=g;
- const lines=kind==='argument'?[['I see it differently.','Can we take a break?'],['I disagree.','Let’s talk calmly.']]:kind==='apology'?[['Sorry about earlier.','Let’s try again.'],['Thanks for telling me.','We can work on it.']]:[['Want to hang out?','I like your ideas!'],['Sure, tell me more!','That sounds fun!']];
- for(let i=0;i<2;i++){g.players[i].speech=lines[i][0];g.players[i].speechReply=lines[i][1];if(kind==='argument'){g.players[i].emote='frustrated';g.players[i].socialReply='thinking';}}
- if(afterTag)for(const p of g.players)p.speech='That was fun!';
+ // Relationship outcomes are expressed visually, without agreement/disagreement text.
+ for(const p of g.players){p.speech='';p.speechReply='';p.emote=kind==='argument'?'frustrated':kind==='apology'?'love':'happy';p.socialReply=kind==='argument'?'thinking':'ok';p.emoteTime=6;}
+
  return g;
 }
 export function advanceFriendships(pets,dt){
@@ -59,6 +59,7 @@ export function advanceFriendships(pets,dt){
  }
 }
 export function drawSpeech(ctx,p,x,y,unit,width){
+ if(p.friendshipConversation)return;
  if(p.mode!=='social'||!p.speech||(Math.floor(p.clock/2)+(p.socialTurn||0))%2)return;
  const message=p.speech.slice(0,44);ctx.save();ctx.font=`600 ${Math.max(10,12*unit)}px system-ui`;ctx.textAlign='center';
  const w=Math.min(width-12,ctx.measureText(message).width+16),h=25*unit,center=Math.max(w/2+6,Math.min(width-w/2-6,x)),top=Math.max(6,y-h);

@@ -1,4 +1,4 @@
-import {identity,rankings,restoreFriendships,FRIENDSHIP_SAVE_SECONDS} from './friendships.js?v=height1';
+import {identity,rankings,restoreFriendships,FRIENDSHIP_SAVE_SECONDS} from './friendships.js?v=control45';
 const ENDPOINT='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site/board-api/friendships';
 const persistable=p=>/^[a-f0-9]{64}$/.test(identity(p))||/^companion-(fern|echo|moss|nova)$/.test(identity(p));
 export function installFriendships(getPets){

@@ -1,4 +1,4 @@
-import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=height1';
+import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=control45';
 import {freeForActivity} from './activity-state.js?v=height1';
 import {resolveAction,aliases} from './pet-animation.js?v=height1';
 import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=height1';

@@ -1,7 +1,8 @@
+import {controls} from './control-state.js';
 import {freeForActivity} from './activity-state.js?v=height1';
 import {floor,hasAction} from './motion.js?v=height1';
 import {travelSpeed} from './profile.js?v=height1';
-import {contagious,grantUnicornPotion} from './health.js?v=height1';
+import {contagious,grantUnicornPotion} from './health.js?v=control45';
 // Outbreak visits are separate from ordinary toy visits. All supplies are session-only gifts.
 export const unicornCareSettings={deliveryChance:.2,arrivalBase:.30,extraInfected:.05,arrivalGrowth:0.05,rollSeconds:60,quietReset:30,visitLimit:180,handoffSeconds:2.4};
 const ill=p=>!!p.health?.conditions.length;
@@ -77,8 +78,8 @@ function arrive(f,p){f.state='talk';f.clock=0;f.duration=unicornCareSettings.han
 // Return true while medicine owns flight so normal greetings and toy throws cannot steal it.
 export function advanceUnicornCare(f,pets,dt){
  if(!Number.isFinite(dt)||dt<=0)return !!f.careVisit;
- const o=observeOutbreak(f,pets,dt);
- if(!f.careVisit&&o.active&&o.infectedCount>0&&!o.handled&&o.requested&&!f.magicTarget&&['absent','fly','talk'].includes(f.state))startUnicornCare(f,pets,f.random()<unicornCareSettings.deliveryChance?'delivery':'tent');
+ const o=controls.settings.unicorn?observeOutbreak(f,pets,dt):(f.careOutbreak||{});
+ if(controls.settings.unicorn&&!f.careVisit&&o.active&&o.infectedCount>0&&!o.handled&&o.requested&&!f.magicTarget&&['absent','fly','talk'].includes(f.state))startUnicornCare(f,pets,f.random()<unicornCareSettings.deliveryChance?'delivery':'tent');
  const visit=f.careVisit;if(!visit)return false;
  f.age+=dt;visit.age+=dt;
  if(visit.age>=visit.limit){leave(f);return true;}

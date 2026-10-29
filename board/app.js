@@ -1,14 +1,17 @@
+import {controls,adjustedMetrics,keyOf} from './control-state.js';
+import {createCommandRunner,pollControls} from './control-events.js';
+import {installBoardTeacher} from './board-teacher.js';
 import {frameSteps,renderSize,petFilter} from './render-budget.js?v=performance42';
 import {stableArtwork,stableFrame} from './stable-artwork.js?v=height1';
-import {drawSpeech} from './friendships.js?v=height1';
+import {drawSpeech} from './friendships.js?v=control45';
 import {installFriendships} from './friendship-panel.js?v=height1';
-import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=height1';
+import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=control45';
 import {installSavedRewards} from './saved-rewards.js?v=height1';
 import {hydrationChoice} from './hydration.js?v=height1';
 import {installSharingChoice} from './sharing-choice.js?v=height1';
 import {reconcilePets} from './roster-state.js?v=height1';
 import {boardActions,resolveAction,visibleFeeling,selectPetAction} from './pet-animation.js?v=height1';
-import {stepBoard} from './simulation.js?v=height1';
+import {stepBoard} from './simulation.js?v=control45';
 import {createHosts,loadNpcArt} from './npc-animation.js?v=height1';
 import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=height1';
 import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=height1';
@@ -17,9 +20,9 @@ import {displayMetrics,framePlacement,artworkDirection} from './display.js?v=pla
 import {createCompanions,withResidents} from './companions.js?v=height1';
 import {isClassPet} from './profile.js?v=height1';
 import {drawGames} from './games.js?v=height1';
-import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=height1';
+import {createWorld,drawWorldGround,drawWorldAtmosphere,worldModes} from './world.js?v=control45';
 import {chooseItem} from './sharing.js?v=height1';
-import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=height1';
+import {loadEmotes,drawFeeling,feelingFallback} from './emotes.js?v=control45';
 import {stairs,floor,makePet,petFloor,frameIndex,hasAction,animationDuration,foodRemaining} from './motion.js?v=height1';
 import {favoriteFood} from './food.js?v=height1';
 import {drawLandscape,drawWash} from './scenery.js?v=height1';
@@ -35,6 +38,9 @@ const livingWorld=createWorld(),washHistory=createWash();
 let companions=[];
 const counter=createCounter(),counterArt=loadCounterArt(),hosts=createHosts(),flyer=createFlyer();
 const simulation={counter,hosts,flyer,livingWorld,washHistory};
+let commandStorage;try{commandStorage=sessionStorage;}catch{}
+const commandRunner=createCommandRunner(commandStorage),teacher=installBoardTeacher(canvas,()=>pets);
+pollControls().catch(()=>{});setInterval(()=>pollControls().catch(()=>{}),15000);
 loadNpcArt(hosts).catch(()=>{});
 
 let width=1600,height=850,mode='class',busy=false;
@@ -94,10 +100,10 @@ function updateMedalHover(){
 }
 canvas.addEventListener('pointermove',event=>{const box=canvas.getBoundingClientRect();medalPointer={x:(event.clientX-box.left)*width/box.width,y:(event.clientY-box.top)*height/box.height};updateMedalHover();});
 canvas.addEventListener('pointerleave',()=>{medalPointer=null;updateMedalHover();});
-function petSize(data){return displayMetrics(data,width,height,pets.length);}
+function petSize(data){return adjustedMetrics(data,displayMetrics(data,width,height,pets.length),height);}
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,groundY=(petFloor(pet)-(pet.worldBob||0))*height;
-  const metrics=petSize(data),y=groundY+metrics.offsetY;
+  let metrics=petSize(data);const preview=teacher.layout(pet);if(preview){const base=displayMetrics(data,width,height,pets.length);metrics={...base,scale:base.scale*preview.scale,desired:base.desired*preview.scale,offsetY:base.offsetY+preview.offset*height/720};}const y=groundY+metrics.offsetY;
   const action=pet.renderAction||selectPetAction(pet)||resolveAction(data,'idle');
   const animationClock=['eat','eat_side','jump','jump_side','play_side'].includes(action)?(pet.renderClock||0)%animationDuration(data.config,action):(pet.renderClock||0);
   const frames=data.config.animations[action],name=frames?.[frameIndex(data.config,action,animationClock)],img=data.images.get(name)||data.images.get(data.config.animations[resolveAction(data,'idle')]?.[0]);
@@ -106,6 +112,8 @@ function drawPet(pet){
   const size=metrics,desired=size.desired*(pet.mode==='shelter'?(pet.shelterScale||1):1),scale=size.scale*(pet.mode==='shelter'?(pet.shelterScale||1):1);
   const facing=artworkDirection(data.config,action,pet.direction);
   const placement=framePlacement(stableFrame(data,action,name,bounds,img),data.artworkEnvelope,scale),w=placement.w,h=placement.h;
+  teacher.areas.push({id:keyOf(pet),x:x+facing*placement.x-(facing<0?w:0),y:y+placement.y,w,h});
+  if(teacher.selected(pet)){ctx.save();ctx.shadowColor='#9affdd';ctx.shadowBlur=24;ctx.strokeStyle='#bcffe5';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(x-w/2-7,y+placement.y-7,w+14,h+14,12);ctx.stroke();ctx.restore();}
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
   const healthVisual=conditionVisual(pet,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
   ctx.save();ctx.translate(x,y);ctx.scale(facing,1);ctx.globalAlpha=healthVisual.alpha;ctx.filter=petFilter(data.tint||0,healthVisual.gray);ctx.imageSmoothingEnabled=false;ctx.drawImage(img,bounds.x,bounds.y,bounds.w,bounds.h,placement.x,placement.y,w,h);ctx.restore();
@@ -124,7 +132,7 @@ function drawPet(pet){
     if(image?.complete&&image.naturalWidth)ctx.drawImage(image,fx-size/2,y-size,size,size);
 
   }
-  const feeling=visibleFeeling(pet);
+  const feeling=pet.teacherEmoteUntil>elapsed?pet.teacherEmote:visibleFeeling(pet);
   if(feeling && (pet.foodReactionTime>0||!['eat','snack'].includes(pet.mode))){
     const ey=y-desired-20*unit,size=38*unit;
     if(!drawFeeling(ctx,feeling,elapsed,x,ey,size)){ctx.font=`600 ${18*unit}px system-ui`;ctx.fillStyle='#344b66';ctx.fillText(feelingFallback[feeling]||'…',x,ey+6*unit);}
@@ -144,8 +152,8 @@ function drawPet(pet){
 function render(time){
   if(resizePending)resize();
   const steps=frameSteps(previous?(time-previous)/1000:0);previous=time;
-  if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){for(const dt of steps){elapsed+=dt;for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}}
-  medalHoverAreas.length=0;
+  if(!paused&&!document.hidden&&!document.querySelector('#sharing-choice[open]')){for(const dt of steps){elapsed+=dt;commandRunner.run(simulation,pets,elapsed);for(const p of pets)p.bodyWidth=p.data.maxWidth*petSize(p.data).scale/width;stepBoard(simulation,pets,dt,elapsed,width/height,counterArtReady(counterArt));friendships.tick(dt);}}
+  medalHoverAreas.length=0;teacher.areas.length=0;
   stage();drawCounter(ctx,width,height,counter,counterArt,foodImages,hosts,elapsed);drawToys(ctx,width,height,flyer,foodImages);for(const p of [...pets].sort((a,b)=>petFloor(a)-petFloor(b)))drawPet(p);drawFlyer(ctx,width,height,flyer,hosts.art,elapsed,foodImages);drawWash(ctx,width,height,pets,elapsed);drawGames(ctx,width,height,pets,elapsed);drawWorldAtmosphere(ctx,width,height,livingWorld,elapsed);
   updateMedalHover();
   animationRequest=requestAnimationFrame(render);
