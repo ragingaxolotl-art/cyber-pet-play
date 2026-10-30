@@ -1,4 +1,4 @@
-import {seedBoardDisease,contagious} from './health.js?v=care46';
+import {seedBoardDisease,contagious} from './health.js?v=illness47';
 // One random roll per active minute: a uniformly distributed start in minutes 1–30.
 export const outbreakTuning={checkSeconds:60,maximumMinutes:30};
 export const outbreakChance=minute=>minute<1?0:Math.min(1,1/Math.max(1,outbreakTuning.maximumMinutes+1-minute));

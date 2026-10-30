@@ -1,4 +1,4 @@
-import {installTeacherPanel} from './teacher-panel.js?v=care46';
+import {installTeacherPanel} from './teacher-panel.js?v=illness47';
 const frame=document.getElementById('board'),origin='https://ragingaxolotl-art.github.io';
 const send=data=>frame.contentWindow.postMessage(data,origin);
 const panel=installTeacherPanel(document.getElementById('desk'),{onSelection:ids=>send({type:'board-selection',ids,enabled:panel.unlocked}),onPreview:(ids,layout)=>send({type:'board-preview',ids,layout}),onSaved:state=>send({type:'board-saved',state})});

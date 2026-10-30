@@ -1,7 +1,7 @@
-import {changeFriendship} from './friendships.js?v=care46';
-import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=care46';
-import {friendship,shareItem,itemScore} from './sharing.js?v=care46';
-import {foodScore} from './food.js?v=care46';
+import {changeFriendship} from './friendships.js?v=illness47';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,washThreshold} from './profile.js?v=illness47';
+import {friendship,shareItem,itemScore} from './sharing.js?v=illness47';
+import {foodScore} from './food.js?v=illness47';
 const feeling=(p,emote,seconds=5)=>{p.emote=emote;p.emoteTime=seconds;};
 const gap=(a,b)=>(a.bodyWidth??.06)/2+(b.bodyWidth??.06)/2+.018;
 export function rememberFavorite(observer,other){

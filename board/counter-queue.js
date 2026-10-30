@@ -1,7 +1,7 @@
-import {travelSpeed,trait,love} from './profile.js?v=care46';
-import {foodScore} from './food.js?v=care46';
-import {collectItem} from './sharing.js?v=care46';
-import {hasAction,animationDuration} from './motion.js?v=care46';
+import {travelSpeed,trait,love} from './profile.js?v=illness47';
+import {foodScore} from './food.js?v=illness47';
+import {collectItem} from './sharing.js?v=illness47';
+import {hasAction,animationDuration} from './motion.js?v=illness47';
 const FRONT=.49,LEFT=.045,RIGHT=.97,GAP=.014;
 export const queueWidth=p=>Math.max(.018,p.bodyWidth||.055);
 export const queueGap=(a,b)=>(queueWidth(a)+queueWidth(b))/2+GAP;

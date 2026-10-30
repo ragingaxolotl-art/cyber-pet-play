@@ -1,7 +1,7 @@
-import {clipFrameAt} from './clip-timing.js?v=care46';
-import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=care46';
-import {availablePairs,choosePair} from './host-interactions.js?v=care46';
-import {drawFeeling} from './emotes.js?v=care46';
+import {clipFrameAt} from './clip-timing.js?v=illness47';
+import {walkCandidate,beginHostWalk,advanceHostWalk} from './host-walks.js?v=illness47';
+import {availablePairs,choosePair} from './host-interactions.js?v=illness47';
+import {drawFeeling} from './emotes.js?v=illness47';
 export function createHosts(random=Math.random){return {random,pair:null,pendingPair:false,nextPair:10,pairBag:[],walker:null,nextWalk:18,nextWalker:0,art:{},people:[{action:'idle',clock:0,nextBreak:11},{action:'idle',clock:.8,nextBreak:19}],clock:0};}
 export async function loadNpcArt(hosts){
  const images=new Map();const load=src=>{if(!images.has(src)){const image=new Image();image.src=src;images.set(src,image);}return images.get(src);};

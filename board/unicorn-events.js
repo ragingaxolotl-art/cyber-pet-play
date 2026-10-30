@@ -1,7 +1,7 @@
-import {controls} from './control-state.js?v=care46';
-import {floor} from './motion.js?v=care46';
-import {hostX} from './host-interactions.js?v=care46';
-import {weatherAt,huts} from './world.js?v=care46';
+import {controls} from './control-state.js?v=illness47';
+import {floor} from './motion.js?v=illness47';
+import {hostX} from './host-interactions.js?v=illness47';
+import {weatherAt,huts} from './world.js?v=illness47';
 // Seconds, not frame counts. Visits remain brief with several quiet minutes between.
 export const visitSettings={duration:48,variation:12,quiet:240,quietVariation:180,rainChance:.75,rainDelay:5,rainVariation:12,minQuiet:150};
 export function visitState(random){return {age:0,nextVisit:105+random()*90,lastDeparture:-Infinity,visitRemaining:0,visits:0,trail:[],glitter:[],particleClock:0,wasRaining:false,rainChecked:-1,magicAttempted:false};}

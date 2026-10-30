@@ -1,8 +1,8 @@
-import {controls} from './control-state.js?v=care46';
-import {freeForActivity} from './activity-state.js?v=care46';
-import {floor,hasAction} from './motion.js?v=care46';
-import {travelSpeed} from './profile.js?v=care46';
-import {contagious,grantUnicornPotion} from './health.js?v=care46';
+import {controls} from './control-state.js?v=illness47';
+import {freeForActivity} from './activity-state.js?v=illness47';
+import {floor,hasAction} from './motion.js?v=illness47';
+import {travelSpeed} from './profile.js?v=illness47';
+import {isContagious,diseaseKey,grantUnicornPotion} from './health.js?v=illness47';
 // Outbreak visits are separate from ordinary toy visits. All supplies are session-only gifts.
 export const unicornCareSettings={deliveryChance:.2,arrivalBase:.30,extraInfected:.05,arrivalGrowth:0.05,rollSeconds:60,quietReset:30,visitLimit:180,handoffSeconds:2.4};
 const ill=p=>!!p.health?.conditions.length;
@@ -19,7 +19,7 @@ export function unicornArrivalChance(count,infectedSeconds=0){
 }
 export function observeOutbreak(f,pets,dt){
  const o=f.careOutbreak??={number:0,active:false,quiet:0,ids:new Set(),handled:false};
- const infected=pets.filter(p=>p.health?.conditions.some(c=>contagious.has(c.id)));
+ const infected=pets.filter(p=>p.health?.conditions.some(c=>isContagious(c)));
  o.infectedCount=infected.length;
  if(!infected.length){
   o.quiet+=dt;
@@ -28,7 +28,7 @@ export function observeOutbreak(f,pets,dt){
  }
  if(!o.active){o.active=true;o.number++;o.quiet=0;o.handled=false;o.requested=false;o.ids.clear();o.infectedSeconds=0;o.elapsed=0;o.nextRoll=0;o.rolls=0;}
  o.quiet=0;
- for(const p of infected)for(const c of p.health.conditions)if(contagious.has(c.id))o.ids.add(c.id);
+ for(const p of infected)for(const c of p.health.conditions)if(isContagious(c))o.ids.add(diseaseKey(c));
  if(o.handled||o.requested)return o;
  // Older in-memory outbreaks and test fixtures can lack the new counters.
  o.elapsed??=0;o.infectedSeconds??=0;o.nextRoll??=0;o.rolls??=0;

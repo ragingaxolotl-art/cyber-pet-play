@@ -1,10 +1,10 @@
-import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=care46';
-import {freeForActivity} from './activity-state.js?v=care46';
-import {resolveAction,aliases} from './pet-animation.js?v=care46';
-import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=care46';
-import {makeDirt} from './dirt.js?v=care46';
-import {collectItem,friendship} from './sharing.js?v=care46';
-import {trySocial,startGesture,advanceSocial} from './social.js?v=care46';
+import {beginFriendshipConversation,advanceFriendships} from './friendships.js?v=illness47';
+import {freeForActivity} from './activity-state.js?v=illness47';
+import {resolveAction,aliases} from './pet-animation.js?v=illness47';
+import {trait as axis,expression,travelSpeed,traitFeeling,love,willing} from './profile.js?v=illness47';
+import {makeDirt} from './dirt.js?v=illness47';
+import {collectItem,friendship} from './sharing.js?v=illness47';
+import {trySocial,startGesture,advanceSocial} from './social.js?v=illness47';
 // Normalized stage coordinates keep paths identical on every board size.
 export const stairs=[{from:0,to:1,a:.20,b:.35},{from:1,to:2,a:.77,b:.62}];
 export const tuning={walkSpeed:.018,stairChance:.42,minPause:2,maxPause:5,emoteSeconds:3.5,dirtPerStage:0.32};

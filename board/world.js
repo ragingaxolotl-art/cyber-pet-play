@@ -1,9 +1,9 @@
-import {controlledWeather} from './control-state.js?v=care46';
-import {freeForActivity} from './activity-state.js?v=care46';
-import {splashDirt} from './dirt.js?v=care46';
-import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=care46';
-import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=care46';
-import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=care46';
+import {controlledWeather} from './control-state.js?v=illness47';
+import {freeForActivity} from './activity-state.js?v=illness47';
+import {splashDirt} from './dirt.js?v=illness47';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,mudEnjoyment} from './profile.js?v=illness47';
+import {createBuildings,advanceConstruction,drawConstruction} from './construction.js?v=illness47';
+import {floor,hasAction,tuning,addWalkingDirt} from './motion.js?v=illness47';
 export const huts=[{level:0,left:.62,right:.95},{level:1,left:.025,right:.31},{level:2,left:.67,right:.97}];
 export const puddles=[{level:0,x:.105,r:.041},{level:1,x:.895,r:.038},{level:2,x:.16,r:.043}];
 export const mud=[{level:0,x:.155,r:.025},{level:1,x:.835,r:.025},{level:2,x:.225,r:.025}];

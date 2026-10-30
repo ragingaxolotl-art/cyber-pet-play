@@ -1,4 +1,4 @@
-import {controls} from './control-state.js?v=care46';
+import {controls} from './control-state.js?v=illness47';
 // Reuses the game's 32×32 emote atlas rules (scripts/game/emote_art.gd).
 const groups=['laughing','thinking','question','eager','cute','silence','drooling','sleepy','frustrated','sweat','crying','neutral','ok','love'];
 const sequences=new Map(),faces=new Map();

@@ -1,11 +1,14 @@
-import {bestBoardMedicine} from './care-medicines.js?v=care46';
-import {sanitizeConditions} from './condition-data.js?v=care46';
-import {trait,love,travelSpeed} from './profile.js?v=care46';
-import {freeForActivity} from './activity-state.js?v=care46';
-import {resolveAction} from './pet-animation.js?v=care46';
+import {loadIllnessArt,visualKind} from './illness-renderer.js?v=illness47';
+import {bestBoardMedicine} from './care-medicines.js?v=illness47';
+import {sanitizeConditions} from './condition-data.js?v=illness47';
+import {trait,love,travelSpeed} from './profile.js?v=illness47';
+import {freeForActivity} from './activity-state.js?v=illness47';
+import {resolveAction} from './pet-animation.js?v=illness47';
 // Seconds of board play, not real medical guidance or persistent health changes.
 export const healthTuning={contactRadius:.085,avoidRadius:.15,exposureMinimum:8,exposureRange:16,doseSeconds:6};
 export const contagious=new Set(['glitch_fever','parasite_spore_fan','static_mites']);
+export const diseaseKey=c=>c.specific_kind?(visualKind(c)==='sporefan'?'parasite_spore_fan':visualKind(c)):c.id;
+export const isContagious=c=>c.specific_kind?['glitch_fever','sporefan','static_mites'].includes(visualKind(c)):contagious.has(c.id);
 export const conditionNames={glitch_fever:'Glitch Fever',infection_crystal_rash:'Crystal Bloom',parasite_moss_crown:'Mosswire',parasite_spore_fan:'Sporefan',static_mites:'Static Mites',bitrot_patch:'Bitrot',phase_drift:'Phase Drift',injury_bruise:'Injury',fatigue_droplets:'Fatigue',queasy_bubbles:'Digestive discomfort',carb_bloat:'Carb Bloat',protein_knot:'Protein Knot',oil_churn:'Oil Churn',vitamin_fizz:'Vitamin Fizz',water_wobble:'Water Wobble',overfull:'Overfull Belly',travel_queasy:'Travel Queasiness',overwhelmed:'Crowd Frazzle',spooked:'Echo Fright',lonely:'Separation Static',chroma_drain:'Chroma Drain',signal_flicker:'Signal Flicker',mite_bite:'Static Mite Ambush',echo_strike:'Echo Wisp Strike',crystal_snare:'Crystal Crawler Pinch'};
 export function carePreference(p){
  const caution=1-trait(p,'bravery'),routine=1-trait(p,'curiosity');
@@ -23,7 +26,7 @@ export function syncHealth(p){
   const next=saved.find(c=>c.family===family),before=h.saved.find(c=>c.family===family);
   if(JSON.stringify(next)===JSON.stringify(before))continue;
   h.conditions=h.conditions.filter(c=>c.family!==family);
-  if(next){h.conditions.push({...next});h.immune.delete(next.id);h.potionProtection?.delete(next.id);}
+  if(next){h.conditions.push({...next});h.immune.delete(diseaseKey(next));h.potionProtection?.delete(diseaseKey(next));}
   h.age=0;h.dose=0;h.isolated=false;
  }
  h.saved=saved;
@@ -32,18 +35,18 @@ export function syncHealth(p){
 function finish(p){p.mode='idle';p.timer=3;p.clock=0;p.decisionCooldown=3;p.emote='ok';p.emoteTime=3;p.health.isolated=false;}
 // Freeze each source list before checking recipients: new infections cannot chain in the same step.
 export function advanceContagion(pets,dt){
- const sources=pets.filter(p=>!p.stair&&!p.health?.isolated).flatMap(p=>(p.health?.conditions||[]).filter(c=>contagious.has(c.id)).map(c=>({p,c})));
+ const sources=pets.filter(p=>!p.stair&&!p.health?.isolated).flatMap(p=>(p.health?.conditions||[]).filter(c=>isContagious(c)).map(c=>({p,c})));
  for(const p of pets){
   if(p.stair||p.health?.isolated)continue;
   const nearby=new Map();
-  for(const {p:source,c} of sources)if(source!==p&&source.level===p.level&&Math.abs(source.x-p.x)<healthTuning.contactRadius)nearby.set(c.id,c);
+  for(const {p:source,c} of sources)if(source!==p&&source.level===p.level&&Math.abs(source.x-p.x)<healthTuning.contactRadius)nearby.set(diseaseKey(c),c);
   for(const [id,c] of nearby){
    const h=p.health??=newHealth();
    if(h.immune.has(id)||h.conditions.some(x=>x.family===c.family))continue;
    let dose=h.exposure.get(id);
    if(!dose){dose={contact:0,threshold:healthTuning.exposureMinimum+(p.random?.()??.5)*healthTuning.exposureRange};h.exposure.set(id,dose);}
    dose.contact+=dt;
-   if(dose.contact>=dose.threshold){h.conditions.push({family:c.family,id,severity:1});h.transmissionsCaught=(h.transmissionsCaught||0)+1;h.age=0;h.dose=0;h.exposure.delete(id);p.emote='sweat';p.emoteTime=3;}
+   if(dose.contact>=dose.threshold){h.conditions.push({family:c.family,id:c.id,severity:1,...(c.specific_kind?{specific_kind:c.specific_kind}:{})});h.transmissionsCaught=(h.transmissionsCaught||0)+1;h.age=0;h.dose=0;h.exposure.delete(id);p.emote='sweat';p.emoteTime=3;}
   }
   for(const [id,dose] of p.health?.exposure||[])if(!nearby.has(id)){dose.contact=Math.max(0,dose.contact-dt*2);if(!dose.contact)p.health.exposure.delete(id);}
  }
@@ -55,7 +58,7 @@ function care(p,dt){
  const preferences=carePreference(p);
  if(freeForActivity(p)||['quarantine','medicine'].includes(p.mode)){
   if(h.age>=preferences.medicineDelay){if(p.mode!=='medicine'){p.mode='medicine';p.clock=0;}h.isolated=true;}
-  else if(h.conditions.some(c=>contagious.has(c.id))&&h.age>=preferences.quarantineDelay){p.mode='quarantine';h.isolated=true;}
+  else if(h.conditions.some(c=>isContagious(c))&&h.age>=preferences.quarantineDelay){p.mode='quarantine';h.isolated=true;}
  }
  if(p.mode==='medicine'){
   h.conditions[0].medicine??=bestBoardMedicine(h.conditions[0]);
@@ -63,7 +66,7 @@ function care(p,dt){
   if(h.dose>=healthTuning.doseSeconds){
    h.dose-=healthTuning.doseSeconds;
    const c=h.conditions[0],medicine=c.medicine??=bestBoardMedicine(c);c.severity=medicine?.instant_cure?0:c.severity-(medicine?.treatment_power||1);if(c.severity>0)c.severity=Math.max(1,c.severity);else c.severity=0;
-   if(!c.severity){h.immune.add(c.id);h.conditions.shift();h.recovered++;}
+   if(!c.severity){h.immune.add(diseaseKey(c));h.conditions.shift();h.recovered++;}
    if(!h.conditions.length)finish(p);
   }
  }
@@ -71,7 +74,7 @@ function care(p,dt){
 function avoid(p,pets,dt){
  if(p.health?.conditions.length||p.health?.isolated||p.stair)return;
  const preference=carePreference(p);
- const sick=pets.filter(other=>other!==p&&other.level===p.level&&!other.stair&&other.health?.conditions.some(c=>contagious.has(c.id))).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
+ const sick=pets.filter(other=>other!==p&&other.level===p.level&&!other.stair&&other.health?.conditions.some(c=>isContagious(c))).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
  if(p.mode==='avoidSick'){
   const h=p.health;h.avoidTime+=dt;
   if(!sick||Math.abs(sick.x-p.x)>=preference.distance||h.avoidTime>=5){finish(p);h.avoiding=0;return;}
@@ -96,7 +99,7 @@ export function conditionVisual(p,seconds,reducedMotion=false){
  let gray=0,alpha=1;
  for(const c of p.health?.conditions||[]){
   if(c.id==='chroma_drain')gray=Math.max(gray,.35+.6*c.severity/3);
-  if(c.id==='signal_flicker'){gray=Math.max(gray,.2);const depth=.18+.22*c.severity/3;alpha=1-depth*(reducedMotion?.5:.5-.5*Math.cos(2*Math.PI*seconds/2.4));}
+  if(visualKind(c)==='signal_flicker'){gray=Math.max(gray,.2);const depth=.18+.22*c.severity/3;alpha=1-depth*(reducedMotion?.5:.5-.5*Math.cos(2*Math.PI*seconds/2.4));}
  }
  return {gray,alpha};
 }
@@ -107,18 +110,12 @@ export function drawHealth(ctx,p,x,y,size){
  if(!p.health?.conditions.length)return;
  ctx.save();
 
- const c=p.health?.conditions[0],fallback={digestive:'queasy_bubbles',stress:'phase_drift',injury:'injury_bruise'};
- const icon=c&&conditionArt.get(c.id)||conditionArt.get(fallback[c?.family]);if(icon){const scale=c.severity<=1?20:c.severity<=2?26:32;ctx.imageSmoothingEnabled=false;ctx.drawImage(icon,x+size*.5,y-size*.7,scale,scale);}
- const swirl=conditionArt.get('confused_swirl');if(swirl&&c?.severity>2&&['stress','infection'].includes(c.family))ctx.drawImage(swirl,x-16,y-size-35,32,32);
  if(p.health?.isolated){ctx.strokeStyle='#83e5df';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.ellipse(x,y,Math.max(22,size*.65),8,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
  if(p.mode==='medicine'){ctx.fillStyle='#b3f4ed';ctx.fillRect(x+size*.45,y-24,9,16);ctx.fillStyle='#eefcf9';ctx.fillRect(x+size*.45+1,y-28,7,4);}
  ctx.restore();
 }
 
-const conditionArt=new Map();
-export async function loadConditionArt(){
- await Promise.allSettled(['glitch_fever','infection_crystal_rash','parasite_moss_crown','parasite_spore_fan','static_mites','bitrot_patch','phase_drift','injury_bruise','fatigue_droplets','queasy_bubbles','confused_swirl'].map(async id=>{const img=new Image();img.src=`assets/care/${id}.png`;await img.decode();conditionArt.set(id,img);}));
-}
+export const loadConditionArt=loadIllnessArt;
 
 // One delivered magical board potion clears the patient's current conditions and shields
 // against the contagious variants in this outbreak. A different future disease can still occur.
@@ -126,7 +123,7 @@ export function grantUnicornPotion(p,outbreakIds,{preserveActivity=false}={}){
  const h=p.health??=newHealth();
  for(const id of outbreakIds)h.immune.add(id);
  h.potionProtection=new Set([...(h.potionProtection||[]),...outbreakIds]);
- for(const c of h.conditions){h.immune.add(c.id);h.recovered++;}
+ for(const c of h.conditions){h.immune.add(diseaseKey(c));h.recovered++;}
  h.conditions=[];h.exposure.clear();h.dose=0;h.isolated=false;p.unicornCare=false;if(!preserveActivity)finish(p);p.healingTime=2.4;p.emote='hearts';p.emoteTime=5;
 }
 

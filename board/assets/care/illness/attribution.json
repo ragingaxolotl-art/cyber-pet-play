@@ -1,0 +1,113 @@
+{
+  "note": "Reused Cyber Pet project illness artwork. Original provenance retained in source asset manifests and docs/illness-visuals.json.",
+  "files": [
+    {
+      "file": "assets/care/illness/bitrot_patch.png",
+      "source": "assets/care/pixellab-2026-10-28/bitrot_patch.png"
+    },
+    {
+      "file": "assets/care/illness/confused_swirl.png",
+      "source": "assets/care/pixellab-2026-10-28/confused_swirl.png"
+    },
+    {
+      "file": "assets/care/illness/coral_polyp_branch.png",
+      "source": "assets/care/illness-originals/coral_polyp_branch.png"
+    },
+    {
+      "file": "assets/care/illness/animated-coral_polyp_branch.png",
+      "source": "assets/care/illness-originals/coral_polyp_branch-loop.png"
+    },
+    {
+      "file": "assets/care/illness/fatigue_droplets.png",
+      "source": "assets/care/pixellab-2026-10-28/fatigue_droplets.png"
+    },
+    {
+      "file": "assets/care/illness/glitch_fever.png",
+      "source": "assets/care/pixellab-2026-10-28/glitch_fever.png"
+    },
+    {
+      "file": "assets/care/illness/animated-glitch_fever.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/glitch_fever.png"
+    },
+    {
+      "file": "assets/care/illness/infection_crystal_rash.png",
+      "source": "assets/care/pixellab-2026-10-28/infection_crystal_rash.png"
+    },
+    {
+      "file": "assets/care/illness/animated-infection_crystal_rash.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/infection_crystal_rash.png"
+    },
+    {
+      "file": "assets/care/illness/injury_bruise.png",
+      "source": "assets/care/pixellab-2026-10-28/injury_bruise.png"
+    },
+    {
+      "file": "assets/care/illness/memory_reedling_v2.png",
+      "source": "assets/care/illness-originals/memory_reedling_v2.png"
+    },
+    {
+      "file": "assets/care/illness/animated-memory_reedling_v2.png",
+      "source": "assets/care/illness-originals/memory_reedling_v2-loop.png"
+    },
+    {
+      "file": "assets/care/illness/parasite_moss_crown.png",
+      "source": "assets/care/pixellab-2026-10-28/parasite_moss_crown.png"
+    },
+    {
+      "file": "assets/care/illness/animated-parasite_moss_crown.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/parasite_moss_crown.png"
+    },
+    {
+      "file": "assets/care/illness/parasite_spore_fan.png",
+      "source": "assets/care/pixellab-2026-10-28/parasite_spore_fan.png"
+    },
+    {
+      "file": "assets/care/illness/animated-parasite_spore_fan.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/parasite_spore_fan.png"
+    },
+    {
+      "file": "assets/care/illness/phase_drift.png",
+      "source": "assets/care/pixellab-2026-10-28/phase_drift.png"
+    },
+    {
+      "file": "assets/care/illness/pumpwire_leech_v2.png",
+      "source": "assets/care/illness-originals/pumpwire_leech_v2.png"
+    },
+    {
+      "file": "assets/care/illness/animated-pumpwire_leech_v2.png",
+      "source": "assets/care/illness-originals/pumpwire_leech_v2-loop.png"
+    },
+    {
+      "file": "assets/care/illness/queasy_bubbles.png",
+      "source": "assets/care/pixellab-2026-10-28/queasy_bubbles.png"
+    },
+    {
+      "file": "assets/care/illness/animated-queasy_bubbles.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/queasy_bubbles.png"
+    },
+    {
+      "file": "assets/care/illness/static_mite_single.png",
+      "source": "assets/care/illness-originals/static_mite_single.png"
+    },
+    {
+      "file": "assets/care/illness/animated-static_mite_single.png",
+      "source": "assets/care/illness-originals/static_mite_walk.png"
+    },
+    {
+      "file": "assets/care/illness/static_mites.png",
+      "source": "assets/care/pixellab-2026-10-28/static_mites.png"
+    },
+    {
+      "file": "assets/care/illness/animated-static_mites.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/static_mites.png"
+    },
+    {
+      "file": "assets/care/illness/stress_tangle.png",
+      "source": "assets/care/pixellab-2026-10-28/stress_tangle.png"
+    },
+    {
+      "file": "assets/care/illness/animated-stress_tangle.png",
+      "source": "assets/care/pixellab-2026-10-28/animations/stress_tangle.png"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
-import {drawFeeling} from './emotes.js?v=care46';
-import {clipFrameAt} from './clip-timing.js?v=care46';
+import {drawFeeling} from './emotes.js?v=illness47';
+import {clipFrameAt} from './clip-timing.js?v=illness47';
 // Shared clips contain both people, so hands, gaze and embraces stay synchronized.
 export const pairActions=['talk','laugh','hug','highfive','selfie'];
 export const clipReady=clip=>clip?.image?.complete&&clip.image.naturalWidth>0;

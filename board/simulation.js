@@ -1,20 +1,20 @@
-import {advanceTentContact,advanceClinicRecovery} from './unicorn-care.js?v=care46';
-import {controls} from './control-state.js?v=care46';
-import {advanceOutbreaks} from './outbreaks.js?v=care46';
-import {advanceHealth} from './health.js?v=care46';
-import {preserveRecovery} from './activity-state.js?v=care46';
-import {advancePetPresentation} from './pet-animation.js?v=care46';
-import {advanceMagic} from './unicorn-events.js?v=care46';
-import {prepareCounterQueue} from './counter-queue.js?v=care46';
-import {advanceCounter} from './counter.js?v=care46';
-import {advanceHosts} from './npc-animation.js?v=care46';
-import {advanceFlyer} from './flyer.js?v=care46';
-import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=care46';
-import {advanceMeals} from './meals.js?v=care46';
-import {advanceGames} from './games.js?v=care46';
-import {advanceWorld} from './world.js?v=care46';
-import {advanceHygiene} from './hygiene.js?v=care46';
-import {advanceWash} from './wash.js?v=care46';
+import {advanceTentContact,advanceClinicRecovery} from './unicorn-care.js?v=illness47';
+import {controls} from './control-state.js?v=illness47';
+import {advanceOutbreaks} from './outbreaks.js?v=illness47';
+import {advanceHealth} from './health.js?v=illness47';
+import {preserveRecovery} from './activity-state.js?v=illness47';
+import {advancePetPresentation} from './pet-animation.js?v=illness47';
+import {advanceMagic} from './unicorn-events.js?v=illness47';
+import {prepareCounterQueue} from './counter-queue.js?v=illness47';
+import {advanceCounter} from './counter.js?v=illness47';
+import {advanceHosts} from './npc-animation.js?v=illness47';
+import {advanceFlyer} from './flyer.js?v=illness47';
+import {tick,advanceTag,advanceInteractions,interactPets} from './motion.js?v=illness47';
+import {advanceMeals} from './meals.js?v=illness47';
+import {advanceGames} from './games.js?v=illness47';
+import {advanceWorld} from './world.js?v=illness47';
+import {advanceHygiene} from './hygiene.js?v=illness47';
+import {advanceWash} from './wash.js?v=illness47';
 // Keep this exact update order shared by the live board and coexistence tests.
 // Active actions finish first, then care/play invitations, then optional scenery.
 export function stepBoard(scene,pets,dt,time,aspect=16/9,artReady=true){

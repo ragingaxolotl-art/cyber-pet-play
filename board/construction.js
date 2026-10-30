@@ -1,6 +1,6 @@
-import {freeForActivity} from './activity-state.js?v=care46';
-import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,shelterHelpChance} from './profile.js?v=care46';
-import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=care46';
+import {freeForActivity} from './activity-state.js?v=illness47';
+import {trait,expression,love,travelSpeed,traitFeeling,willing,wantsRainShelter,shelterHelpChance} from './profile.js?v=illness47';
+import {hasAction,tuning,floor,addWalkingDirt} from './motion.js?v=illness47';
 export const createBuildings=(random=Math.random)=>Array.from({length:3},()=>({random,startAt:Infinity,dismantleAt:Infinity,rainCycle:-1,dryCycle:-1,phase:'bare',progress:0,workers:[],lastBuildCycle:-1,recruitAt:0,dust:0}));
 const available=p=>(freeForActivity(p)||p.mode==='shelterWait')&&hasAction(p.data,'walking');
 export function workRate(helpers){return Math.max(0,helpers)/18;}
