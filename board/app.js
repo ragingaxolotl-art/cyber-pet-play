@@ -4,11 +4,11 @@ import {potionNameplate,drawPotionBadge,drawHealing} from './potion-badge.js?v=i
 import {drawUnicornTent} from './unicorn-care.js?v=illness47';
 import {controls,adjustedMetrics,keyOf} from './control-state.js?v=illness47';
 import {createCommandRunner,pollControls} from './control-events.js?v=illness47';
-import {installBoardTeacher} from './board-teacher.js?v=illness47';
+import {installBoardTeacher} from './board-teacher.js?v=friends49';
 import {frameSteps,renderSize,petFilter} from './render-budget.js?v=illness47';
 import {stableArtwork,stableFrame} from './stable-artwork.js?v=illness47';
 import {drawSpeech} from './friendships.js?v=illness47';
-import {installFriendships} from './friendship-panel.js?v=illness47';
+import {installFriendships} from './friendship-panel.js?v=friends49';
 import {conditionVisual,drawHealth,loadConditionArt} from './health.js?v=illness47';
 import {installSavedRewards} from './saved-rewards.js?v=illness47';
 import {hydrationChoice} from './hydration.js?v=illness47';
@@ -38,6 +38,9 @@ const medalHoverAreas=[];let medalPointer=null;
 const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
 let pets=[],loaded=[],paused=matchMedia('(prefers-reduced-motion: reduce)').matches,previous=0,elapsed=0,animationRequest=null;
 const friendships=installFriendships(()=>pets);
+window.addEventListener('message',event=>{
+ if(event.source===window.parent&&['https://ragingaxolotl-art.github.io','https://cyber-pet-board-control.ragingaxolotl.chatgpt.site'].includes(event.origin)&&event.data?.type==='board-open-friendships')friendships.open();
+});
 const livingWorld=createWorld(),washHistory=createWash();
 let companions=[];
 const counter=createCounter(),counterArt=loadCounterArt(),hosts=createHosts(),flyer=createFlyer();

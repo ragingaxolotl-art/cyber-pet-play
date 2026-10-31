@@ -1,4 +1,4 @@
-import {installTeacherPanel} from './teacher-panel.js?v=illness47';
+import {installTeacherPanel} from './teacher-panel.js?v=friends49';
 import {controls,setControls,keyOf} from './control-state.js?v=illness47';
 const DESKS=['https://cyber-pet-board-control.ragingaxolotl.chatgpt.site','https://ragingaxolotl-art.github.io'];
 export function installBoardTeacher(canvas,getPets){
