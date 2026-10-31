@@ -20,7 +20,7 @@ import {createHosts,loadNpcArt} from './npc-animation.js?v=illness47';
 import {createFlyer,drawFlyer,drawToys} from './flyer.js?v=illness47';
 import {createCounter,loadCounterArt,counterArtReady,drawCounter} from './counter.js?v=illness47';
 import {createWash} from './wash.js?v=illness47';
-import {displayMetrics,framePlacement,artworkDirection} from './display.js?v=illness47';
+import {displayMetrics,framePlacement,artworkDirection} from './display.js?v=click48';
 import {createCompanions,withResidents} from './companions.js?v=illness47';
 import {isClassPet} from './profile.js?v=illness47';
 import {drawGames} from './games.js?v=illness47';
@@ -105,6 +105,23 @@ function updateMedalHover(){
 canvas.addEventListener('pointermove',event=>{const box=canvas.getBoundingClientRect();medalPointer={x:(event.clientX-box.left)*width/box.width,y:(event.clientY-box.top)*height/box.height};updateMedalHover();});
 canvas.addEventListener('pointerleave',()=>{medalPointer=null;updateMedalHover();});
 function petSize(data){return adjustedMetrics(data,displayMetrics(data,width,height,pets.length),height);}
+// Use the same visible artwork bounds as teacher selection, including floor offsets.
+const namePopup=$('pet-name-popup');let namePopupTimer;
+canvas.addEventListener('click',event=>{
+  clearTimeout(namePopupTimer);
+  const box=canvas.getBoundingClientRect(),x=event.clientX-box.left,y=event.clientY-box.top;
+  const hit=[...teacher.areas].reverse().find(area=>x>=area.x&&x<=area.x+area.w&&y>=area.y&&y<=area.y+area.h);
+  const pet=hit&&pets.find(p=>keyOf(p)===hit.id);
+  namePopup.hidden=!pet;if(!pet)return;
+  namePopup.querySelector('span').textContent=pet.data.name||'Cyber Pet';
+  const icon=namePopup.querySelector('canvas'),paint=icon.getContext('2d');paint.clearRect(0,0,48,48);
+  const action=resolveAction(pet.data,'idle'),image=pet.data.images.get(pet.data.config.animations[action]?.[0]);
+  if(image){const bounds=measureArtwork(image),scale=40/Math.max(bounds.w,bounds.h);paint.imageSmoothingEnabled=false;paint.drawImage(image,bounds.x,bounds.y,bounds.w,bounds.h,(48-bounds.w*scale)/2,(48-bounds.h*scale)/2,bounds.w*scale,bounds.h*scale);}
+  namePopup.style.left='8px';namePopup.style.top='8px';
+  namePopup.style.left=Math.max(8,Math.min(box.width-namePopup.offsetWidth-8,x-namePopup.offsetWidth/2))+'px';
+  namePopup.style.top=Math.max(8,Math.min(box.height-namePopup.offsetHeight-8,hit.y-namePopup.offsetHeight-10))+'px';
+  namePopupTimer=setTimeout(()=>{namePopup.hidden=true;},4500);
+});
 function drawPet(pet){
   const data=pet.data,x=pet.x*width,groundY=(petFloor(pet)-(pet.worldBob||0))*height;
   let metrics=petSize(data);const preview=teacher.layout(pet);if(preview){const base=displayMetrics(data,width,height,pets.length);metrics={...base,scale:base.scale*preview.scale,desired:base.desired*preview.scale,offsetY:base.offsetY+preview.offset*height/720};}const y=groundY+metrics.offsetY;
