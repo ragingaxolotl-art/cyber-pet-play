@@ -1,4 +1,4 @@
-import {drawMeepCompanion} from './meep-companion.js?v=meep50';
+import {drawMeepCompanion} from './meep-companion.js?v=meep51';
 import {drawIllnessPet} from './illness-renderer.js?v=illness47';
 import {personalEmoteTime} from './pet-emote-time.js?v=illness47';
 import {potionNameplate,drawPotionBadge,drawHealing} from './potion-badge.js?v=illness47';
@@ -142,7 +142,7 @@ function drawPet(pet){
   ctx.fillStyle='#172b4a36';ctx.beginPath();ctx.ellipse(x,groundY+1,Math.min(w*.32,desired*.5),4,0,0,Math.PI*2);ctx.fill();
   const healthVisual=conditionVisual(pet,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
   drawIllnessPet(ctx,pet,{img,bounds,originX:x,originY:y,x:placement.x,y:placement.y,w,h,facing,screenX:x+facing*placement.x-(facing<0?w:0),screenY:y+placement.y,screenWidth:w,screenHeight:h},elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches,petFilter(data.tint||0,healthVisual.gray),healthVisual.alpha);
-  drawMeepCompanion(ctx,data,x,groundY,w,h,pet.direction,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
+  drawMeepCompanion(ctx,data,x,petFloor(pet)*height,w,h,pet.direction,elapsed,matchMedia('(prefers-reduced-motion: reduce)').matches);
   const unit=Math.max(.65,Math.min(width/1280,height/595));
   const font=Math.max(8,Math.min(15*unit,desired*.25));ctx.font=`600 ${font}px system-ui`;ctx.textAlign='center';
   if(showNames){
