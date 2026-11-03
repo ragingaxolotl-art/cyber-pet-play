@@ -1,6 +1,6 @@
-import {conditionKinds} from './condition-kinds.js?v=illness47';
-import {drawMotif,motifIds} from './illness-motifs.js?v=illness47';
-import {personalEmoteTime} from './pet-emote-time.js?v=illness47';
+import {conditionKinds} from './condition-kinds.js?v=board52';
+import {drawMotif,motifIds} from './illness-motifs.js?v=board52';
+import {personalEmoteTime} from './pet-emote-time.js?v=board52';
 const aliases={infection_crystal_rash:'crystal_bloom',parasite_moss_crown:'mosswire',parasite_spore_fan:'sporefan',bitrot_patch:'bitrot',injury_bruise:'seam_bruise',fatigue_droplets:'muscle_fatigue',queasy_bubbles:'signal_churn',phase_drift:'phase_scarring',spooked:'echo_fright',overfull:'buffer_bloat'};
 export function visualKind(c){return conditionKinds[c.specific_kind]?.family===c.family?c.specific_kind:conditionKinds[c.id]?c.id:aliases[c.id]||({digestive:'signal_churn',stress:'echo_fright',injury:'seam_bruise',fatigue:'muscle_fatigue',chronic:'bitrot',infection:'crystal_bloom',parasites:'mosswire'}[c.family]);}
 const art=new Map(),sheets=new Map(),states=new WeakMap(),anchors=new WeakMap();

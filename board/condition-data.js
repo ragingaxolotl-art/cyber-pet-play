@@ -1,4 +1,4 @@
-import {conditionKinds} from './condition-kinds.js?v=illness47';
+import {conditionKinds} from './condition-kinds.js?v=board52';
 // Shared with the public archive projection. Only these fictional display fields leave the save.
 export const families=['digestive','infection','parasites','chronic','injury','fatigue','stress'];
 const causes={digestive:['carb_bloat','protein_knot','oil_churn','vitamin_fizz','water_wobble','overfull','travel_queasy'],stress:['overwhelmed','spooked','lonely','chroma_drain','signal_flicker'],injury:['mite_bite','echo_strike','crystal_snare']};

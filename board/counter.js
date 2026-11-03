@@ -1,6 +1,6 @@
-import {drawHostPair,hostX} from './host-interactions.js?v=illness47';
-import {drawHost} from './npc-animation.js?v=illness47';
-import {advanceCounterQueue} from './counter-queue.js?v=illness47';
+import {drawHostPair,hostX} from './host-interactions.js?v=board52';
+import {drawHost} from './npc-animation.js?v=board52';
+import {advanceCounterQueue} from './counter-queue.js?v=board52';
 // Original 4x4, 64px-cell atlases. Coordinates are zero-based; no repainted frames.
 // Front -> three-quarter -> profile bridges the idle and tray clips in both directions.
 export const frames={

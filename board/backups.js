@@ -1,6 +1,6 @@
-import {readConditions} from './condition-data.js?v=illness47';
-import {readDevelopment} from './development.js?v=illness47';
-import {boardActions,aliases} from './pet-animation.js?v=illness47';
+import {readConditions} from './condition-data.js?v=board52';
+import {readDevelopment} from './development.js?v=board52';
+import {boardActions,aliases} from './pet-animation.js?v=board52';
 // Read the existing Godot PetSnapshot ZIP format entirely in browser memory.
 export const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
 const decode=bytes=>new TextDecoder('utf-8',{fatal:true}).decode(bytes);

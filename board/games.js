@@ -1,7 +1,7 @@
-import {developmentWeight,developmentPersistence,developmentReaction} from './development.js?v=illness47';
-import {freeForActivity} from './activity-state.js?v=illness47';
-import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=illness47';
-import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=illness47';
+import {developmentWeight,developmentPersistence,developmentReaction} from './development.js?v=board52';
+import {freeForActivity} from './activity-state.js?v=board52';
+import {trait,expression,love,travelSpeed,traitFeeling,willing} from './profile.js?v=board52';
+import {floor,hasAction,tuning,addWalkingDirt,standBeside,startTag} from './motion.js?v=board52';
 export const gameKinds=['hide','follow','race','freeze','copy','ball','balloon','treasure','favorites'];
 const active=p=>hasAction(p.data,'walking');
 const eligible=p=>freeForActivity(p)&&!(p.gameCooldown>0);

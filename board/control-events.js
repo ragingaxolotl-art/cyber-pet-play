@@ -1,5 +1,5 @@
-import {controls,keyOf,weatherOverride,setControls} from './control-state.js?v=illness47';
-import {seedBoardDisease,grantUnicornPotion} from './health.js?v=illness47';
+import {controls,keyOf,weatherOverride,setControls} from './control-state.js?v=board52';
+import {seedBoardDisease,grantUnicornPotion} from './health.js?v=board52';
 export function createCommandRunner(storage){
  let done=new Set();try{done=new Set(JSON.parse(storage?.getItem('board.commands.v1')||'[]'));}catch{}
  const results=new Map();
