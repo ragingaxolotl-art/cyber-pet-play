@@ -1,0 +1,9 @@
+{
+  "release": "20261105-combat-v2",
+  "attackDefinitionVersions": [
+    1,
+    2
+  ],
+  "sequenceTransport": "project-download",
+  "cloudSequencePublishing": false
+}

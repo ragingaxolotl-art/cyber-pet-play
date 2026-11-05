@@ -1,5 +1,7 @@
-import {pathSample} from './attack-motion.js?v=20261024-reviewed18';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261024-reviewed18';
+import {pathSample} from './attack-motion.js?v=20261105-combat-v2';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-v2';
+import {validateHitSequence} from './hit-sequence.js?v=20261105-combat-v2';
+import {simulateSequence} from './sequence-preview.js?v=20261105-combat-v2';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -15,6 +17,7 @@ const fail=s=>{throw Error(s);};
 function num(o,key,min,max,integer=false){const v=o[key];if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max||(integer&&!Number.isInteger(v)))fail(`${key} must be ${integer?'a whole number ':''}between ${min} and ${max}.`);}
 export function validateAttack(a,ids){
  if(!a||typeof a!=='object')fail('Invalid attack.');
+ validateHitSequence(a);
  if(!/^attack_[a-zA-Z0-9_]{1,80}$/.test(a.id)||typeof a.name!=='string'||!a.name.trim()||a.name.length>48)fail('Attack needs an ID and a name (1–48 characters).');
  if(typeof a.notes!=='string'||a.notes.length>2000||!Array.isArray(a.tags)||a.tags.length>24||a.tags.some(t=>typeof t!=='string'||t.length>40))fail('Invalid notes or tags.');
  for(const [k,values] of Object.entries({motion:MOTIONS,element:['earth','water','air','fire','metal','ice','electric','plant','light','dark','mixed'],delivery:['melee','projectile','area','self','ally'],payload:['damage','heal','shield','energy','push','block','dodge'],scaling:STATS,status:['none','burn','poison','regen','slow','haste','weaken','stun']}))if(!values.includes(a[k]))fail('Invalid '+k);
@@ -40,8 +43,9 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||p.version!==1||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1 or 2 Combat Design project (1–256 attacks).');
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
+ if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
  const unique=new Set();for(const a of p.attacks){validateAttack(a,ids);if(unique.has(a.id))fail('Duplicate attack ID.');unique.add(a.id);}return p;
 }
 export function validateSandbox(o){if(!o||typeof o.guard!=='boolean'||![1,-1].includes(o.facing)||![1,-1].includes(o.targetSide))fail('Invalid test scenario.');for(const [key,min,max] of [['distance',0,245],['resistance',-50,75],['selfHP',.05,1],['targetHP',.05,1],['energy',0,1]])num(o,key,min,max);for(const [key,min,max] of [['incomingDamage',0,500],['incomingFrame',0,1800],['targetHeight',0,60]])if(o[key]!==undefined)num(o,key,min,max,true);}
@@ -51,7 +55,7 @@ export function magnitude(a,s){if(['push','block','dodge'].includes(a.payload))r
 export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-Math.round((a.projectileStart??a.startup)*statsFor(s).timing))*a.projectileSpeed:0;return {x:facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x,y:a.box.y+path.y,w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing};}
 export const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 export function simulate(a,attacker,target,options={}){
- validateAttack(a);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
+ validateAttack(a);if(a.hitEvents)return simulateSequence(a,attacker,target,options);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
  const distance=options.distance??100,side=options.targetSide===-1?-1:1;
  let self={hp:Math.round(av.maxHP*(options.selfHP??.6)),maxHP:av.maxHP,energy:Math.round(av.maxEnergy*(options.energy??1)),shield:0,shieldUntil:0,x:0,stun:0,y:0};
  let other={hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,shieldUntil:0,x:side*distance,stun:0,y:-(options.targetHeight??0)};

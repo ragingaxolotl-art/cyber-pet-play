@@ -1,0 +1,126 @@
+{
+  "format": "cyber-pet-combat-design",
+  "version": 2,
+  "attacks": [
+    {
+      "id": "attack_electrical_barrage_v2",
+      "name": "Electrical barrage",
+      "notes": "First unblocked contact attaches five pulses. Contact + 0, 5, 10, 15, 20 frames. Total fixed damage: 28. Block/dodge cancels attachment.",
+      "tags": [],
+      "poseImpact": 0,
+      "poseTiming": "synced",
+      "poseFinish": "stand",
+      "pushAxis": "both",
+      "blockPercent": 100,
+      "launchHeight": 0,
+      "flightFrames": 36,
+      "wallSlam": false,
+      "floorSlam": false,
+      "motion": "release_power_side",
+      "element": "electric",
+      "delivery": "projectile",
+      "payload": "damage",
+      "base": 12,
+      "scaling": "intelligence",
+      "coefficient": 0,
+      "startup": 18,
+      "active": 21,
+      "recovery": 24,
+      "cooldown": 90,
+      "cost": 12,
+      "hitLimit": 1,
+      "hitInterval": 12,
+      "knockback": 12,
+      "hitstun": 12,
+      "blockable": true,
+      "projectileSpeed": 3,
+      "box": {
+        "x": 22,
+        "y": -52,
+        "w": 54,
+        "h": 44
+      },
+      "visuals": [
+        {
+          "effectId": "elements/pixel-library-2026-10-22/distinct-attacks/elements/electric/release_power_side/1",
+          "x": 0,
+          "y": 0,
+          "scale": 1,
+          "start": 0,
+          "rate": 1,
+          "loop": true
+        }
+      ],
+      "status": "none",
+      "statusPower": 0,
+      "statusDuration": 180,
+      "statusInterval": 60,
+      "shieldDuration": 240,
+      "behaviorVersion": 2,
+      "hitEvents": [
+        {
+          "id": "hit_1",
+          "offset": 0,
+          "duration": 1,
+          "damage": 6,
+          "reaction": "launch",
+          "height": 45,
+          "knockback": 0,
+          "frames": 24,
+          "hold": 5,
+          "target": "any"
+        },
+        {
+          "id": "hit_2",
+          "offset": 5,
+          "duration": 1,
+          "damage": 3,
+          "reaction": "suspend",
+          "height": 45,
+          "knockback": 0,
+          "frames": 24,
+          "hold": 5,
+          "target": "any"
+        },
+        {
+          "id": "hit_3",
+          "offset": 10,
+          "duration": 1,
+          "damage": 3,
+          "reaction": "suspend",
+          "height": 45,
+          "knockback": 0,
+          "frames": 24,
+          "hold": 5,
+          "target": "any"
+        },
+        {
+          "id": "hit_4",
+          "offset": 15,
+          "duration": 1,
+          "damage": 4,
+          "reaction": "relaunch",
+          "height": 45,
+          "knockback": 0,
+          "frames": 24,
+          "hold": 5,
+          "target": "any"
+        },
+        {
+          "id": "hit_5",
+          "offset": 20,
+          "duration": 1,
+          "damage": 12,
+          "reaction": "knockback",
+          "height": 12,
+          "knockback": 65,
+          "frames": 24,
+          "hold": 5,
+          "target": "any"
+        }
+      ],
+      "projectileMode": "attached",
+      "impactTrigger": "contact"
+    }
+  ]
+}
