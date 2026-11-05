@@ -1,15 +1,15 @@
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261105-combat-v2';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261105-combat-v2';
-import {openReviewedAttack} from './reviewed-attacks.js?v=20261105-combat-v2';
-import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261105-combat-v2';
-import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261105-combat-v2';
-import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261105-combat-v2';
-import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261105-combat-v2';
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261105-combat-v2';
-import {installAttackBank} from './attack-bank.js?v=20261105-combat-v2';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261105-combat-v2';
-import {EditHistory} from './edit-history.js?v=20261105-combat-v2';
-import {installSequenceEditor} from './sequence-editor.js?v=20261105-combat-v2';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261105-combat-compat';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261105-combat-compat';
+import {openReviewedAttack} from './reviewed-attacks.js?v=20261105-combat-compat';
+import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261105-combat-compat';
+import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261105-combat-compat';
+import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261105-combat-compat';
+import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261105-combat-compat';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261105-combat-compat';
+import {installAttackBank} from './attack-bank.js?v=20261105-combat-compat';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261105-combat-compat';
+import {EditHistory} from './edit-history.js?v=20261105-combat-compat';
+import {installSequenceEditor} from './sequence-editor.js?v=20261105-combat-compat';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
@@ -235,7 +235,6 @@ function installEditing(){
  $('scenario').onchange=()=>{const presets={standing:{guard:false,distance:72,targetHeight:0},blocking:{guard:true,distance:72,targetHeight:0},airborne:{guard:false,distance:72,targetHeight:40},distant:{guard:false,distance:190,targetHeight:0}};Object.assign(options,presets[$('scenario').value]);installSandbox();changed();};
  $('saveScenario').onclick=()=>{try{localStorage.setItem(storageKey+'-scenario',JSON.stringify(options));status('Test scenario saved in this browser.');}catch(e){status(e.message);}};
  $('loadScenario').onclick=()=>{try{const saved=JSON.parse(localStorage.getItem(storageKey+'-scenario')||'null');if(!saved)throw Error('Save a scenario first.');const candidate=structuredClone(project);candidate.testBench.options=saved;validateDesign(candidate,ids);Object.assign(options,saved);installSandbox();changed();}catch(e){status(e.message);}};
- $('saveAttack').addEventListener('click',e=>{if(attack().hitEvents){e.preventDefault();e.stopImmediatePropagation();status('Version 2: use Download backup, then Open attack design in the upgraded Arena. Classroom-bank publishing is held until its deployed clients support version 2.');}},true);
  sequenceEditor.results();recordEdit();
 }
 

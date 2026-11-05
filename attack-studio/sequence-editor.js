@@ -1,4 +1,5 @@
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261105-combat-v2';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261105-combat-compat';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261105-combat-compat';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -45,7 +46,8 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
     if(sim.hitResults){const table=el('table');const head=el('tr');for(const title of ['Hit','Expected','Actual','Result'])head.append(el('th',title));table.append(head);
       sim.hitResults.forEach((r,i)=>{const row=el('tr');for(const value of [i+1,'contact + '+r.offset,r.frame??'—',r.result+(r.reason?' · '+r.reason:'')])row.append(el('td',String(value)));table.append(row);});output.append(table);
     }else{const p=el('p',sim.events.at(-1)?.text||'Run a test to see the result.');output.append(p);}
-    const warning=el('p',getAttack().hitEvents?'Version 2 sequence: download the project for Arena import. Damage is per hit; ordinary base damage and hit-limit fields do not apply.':'Legacy attack: advanced reaction choreography may differ in Arena.');warning.className='hint';output.append(warning);
+    const diagnostics=el('section');diagnostics.setAttribute('aria-label','Attack compatibility and test checks');diagnostics.append(el('h3','Compatibility & test checks'));
+    const list=el('ul');for(const finding of attackDiagnostics(getAttack(),sim)){const item=el('li');item.dataset.diagnostic=finding.code;item.append(el('strong',finding.level==='warning'?'Check: ':'Note: '),el('span',finding.message+' '+finding.action));list.append(item);}diagnostics.append(list);output.append(diagnostics);
   }
   render();return {render,results};
 }

@@ -61,6 +61,7 @@ export function sequenceOpportunities(attack,state,age,overlap,target) {
 export function applyPulseReaction(target,event,direction,frame) {
   if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;}
   if(event.reaction==='none')return;
+  target.legacyMotion=null;
   target.juggleHits=(target.juggleHits||0)+1;
   if(target.juggleHits>=SEQUENCE_LIMITS.hits){target.juggleLocked=true;event={...event,reaction:'knockback',height:0,knockback:30,frames:15};}
   target.pulseMotion={start:frame,x:target.x,y:target.y,direction,event:structuredClone(event)};

@@ -1,5 +1,5 @@
-import {TREE_KEY,validateTree} from './skill-tree-model.js?v=20261105-combat-v2';
-import {freshAttack,validateAttack} from './combat-model.js?v=20261105-combat-v2';
+import {TREE_KEY,validateTree} from './skill-tree-model.js?v=20261105-combat-compat';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261105-combat-compat';
 // Tree attacks are independent copies. Explicit save updates only the chosen node.
 export function connectTreeEditor({effects,open,current,status}){
  const id=new URLSearchParams(location.search).get('treeNode');if(!id)return;

@@ -1,7 +1,9 @@
-import {pathSample} from './attack-motion.js?v=20261105-combat-v2';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-v2';
-import {validateHitSequence} from './hit-sequence.js?v=20261105-combat-v2';
-import {simulateSequence} from './sequence-preview.js?v=20261105-combat-v2';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261105-combat-compat';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261105-combat-compat';
+import {pathSample} from './attack-motion.js?v=20261105-combat-compat';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-compat';
+import {validateHitSequence} from './hit-sequence.js?v=20261105-combat-compat';
+import {simulateSequence} from './sequence-preview.js?v=20261105-combat-compat';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -75,9 +77,8 @@ export function simulate(a,attacker,target,options={}){
  function hurt(who,n){const absorb=Math.min(who.shield,n);who.shield-=absorb;const damage=Math.min(who.hp,n-absorb);who.hp-=damage;return damage;}
  for(let f=0;f<=end;f++){
   if(flight){
-   const t=clamp((f-flight.start)/a.flightFrames,0,1),who=flight.who;
-   who.x=flight.x+facing*(a.pushAxis==='y'?0:a.knockback)*t;
-   who.y=(flight.y||0)*(1-t)-4*(a.pushAxis==='x'?0:a.launchHeight)*t*(1-t);
+   const who=flight.who,sample=sampleLegacyMotion(flight,a,facing,f-flight.start);
+   const t=sample.done?1:0;who.x=sample.x;who.y=sample.y;
    if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');flight.wall=true;who.reactionWallFrame=f;}}
    if(t===1){who.y=0;who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
@@ -92,7 +93,7 @@ export function simulate(a,attacker,target,options={}){
   if(self.evading&&f===tm.startup)event(f,'Dodge window opened.');
   if(self.blocking&&f===tm.startup)event(f,'Block window opened.');
   if(incomingDamage>0&&f===incomingFrame&&f<other.stun)event(f,'Incoming attack interrupted — opponent is stunned.');
-  if(incomingDamage>0&&f===incomingFrame&&f>=other.stun){const blocked=self.blocking&&facing===side,evaded=self.evading;const damage=hurt(self,Math.round(incomingDamage*(evaded?0:blocked?1-a.blockPercent/100:1)));event(f,`${evaded?'Incoming attack evaded':blocked?'Incoming attack blocked':'Incoming attack hit'}: ${damage} damage to attacker.`);}
+  if(incomingDamage>0&&f===incomingFrame&&f>=other.stun){const blocked=self.blocking&&facing===side,evaded=self.evading;const damage=hurt(self,Math.round(incomingDamage*statusMultiplier(statuses.filter(s=>s.who===other&&f>=s.start&&f<s.end),'weaken')*(evaded?0:blocked?1-a.blockPercent/100:1)));event(f,`${evaded?'Incoming attack evaded':blocked?'Incoming attack blocked':'Incoming attack hit'}: ${damage} damage to attacker.`);}
   if(!['block','dodge'].includes(a.payload)&&active&&contact&&hits<a.hitLimit&&f-lastHit>=a.hitInterval&&recipient.hp>0){
    hits++;lastHit=f;let amount=magnitude(a,attacker);
    const guarding=['damage','push'].includes(a.payload)&&options.guard&&a.blockable&&a.delivery!=='self';
@@ -106,7 +107,7 @@ export function simulate(a,attacker,target,options={}){
    else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=f+a.shieldDuration;event(f,`Shield: ${amount} HP (refresh; does not stack).`);}
    else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${recipient.energy-old} energy.`);}
    if(!['push','block','dodge'].includes(a.payload)&&a.status!=='none'&&!guarding){
-    const duration=Math.max(1,Math.round(a.statusDuration*(['burn','poison','slow','weaken','stun'].includes(a.status)?(recipient===self?av:tv).resistance:1)));
+    const duration=statusDuration(a,(recipient===self?av:tv).resistance);
     // One status per cast/recipient; repeated hits refresh duration instead of multiplying ticks.
     const previous=statuses.find(s=>s.who===recipient);
     const status={who:recipient,kind:a.status,power:a.statusPower,start:f,end:f+duration,next:f+a.statusInterval};

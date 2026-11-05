@@ -1,9 +1,14 @@
 {
-  "release": "20261105-combat-v2",
+  "release": "20261105-combat-compat",
   "attackDefinitionVersions": [
     1,
     2
   ],
   "sequenceTransport": "project-download",
-  "cloudSequencePublishing": false
+  "classroomBankVersions": [
+    1,
+    2
+  ],
+  "cloudSequencePublishing": true,
+  "skillTreeSequencePublishing": false
 }

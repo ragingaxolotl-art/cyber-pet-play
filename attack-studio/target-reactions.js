@@ -1,5 +1,6 @@
 // Presentation only: reaction poses do not change combat hitboxes or damage.
-export const REACTION_TIMING = Object.freeze({wall:10,landing:12,fall:12,down:30,getUp:32});
+import {RECOVERY_TIMING} from './recovery-timing.js?v=20261105-combat-compat';
+export const REACTION_TIMING = RECOVERY_TIMING;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export function targetReaction(target,frame,{guard=false}={}){
  const direction=target.reactionDirection??1;

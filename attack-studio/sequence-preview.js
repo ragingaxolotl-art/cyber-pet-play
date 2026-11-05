@@ -1,6 +1,6 @@
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261105-combat-v2';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-v2';
-import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261105-combat-v2';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261105-combat-compat';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-compat';
+import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261105-combat-compat';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;

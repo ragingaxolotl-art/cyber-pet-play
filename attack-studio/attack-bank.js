@@ -2,13 +2,15 @@
 export const BANK_KEY='cyber-pet-attack-bank-v1';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}
 export function validateBank(bank,validate){
- if(bank?.format!=='cyber-pet-attack-bank'||bank.version!==1||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
+ if(bank?.format!=='cyber-pet-attack-bank'||![1,2].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
+ if(bank.version===1&&bank.attacks.some(a=>a.hitEvents))throw Error('Hit sequences require a version 2 attack bank.');
  const ids=new Set();for(const a of bank.attacks){validate(a);if(ids.has(a.id))throw Error('Duplicate saved attack ID.');ids.add(a.id);}return bank;
 }
 export function saveToBank(bank,attack,validate){
  const next=structuredClone(bank),copy=structuredClone(attack);validate(copy);
  const index=next.attacks.findIndex(a=>a.id===copy.id);
  if(index<0){if(next.attacks.length>=256)throw Error('The bank is full (256 attacks).');next.attacks.push(copy);}else next.attacks[index]=copy;
+ next.version=next.attacks.some(a=>a.hitEvents)?2:1;
  validateBank(next,validate);
  if(new TextEncoder().encode(JSON.stringify(next)).length>900000)throw Error('This bank is too large. Download a project backup before starting another bank.');
  return next;
@@ -19,7 +21,7 @@ export const SESSION_KEY='cyber-pet-attack-classroom-session-v1';
 const API='https://cyber-pet-classroom-settings.ragingaxolotl.chatgpt.site/attack-bank';
 export function createClassroomBank(validate,request=fetch){
  let session=null;
- const headers=()=>({'Content-Type':'application/json',...(session?{'X-Attack-Bank-Session':session.token}:{})});
+ const headers=()=>({'Content-Type':'application/json','X-Attack-Bank-Version':'2',...(session?{'X-Attack-Bank-Session':session.token}:{})});
  async function call(path='',options={}){
   const response=await request(API+path,{cache:'no-store',...options,headers:{...headers(),...options.headers}});
   const data=await response.json();if(!response.ok){if(response.status===401)session=null;const error=Error(data.error||'Classroom saving is unavailable. Keep this page open and download a project backup.');error.status=response.status;throw error;}return data;
@@ -30,7 +32,7 @@ export function createClassroomBank(validate,request=fetch){
   async connect(password){session=await call('/connect',{method:'POST',headers:{'X-Teacher-Password':password}});return session;},
   async disconnect(){try{if(session)await call('/disconnect',{method:'POST'});}finally{session=null;}},
   async read(){const data=await call();validateBank(data.bank,validate);return data;},
-  async write(bank,revision){validateBank(bank,validate);return call('',{method:'PUT',body:JSON.stringify({bank,revision})});}
+  async write(bank,revision){validateBank(bank,validate);if(bank.version===2){const capabilities=await call('/capabilities');if(!capabilities.bankVersions?.includes(2)||!capabilities.attackVersions?.includes(2)||capabilities.revisionProtection!==true)throw Error('This classroom server cannot safely save version 2 attacks yet. Your local recovery copy is preserved; download a project backup.');}return call('',{method:'PUT',body:JSON.stringify({bank,revision})});}
  };
 }
 // IndexedDB has a separate quota from localStorage. Keep legacy data until migration succeeds.
