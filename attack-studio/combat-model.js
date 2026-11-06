@@ -1,9 +1,9 @@
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261105-combat-compat';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261105-combat-compat';
-import {pathSample} from './attack-motion.js?v=20261105-combat-compat';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-compat';
-import {validateHitSequence} from './hit-sequence.js?v=20261105-combat-compat';
-import {simulateSequence} from './sequence-preview.js?v=20261105-combat-compat';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261105-combat-trees';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261105-combat-trees';
+import {pathSample} from './attack-motion.js?v=20261105-combat-trees';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-trees';
+import {validateHitSequence} from './hit-sequence.js?v=20261105-combat-trees';
+import {simulateSequence} from './sequence-preview.js?v=20261105-combat-trees';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];

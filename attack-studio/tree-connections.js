@@ -1,5 +1,5 @@
-import {ancestors} from './skill-tree-model.js?v=20261105-combat-compat';
-import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261105-combat-compat';
+import {ancestors} from './skill-tree-model.js?v=20261105-combat-trees';
+import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261105-combat-trees';
 
 // Connection edits return a copy and never delete attacks or their descendants.
 export function editConnection(tree, action, prerequisiteId, attackId) {

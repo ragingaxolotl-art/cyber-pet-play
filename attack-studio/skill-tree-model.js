@@ -1,7 +1,8 @@
 // Learning order is a directed acyclic graph. Edges point from prerequisite to attack.
 export const TREE_KEY='cyber-pet-attack-skill-tree-v1';
 export function validateTree(tree,effectIds,validateAttack){
- if(tree?.format!=='cyber-pet-attack-skill-tree'||tree.version!==1||!Array.isArray(tree.nodes)||tree.nodes.length>512)throw Error('Choose a version 1 attack tree with at most 512 attacks.');
+ if(tree?.format!=='cyber-pet-attack-skill-tree'||![1,2].includes(tree.version)||!Array.isArray(tree.nodes)||tree.nodes.length>512)throw Error('Choose a version 1 or 2 attack tree with at most 512 attacks.');
+ if(tree.version===1&&tree.nodes.some(n=>n?.attack?.hitEvents))throw Error('Hit sequences require a version 2 skill tree.');
  const ids=new Set();
  for(const n of tree.nodes){
   if(!n||typeof n.id!=='string'||!n.id||n.id.length>160||ids.has(n.id))throw Error('Attack IDs must be unique.');ids.add(n.id);
@@ -33,3 +34,5 @@ export function starterTree(effects,setups){
  let offset=0;for(const branch of [...new Set(tree.nodes.map(n=>n.branch))]){const lane={nodes:tree.nodes.filter(n=>n.branch===branch)};arrange(lane);for(const n of lane.nodes)n.y+=offset;offset+=Math.max(...lane.nodes.map(n=>n.y-offset))+244;}
  return tree;
 }
+
+export function treeVersion(tree){return tree.nodes.some(n=>n.attack?.hitEvents)?2:1;}

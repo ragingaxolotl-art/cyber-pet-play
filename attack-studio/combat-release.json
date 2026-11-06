@@ -1,5 +1,5 @@
 {
-  "release": "20261105-combat-compat",
+  "release": "20261105-combat-trees",
   "attackDefinitionVersions": [
     1,
     2
@@ -10,5 +10,9 @@
     2
   ],
   "cloudSequencePublishing": true,
-  "skillTreeSequencePublishing": false
+  "skillTreeSequencePublishing": true,
+  "skillTreeVersions": [
+    1,
+    2
+  ]
 }

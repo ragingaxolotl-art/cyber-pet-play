@@ -1,5 +1,5 @@
 // Local review helper: use the editor's crop, feet anchoring and pose timing rules.
-import {posePlayback} from './pose-timing.js?v=20261105-combat-compat';
+import {posePlayback} from './pose-timing.js?v=20261105-combat-trees';
 const images=new Map();
 export async function loadExample(reference){
  if(!reference||images.has(reference.url))return;

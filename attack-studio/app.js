@@ -1,5 +1,5 @@
-import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261105-combat-compat';
-import {readBackup} from './backups.js?v=20261105-combat-compat';
+import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261105-combat-trees';
+import {readBackup} from './backups.js?v=20261105-combat-trees';
 const $=id=>document.getElementById(id),ctx=$('canvas').getContext('2d');
 let catalog,examples,selected,mode='example',frame=1,playing=false,clock=0,lastTime=0,dirty=false,busy=false;
 let character={name:'',clips:{},mappings:{}},referenceTiming={},art=new Map(),refs=new Map();
