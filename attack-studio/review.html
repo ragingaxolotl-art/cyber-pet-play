@@ -1,6 +1,6 @@
 <!doctype html><meta charset="utf-8"><title>Attack tuning review</title><style>body{background:#101820;color:#e8f0f5;font:14px system-ui;margin:16px}header{position:sticky;top:0;background:#101820;padding:10px;z-index:1}button,input{padding:8px;margin-right:8px}main{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}article{background:#1a2838;padding:12px;border-radius:8px}canvas{width:100%;background:#0d1520}p{min-height:34px}output{color:#dce993}h2{font-size:16px}</style><header><h1>Attack tuning review · Earth spinning effects</h1><button id="play">Play all</button><button id="reset">Reset</button><label>Frame <input id="frame" type="range" min="0" max="270" value="0"></label><output id="progress">Ready · 0 completed playbacks</output></header><main id="cards"></main><script type="module">
-import {shapePoints} from './hitbox-shapes.js';
-import {loadExample,drawExample,reviewPose} from './review-example.js';
+import {shapePoints} from './hitbox-shapes.js?v=20261106-hitboxes';
+import {loadExample,drawExample,reviewPose} from './review-example.js?v=20261106-hitboxes';
 import {simulate,defaultStats} from './combat-model.js?v=20261024-stun-interrupt';import {visualFrame,pathSample,visualOpacity} from './attack-motion.js?v=20261024-review-support2';
 const examples=(await (await fetch('vfx-library.json')).json()).examples;
 const rows=await (await fetch('review-batch.json',{cache:'no-store'})).json();let frame=0,playing=false,last=0,elapsed=0,completed=0;

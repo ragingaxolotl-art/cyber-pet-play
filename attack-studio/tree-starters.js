@@ -1,4 +1,4 @@
-import {trimEdgeDetails} from './tree-paths.js?v=20261106-recovery';
+import {trimEdgeDetails} from './tree-paths.js?v=20261106-hitboxes';
 export function setStarter(tree,id,enabled) {
   const next=structuredClone(tree),node=next.nodes.find(n=>n.id===id);
   if(!node)throw Error('Choose an attack to put in the starter bank.');

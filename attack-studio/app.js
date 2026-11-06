@@ -1,5 +1,5 @@
-import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261106-recovery';
-import {readBackup} from './backups.js?v=20261106-recovery';
+import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261106-hitboxes';
+import {readBackup} from './backups.js?v=20261106-hitboxes';
 const $=id=>document.getElementById(id),ctx=$('canvas').getContext('2d');
 let catalog,examples,selected,mode='example',frame=1,playing=false,clock=0,lastTime=0,dirty=false,busy=false;
 let character={name:'',clips:{},mappings:{}},referenceTiming={},art=new Map(),refs=new Map();

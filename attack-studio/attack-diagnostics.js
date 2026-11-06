@@ -2,6 +2,11 @@
 export function attackDiagnostics(attack,simulation=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.hitboxGroups){
+  const boxes=attack.hitboxGroups.reduce((n,g)=>n+g.boxes.length,0);
+  add('group-hits','info',`${boxes} boxes in ${attack.hitboxGroups.length} hit group(s). Boxes in one group share hit limits; separate groups each apply full attack damage.`, 'Edit limits in the group inspector. Overlapping independent groups can deal damage on the same frame.');
+  add('group-transfer','info','Multiple hitboxes require a version 3 project, bank or skill tree.','Use the updated Studio and Arena. Earlier versions cannot play this definition.');
+ }
  if(attack.hitEvents){
   add('sequence-transfer','info','Save this sequence locally or to the upgraded classroom bank after teacher sign-in.','For Arena, download the project and use Open attack design. Version 2 skill trees can also be downloaded from Studio and opened in Arena.');
   add('sequence-damage','info','Damage is authored per hit; base damage, stat scaling and ordinary hit-limit settings do not apply.','Edit damage and reactions in the selected-hit inspector.');

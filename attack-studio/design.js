@@ -1,15 +1,17 @@
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261106-recovery';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261106-recovery';
-import {openReviewedAttack} from './reviewed-attacks.js?v=20261106-recovery';
-import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261106-recovery';
-import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261106-recovery';
-import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261106-recovery';
-import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261106-recovery';
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261106-recovery';
-import {installAttackBank} from './attack-bank.js?v=20261106-recovery';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261106-recovery';
-import {EditHistory} from './edit-history.js?v=20261106-recovery';
-import {installSequenceEditor} from './sequence-editor.js?v=20261106-recovery';
+import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261106-hitboxes';
+import {attacksVersion} from './attack-format.js?v=20261106-hitboxes';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261106-hitboxes';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261106-hitboxes';
+import {openReviewedAttack} from './reviewed-attacks.js?v=20261106-hitboxes';
+import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261106-hitboxes';
+import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261106-hitboxes';
+import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261106-hitboxes';
+import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261106-hitboxes';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261106-hitboxes';
+import {installAttackBank} from './attack-bank.js?v=20261106-hitboxes';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261106-hitboxes';
+import {EditHistory} from './edit-history.js?v=20261106-hitboxes';
+import {installSequenceEditor} from './sequence-editor.js?v=20261106-hitboxes';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
@@ -49,10 +51,14 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  for(const [key,title,max] of [['recovery','Recovery',180],['cooldown','Cooldown',900],['hitLimit','Maximum hits per cast',10],['hitInterval','Frames between hits',300]])field($('timing'),title,a,key,'number',null,['active','hitLimit','hitInterval'].includes(key)?1:0,max);
  field($('hitbox'),a.impactTrigger==='contact'?'Contact detection starts at frame':'Damage / effect starts at frame',a,'startup','number',null,0,180);
  field($('hitbox'),'Damage / effect lasts (frames)',a,'active','number',null,1,300);
+ if(!a.hitboxGroups){
  field($('hitbox'),'Hitbox shape',a.box,'shape','select',[['rectangle','Rectangle'],['ellipse','Oval / circle'],['diamond','Diamond'],['triangle','Forward triangle']]);
  for(const [key,title,min,max] of [['x','Forward offset',-500,500],['y','Vertical offset',-500,500],['w','Width',1,500],['h','Height',1,500]])field($('hitbox'),title,a.box,key,'number',null,min,max);
+ }
+ renderHitboxEditor({root:$('hitbox'),attack:a,status,commit:(next,edited=true)=>{if(next.hitboxGroups)a.hitboxGroups=next.hitboxGroups;else{delete a.hitboxGroups;Object.assign(a,{box:next.box,hitLimit:next.hitLimit,hitInterval:next.hitInterval});}if(edited)changed();refresh();}});
  field($('hitbox'),'Projectile px / frame',a,'projectileSpeed','number',null,0,12,.25);
  const s=$('statusFields');field(s,'Secondary status',a,'status','select',['none','burn','poison','regen','slow','haste','weaken','stun']);field(s,'Tick amount / modifier %',a,'statusPower','number',null,0,100);field(s,'Status duration (frames)',a,'statusDuration','number',null,1,900);field(s,'Tick interval (frames)',a,'statusInterval','number',null,1,300);field(s,'Shield lifetime (frames)',a,'shieldDuration','number',null,1,900);
+ if(a.hitboxGroups)for(const key of ['hitLimit','hitInterval']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Edit these settings in the selected hit group.';}}
  if(a.hitEvents)for(const key of ['base','coefficient','knockback','launchHeight','flightFrames','hitLimit','hitInterval','active','wallSlam','floorSlam','payload','delivery','status','impactTrigger']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Controlled by the Hit sequence editor; return to ordinary projectile to edit this.';}}
  $('tags').value=a.tags.join(', ');$('notes').value=a.notes;
 }
@@ -98,7 +104,7 @@ function draw(){if(!simulation)return;const state=simulation.frames[frame],a=att
  if($('showBoxes').checked&&index===layerIndex){ctx.strokeStyle='#b7f3ce';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);ctx.stroke();}
  });
  if(!sprite(reference,0,options.facing,Math.min(.999,progress),poseOrder))mannequin(0,'#a6d6bd');
- if($('showBoxes').checked){drawBox({x:state.target.x-14,y:(state.target.y||0)-60,w:28,h:60},'#78b9ff',true);drawBox(state.box,state.active?'#ffba78':'#7e6b60',state.active);ctx.fillStyle='#ffba78';for(const h of resizeHandles(state.box))ctx.fillRect(h.x-2,h.y-2,4,4);}
+ if($('showBoxes').checked){drawBox({x:state.target.x-14,y:(state.target.y||0)-60,w:28,h:60},'#78b9ff',true);if(state.boxes){for(const box of state.boxes){drawBox(box,box.boxId===selectedHitbox()?'#ffe8a3':'#ffba78',state.active);if(box.boxId===selectedHitbox()){ctx.fillStyle='#ffe8a3';for(const h of resizeHandles(box))ctx.fillRect(h.x-2,h.y-2,4,4);}}}else{drawBox(state.box,state.active?'#ffba78':'#7e6b60',state.active);ctx.fillStyle='#ffba78';for(const h of resizeHandles(state.box))ctx.fillRect(h.x-2,h.y-2,4,4);}}
  if(state.self.evading){ctx.strokeStyle='#c7f7ff';ctx.setLineDash([3,3]);ctx.strokeRect(-15,-64,30,66);ctx.setLineDash([]);}
  if(state.self.blocking){ctx.strokeStyle='#b7f3ce';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-32,37,-Math.PI/2,Math.PI/2,options.facing<0);ctx.stroke();}
  ctx.restore();ctx.font='12px system-ui';ctx.fillStyle='#a4b5c7';ctx.fillText('ATTACKER',115,430);ctx.fillText(a.delivery==='ally'?'ALLY TARGET':'TEST TARGET',Math.max(15,Math.min(850,150+state.target.x*3-32)),430);
@@ -122,10 +128,17 @@ $('tags').onchange=()=>{const old=attack().tags;attack().tags=$('tags').value.sp
 $('save').onclick=()=>{try{validateDesign(project,ids);localStorage.setItem(storageKey,JSON.stringify(project));localStorage.setItem(storageKey+'-recovery',JSON.stringify(project));dirty=false;$('saveState').textContent='Workspace saved in this browser';status('Saved on this device. Download a project file for a portable backup.');}catch(e){status('Could not save: '+e.message+' Download a project file instead.');}};
 $('download').onclick=()=>{try{validateDesign(project,ids);download('cyber-pet-attack-designs.json',project);dirty=false;status('Project download started. It contains definitions and VFX references; reopen it here.');}catch(e){status(e.message);}};
 $('open').onclick=()=>{$('file').value='';$('file').click();};$('file').onchange=async()=>{const f=$('file').files[0];if(!f)return;try{if(f.size>4*1024*1024)throw Error('Choose a project under 4 MiB.');const candidate=validateDesign(JSON.parse(await f.text()),ids);if(dirty&&!confirm('Replace unsaved edits with this project?'))return;project=candidate;history?.reset(project);connectTestBench();installSandbox();selected=project.attacks[0].id;frame=0;playing=false;dirty=false;refresh();status('Opened attack designs. Save on device to keep this project here.');}catch(e){status(e.message);}};
-$('export').onclick=()=>{try{validateDesign(project,ids);const used=[...new Set(project.attacks.flatMap(a=>a.visuals.map(v=>v.effectId)))];const eligibility=project.attacks.map(a=>({id:a.id,required_animation:a.motion,requires_exact_saved_reviewed_art:true,legacy_catalog_compatible:!a.hitEvents&&MOTIONS.slice(0,13).includes(a.motion)}));download('cyber-pet-attacks-for-review.json',{format:'cyber-pet-combat-review',version:1,state:'draft-not-runtime',project,assets:used.map(id=>effectMap.get(id)),requirements:eligibility,balance:BALANCE,notes:['Version 2 contact sequences are supported by the upgraded Arena. Legacy reaction choreography still needs compatibility review.','Existing teacher catalog accepts at most 32 attacks and exact attack-animation slots.','VFX motion tags never grant student artwork eligibility.','Example character artwork is view-only and is not included.']});status('Review package downloaded. Nothing was uploaded or added to student options.');}catch(e){status(e.message);}};
+$('export').onclick=()=>{try{validateDesign(project,ids);const used=[...new Set(project.attacks.flatMap(a=>a.visuals.map(v=>v.effectId)))];const eligibility=project.attacks.map(a=>({id:a.id,required_animation:a.motion,requires_exact_saved_reviewed_art:true,legacy_catalog_compatible:!a.hitboxGroups&&!a.hitEvents&&MOTIONS.slice(0,13).includes(a.motion)}));download('cyber-pet-attacks-for-review.json',{format:'cyber-pet-combat-review',version:1,state:'draft-not-runtime',project,assets:used.map(id=>effectMap.get(id)),requirements:eligibility,balance:BALANCE,notes:['Version 2 contact sequences are supported by the upgraded Arena. Legacy reaction choreography still needs compatibility review.','Existing teacher catalog accepts at most 32 attacks and exact attack-animation slots.','VFX motion tags never grant student artwork eligibility.','Example character artwork is view-only and is not included.']});status('Review package downloaded. Nothing was uploaded or added to student options.');}catch(e){status(e.message);}};
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 function point(e){const r=canvas.getBoundingClientRect();return {x:((e.clientX-r.left)*960/r.width-150)/3,y:((e.clientY-r.top)*480/r.height-375)/3};}
 canvas.onpointerdown=e=>{if(editMode==='target'){playing=false;frame=0;drag={kind:'target'};canvas.setPointerCapture(e.pointerId);moveTarget(e);return;}if(editMode==='path'){playing=false;const p=point(e);pathDraft=[{x:Math.max(-500,Math.min(500,p.x*options.facing)),y:Math.max(-500,Math.min(500,p.y))}];canvas.setPointerCapture(e.pointerId);draw();return;}if(!$('showBoxes').checked)return;const p=point(e),a=attack(),v=a.visuals[layerIndex],box=simulation.frames[frame].box,travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,frame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0,path=pathSample(a,frame);
+ if(a.hitboxGroups&&editMode==='hitbox'){
+  const boxes=simulation.frames[frame].boxes||[],current=boxes.find(b=>b.boxId===selectedHitbox());
+  const handle=current&&resizeHandles(current).find(h=>Math.abs(p.x-h.x)<5&&Math.abs(p.y-h.y)<5);
+  const chosen=handle?current:[...boxes].reverse().find(b=>containsPoint(b,p));
+  if(chosen){selectHitbox(chosen.boxId);const authored=a.hitboxGroups.flatMap(g=>g.boxes).find(b=>b.id===chosen.boxId);drag={kind:handle?.kind||'box',p,box:{...authored},groupBoxId:authored.id};playing=false;canvas.setPointerCapture(e.pointerId);renderSettings();draw();}
+  return;
+ }
  const handle=resizeHandles(box).find(h=>Math.abs(p.x-h.x)<5&&Math.abs(p.y-h.y)<5);
  if(editMode==='hitbox'&&handle)drag={kind:handle.kind,p,box:{...a.box}};
  else if(editMode==='effect'&&v&&Math.hypot(p.x-(v.x+travel+path.x)*options.facing,p.y-v.y-path.y)<8)drag={kind:'layer',p,x:v.x,y:v.y};
@@ -133,9 +146,10 @@ canvas.onpointerdown=e=>{if(editMode==='target'){playing=false;frame=0;drag={kin
  if(drag){playing=false;canvas.setPointerCapture(e.pointerId);}};
 function moveTarget(e){const p=point(e),x=Math.max(-35,Math.min(245,Math.round(p.x)));options.distance=Math.abs(x);options.targetSide=x<0?-1:1;options.targetHeight=Math.max(0,Math.min(60,Math.round(-p.y)));dirty=true;recompute();}
 canvas.onpointermove=e=>{if(drag?.kind==='target'){moveTarget(e);return;}if(pathDraft){const p=point(e),next={x:Math.max(-500,Math.min(500,p.x*options.facing)),y:Math.max(-500,Math.min(500,p.y))};if(Math.hypot(next.x-pathDraft.at(-1).x,next.y-pathDraft.at(-1).y)>=3){if(pathDraft.length<64)pathDraft.push(next);else pathDraft[pathDraft.length-1]=next;}draw();return;}if(!drag)return;const p=point(e),dx=Math.round(p.x-drag.p.x),dy=Math.round(p.y-drag.p.y),a=attack(),bound=(v,min,max)=>Math.max(min,Math.min(max,v));
+ const editedBox=drag.groupBoxId?a.hitboxGroups.flatMap(g=>g.boxes).find(b=>b.id===drag.groupBoxId):a.box;
  if(drag.kind==='layer'){a.visuals[layerIndex].x=bound(drag.x+dx*options.facing,-500,500);a.visuals[layerIndex].y=bound(drag.y+dy,-500,500);}
- else if(drag.kind==='box'){a.box.x=bound(drag.box.x+dx*options.facing,-500,500);a.box.y=bound(drag.box.y+dy,-500,500);}
- else a.box=resizeHitbox(drag.box,dx,dy,drag.kind,options.facing);
+ else if(drag.kind==='box'){editedBox.x=bound(drag.box.x+dx*options.facing,-500,500);editedBox.y=bound(drag.box.y+dy,-500,500);}
+ else Object.assign(editedBox,resizeHitbox(drag.box,dx,dy,drag.kind,options.facing));
  mark();recompute();};canvas.onpointerup=()=>{if(pathDraft){if(pathDraft.length>=2){attack().motionPath=pathDraft;mark();status('Path saved. Set travel time, then scrub and mark impact.');}pathDraft=null;editMode='hitbox';recompute();}if(drag){if(drag.kind==='target')installSandbox();drag=null;renderSettings();renderLayers();}};canvas.onpointercancel=()=>{pathDraft=null;drag=null;draw();};
 function tick(now){const delta=Math.min((now-last)/1000,.1);last=now;if(playing){elapsed+=delta*60*Number($('playback').value);while(elapsed>=1){elapsed--;frame++;if(frame>=simulation.frames.length-1){frame=simulation.frames.length-1;playing=false;break;}}draw();}requestAnimationFrame(tick);}
 try{const response=await fetch('vfx-library.json',{cache:'no-store'});if(!response.ok)throw Error('Library index unavailable. Run build_library.py.');library=await response.json();effectMap=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effectMap.keys());$('total').textContent=library.effects.length;
@@ -209,7 +223,7 @@ function openTunedAttack(effectId){try{const setup=reviewedSetups.get(effectId);
 $('openTunedAttack').onclick=()=>openTunedAttack($('tunedAttack').value);
 
 function recordEdit(){
- project.version=project.attacks.some(a=>a.hitEvents)?2:1;
+ project.version=attacksVersion(project.attacks);
  if(!history||restoringHistory)return;
  const key=drag?'drag:'+drag.kind:document.activeElement?.dataset.field||'';
  if(history.record(project,key?selected+':'+key:'')){

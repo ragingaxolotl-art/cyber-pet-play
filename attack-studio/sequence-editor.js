@@ -1,5 +1,5 @@
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261106-recovery';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261106-recovery';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261106-hitboxes';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261106-hitboxes';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -8,7 +8,7 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
     const a=getAttack();root.replaceChildren();
     root.append(el('h2','Hit sequence'),el('p','Contact starts the clock. Each hit has its own damage, timing and reaction. Up to ten hits; no unlimited suspension.'));
     if(!a.hitEvents){
-      const create=el('button','Create five-hit juggling projectile');create.type='button';
+      const create=el('button','Create five-hit juggling projectile');create.type='button';create.disabled=!!a.hitboxGroups;if(a.hitboxGroups)create.title='Return to one hitbox before creating a contact sequence.';
       create.onclick=()=>mutate(n=>{Object.assign(n,{behaviorVersion:2,delivery:'projectile',payload:'damage',status:'none',impactTrigger:'contact',projectileMode:'attached',hitEvents:jugglePreset(),active:21,coefficient:0});});
       root.append(create);return;
     }
