@@ -1,9 +1,10 @@
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261105-combat-trees';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261105-combat-trees';
-import {pathSample} from './attack-motion.js?v=20261105-combat-trees';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261105-combat-trees';
-import {validateHitSequence} from './hit-sequence.js?v=20261105-combat-trees';
-import {simulateSequence} from './sequence-preview.js?v=20261105-combat-trees';
+import {legacyRecoveryEnd} from './recovery-timing.js?v=20261106-recovery';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261106-recovery';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261106-recovery';
+import {pathSample} from './attack-motion.js?v=20261106-recovery';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261106-recovery';
+import {validateHitSequence} from './hit-sequence.js?v=20261106-recovery';
+import {simulateSequence} from './sequence-preview.js?v=20261106-recovery';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -70,6 +71,7 @@ export function simulate(a,attacker,target,options={}){
  function event(frame,text){events.push({frame,text});}
  function heal(who,n){const old=who.hp;who.hp=Math.min(who.maxHP,who.hp+n);return who.hp-old;}
  function startReaction(who,f){
+  who.stun=Math.max(who.stun,legacyRecoveryEnd(who,a,f));
   who.reactionHitFrame=f;who.reactionDirection=facing;who.reactionWallFrame=null;who.reactionLandFrame=null;
   who.reactionLaunched=(a.pushAxis!=='x'&&a.launchHeight>0)||who.y<0;who.reactionInFlight=true;who.reactionFlightFrames=a.flightFrames;who.reactionKnockedDown=false;
   end=Math.max(end,f+Math.max(18,a.hitstun));
@@ -79,7 +81,7 @@ export function simulate(a,attacker,target,options={}){
   if(flight){
    const who=flight.who,sample=sampleLegacyMotion(flight,a,facing,f-flight.start);
    const t=sample.done?1:0;who.x=sample.x;who.y=sample.y;
-   if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');flight.wall=true;who.reactionWallFrame=f;}}
+   if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');who.stun=Math.max(who.stun,legacyRecoveryEnd(flight,a,flight.start,true));flight.wall=true;who.reactionWallFrame=f;}}
    if(t===1){who.y=0;who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
   for(const who of [self,other])if(who.shield&&f>=who.shieldUntil){who.shield=0;event(f,'Shield expired.');}
@@ -120,6 +122,7 @@ export function simulate(a,attacker,target,options={}){
    if(['burn','poison','regen'].includes(s.kind)){const n=s.kind==='regen'?heal(s.who,s.power):hurt(s.who,s.power);event(f,`${s.kind} tick: ${n} ${s.kind==='regen'?'healing':'damage'}.`);}s.next+=a.statusInterval;
   }
   const modifiers=statuses.filter(s=>f>=s.start&&f<s.end).map(s=>({recipient:s.who===self?'self':'target',kind:s.kind,power:s.power,remaining:s.end-f}));
+  for(const who of [self,other])who.canAct=who.hp>0&&f>=who.stun;
   frames.push({frame:f,active,box,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
  }
  if(cast&&!hits&&!['block','dodge'].includes(a.payload))event(contactMode?contactDeadline:tm.startup+tm.active,contactMode?'Miss — no opponent contact before travel timeout.':'Miss — no hitbox contact during the active window.');

@@ -7,3 +7,7 @@ export function sampleLegacyMotion(origin,attack,direction,elapsed,minX=-Infinit
  return {x:Math.max(minX,Math.min(maxX,rawX)),y:origin.y*(1-progress)-4*height*progress*(1-progress),
   wall:rawX<=minX||rawX>=maxX,done:progress===1};
 }
+
+export function hasLegacyMotion(target,attack) {
+ return target.y<0||(attack.pushAxis!=='y'&&attack.knockback>0)||(attack.pushAxis!=='x'&&attack.launchHeight>0);
+}

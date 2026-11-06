@@ -1,9 +1,9 @@
-import {installConnections} from './tree-connections.js?v=20261105-combat-trees';
-import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261105-combat-trees';
-import {installTreeGallery} from './tree-gallery.js?v=20261105-combat-trees';
-import {installStarters,setStarter} from './tree-starters.js?v=20261105-combat-trees';
-import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261105-combat-trees';
-import {validateAttack} from './combat-model.js?v=20261105-combat-trees';
+import {installConnections} from './tree-connections.js?v=20261106-recovery';
+import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261106-recovery';
+import {installTreeGallery} from './tree-gallery.js?v=20261106-recovery';
+import {installStarters,setStarter} from './tree-starters.js?v=20261106-recovery';
+import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261106-recovery';
+import {validateAttack} from './combat-model.js?v=20261106-recovery';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let connections,paths,starters;const history=[];
