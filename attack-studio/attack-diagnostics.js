@@ -2,10 +2,15 @@
 export function attackDiagnostics(attack,simulation=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.defenseWindows){
+  add('armor-transfer','info','Armor windows require a version 4 project, bank or skill tree.','Use the updated Studio and Arena; classroom saving checks server compatibility before writing.');
+  add('armor-behavior','info','Armor takes damage and prevents ordinary hit reactions during its active frames. Status effects still apply; defeat ends the move.','Edit timing and hit limits in Armor windows. Overlapping windows consume their budgets in list order.');
+  if(attack.defenseWindows.some(w=>w.against!=='all'&&w.against!=='melee'))add('armor-probe','info','The Studio incoming-hit probe is melee; it cannot demonstrate projectile-only or area-only armor.','Use Arena’s two-attack comparison to test the matching attack type.');
+ }
  if(attack.hitboxGroups){
   const boxes=attack.hitboxGroups.reduce((n,g)=>n+g.boxes.length,0);
   if(attack.hitEvents)add('group-hits','info','Each sequence hit uses its assigned group and deals damage once. Group hit-limit settings do not add extra sequence hits.','Edit per-hit damage and group assignments in the hit inspector.');else add('group-hits','info',`${boxes} boxes in ${attack.hitboxGroups.length} hit group(s). Boxes in one group share hit limits; separate groups each apply full attack damage.`, 'Edit limits in the group inspector. Overlapping independent groups can deal damage on the same frame.');
-  add('group-transfer','info','Multiple hitboxes require a version 3 project, bank or skill tree.','Use the updated Studio and Arena. Earlier versions cannot play this definition.');
+  add('group-transfer','info','Multiple hitboxes require at least a version 3 project, bank or skill tree.','Use the updated Studio and Arena. Earlier versions cannot play this definition.');
  }
  if(attack.hitEvents){
   add('sequence-transfer','info','Save this sequence locally or to the upgraded classroom bank after teacher sign-in.','For Arena, download the project and use Open attack design. Version 2 skill trees can also be downloaded from Studio and opened in Arena.');

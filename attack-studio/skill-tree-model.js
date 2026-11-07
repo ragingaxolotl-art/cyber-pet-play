@@ -1,8 +1,8 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261106-contact-groups';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261107-armor';
 // Learning order is a directed acyclic graph. Edges point from prerequisite to attack.
 export const TREE_KEY='cyber-pet-attack-skill-tree-v1';
 export function validateTree(tree,effectIds,validateAttack){
- if(tree?.format!=='cyber-pet-attack-skill-tree'||![1,2,3].includes(tree.version)||!Array.isArray(tree.nodes)||tree.nodes.length>512)throw Error('Choose a version 1, 2 or 3 attack tree with at most 512 attacks.');
+ if(tree?.format!=='cyber-pet-attack-skill-tree'||![1,2,3,4].includes(tree.version)||!Array.isArray(tree.nodes)||tree.nodes.length>512)throw Error('Choose a version 1, 2, 3 or 4 attack tree with at most 512 attacks.');
  requireGroupVersion(tree.version,tree.nodes.map(n=>n?.attack));
  if(tree.version===1&&tree.nodes.some(n=>n?.attack?.hitEvents))throw Error('Hit sequences require a version 2 skill tree.');
  const ids=new Set();

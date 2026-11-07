@@ -1,5 +1,5 @@
 {
-  "release": "20261106-contact-groups",
+  "release": "20261107-armor",
   "attackDefinitionVersions": [
     1,
     2,
@@ -26,6 +26,14 @@
     "hit-sequences",
     "visual-effects",
     "movement-path",
-    "block-dodge"
+    "block-dodge",
+    "armor"
+  ],
+  "armorWindows": true,
+  "attackContainerVersions": [
+    1,
+    2,
+    3,
+    4
   ]
 }

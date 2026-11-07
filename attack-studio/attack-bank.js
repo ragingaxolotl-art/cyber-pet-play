@@ -1,9 +1,9 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261106-contact-groups';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261107-armor';
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}
 export function validateBank(bank,validate){
- if(bank?.format!=='cyber-pet-attack-bank'||![1,2,3].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
+ if(bank?.format!=='cyber-pet-attack-bank'||![1,2,3,4].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
  requireGroupVersion(bank.version,bank.attacks);
  if(bank.version===1&&bank.attacks.some(a=>a.hitEvents))throw Error('Hit sequences require a version 2 attack bank.');
  const ids=new Set();for(const a of bank.attacks){validate(a);if(ids.has(a.id))throw Error('Duplicate saved attack ID.');ids.add(a.id);}return bank;
@@ -33,7 +33,7 @@ export function createClassroomBank(validate,request=fetch){
   connected:()=>!!session&&session.expires>Date.now()/1000,
   async connect(password){session=await call('/connect',{method:'POST',headers:{'X-Teacher-Password':password}});return session;},
   async disconnect(){try{if(session)await call('/disconnect',{method:'POST'});}finally{session=null;}},
-  async read(){const capabilities=await call('/capabilities');const version=capabilities.bankVersions?.includes(3)?'3':'2';const data=await call('',{headers:{'X-Attack-Bank-Version':version}});validateBank(data.bank,validate);return data;},
+  async read(){const capabilities=await call('/capabilities');const version=capabilities.bankVersions?.includes(4)?'4':capabilities.bankVersions?.includes(3)?'3':'2';const data=await call('',{headers:{'X-Attack-Bank-Version':version}});validateBank(data.bank,validate);return data;},
   async write(bank,revision){validateBank(bank,validate);if(bank.version>=2){const capabilities=await call('/capabilities');if(bank.attacks.some(a=>a.hitEvents&&a.hitboxGroups)&&capabilities.groupedSequences!==true)throw Error('This server does not yet support hitbox groups in sequences. Download a project backup; your local copy is preserved.');if(!capabilities.bankVersions?.includes(bank.version)||!capabilities.attackVersions?.includes(bank.version)||capabilities.revisionProtection!==true)throw Error(`This classroom server cannot safely save version ${bank.version} attacks yet. Your local recovery copy is preserved; download a project backup.`);}return call('',{method:'PUT',headers:{'X-Attack-Bank-Version':String(Math.max(2,bank.version))},body:JSON.stringify({bank,revision})});}
  };
 }
