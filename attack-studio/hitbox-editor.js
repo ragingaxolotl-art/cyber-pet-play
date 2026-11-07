@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261106-hitboxes';
+import {validateAttack} from './combat-model.js?v=20261106-timeline';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const unique=prefix=>prefix+crypto.randomUUID().replaceAll('-','');
 let selectedBox=null;

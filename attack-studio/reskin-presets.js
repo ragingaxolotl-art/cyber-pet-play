@@ -1,5 +1,5 @@
-import {freshAttack,validateAttack} from './combat-model.js?v=20261106-hitboxes';
-import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261106-hitboxes';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261106-timeline';
+import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261106-timeline';
 // Editable starting balance, shared by matching elemental artwork. No elemental bonuses.
 export const RESKIN_PROFILES={
  block_side:{payload:'block',base:0,cost:10,scaling:'stamina',active:45,blockPercent:85,path:[[0,0],[0,0]]},

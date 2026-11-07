@@ -1,12 +1,12 @@
-import {requireGroupVersion} from './attack-format.js?v=20261106-hitboxes';
-import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261106-hitboxes';
-import {legacyRecoveryEnd} from './recovery-timing.js?v=20261106-hitboxes';
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261106-hitboxes';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261106-hitboxes';
-import {pathSample} from './attack-motion.js?v=20261106-hitboxes';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261106-hitboxes';
-import {validateHitSequence} from './hit-sequence.js?v=20261106-hitboxes';
-import {simulateSequence} from './sequence-preview.js?v=20261106-hitboxes';
+import {requireGroupVersion} from './attack-format.js?v=20261106-timeline';
+import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261106-timeline';
+import {legacyRecoveryEnd} from './recovery-timing.js?v=20261106-timeline';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261106-timeline';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261106-timeline';
+import {pathSample} from './attack-motion.js?v=20261106-timeline';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261106-timeline';
+import {validateHitSequence} from './hit-sequence.js?v=20261106-timeline';
+import {simulateSequence} from './sequence-preview.js?v=20261106-timeline';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];

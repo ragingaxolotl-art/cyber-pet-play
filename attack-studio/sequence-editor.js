@@ -1,5 +1,5 @@
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261106-hitboxes';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261106-hitboxes';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261106-timeline';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261106-timeline';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;

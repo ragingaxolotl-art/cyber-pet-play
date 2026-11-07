@@ -1,5 +1,5 @@
 {
-  "release": "20261106-hitboxes",
+  "release": "20261106-timeline",
   "attackDefinitionVersions": [
     1,
     2,
@@ -19,5 +19,11 @@
     3
   ],
   "multipleHitboxes": "timed-damage",
-  "groupSequenceSupport": false
+  "groupSequenceSupport": false,
+  "timelineTracks": [
+    "hitbox-groups",
+    "hit-sequences",
+    "visual-effects",
+    "movement-path"
+  ]
 }
