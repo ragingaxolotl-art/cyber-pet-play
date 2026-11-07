@@ -1,4 +1,4 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261107-armor';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261107-invulnerability';
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}
@@ -34,7 +34,7 @@ export function createClassroomBank(validate,request=fetch){
   async connect(password){session=await call('/connect',{method:'POST',headers:{'X-Teacher-Password':password}});return session;},
   async disconnect(){try{if(session)await call('/disconnect',{method:'POST'});}finally{session=null;}},
   async read(){const capabilities=await call('/capabilities');const version=capabilities.bankVersions?.includes(4)?'4':capabilities.bankVersions?.includes(3)?'3':'2';const data=await call('',{headers:{'X-Attack-Bank-Version':version}});validateBank(data.bank,validate);return data;},
-  async write(bank,revision){validateBank(bank,validate);if(bank.version>=2){const capabilities=await call('/capabilities');if(bank.attacks.some(a=>a.hitEvents&&a.hitboxGroups)&&capabilities.groupedSequences!==true)throw Error('This server does not yet support hitbox groups in sequences. Download a project backup; your local copy is preserved.');if(!capabilities.bankVersions?.includes(bank.version)||!capabilities.attackVersions?.includes(bank.version)||capabilities.revisionProtection!==true)throw Error(`This classroom server cannot safely save version ${bank.version} attacks yet. Your local recovery copy is preserved; download a project backup.`);}return call('',{method:'PUT',headers:{'X-Attack-Bank-Version':String(Math.max(2,bank.version))},body:JSON.stringify({bank,revision})});}
+  async write(bank,revision){validateBank(bank,validate);if(bank.version>=2){const capabilities=await call('/capabilities');if(bank.attacks.some(a=>a.defenseWindows?.some(w=>w.kind==='invulnerability'))&&!capabilities.defenseKinds?.includes('invulnerability'))throw Error('This server does not yet support invulnerability windows. Download a project backup; your local copy is preserved.');if(bank.attacks.some(a=>a.hitEvents&&a.hitboxGroups)&&capabilities.groupedSequences!==true)throw Error('This server does not yet support hitbox groups in sequences. Download a project backup; your local copy is preserved.');if(!capabilities.bankVersions?.includes(bank.version)||!capabilities.attackVersions?.includes(bank.version)||capabilities.revisionProtection!==true)throw Error(`This classroom server cannot safely save version ${bank.version} attacks yet. Your local recovery copy is preserved; download a project backup.`);}return call('',{method:'PUT',headers:{'X-Attack-Bank-Version':String(Math.max(2,bank.version))},body:JSON.stringify({bank,revision})});}
  };
 }
 // IndexedDB has a separate quota from localStorage. Keep legacy data until migration succeeds.

@@ -1,8 +1,8 @@
-import {createDefenseState,defenseSnapshot,claimArmor} from './defense-windows.js?v=20261107-armor';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261107-armor';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261107-armor';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261107-armor';
-import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261107-armor';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable} from './defense-windows.js?v=20261107-invulnerability';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261107-invulnerability';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261107-invulnerability';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261107-invulnerability';
+import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261107-invulnerability';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
@@ -25,7 +25,12 @@ export function simulateSequence(attack,attacker,target,options={}) {
     let incomingInterrupted=false;
     if(options.incomingDamage>0&&frame===(options.incomingFrame??30)){
       if(other.stun>frame)events.push({frame,text:'Incoming attack interrupted — opponent is stunned.'});
-      else {self.hp=Math.max(0,self.hp-options.incomingDamage);const castAlive=cast&&!state.cancelled&&frame<(state.contactFrame===null?tm.startup+600:state.contactFrame+sequenceDuration(attack)+tm.recovery);const armored=claimArmor(defenseSnapshot(castAlive?defenseCast:null,frame),{payload:'damage',delivery:'melee'});incomingInterrupted=!armored||self.hp<=0;events.push({frame,text:incomingInterrupted?'Incoming attack interrupted this sequence.':'Incoming attack armored; damage still applies.'});}
+      else {
+       const castAlive=cast&&!state.cancelled&&frame<(state.contactFrame===null?tm.startup+600:state.contactFrame+sequenceDuration(attack)+tm.recovery),defense=defenseSnapshot(castAlive?defenseCast:null,frame),incoming={payload:'damage',delivery:'melee'};
+       const invulnerable=isInvulnerable(defense,incoming),armored=!invulnerable&&claimArmor(defense,incoming);
+       self.hp=Math.max(0,self.hp-(invulnerable?0:options.incomingDamage));incomingInterrupted=(!invulnerable&&!armored)||self.hp<=0;
+       events.push({frame,text:invulnerable?'Incoming attack invulnerable; no damage.':incomingInterrupted?'Incoming attack interrupted this sequence.':'Incoming attack armored; damage still applies.'});
+      }
     }
     const active=cast&&frame>=tm.startup&&!state.cancelled&&(state.contactFrame===null||frame<state.contactFrame+sequenceDuration(attack));
     if(active){

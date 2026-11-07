@@ -3,9 +3,10 @@ export function attackDiagnostics(attack,simulation=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
  if(attack.defenseWindows){
-  add('armor-transfer','info','Armor windows require a version 4 project, bank or skill tree.','Use the updated Studio and Arena; classroom saving checks server compatibility before writing.');
-  add('armor-behavior','info','Armor takes damage and prevents ordinary hit reactions during its active frames. Status effects still apply; defeat ends the move.','Edit timing and hit limits in Armor windows. Overlapping windows consume their budgets in list order.');
-  if(attack.defenseWindows.some(w=>w.against!=='all'&&w.against!=='melee'))add('armor-probe','info','The Studio incoming-hit probe is melee; it cannot demonstrate projectile-only or area-only armor.','Use Arena’s two-attack comparison to test the matching attack type.');
+  if(attack.defenseWindows.some(w=>w.kind==='invulnerability'))add('invulnerability-behavior','info','Invulnerability prevents eligible damage, push reactions and statuses carried by those hits during its window. Existing status effects continue.','Choose attack types in Defense windows. Classroom saving requires a server that advertises invulnerability support.');
+  add('armor-transfer','info','Defense windows require a version 4 project, bank or skill tree.','Use the updated Studio and Arena; classroom saving checks server compatibility before writing.');
+  if(attack.defenseWindows.some(w=>w.kind==='armor'))add('armor-behavior','info','Armor takes damage and prevents ordinary hit reactions during its active frames. Status effects still apply; defeat ends the move.','Edit timing and hit limits in Armor windows. Overlapping windows consume their budgets in list order.');
+  if(attack.defenseWindows.some(w=>w.against!=='all'&&w.against!=='melee'))add('armor-probe','info','The Studio incoming-hit probe is melee; it cannot demonstrate projectile-only or area-only defense.','Use Arena’s two-attack comparison to test the matching attack type.');
  }
  if(attack.hitboxGroups){
   const boxes=attack.hitboxGroups.reduce((n,g)=>n+g.boxes.length,0);

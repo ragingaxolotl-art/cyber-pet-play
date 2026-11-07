@@ -1,5 +1,5 @@
 {
-  "release": "20261107-armor",
+  "release": "20261107-invulnerability",
   "attackDefinitionVersions": [
     1,
     2,
@@ -35,5 +35,9 @@
     2,
     3,
     4
+  ],
+  "defenseKinds": [
+    "armor",
+    "invulnerability"
   ]
 }
