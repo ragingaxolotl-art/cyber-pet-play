@@ -1,22 +1,25 @@
 {
-  "release": "20261107-invulnerability",
+  "release": "20261107-parry",
   "attackDefinitionVersions": [
     1,
     2,
-    3
+    3,
+    4
   ],
   "sequenceTransport": "project-download",
   "classroomBankVersions": [
     1,
     2,
-    3
+    3,
+    4
   ],
   "cloudSequencePublishing": true,
   "skillTreeSequencePublishing": true,
   "skillTreeVersions": [
     1,
     2,
-    3
+    3,
+    4
   ],
   "multipleHitboxes": "timed-damage-and-contact-sequences",
   "groupSequenceSupport": true,
@@ -38,6 +41,7 @@
   ],
   "defenseKinds": [
     "armor",
-    "invulnerability"
+    "invulnerability",
+    "parry"
   ]
 }

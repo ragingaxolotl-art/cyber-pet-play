@@ -1,13 +1,13 @@
-import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable} from './defense-windows.js?v=20261107-invulnerability';
-import {requireGroupVersion} from './attack-format.js?v=20261107-invulnerability';
-import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261107-invulnerability';
-import {legacyRecoveryEnd} from './recovery-timing.js?v=20261107-invulnerability';
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261107-invulnerability';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261107-invulnerability';
-import {pathSample} from './attack-motion.js?v=20261107-invulnerability';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261107-invulnerability';
-import {validateHitSequence} from './hit-sequence.js?v=20261107-invulnerability';
-import {simulateSequence} from './sequence-preview.js?v=20261107-invulnerability';
+import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261107-parry';
+import {requireGroupVersion} from './attack-format.js?v=20261107-parry';
+import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261107-parry';
+import {legacyRecoveryEnd} from './recovery-timing.js?v=20261107-parry';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261107-parry';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261107-parry';
+import {pathSample} from './attack-motion.js?v=20261107-parry';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261107-parry';
+import {validateHitSequence} from './hit-sequence.js?v=20261107-parry';
+import {simulateSequence} from './sequence-preview.js?v=20261107-parry';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -111,10 +111,11 @@ export function simulate(a,attacker,target,options={}){
   if(incomingDamage>0&&f===incomingFrame&&f>=other.stun){
    const blocked=self.blocking&&facing===side,evaded=self.evading;
    const castAlive=cast&&!interrupted&&f<((contactMode?(impactFrame??contactDeadline):tm.startup)+tm.active+tm.recovery),defense=defenseSnapshot(castAlive?defenseCast:null,f),incoming={payload:'damage',delivery:'melee'};
-   const invulnerable=isInvulnerable(defense,incoming),armored=!invulnerable&&!evaded&&!blocked&&claimArmor(defense,incoming);
-   const damage=hurt(self,Math.round(incomingDamage*statusMultiplier(statuses.filter(s=>s.who===other&&f>=s.start&&f<s.end),'weaken')*(invulnerable||evaded?0:blocked?1-a.blockPercent/100:1)));
-   if(!invulnerable&&!evaded&&!blocked&&!armored||self.hp<=0)interrupted=true;
-   event(f,`${invulnerable?'Incoming attack invulnerable':evaded?'Incoming attack evaded':blocked?'Incoming attack blocked':armored?'Incoming attack armored':'Incoming attack hit'}: ${damage} damage to attacker.`);
+   const invulnerable=isInvulnerable(defense,incoming),parry=!invulnerable&&!evaded&&claimParry(defense,incoming),armored=!parry&&!invulnerable&&!evaded&&!blocked&&claimArmor(defense,incoming);
+   if(parry)other.stun=Math.max(other.stun,f+parry.stun);
+   const damage=hurt(self,Math.round(incomingDamage*statusMultiplier(statuses.filter(s=>s.who===other&&f>=s.start&&f<s.end),'weaken')*(parry||invulnerable||evaded?0:blocked?1-a.blockPercent/100:1)));
+   if(!parry&&!invulnerable&&!evaded&&!blocked&&!armored||self.hp<=0)interrupted=true;
+   event(f,`${parry?'Incoming attack parried':invulnerable?'Incoming attack invulnerable':evaded?'Incoming attack evaded':blocked?'Incoming attack blocked':armored?'Incoming attack armored':'Incoming attack hit'}: ${damage} damage to attacker.`);
    if(interrupted&&castAlive)event(f,'The incoming hit interrupted this move.');
   }
   const eligibleGroups=groupContacts?groupContacts.filter(g=>active&&recipient.hp>0&&groupTracker.claim('target',g,f)):null;

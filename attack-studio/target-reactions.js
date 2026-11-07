@@ -1,5 +1,5 @@
 // Presentation only: reaction poses do not change combat hitboxes or damage.
-import {RECOVERY_TIMING} from './recovery-timing.js?v=20261107-invulnerability';
+import {RECOVERY_TIMING} from './recovery-timing.js?v=20261107-parry';
 export const REACTION_TIMING = RECOVERY_TIMING;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export function targetReaction(target,frame,{guard=false}={}){

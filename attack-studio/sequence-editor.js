@@ -1,6 +1,6 @@
-import {validateAttack} from './combat-model.js?v=20261107-invulnerability';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261107-invulnerability';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261107-invulnerability';
+import {validateAttack} from './combat-model.js?v=20261107-parry';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261107-parry';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261107-parry';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
