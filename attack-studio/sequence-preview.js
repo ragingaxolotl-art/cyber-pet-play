@@ -1,6 +1,7 @@
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261106-timeline';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261106-timeline';
-import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261106-timeline';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261106-contact-groups';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261106-contact-groups';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261106-contact-groups';
+import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261106-contact-groups';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
@@ -14,14 +15,18 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(!advancePulseReaction(other,frame,-220,220)&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){other.reaction='standing';other.reactionLandFrame=frame;}}
     let box=worldBox(attack,state.contactFrame??frame,attacker,direction);
     if(state.attached&&attack.projectileMode==='attached')box={...box,x:other.x-box.w/2,y:other.y-box.h};
-    const targetBox={x:other.x-14,y:other.y-60,w:28,h:60},contact=shapeHitsRectangle(box,targetBox);
+    const targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
+    const base=worldBox(attack,state.contactFrame??frame,attacker,direction),elapsed=state.contactFrame===null?0:frame-state.contactFrame;
+    const boxes=attack.hitboxGroups?activeGroupBoxes(attack.hitboxGroups,elapsed,b=>{const world=worldBox({...attack,box:b},state.contactFrame??frame,attacker,direction);return {...world,x:world.x+box.x-base.x,y:world.y+box.y-base.y};}):null;
+    const overlap=event=>boxes?boxes.some(b=>b.groupId===event.hitboxGroup&&shapeHitsRectangle(b,targetBox)):shapeHitsRectangle(box,targetBox);
+    const contact=boxes?boxes.some(b=>shapeHitsRectangle(b,targetBox)):shapeHitsRectangle(box,targetBox);
     if(options.incomingDamage>0&&frame===(options.incomingFrame??30)){
       if(other.stun>frame)events.push({frame,text:'Incoming attack interrupted — opponent is stunned.'});
       else {self.hp=Math.max(0,self.hp-options.incomingDamage);state.cancelled='Attacker interrupted.';events.push({frame,text:'Incoming attack interrupted this sequence.'});}
     }
     const active=cast&&frame>=tm.startup&&!state.cancelled&&(state.contactFrame===null||frame<state.contactFrame+sequenceDuration(attack));
     if(active){
-      for(const event of sequenceOpportunities(attack,state,frame,contact,other)){
+      for(const event of sequenceOpportunities(attack,state,frame,overlap,other)){
         const guarded=!!options.guard&&attack.blockable;
         const damage=Math.round(event.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1));
         const actual=Math.min(other.hp,damage);other.hp-=actual;hits++;
@@ -33,7 +38,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
       }
     }
     if(state.contactFrame!==null)end=state.contactFrame+sequenceDuration(attack)+Math.max(120,tm.recovery);
-    frames.push({frame,active,box,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
+    frames.push({frame,active,box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
     if(!cast)break;
   }
   const results=attack.hitEvents.map(event=>state.results.find(r=>r.id===event.id)||{id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.cancelled||'Projectile did not reach the target.'});

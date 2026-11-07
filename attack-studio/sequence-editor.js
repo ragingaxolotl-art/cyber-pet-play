@@ -1,9 +1,10 @@
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261106-timeline';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261106-timeline';
+import {validateAttack} from './combat-model.js?v=20261106-contact-groups';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261106-contact-groups';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261106-contact-groups';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
-  function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));validateHitSequence(next);commit(next);render();}
+  function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));validateAttack(next);commit(next);render();}
   function render(){
     const a=getAttack();root.replaceChildren();
     root.append(el('h2','Hit sequence'),el('p','Contact starts the clock. Each hit has its own damage, timing and reaction. Up to ten hits; no unlimited suspension.'));
@@ -38,8 +39,9 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
     for(const [key,title,choices] of [['reaction','Reaction',REACTIONS],['target','Eligible target',['any','grounded','airborne']]]){
       const l=el('label',title),input=el('select');for(const choice of choices)input.add(new Option(choice,choice));input.value=event[key];input.onchange=()=>mutate(n=>n.hitEvents.find(e=>e.id===selected)[key]=input.value);l.append(input);fields.append(l);
     }
+    if(a.hitboxGroups){const label=el('label','Hitbox group for this hit'),select=el('select');select.setAttribute('aria-label','Hitbox group for this hit');a.hitboxGroups.forEach((g,i)=>select.add(new Option('Group '+(i+1),g.id)));select.value=event.hitboxGroup;select.onchange=()=>{try{mutate(n=>n.hitEvents.find(e=>e.id===selected).hitboxGroup=select.value);}catch(e){error.textContent=e.message;select.value=event.hitboxGroup;}};label.append(select);fields.append(label);}
     root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
-    const legacy=el('button','Return to ordinary projectile');legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.behaviorVersion;delete n.projectileMode;});root.append(legacy);
+    const legacy=el('button','Return to ordinary projectile');legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.behaviorVersion;delete n.projectileMode;if(n.hitboxGroups)n.impactTrigger='timed';});root.append(legacy);
   }
   function results(){const output=document.getElementById('hitResults');output.replaceChildren();const sim=getSimulation();if(!sim)return;
     const summary=el('strong',`${sim.frames.at(-1).hits} contact(s) · ${sim.cost} energy · impact ${sim.impactFrame===null?'not reached':sim.impactFrame+'f'}`);output.append(summary);

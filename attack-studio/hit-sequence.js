@@ -16,6 +16,7 @@ export function validateHitSequence(attack) {
   for (const event of attack.hitEvents) {
     if (!event||typeof event.id!=='string'||!/^hit_[a-zA-Z0-9_]{1,80}$/.test(event.id)||ids.has(event.id)) throw Error('Every hit needs a unique ID.');
     ids.add(event.id);
+    if(event.hitboxGroup!==undefined&&(!attack.hitboxGroups||!attack.hitboxGroups.some(g=>g.id===event.hitboxGroup)))throw Error('Hit references a missing hitbox group.');
     if (!integer(event.offset,0,SEQUENCE_LIMITS.duration)||event.offset<=previous) throw Error('Hit offsets must increase, starting at contact + 0.');
     if (!integer(event.duration,1,60)||event.offset+event.duration>SEQUENCE_LIMITS.duration) throw Error('Hit windows must end within 300 frames of contact.');
     if (!Number.isFinite(event.damage)||event.damage<0||event.damage>500) throw Error('Hit damage must be 0–500.');
@@ -48,18 +49,20 @@ export function resizeHits(events,count,interval,mode='extend') {
 export function sequenceState(){return {contactFrame:null,attached:false,consumed:new Set(),results:[],cancelled:null};}
 export function sequenceOpportunities(attack,state,age,overlap,target) {
   if(state.cancelled)return [];
-  if(state.contactFrame===null){if(!overlap)return [];state.contactFrame=age;}
+  const touches=event=>typeof overlap==='function'?overlap(event):overlap;
+  if(state.contactFrame===null){if(!touches(attack.hitEvents[0]))return [];state.contactFrame=age;}
   const elapsed=age-state.contactFrame,ready=[];
   for(const event of attack.hitEvents){
     if(state.consumed.has(event.id)||elapsed<event.offset)continue;
     if(elapsed>=event.offset+event.duration){state.consumed.add(event.id);state.results.push({id:event.id,offset:event.offset,frame:null,result:'Missed',reason:'No eligible contact during this hit window.'});continue;}
     const eligible=!(target.juggleLocked&&target.y<0)&&(event.target==='any'||(event.target==='airborne'?target.y<0:target.y>=0));
-    if(eligible&&(overlap||(attack.projectileMode==='attached'&&state.attached))){state.consumed.add(event.id);ready.push(event);}
+    if(eligible&&(touches(event)||(!event.hitboxGroup&&attack.projectileMode==='attached'&&state.attached))){state.consumed.add(event.id);ready.push(event);}
   }
   return ready;
 }
 export function applyPulseReaction(target,event,direction,frame) {
   if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;}
+  target.lastHit=frame;
   if(event.reaction==='none')return;
   target.legacyMotion=null;
   target.juggleHits=(target.juggleHits||0)+1;

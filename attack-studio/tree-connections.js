@@ -1,5 +1,5 @@
-import {ancestors} from './skill-tree-model.js?v=20261106-timeline';
-import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261106-timeline';
+import {ancestors} from './skill-tree-model.js?v=20261106-contact-groups';
+import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261106-contact-groups';
 
 // Connection edits return a copy and never delete attacks or their descendants.
 export function editConnection(tree, action, prerequisiteId, attackId) {

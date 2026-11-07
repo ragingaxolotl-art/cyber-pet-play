@@ -4,7 +4,7 @@ export function attackDiagnostics(attack,simulation=null) {
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
  if(attack.hitboxGroups){
   const boxes=attack.hitboxGroups.reduce((n,g)=>n+g.boxes.length,0);
-  add('group-hits','info',`${boxes} boxes in ${attack.hitboxGroups.length} hit group(s). Boxes in one group share hit limits; separate groups each apply full attack damage.`, 'Edit limits in the group inspector. Overlapping independent groups can deal damage on the same frame.');
+  if(attack.hitEvents)add('group-hits','info','Each sequence hit uses its assigned group and deals damage once. Group hit-limit settings do not add extra sequence hits.','Edit per-hit damage and group assignments in the hit inspector.');else add('group-hits','info',`${boxes} boxes in ${attack.hitboxGroups.length} hit group(s). Boxes in one group share hit limits; separate groups each apply full attack damage.`, 'Edit limits in the group inspector. Overlapping independent groups can deal damage on the same frame.');
   add('group-transfer','info','Multiple hitboxes require a version 3 project, bank or skill tree.','Use the updated Studio and Arena. Earlier versions cannot play this definition.');
  }
  if(attack.hitEvents){
