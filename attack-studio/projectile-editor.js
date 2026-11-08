@@ -1,4 +1,5 @@
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-steering';
+import {addContextHelp} from './context-help.js';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-projectile-help';
 import {validateAttack} from './combat-model.js?v=20261108-drag-recovery';
 export function renderProjectileEditor({root,attack,commit,status}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
@@ -22,5 +23,6 @@ export function renderProjectileEditor({root,attack,commit,status}){
   renderSteeringEditor({root:section,attack,commit,status});
   const hint=document.createElement('p');hint.textContent=`60 frames = 1 second. Contact timing and active duration may end the projectile sooner. Saving requires version ${attack.projectileDurability===undefined?7:8} support.`;section.append(hint);
  }
+ addContextHelp(section,legend,[...section.children].filter(n=>n.tagName==='P'));
  root.append(section);
 }

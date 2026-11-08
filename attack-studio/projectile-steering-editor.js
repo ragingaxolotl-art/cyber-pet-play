@@ -1,3 +1,4 @@
+import {addContextHelp} from './context-help.js';
 import {validateAttack} from './combat-model.js?v=20261108-drag-recovery';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderSteeringEditor({root,attack,commit,status}){
@@ -7,7 +8,7 @@ export function renderSteeringEditor({root,attack,commit,status}){
  for(const [value,title] of [['off','Straight / authored path'],['homing','Home toward opponent'],['return','Return to owner']])mode.add(new Option(title,value));
  mode.value=attack.projectileSteering?.mode??'off';mode.disabled=!!attack.motionPath?.length;
  mode.onchange=()=>{if(!mutate(n=>{if(mode.value==='off')delete n.projectileSteering;else n.projectileSteering={mode:mode.value,turnRate:n.projectileSteering?.turnRate??10,...(mode.value==='return'?{returnAfter:30}:{})};}))mode.value=attack.projectileSteering?.mode??'off';};label.append(mode);section.append(label);
- if(mode.disabled)section.append(make('p','Remove the authored movement path to enable steering.'));
+ if(mode.disabled){const warning=make('p','Remove the authored movement path to enable steering.');warning.setAttribute('role','status');section.append(warning);}
  if(attack.projectileSteering){
   for(const [key,title,min,max] of [['turnRate','Maximum turn (degrees per frame)',1,180],['returnAfter','Start returning after (combat frames)',1,600]]){
    if(key==='returnAfter'&&attack.projectileSteering.mode!=='return')continue;
@@ -16,5 +17,6 @@ export function renderSteeringEditor({root,attack,commit,status}){
   }
   section.append(make('p','Requires version 17 saving. Speed stays constant. Return delay starts at launch; catching removes the projectile without hurting its owner. Reflection changes the owner without restarting the delay. Attachment takes over movement after contact. Lifetime and active windows can end travel before a return completes.'));
  }
+ addContextHelp(section,section.querySelector('legend'),[...section.children].filter(n=>n.tagName==='P'&&n.getAttribute('role')===null));
  root.append(section);
 }
