@@ -1,3 +1,4 @@
+import {createTreeStore,treeStorageMessage} from './tree-storage.js?v=20261108-tree-storage';
 import {readTreeSession,writeTreeSession,restoreTreeHistory} from './tree-session.js?v=20261108-workflow';
 import {BUNDLE_FORMAT,exportDataSet,importDataSet,validateBundle,bundleSummary} from './tree-bundle.js?v=20261108-workflow';
 import {reviewImport} from './import-preview.js?v=20261108-workflow';
@@ -16,7 +17,7 @@ import {installStarters,setStarter} from './tree-starters.js?v=20261108-schedule
 import {TREE_KEY,validateTree,starterTree,ancestors,arrange,treeVersion} from './skill-tree-model.js?v=20261108-absorption';
 import {validateAttack} from './combat-model.js?v=20261108-absorption';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
-let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
+let treeStore,editRevision=0,tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let dataSets=[],dataSetId='original',treeId=MAIN_TREE,treeKey=TREE_KEY;
 let navigationMode='all',zoomControls,treeBrowser;const savedTreeSession=readTreeSession(localStorage),treeViews=new Map(savedTreeSession.views),openTreeTabs=new Map(),treeHistories=new Map();
 let connections,paths,starters;const history=[];
@@ -24,8 +25,8 @@ const images=new Map(),nodeViews=new Map();
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 const current=()=>tree.nodes.find(n=>n.id===selected);
 function check(value){return validateExtras(validateTree(value,ids,validateAttack));}
-function save(){applyPending();check(tree);const existing=localStorage.getItem(treeKey);if(existing!==baseSaved)throw Error('This tree changed in another tab. Download your edits, then reload before saving.');const data=JSON.stringify(tree);localStorage.setItem(treeKey,data);baseSaved=data;dirty=false;say('Tree saved in this browser. Download a copy to move it to another device.');}
-function commit(candidate){candidate.version=treeVersion(candidate);trimEdgeDetails(candidate);candidate.starterSkills=(candidate.starterSkills||[]).filter(id=>candidate.nodes.some(n=>n.id===id));check(candidate);if(JSON.stringify(candidate)===JSON.stringify(tree))return;history.push(structuredClone(tree));if(history.length>20)history.shift();tree=candidate;dirty=true;render();}
+async function save(){applyPending();check(tree);const data=JSON.stringify(tree),revision=editRevision;await treeStore.transaction(storage=>{if(storage.getItem(treeKey)!==baseSaved)throw Error('This tree changed in another tab. Download your edits, then reload before saving.');storage.setItem(treeKey,data);});baseSaved=data;if(editRevision===revision)dirty=false;say('Tree saved in this browser. Download a copy to move it to another device.');}
+function commit(candidate){candidate.version=treeVersion(candidate);trimEdgeDetails(candidate);candidate.starterSkills=(candidate.starterSkills||[]).filter(id=>candidate.nodes.some(n=>n.id===id));check(candidate);if(JSON.stringify(candidate)===JSON.stringify(tree))return;history.push(structuredClone(tree));if(history.length>20)history.shift();tree=candidate;editRevision++;dirty=true;render();}
 function selectNode(id,reveal=false){selected=id;playing=false;if(reveal){navigationMode='all';$('branch').value='';$('search').value='';$('viewPath').value='';}render();inspect();if(reveal)nodeViews.get(id)?.scrollIntoView({block:'nearest',inline:'center'});}
 function applyPending(){if(!tree)return;const candidate=structuredClone(tree),n=candidate.nodes.find(n=>n.id===selected);candidate.notes=$('treeNotes').value;if(n&&!$('editor').hidden){for(const key of ['name','description','state','requirement'])n[key]=$(key).value.trim();n.branch=$('nodeBranch').value.trim();n.notes=$('attackNotes').value;n.requires=[...$('prerequisites').querySelectorAll('input:checked')].map(input=>input.value);if(JSON.stringify(n.requires)!==JSON.stringify(current().requires)&&n.state==='ready')n.state='draft';}commit(candidate);}
 function undo(){if(!history.length)return;tree=history.pop();if(!tree.nodes.some(n=>n.id===selected))selected=tree.nodes[0]?.id;dirty=true;render();}
@@ -50,13 +51,13 @@ function prerequisites(){const n=current();if(!n)return;const chosen=new Set([..
 function inspect(){const n=current();$('editor').hidden=!n;if(!n){$('selectedTitle').textContent='Choose an attack';return;}$('selectedTitle').textContent=n.name;for(const key of ['name','description','state','requirement'])$(key).value=n[key];$('attackNotes').value=n.notes||'';$('nodeBranch').value=n.branch;$('prerequisiteSearch').value='';$('prerequisites').replaceChildren();prerequisites();const inherited=[...ancestors(tree,n.id)].filter(id=>!n.requires.includes(id)).map(id=>tree.nodes.find(p=>p.id===id).name);$('inherited').textContent=inherited.length?'Earlier prerequisites along these paths: '+inherited.join(', ')+'. ANY choices depend on the path taken.':'No indirect prerequisites yet.';const effect=effects.get(n.effectId);$('frame').max=effect.times.length-1;clipFrame=Math.max(0,(effect.impact||1)-1);showFrame();$('play').textContent='Play clip';}
 function showFrame(){if(!current())return;const effect=effects.get(current().effectId);paint($('clip'),effect,clipFrame);$('frame').value=clipFrame;$('frameLabel').textContent=`${clipFrame+1}/${effect.times.length}`;}
 function libraryOptions(){const query=$('librarySearch').value.toLowerCase();$('effect').replaceChildren();for(const e of effects.values())if((e.name+' '+e.element+' '+e.slot).toLowerCase().includes(query))$('effect').add(new Option(e.name+' · '+e.element+' · '+e.slot,e.id));$('add').disabled=!$('effect').options.length;}
-function guarded(fn){return async event=>{try{await fn(event);}catch(e){say(e.message);}};}
+let actionBusy=false;function guarded(fn){return async event=>{if(actionBusy)return;actionBusy=true;try{await fn(event);}catch(e){say(treeStorageMessage(e));}finally{actionBusy=false;}};}
 $('editor').onsubmit=guarded(event=>{event.preventDefault();applyPending();inspect();say('Attack, notes and connections updated. Save tree to retain them.');});
 $('prerequisiteSearch').oninput=prerequisites;
 $('save').onclick=guarded(save);
 $('download').onclick=guarded(()=>{applyPending();check(tree);const url=URL.createObjectURL(new Blob([JSON.stringify(tree,null,2)],{type:'application/json'}));const link=el('a');link.href=url;link.download=(dataSets.find(d=>d.id===dataSetId)?.trees.find(t=>t.id===treeId)?.name||'skill-tree').replace(/[^a-z0-9_-]/gi,'-')+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Tree download started, including saved attack and animation edits.');});
 const downloadSet=el('button','Download entire data set');downloadSet.id='downloadDataSet';$('download').after(downloadSet);
-downloadSet.onclick=guarded(()=>{save();const bundle=exportDataSet(localStorage,dataSetId,check),url=URL.createObjectURL(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'})),link=el('a');link.href=url;link.download=bundle.name.replace(/[^a-z0-9_-]/gi,'-')+'-data-set.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Downloaded all '+bundle.trees.length+' trees in '+bundle.name+'.');});
+downloadSet.onclick=guarded(async()=>{applyPending();check(tree);await treeStore.refresh();const backupStorage={getItem:key=>key===treeKey?JSON.stringify(tree):treeStore.getItem(key)};const bundle=exportDataSet(backupStorage,dataSetId,check),url=URL.createObjectURL(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'})),link=el('a');link.href=url;link.download=bundle.name.replace(/[^a-z0-9_-]/gi,'-')+'-data-set.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Downloaded all '+bundle.trees.length+' trees in '+bundle.name+'.');});
 $('open').textContent='Import tree or data set';$('open').onclick=()=>$('file').click();
 $('file').onchange=guarded(async()=>{
  const f=$('file').files[0];if(!f)return;
@@ -65,7 +66,7 @@ $('file').onchange=guarded(async()=>{
   const value=JSON.parse(await f.text()),isBundle=value?.format===BUNDLE_FORMAT;
   const bundle=isBundle?validateBundle(value,check):{format:BUNDLE_FORMAT,version:1,name:f.name.replace(/\.json$/i,'').slice(0,80)||'Imported tree',trees:[{id:MAIN_TREE,name:'Main tree',tree:check(value)}]};
   const accepted=await reviewImport({title:'Import '+bundle.name,description:'This creates a separate data set. Your existing trees stay in place.',items:bundleSummary(bundle).map(item=>item.name+' — '+item.attacks+' attacks, '+item.paths+' paths')});
-  if(!accepted)return;save();const id=importDataSet(localStorage,bundle,check);openDataSet(id);say('Imported '+bundle.trees.length+' trees into '+bundle.name+'.');
+  if(!accepted)return;await save();const id=await treeStore.transaction(storage=>importDataSet(storage,bundle,check));await openDataSet(id);say('Imported '+bundle.trees.length+' trees into '+bundle.name+'.');
  }finally{$('file').value='';}
 });
 
@@ -84,16 +85,16 @@ function addEffect(effectId,placement='attached',definition=null){
 }
 $('add').onclick=guarded(()=>{applyPending();addEffect($('effect').value);say('Added animation as an editable attack. Review its description and prerequisites.');});
 $('remove').onclick=guarded(()=>{applyPending();if(!confirm('Remove this attack and its direct prerequisite connections? Dependent attacks will need their learning rules reviewed.'))return;const candidate=structuredClone(tree);candidate.nodes=candidate.nodes.filter(n=>n.id!==selected);for(const n of candidate.nodes)if(n.requires.includes(selected)){n.requires=n.requires.filter(id=>id!==selected);n.state='draft';}selected=candidate.nodes[0]?.id;commit(candidate);inspect();});
-$('editAnimation').onclick=guarded(()=>{save();location.href='design.html?treeNode='+encodeURIComponent(selected)+'&dataSet='+encodeURIComponent(dataSetId)+'&tree='+encodeURIComponent(treeId);});
+$('editAnimation').onclick=guarded(async()=>{await save();location.href='design.html?treeNode='+encodeURIComponent(selected)+'&dataSet='+encodeURIComponent(dataSetId)+'&tree='+encodeURIComponent(treeId);});
 $('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause clip':'Play clip';};$('frame').oninput=()=>{playing=false;$('play').textContent='Play clip';clipFrame=Number($('frame').value);showFrame();};
 function tick(now){if(playing&&current()){const effect=effects.get(current().effectId);clipElapsed+=Math.min(now-last,100);if(clipElapsed>=(effect.times[clipFrame]||100)){clipElapsed=0;clipFrame=(clipFrame+1)%effect.times.length;showFrame();}}last=now;requestAnimationFrame(tick);}
-$('editor').addEventListener('input',event=>{if(!['frame','prerequisiteSearch'].includes(event.target.id))dirty=true;});$('treeNotes').oninput=()=>dirty=true;
+$('editor').addEventListener('input',event=>{if(!['frame','prerequisiteSearch'].includes(event.target.id)){editRevision++;dirty=true;}});$('treeNotes').oninput=()=>{editRevision++;dirty=true;};
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
-try{const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));dataSets=readCabinet(localStorage);dataSetId=new URLSearchParams(location.search).get('dataSet')||savedTreeSession.active?.dataSetId||'original';if(!dataSets.some(d=>d.id===dataSetId))dataSetId=dataSets[0].id;treeId=new URLSearchParams(location.search).get('tree')||(!new URLSearchParams(location.search).has('dataSet')?savedTreeSession.active?.treeId:null)||MAIN_TREE;if(!dataSets.find(d=>d.id===dataSetId).trees.some(t=>t.id===treeId)){if(new URLSearchParams(location.search).has('tree'))throw Error('The requested tree is not in this browser. Import its backup to open it.');treeId=MAIN_TREE;}for(const tab of savedTreeSession.tabs)if(dataSets.find(d=>d.id===tab.dataSetId)?.trees.some(t=>t.id===tab.treeId))openTreeTabs.set(treeStorageKey(tab.dataSetId,tab.treeId),tab);treeKey=treeStorageKey(dataSetId,treeId);rememberTab();refreshDataSets();baseSaved=localStorage.getItem(treeKey);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
+try{treeStore=await createTreeStore();const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));dataSets=readCabinet(treeStore);dataSetId=new URLSearchParams(location.search).get('dataSet')||savedTreeSession.active?.dataSetId||'original';if(!dataSets.some(d=>d.id===dataSetId))dataSetId=dataSets[0].id;treeId=new URLSearchParams(location.search).get('tree')||(!new URLSearchParams(location.search).has('dataSet')?savedTreeSession.active?.treeId:null)||MAIN_TREE;if(!dataSets.find(d=>d.id===dataSetId).trees.some(t=>t.id===treeId)){if(new URLSearchParams(location.search).has('tree'))throw Error('The requested tree is not in this browser. Import its backup to open it.');treeId=MAIN_TREE;}for(const tab of savedTreeSession.tabs)if(dataSets.find(d=>d.id===tab.dataSetId)?.trees.some(t=>t.id===tab.treeId))openTreeTabs.set(treeStorageKey(tab.dataSetId,tab.treeId),tab);treeKey=treeStorageKey(dataSetId,treeId);rememberTab();refreshDataSets();baseSaved=treeStore.getItem(treeKey);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
 connections=installConnections({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,undo,canUndo:()=>history.length>0,paths});
 starters=installStarters({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,effects});
 installTreeCatalog();
-installAccessibility($('treeAccessibility'));render();restoreView(treeViews.get(treeKey));inspect();libraryOptions();say(`${tree.nodes.length} attacks in the learning tree. ${baseSaved?'Restored saved edits.':'Proposed order — edit and save to keep it.'}`);requestAnimationFrame(tick);}catch(e){say('Could not open tree: '+e.message);}
+installAccessibility($('treeAccessibility'));render();restoreView(treeViews.get(treeKey));inspect();libraryOptions();say(`${tree.nodes.length} attacks in the learning tree. ${baseSaved?'Restored saved edits.':'Proposed order — edit and save to keep it.'}`);requestAnimationFrame(tick);}catch(e){say('Could not open tree: '+treeStorageMessage(e));}
 
 function refreshDataSets(){
  $('dataSet').replaceChildren(...dataSets.map(d=>new Option(d.name,d.id)));$('dataSet').value=dataSetId;
@@ -104,9 +105,10 @@ function refreshPathPicker(){
 }
 function rememberTab(){openTreeTabs.set(treeKey,{dataSetId,treeId});}
 function rememberView(){treeViews.set(treeKey,{selected,branch:$('branch').value,search:$('search').value,path:$('viewPath').value,active:$('activePath').value,left:$('viewport').scrollLeft,top:$('viewport').scrollTop,zoom:Number($('zoom').value),mode:navigationMode,display:$('treeViewMode').value});}
-function openDataSet(id,nextTree=MAIN_TREE){
- const cabinet=readCabinet(localStorage),entry=cabinet.find(d=>d.id===id)?.trees.find(t=>t.id===nextTree);if(!entry)throw Error('That tree is no longer listed. Reload to refresh the sidebar.');
- const key=treeStorageKey(id,nextTree),raw=localStorage.getItem(key);if(!raw)throw Error('This tree has no saved data. Import its backup to restore it.');const next=check(JSON.parse(raw));
+async function openDataSet(id,nextTree=MAIN_TREE){
+ await treeStore.refresh();
+ const cabinet=readCabinet(treeStore),entry=cabinet.find(d=>d.id===id)?.trees.find(t=>t.id===nextTree);if(!entry)throw Error('That tree is no longer listed. Reload to refresh the sidebar.');
+ const key=treeStorageKey(id,nextTree),raw=treeStore.getItem(key);if(!raw)throw Error('This tree has no saved data. Import its backup to restore it.');const next=check(JSON.parse(raw));
  rememberView();treeHistories.set(treeKey,{base:baseSaved,items:structuredClone(history)});connections?.cancel();tree=next;treeKey=key;dataSetId=id;treeId=nextTree;dataSets=cabinet;baseSaved=raw;dirty=false;history.splice(0,history.length,...restoreTreeHistory(treeHistories.get(key),raw,check));playing=false;
  const view=treeViews.get(key);selected=next.nodes.some(n=>n.id===view?.selected)?view.selected:next.nodes[0]?.id;navigationMode=view?.mode||'all';
  $('branch').value='';$('search').value=view?.search||'';$('viewPath').value='';$('activePath').value='';$('treeNotes').value=tree.notes||'';
@@ -124,25 +126,23 @@ function persistTreeSession(){if(!tree)return;rememberView();try{writeTreeSessio
 window.addEventListener('pagehide',persistTreeSession);window.addEventListener('beforeunload',persistTreeSession);
 let sessionTimer;const scheduleSession=()=>{clearTimeout(sessionTimer);sessionTimer=setTimeout(persistTreeSession,250);};
 document.addEventListener('click',scheduleSession);document.addEventListener('change',scheduleSession);document.addEventListener('input',scheduleSession);$('viewport').addEventListener('scroll',scheduleSession);$('viewport').addEventListener('pointerup',scheduleSession);$('viewport').addEventListener('wheel',scheduleSession);
-function createDataSet(name,next){
- const latest=readDataSets(localStorage),id=crypto.randomUUID();check(next);
- localStorage.setItem(dataSetKey(id),JSON.stringify(next));
- latest.push({id,name,trees:[{id:MAIN_TREE,name:'Main tree'}]});localStorage.setItem(DATASETS_KEY,JSON.stringify(latest));dataSets=readCabinet(localStorage);openDataSet(id);
+async function createDataSet(name,next){
+ check(next);const id=await treeStore.transaction(storage=>{const latest=readDataSets(storage),id=crypto.randomUUID();storage.setItem(dataSetKey(id),JSON.stringify(next));latest.push({id,name,trees:[{id:MAIN_TREE,name:'Main tree'}]});storage.setItem(DATASETS_KEY,JSON.stringify(latest));return id;});await openDataSet(id);
 }
-$('dataSet').onchange=guarded(()=>{const id=$('dataSet').value;try{save();openDataSet(id);}finally{refreshDataSets();}});
-$('newDataSet').onclick=guarded(async()=>{const name=await requestEditorName('New data set name');if(!name?.trim())return;if(name.trim().length>80)throw Error('Use a name under 80 characters.');save();createDataSet(name.trim(),{format:'cyber-pet-attack-skill-tree',version:1,nodes:[],paths:[],edgeDetails:[],notes:''});});
-$('renameDataSet').onclick=guarded(async()=>{const name=await requestEditorName('Data set name',dataSets.find(d=>d.id===dataSetId).name);if(!name?.trim())return;if(name.trim().length>80)throw Error('Use a name under 80 characters.');const latest=readDataSets(localStorage);latest.find(d=>d.id===dataSetId).name=name.trim();localStorage.setItem(DATASETS_KEY,JSON.stringify(latest));dataSets=readCabinet(localStorage);refreshDataSets();refreshTreeNavigation();});
+$('dataSet').onchange=guarded(async()=>{const id=$('dataSet').value;try{await save();await openDataSet(id);}finally{refreshDataSets();}});
+$('newDataSet').onclick=guarded(async()=>{const name=await requestEditorName('New data set name');if(!name?.trim())return;if(name.trim().length>80)throw Error('Use a name under 80 characters.');await save();await createDataSet(name.trim(),{format:'cyber-pet-attack-skill-tree',version:1,nodes:[],paths:[],edgeDetails:[],notes:''});});
+$('renameDataSet').onclick=guarded(async()=>{const name=await requestEditorName('Data set name',dataSets.find(d=>d.id===dataSetId).name);if(!name?.trim())return;if(name.trim().length>80)throw Error('Use a name under 80 characters.');await treeStore.transaction(storage=>{const latest=readDataSets(storage);latest.find(d=>d.id===dataSetId).name=name.trim();storage.setItem(DATASETS_KEY,JSON.stringify(latest));});dataSets=readCabinet(treeStore);refreshDataSets();refreshTreeNavigation();});
 $('viewPath').onchange=guarded(()=>{applyPending();navigationMode='all';$('activePath').value=$('viewPath').value;$('branch').value='';$('search').value='';render();});
 
 function refreshTreeNavigation(){
  if(!tree)return;
  const explorer=$('treeExplorer');explorer.replaceChildren();
  for(const dataSet of dataSets){const group=el('details'),heading=el('summary',dataSet.name);group.open=dataSet.id===dataSetId;group.append(heading);
-  for(const item of dataSet.trees){const button=el('button',item.name);button.className='tree-open';button.setAttribute('aria-current',String(dataSet.id===dataSetId&&item.id===treeId));button.onclick=guarded(()=>{save();openDataSet(dataSet.id,item.id);});group.append(button);
+  for(const item of dataSet.trees){const button=el('button',item.name);button.className='tree-open';button.setAttribute('aria-current',String(dataSet.id===dataSetId&&item.id===treeId));button.onclick=guarded(async()=>{await save();await openDataSet(dataSet.id,item.id);});group.append(button);
    if(dataSet.id===dataSetId&&item.id===treeId)for(const path of tree.paths||[]){const route=el('button','↳ '+path.name);route.className='path-open';route.onclick=guarded(()=>{applyPending();navigationMode='all';$('viewPath').value=path.id;$('activePath').value=path.id;$('branch').value='';$('search').value='';render();fitTree();});group.append(route);}
   }explorer.append(group);
  }
- const tabs=$('treeTabs');tabs.replaceChildren();for(const [key,tab] of openTreeTabs){const set=dataSets.find(d=>d.id===tab.dataSetId),item=set?.trees.find(t=>t.id===tab.treeId);if(!item)continue;const button=el('button',set.name+' / '+item.name);button.setAttribute('aria-pressed',String(key===treeKey));button.onclick=guarded(()=>{save();openDataSet(tab.dataSetId,tab.treeId);});tabs.append(button);}
+ const tabs=$('treeTabs');tabs.replaceChildren();for(const [key,tab] of openTreeTabs){const set=dataSets.find(d=>d.id===tab.dataSetId),item=set?.trees.find(t=>t.id===tab.treeId);if(!item)continue;const button=el('button',set.name+' / '+item.name);button.setAttribute('aria-pressed',String(key===treeKey));button.onclick=guarded(async()=>{await save();await openDataSet(tab.dataSetId,tab.treeId);});tabs.append(button);}
  treeBrowser?.refreshDestination();
  $('treeBreadcrumb').textContent=dataSets.find(d=>d.id===dataSetId)?.name+' / '+dataSets.find(d=>d.id===dataSetId)?.trees.find(t=>t.id===treeId)?.name;
 }
@@ -150,9 +150,9 @@ function renderTreeList(){const list=$('treeList');list.replaceChildren();for(co
  const row=el('article'),choose=el('button',node.name);choose.onclick=guarded(()=>{applyPending();selectNode(node.id);});row.append(choose,el('p',node.description),el('small',node.requires.length?'Requires '+node.requires.map(id=>tree.nodes.find(n=>n.id===id)?.name).join(', '):'No prerequisites'));list.append(row);
 }if(!visible().length)list.append(el('p','No attacks match these filters. Show all attacks or add one.'));}
 function fitTree(){const nodes=visible(),bounds=treeBounds(nodes),minY=nodes.length?Math.min(...nodes.map(n=>n.y))-40:0;zoomControls?.fit({...bounds,y:bounds.y-minY});}
-$('newTree').onclick=guarded(async()=>{const name=await requestEditorName('New tree name');if(!name?.trim())return;save();const id=createTree(localStorage,dataSetId,name,{format:'cyber-pet-attack-skill-tree',version:1,nodes:[],paths:[],edgeDetails:[],notes:''},check);openDataSet(dataSetId,id);});
-$('duplicateTree').onclick=guarded(async()=>{const name=await requestEditorName('Name for the independent copy',dataSets.find(d=>d.id===dataSetId).trees.find(t=>t.id===treeId).name+' copy');if(!name?.trim())return;save();const id=createTree(localStorage,dataSetId,name,structuredClone(tree),check);openDataSet(dataSetId,id);});
-$('renameTree').onclick=guarded(async()=>{const name=await requestEditorName('Tree name',dataSets.find(d=>d.id===dataSetId).trees.find(t=>t.id===treeId).name);if(!name?.trim())return;dataSets=renameTree(localStorage,dataSetId,treeId,name);refreshTreeNavigation();});
+$('newTree').onclick=guarded(async()=>{const name=await requestEditorName('New tree name');if(!name?.trim())return;await save();const id=await treeStore.transaction(storage=>createTree(storage,dataSetId,name,{format:'cyber-pet-attack-skill-tree',version:1,nodes:[],paths:[],edgeDetails:[],notes:''},check));await openDataSet(dataSetId,id);});
+$('duplicateTree').onclick=guarded(async()=>{const name=await requestEditorName('Name for the independent copy',dataSets.find(d=>d.id===dataSetId).trees.find(t=>t.id===treeId).name+' copy');if(!name?.trim())return;await save();const id=await treeStore.transaction(storage=>createTree(storage,dataSetId,name,structuredClone(tree),check));await openDataSet(dataSetId,id);});
+$('renameTree').onclick=guarded(async()=>{const name=await requestEditorName('Tree name',dataSets.find(d=>d.id===dataSetId).trees.find(t=>t.id===treeId).name);if(!name?.trim())return;dataSets=await treeStore.transaction(storage=>renameTree(storage,dataSetId,treeId,name));refreshTreeNavigation();});
 $('fitTree').onclick=fitTree;
 $('showAllNodes').onclick=guarded(()=>{applyPending();navigationMode='all';$('viewPath').value='';$('branch').value='';$('search').value='';render();fitTree();});
 for(const [id,direction] of [['showPrerequisites','before'],['showUnlocks','after']])$(id).onclick=guarded(()=>{applyPending();if(!current())throw Error('Select an attack first.');navigationMode=direction;$('viewPath').value='';$('branch').value='';$('search').value='';render();fitTree();});

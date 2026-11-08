@@ -13,7 +13,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261108-scroll-info'
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-scheduled-sequences';
 import {attacksVersion} from './attack-format.js?v=20261108-absorption';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-scheduled-sequences';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-scheduled-sequences';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-tree-storage';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-scheduled-sequences';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-scheduled-sequences';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -182,7 +182,7 @@ try{const response=await fetch('vfx-library.json',{cache:'no-store'});if(!respon
  selectOptions($('tunedAttack'),[...reviewedSetups.values()].map(s=>[s.effectId,s.attack.name]));$('openTunedAttack').disabled=!reviewedSetups.size;$('tunedCount').textContent=reviewedSetups.size;
  selectOptions($('reskinStarter'),reskinStarters(library.effects).map(e=>[e.id,`${label(e.slot)} · variant ${e.variant} · ${e.name}`]));
  connectTestBench();installSandbox();refresh();renderLibrary();installEditing();status(restored?'Restored your saved attack designs.':`${library.effects.length} effects ready. Start with this example or choose a template.`);requestAnimationFrame(tick);
- connectTreeEditor({effects:library.effects,current:attack,status,open:a=>{if(project.attacks.length>=256)throw Error('Workspace full. Download your project and remove a draft before opening this tree attack.');project.attacks.push(a);selected=a.id;frame=0;playing=false;dirty=true;refresh();}});
+ await connectTreeEditor({effects:library.effects,current:attack,status,open:a=>{if(project.attacks.length>=256)throw Error('Workspace full. Download your project and remove a draft before opening this tree attack.');project.attacks.push(a);selected=a.id;frame=0;playing=false;dirty=true;refresh();}});
 }catch(e){status('Could not start the studio: '+e.message);}
 
 function frameEditor(parent,owner,key,count,asset){
