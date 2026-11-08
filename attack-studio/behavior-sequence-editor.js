@@ -1,3 +1,4 @@
+import {renderReactionTemplates} from './reaction-template-editor.js';
 import {buildReactionSequence,REACTION_BLOCKS} from './behavior-sequence.js';
 const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderReactionBuilder(root,attack,commit){
@@ -19,4 +20,5 @@ export function renderReactionBuilder(root,attack,commit){
  add.onclick=()=>{blocks.push({type:'hit',repeat:1,damage:3});invalidate();renderRows();};
  preview.onclick=()=>{try{proposal=buildReactionSequence(attack,blocks,{interval:Number(spacing.value)});result.textContent=`Replace ${attack.hitEvents.length} hits with ${proposal.hitEvents.length}: ${blocks.map(b=>b.type+' ×'+b.repeat).join(' → ')}. Total authored damage ${proposal.hitEvents.reduce((n,h)=>n+h.damage,0)}. Last hit at ${attack.sequenceTiming==='cast'?'startup':'contact'} + ${proposal.hitEvents.at(-1).offset}. Actual connections depend on collisions. Undo restores the previous hits.`;apply.disabled=false;}catch(error){proposal=null;apply.disabled=true;result.textContent=error.message;}};
  apply.onclick=()=>{if(proposal)commit(proposal);};renderRows();panel.append(rows,add,label,preview,apply,result);root.append(panel);
+ renderReactionTemplates(panel,{getRecipe:()=>({interval:Number(spacing.value),blocks:structuredClone(blocks)}),loadRecipe:recipe=>{blocks=structuredClone(recipe.blocks);spacing.value=recipe.interval;invalidate();renderRows();}});
 }

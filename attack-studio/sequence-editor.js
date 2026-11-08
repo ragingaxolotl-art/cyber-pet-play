@@ -1,4 +1,4 @@
-import {renderReactionBuilder} from './behavior-sequence-editor.js';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-reaction-templates';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
 import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-shared-juggle';
