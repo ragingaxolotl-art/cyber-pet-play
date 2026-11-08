@@ -1,3 +1,5 @@
+import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-shared-juggle';
+export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-shared-juggle';
 // Version 2: a bounded sequence of hits timed from first projectile contact.
 // Shared by the editor preview and the Arena. All times are 60 Hz frames.
 export const SEQUENCE_LIMITS = Object.freeze({hits:10, duration:300, suspension:30, gravity:.48});
@@ -61,14 +63,14 @@ export function sequenceOpportunities(attack,state,age,overlap,target) {
   }
   return ready;
 }
-export function resetGroundedJuggle(target){if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;}}
 export function applyPulseReaction(target,event,direction,frame) {
   resetGroundedJuggle(target);
   target.lastHit=frame;
   if(event.reaction==='none')return;
+  const budget=recordJuggleReaction(target,event.height>0&&event.reaction!=='suspend'&&event.reaction!=='spike');
+  if(budget==='locked')return;
   target.legacyMotion=null;
-  target.juggleHits=(target.juggleHits||0)+1;
-  if(target.juggleHits>=SEQUENCE_LIMITS.hits){target.juggleLocked=true;event={...event,reaction:'knockback',height:0,knockback:30,frames:15};}
+  if(budget==='release')event={...event,reaction:'knockback',height:0,knockback:JUGGLE_RULES.releaseDistance,frames:JUGGLE_RULES.releaseFrames};
   target.pulseMotion={start:frame,x:target.x,y:target.y,direction,event:structuredClone(event)};
   target.reaction=event.reaction==='suspend'||event.height>0||target.y<0?'airborne':'hurt';
   target.reactionStart=frame;target.lastHit=frame;target.vy=0;target.vx=0;

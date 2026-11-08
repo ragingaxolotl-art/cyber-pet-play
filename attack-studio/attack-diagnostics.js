@@ -2,6 +2,7 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.hitEvents||(attack.launchHeight>0&&attack.pushAxis!=='x'))add('shared-juggle-budget','info','Ordinary and sequence reactions share a ten-reaction airborne budget. The grounded launcher counts as one; landing resets the budget.','At the limit, the target is forced toward the floor. Ordinary damage can still connect without restarting the launch. Guard, armor, invulnerability and parry interruptions do not spend this budget. Retest older long launch combos in Arena.');
  if(attack.cancelWindows){
   if(attack.cancelWindows.some(w=>w.automatic))add('automatic-followup','info','Automatic follow-ups start after both fighters resolve contact. The first eligible window has priority; chains stop after eight transitions.','Choose one target per automatic window and equip that attack. Arena comparison reports automatic transitions, contacts and resource or availability failures.');
   add('cancel-transfer','info','Manual follow-up windows require version 5; automatic follow-ups require version 6.','Classroom saving checks the required version before writing.');

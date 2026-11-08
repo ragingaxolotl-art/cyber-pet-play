@@ -1,6 +1,6 @@
-import {validateAttack} from './combat-model.js?v=20261108-juggle-reset';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-juggle-reset';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-juggle-reset';
+import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-shared-juggle';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-shared-juggle';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;

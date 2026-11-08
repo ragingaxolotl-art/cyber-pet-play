@@ -1,9 +1,9 @@
-import {contactDeadline,castEnd} from './contact-timing.js?v=20261108-juggle-reset';
-import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-juggle-reset';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-juggle-reset';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-juggle-reset';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-juggle-reset';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-juggle-reset';
+import {contactDeadline,castEnd} from './contact-timing.js?v=20261108-shared-juggle';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-shared-juggle';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-shared-juggle';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;

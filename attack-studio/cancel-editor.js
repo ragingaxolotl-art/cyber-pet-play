@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-juggle-reset';
+import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCancelEditor({root,attack,attacks,commit,status,test}){
  root.replaceChildren();root.append(make('h2','Follow-up windows'));

@@ -1,15 +1,16 @@
-import {castEnd} from './contact-timing.js?v=20261108-juggle-reset';
-import {validateCancelWindows} from './cancel-windows.js?v=20261108-juggle-reset';
-import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-juggle-reset';
-import {requireGroupVersion} from './attack-format.js?v=20261108-juggle-reset';
-import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-juggle-reset';
-import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-juggle-reset';
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-juggle-reset';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-juggle-reset';
-import {pathSample} from './attack-motion.js?v=20261108-juggle-reset';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-juggle-reset';
-import {validateHitSequence} from './hit-sequence.js?v=20261108-juggle-reset';
-import {simulateSequence} from './sequence-preview.js?v=20261108-juggle-reset';
+import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-shared-juggle';
+import {castEnd} from './contact-timing.js?v=20261108-shared-juggle';
+import {validateCancelWindows} from './cancel-windows.js?v=20261108-shared-juggle';
+import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
+import {requireGroupVersion} from './attack-format.js?v=20261108-shared-juggle';
+import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-shared-juggle';
+import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-shared-juggle';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-shared-juggle';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-shared-juggle';
+import {pathSample} from './attack-motion.js?v=20261108-shared-juggle';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
+import {validateHitSequence} from './hit-sequence.js?v=20261108-shared-juggle';
+import {simulateSequence} from './sequence-preview.js?v=20261108-shared-juggle';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -86,18 +87,20 @@ export function simulate(a,attacker,target,options={}){
  function event(frame,text){events.push({frame,text});}
  function heal(who,n){const old=who.hp;who.hp=Math.min(who.maxHP,who.hp+n);return who.hp-old;}
  function startReaction(who,f){
-  who.stun=Math.max(who.stun,legacyRecoveryEnd(who,a,f));
+  const reaction=juggleLegacyReaction(who,a);if(!reaction)return false;
+  flight={who,x:who.x,y:who.y,start:f,wall:false,attack:reaction};
+  who.stun=Math.max(who.stun,legacyRecoveryEnd(who,reaction,f));
   who.reactionHitFrame=f;who.reactionDirection=facing;who.reactionWallFrame=null;who.reactionLandFrame=null;
-  who.reactionLaunched=(a.pushAxis!=='x'&&a.launchHeight>0)||who.y<0;who.reactionInFlight=true;who.reactionFlightFrames=a.flightFrames;who.reactionKnockedDown=false;
-  end=Math.max(end,f+Math.max(18,a.hitstun));
+  who.reactionLaunched=(reaction.pushAxis!=='x'&&reaction.launchHeight>0)||who.y<0;who.reactionInFlight=true;who.reactionFlightFrames=reaction.flightFrames;who.reactionKnockedDown=false;
+  end=Math.max(end,f+Math.max(18,reaction.hitstun));
  }
  function hurt(who,n){const absorb=Math.min(who.shield,n);who.shield-=absorb;const damage=Math.min(who.hp,n-absorb);who.hp-=damage;return damage;}
  for(let f=0;f<=end;f++){
   if(flight){
-   const who=flight.who,sample=sampleLegacyMotion(flight,a,facing,f-flight.start);
+   const who=flight.who,a=flight.attack,sample=sampleLegacyMotion(flight,a,facing,f-flight.start);
    const t=sample.done?1:0;who.x=sample.x;who.y=sample.y;
    if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');who.stun=Math.max(who.stun,legacyRecoveryEnd(flight,a,flight.start,true));flight.wall=true;who.reactionWallFrame=f;}}
-   if(t===1){who.y=0;who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
+   if(t===1){who.y=0;resetGroundedJuggle(who);who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
   for(const who of [self,other])if(who.shield&&f>=who.shieldUntil){who.shield=0;event(f,'Shield expired.');}
   const box=worldBox(a,contactMode&&impactFrame!==null?Math.min(f,impactFrame):f,attacker,facing),targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
@@ -130,8 +133,8 @@ export function simulate(a,attacker,target,options={}){
     amount=Math.round(amount*(1-clamp(options.resistance??0,-50,75)/100)*(guarding?1-tv.guard:1));
     event(f,`${guarding?'Blocked hit':'Hit'} ${hits}: ${hurt(recipient,amount)} damage.`);
     if(guarding)recipient.reactionGuardFrame=f;
-    if(!guarding){startReaction(recipient,f);flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};recipient.stun=Math.max(recipient.stun,f+a.hitstun);}
-   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(guarding)recipient.reactionGuardFrame=f;if(!guarding){startReaction(recipient,f);flight={who:recipient,x:recipient.x,y:recipient.y,start:f,wall:false};}}
+    if(!guarding){startReaction(recipient,f);}
+   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(guarding)recipient.reactionGuardFrame=f;if(!guarding){startReaction(recipient,f);}}
    else if(a.payload==='heal')event(f,`Healed ${heal(recipient,amount)} HP.`);
    else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=f+a.shieldDuration;event(f,`Shield: ${amount} HP (refresh; does not stack).`);}
    else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${recipient.energy-old} energy.`);}
