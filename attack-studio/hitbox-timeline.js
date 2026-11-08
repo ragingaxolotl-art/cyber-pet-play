@@ -10,7 +10,7 @@ export function adjustWindow(box,delta,mode,frames){
 }
 export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=null,copySelection=null,pasteSelection=null,selectionKey=null,title='Hitbox timing tracks',clockLabel='Active frames',onError=()=>{}}){
  const timeline=el('div');timeline.className='group-timeline';timeline.setAttribute('aria-label',title);
- timeline.append(el('p',`${clockLabel} 0–${frames-1}. Drag a bar to move it; drag its end to resize. Arrow keys move one frame; Shift + arrow resizes.`));
+ timeline.append(el('p',`${clockLabel} 0–${frames-1}. Drag a bar to move it; drag its end to resize. Arrow keys move one frame; Shift + arrow resizes. Resize handles sit below the event bars.`));
  let views=timelineViews.get(root);if(!views){views=new Map();timelineViews.set(root,views);}
  let view=views.get(title);if(!view){view={zoom:1,scroll:0};views.set(title,view);}
  const tools=el('div'),zoomLabel=el('label','Timeline zoom '),zoom=el('select'),fit=el('button','Fit timeline');
@@ -22,7 +22,9 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
  viewport.addEventListener('scroll',()=>{view.scroll=viewport.scrollLeft;});zoomLabel.append(zoom);tools.append(zoomLabel,fit);timeline.append(tools);viewport.append(content);timeline.append(viewport);
  view.locked??=new Set();view.hidden??=new Set();view.selected??=new Map();
  if(view.selectionKey!==selectionKey){view.selected.clear();view.selectionKey=selectionKey;}
- const selectionInputs=[];
+ const selectionInputs=[],eventViews=new Map();
+ const selectedEvents=()=>[...view.selected.values()];
+ const selectionAllowed=()=>{if(selectedEvents().some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock selected tracks before moving them.');};
  const available=new Set(groups.flatMap(g=>g.boxes.map(b=>JSON.stringify([g.id,b.id]))));
  for(const key of view.selected.keys())if(!available.has(key))view.selected.delete(key);
  if(moveSelection){
@@ -63,19 +65,33 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
   const row=el('div');row.className='group-timeline-row';const label=el('span',box.label||`G${gi+1} · Box ${bi+1}`),track=el('div');track.className='group-timeline-track';
   if(moveSelection){const selected=el('input');selected.type='checkbox';const key=JSON.stringify([group.id,box.id]);selected.checked=view.selected.has(key);selected.disabled=!!box.lockStart;selected.setAttribute('aria-label','Select '+(box.label||`group ${gi+1} box ${bi+1}`));selected.onchange=()=>{selected.checked?view.selected.set(key,{groupId:group.id,boxId:box.id}):view.selected.delete(key);};label.append(selected);selectionInputs.push(selected);}
   const bar=el('button'),end=el('button','↔');bar.type=end.type='button';bar.className='group-timeline-bar';end.className='group-timeline-end';end.disabled=!!box.lockDuration;
+  // A separate resize lane prevents its hit target from covering a short event.
+  track.style.height='68px';end.style.top='36px';end.style.width='28px';end.style.height='28px';
   bar.setAttribute('aria-label',box.label?`Move ${box.label}`:`Move group ${gi+1} box ${bi+1}`);end.setAttribute('aria-label',box.label?`Resize ${box.label}`:`Resize group ${gi+1} box ${bi+1}`);
   bar.disabled=view.locked.has(group.id);end.disabled=view.locked.has(group.id)||!!box.lockDuration;row.hidden=view.hidden.has(group.id);
   if(!rowsByGroup.has(group.id)){rowsByGroup.set(group.id,[]);controlsByGroup.set(group.id,[]);}rowsByGroup.get(group.id).push(row);controlsByGroup.get(group.id).push({bar,end,box});
   let proposal={...box},drag=null;
+  const eventKey=JSON.stringify([group.id,box.id]);
+  const groupMove=()=>moveSelection&&view.selected.has(eventKey)&&view.selected.size>1;
+  function previewGroup(delta){
+   const selected=selectedEvents().map(e=>eventViews.get(JSON.stringify([e.groupId,e.boxId]))).filter(Boolean);
+   let min=-Infinity,max=Infinity;
+   for(const item of selected){const b=item.box;if(b.lockStart){min=max=0;break;}min=Math.max(min,(b.minStart??0)-b.start);max=Math.min(max,(b.maxStart??Infinity)-b.start,frames-b.start-b.duration);}
+   delta=Math.max(min,Math.min(max,Math.round(delta)));
+   for(const item of selected)item.preview(delta);
+  }
+  const resetGroup=()=>{for(const item of eventViews.values())item.preview(0);};
+
   function paint(){bar.style.left=100*proposal.start/frames+'%';bar.style.width=100*proposal.duration/frames+'%';bar.textContent=`${proposal.start}–${proposal.start+proposal.duration-1}`;end.style.left=100*(proposal.start+proposal.duration)/frames+'%';bar.title=`Start ${proposal.start}; duration ${proposal.duration} frames`;}
-  function apply(){if(view.locked.has(group.id))return;try{if(proposal.start!==box.start||proposal.duration!==box.duration)commit(group.id,box.id,{start:proposal.start,duration:proposal.duration});}catch(error){proposal={...box};paint();onError(error.message);}}
+  function apply(){if(view.locked.has(group.id))return;try{if(proposal.start!==box.start&&groupMove()){selectionAllowed();moveSelection(selectedEvents(),proposal.start-box.start);}else if(proposal.start!==box.start||proposal.duration!==box.duration)commit(group.id,box.id,{start:proposal.start,duration:proposal.duration});}catch(error){resetGroup();proposal={...box};paint();onError(error.message);}}
   for(const [control,mode] of [[bar,'move'],[end,'resize']]){
    control.onpointerdown=e=>{if(view.locked.has(group.id))return;if(e.button!==undefined&&e.button!==0)return;e.preventDefault();drag={x:e.clientX,width:track.getBoundingClientRect().width,mode};control.setPointerCapture(e.pointerId);};
-   control.onpointermove=e=>{if(!drag||drag.width<=0)return;proposal=adjustWindow(box,(e.clientX-drag.x)*frames/drag.width,drag.mode,frames);paint();};
+   control.onpointermove=e=>{if(!drag||drag.width<=0)return;if(drag.mode==='move'&&groupMove())previewGroup((e.clientX-drag.x)*frames/drag.width);else{proposal=adjustWindow(box,(e.clientX-drag.x)*frames/drag.width,drag.mode,frames);paint();}};
    control.onpointerup=()=>{if(!drag)return;drag=null;apply();};
-   control.onpointercancel=()=>{drag=null;proposal={...box};paint();};
-   control.onkeydown=e=>{if(view.locked.has(group.id))return;if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();proposal=adjustWindow(box,e.key==='ArrowLeft'?-1:1,e.shiftKey?'resize':mode,frames);const label=control.getAttribute('aria-label');apply();[...document.querySelectorAll('button')].find(n=>n.getAttribute('aria-label')===label)?.focus();};
+   control.onpointercancel=()=>{drag=null;resetGroup();proposal={...box};paint();};
+   control.onkeydown=e=>{if(view.locked.has(group.id))return;if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const delta=e.key==='ArrowLeft'?-1:1;if(!e.shiftKey&&mode==='move'&&groupMove())previewGroup(delta);else{proposal=adjustWindow(box,delta,e.shiftKey?'resize':mode,frames);}const label=control.getAttribute('aria-label');apply();[...document.querySelectorAll('button')].find(n=>n.getAttribute('aria-label')===label)?.focus();};
   }
+  eventViews.set(eventKey,{box,preview:delta=>{proposal={...box,start:box.start+delta};paint();}});
   paint();track.append(bar,end);row.append(label,track);content.append(row);
  }));root.append(timeline);viewport.scrollLeft=view.scroll;
 }

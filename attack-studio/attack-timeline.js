@@ -1,6 +1,6 @@
-import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261108-cross-clipboard';
+import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261108-group-drag-lanes';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-shared-juggle';
-import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-cross-clipboard';
+import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-group-drag-lanes';
 import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-shared-juggle';
 import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
