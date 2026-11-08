@@ -21,10 +21,10 @@ export function catalogEntries({effects,setups,drafts=[],saved=[],savedLabel='Sa
  for(const effect of effectList){const setup=setupMap.get(effect.id);result.push(entry(setup?'template':'artwork',effect.id,setup?.attack.name||effect.name,setup?.attack,effect,setup?'Tuned template':'Artwork only'));}
  return result;
 }
-export function filterCatalog(entries,{query='',element='',delivery='',behavior='',source='',collection='',favorites=[],recent=[]}={}){
+export function filterCatalog(entries,{query='',element='',delivery='',behavior='',source='',collection='',favorites=[],recent=[],collections=[]}={}){
  const stop=new Set(['a','an','the','that','with','enemies','enemy','opponent','opponents','back','and','does','something']);
  const tokens=normalize(query).split(/\s+/).filter(t=>t&&!stop.has(t)).map(t=>aliases[t]||t);
- return entries.filter(e=>(!element||e.element===element)&&(!delivery||e.delivery===delivery)&&(!behavior||e.behaviors.includes(behavior))&&(!source||e.source===source)&&(!collection||collection==='favorites'&&favorites.includes(e.id)||collection==='recent'&&recent.includes(e.id))&&tokens.every(t=>e.search.includes(t))).sort((a,b)=>collection==='recent'?recent.indexOf(a.id)-recent.indexOf(b.id):a.name.localeCompare(b.name)||a.source.localeCompare(b.source));
+ return entries.filter(e=>(!element||e.element===element)&&(!delivery||e.delivery===delivery)&&(!behavior||e.behaviors.includes(behavior))&&(!source||e.source===source)&&(!collection||collection==='favorites'&&favorites.includes(e.id)||collection==='recent'&&recent.includes(e.id)||collections.some(c=>'collection:'+c.id===collection&&c.items.includes(e.id)))&&tokens.every(t=>e.search.includes(t))).sort((a,b)=>collection==='recent'?recent.indexOf(a.id)-recent.indexOf(b.id):a.name.localeCompare(b.name)||a.source.localeCompare(b.source));
 }
 export function readBrowserPreferences(storage){try{const p=JSON.parse(storage.getItem(BROWSER_PREFS)||'{}');return {favorites:Array.isArray(p.favorites)?p.favorites.filter(x=>typeof x==='string').slice(0,3000):[],recent:Array.isArray(p.recent)?p.recent.filter(x=>typeof x==='string').slice(0,80):[],size:[120,160,220].includes(p.size)?p.size:160,motion:p.motion===true};}catch{return {favorites:[],recent:[],size:160,motion:false};}}
 export function recordRecent(prefs,id){return {...prefs,recent:[id,...prefs.recent.filter(x=>x!==id)].slice(0,80)};}

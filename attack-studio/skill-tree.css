@@ -13,3 +13,10 @@ dialog{width:min(960px,94vw);max-height:90dvh;overflow:auto;border:1px solid #7f
 #viewport{touch-action:none}#viewport:active{cursor:grabbing}
 
 .tree-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:12px}.tree-layout>.workspace{min-width:0;grid-template-columns:minmax(0,1fr) 310px}.tree-explorer{max-height:82vh;padding:12px}.tree-explorer button{display:block;width:100%;text-align:left;margin:5px 0}.tree-explorer .path-open{padding-left:20px;font-size:12px}.tree-open[aria-current=true],#treeTabs [aria-pressed=true]{border-color:#8fe1d1;background:#304c58}#treeTabs{display:flex;gap:6px;overflow:auto;margin:8px 0}#treeList{overflow:auto;max-height:72vh}#treeList article{padding:12px;margin:8px 0;border:1px solid #52697a;border-radius:8px}.tree-stage{min-width:0}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #f3cf75;outline-offset:3px}@media(max-width:1150px){.tree-layout{grid-template-columns:180px minmax(0,1fr)}.tree-layout>.workspace{grid-template-columns:1fr}.tree-layout>.workspace>aside{max-height:none}}@media(max-width:760px){.tree-layout{display:block}.tree-explorer{max-height:240px;margin-bottom:12px}button,summary{min-height:40px}}
+
+.tree-layout.build-path{display:block}.tree-layout.build-path>.tree-explorer{display:none}
+.tree-layout.build-path>.workspace{grid-template-columns:minmax(260px,320px) minmax(360px,1fr) minmax(260px,320px);align-items:start}
+.tree-builder-finder{padding:0!important;overflow:hidden}
+.tree-layout.build-path .tree-stage{min-width:0}
+@media(max-width:1100px){.tree-layout.build-path>.workspace{grid-template-columns:minmax(240px,1fr) minmax(280px,1.4fr)}.tree-layout.build-path>.workspace>aside:last-child{grid-column:1/-1}}
+@media(max-width:700px){.tree-layout.build-path>.workspace{display:flex;flex-direction:column}.tree-layout.build-path>.workspace>*{width:100%;box-sizing:border-box}}

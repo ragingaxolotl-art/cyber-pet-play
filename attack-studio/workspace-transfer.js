@@ -1,0 +1,15 @@
+export const WORKSPACE_FORMAT='cyber-pet-workspace-layouts';
+export function workspaceBundle(presets){return {format:WORKSPACE_FORMAT,version:1,layouts:presets.map(p=>({name:p.name,layout:structuredClone(p.layout)}))};}
+export function validateWorkspaceBundle(value){
+ if(value?.format!==WORKSPACE_FORMAT||value.version!==1||!Array.isArray(value.layouts)||!value.layouts.length||value.layouts.length>100)throw Error('Choose a workspace backup with 1–100 layouts.');
+ for(const item of value.layouts){
+  if(typeof item?.name!=='string'||!item.name.trim()||item.name.length>80||item.layout?.version!==1)throw Error('Invalid layout name or version.');
+  const {panels,widths}=item.layout;if(!panels||typeof panels!=='object'||Array.isArray(panels)||Object.keys(panels).length>100)throw Error('Invalid panel settings.');
+  if(!Array.isArray(widths)||widths.length!==3||widths.some(n=>!Number.isFinite(n)||n<15||n>70))throw Error('Invalid workspace column widths.');
+  for(const [id,p] of Object.entries(panels))if(!/^[a-zA-Z0-9-]+$/.test(id)||!p||!['left','center','right'].includes(p.dock)||['x','y','w','h'].some(key=>!Number.isFinite(p[key])))throw Error('Invalid panel position or size.');
+ }
+ return structuredClone(value);
+}
+export function downloadJson(value,name){
+ const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}

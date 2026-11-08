@@ -1,3 +1,26 @@
 .attack-browser{width:min(1320px,96vw);max-width:96vw;max-height:94dvh;background:#14232f;color:#edf6fb;border:1px solid #7fb7be;border-radius:14px;padding:18px}.attack-browser::backdrop{background:#000b}.attack-browser-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.attack-browser-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end}.attack-browser-filters label{display:flex;flex-direction:column;gap:5px;min-width:130px}.attack-browser-filters input,.attack-browser-filters select{min-height:42px;width:100%}.attack-browser-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:18px;max-height:58dvh;overflow:auto}.attack-browser-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--attack-card-size,160px),1fr));gap:12px;align-content:start}.attack-browser-cards article{border:1px solid #52697a;border-radius:9px;padding:8px;min-width:0}.attack-browser-cards button{width:100%;padding:6px;text-align:left;white-space:normal}.attack-browser-cards canvas{width:100%;height:110px;object-fit:contain}.attack-browser-cards strong,.attack-browser-cards small{display:block}.attack-browser-cards small{font-size:12px;margin-top:5px;line-height:1.5}.attack-browser-preview{padding:12px;background:#203442;border-radius:10px;align-self:start;position:sticky;top:0}.attack-browser-preview canvas{width:100%;height:auto}.attack-browser-preview button{margin:5px;min-height:42px}.attack-browser-preview p{font-size:13px;line-height:1.55}.attack-browser button:focus-visible,.attack-browser input:focus-visible,.attack-browser select:focus-visible{outline:3px solid #f3cf75;outline-offset:3px}.attack-browser>div:last-child{display:flex;gap:10px;margin-top:12px}@media(max-width:760px){.attack-browser-body{display:block;max-height:65dvh}.attack-browser-preview{position:static;margin-top:12px}.attack-browser-filters label{flex:1 1 140px}.attack-browser-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .attack-browser{font-size:14px}.attack-browser-filters label{font-size:13px}.attack-browser-body{overflow:hidden}.attack-browser-cards{overflow:auto;min-height:0}.attack-browser-preview{position:static;max-height:58dvh;overflow:auto}.attack-browser-cards article{align-self:start}@media(max-width:760px){.attack-browser-body{display:flex;flex-direction:column;overflow:auto}.attack-browser-preview{order:-1;max-height:none;overflow:visible}.attack-browser-cards{overflow:visible;min-height:auto}}
+
+/* Keep the action and destination outside the independently scrolling preview. */
+.attack-browser[open]{display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;height:min(900px,94dvh)}
+.attack-browser-heading,.attack-browser-filters,.attack-browser-footer{flex-shrink:0}
+.attack-browser-body{flex:1;min-height:80px;max-height:none}
+.attack-browser-preview{max-height:100%;box-sizing:border-box}
+.attack-browser-footer{display:block!important;border-top:1px solid #52697a;padding-top:10px;margin-top:10px}
+.attack-browser-actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.attack-browser-actions button{min-height:44px}
+.attack-browser-destination{margin:0 0 6px;color:#b4eadf}
+.attack-browser-footer label{display:flex;align-items:center;gap:8px}
+@media(max-width:760px){.attack-browser[open]{height:94dvh}.attack-browser-preview{max-height:none}.attack-browser-filters{max-height:28dvh;overflow:auto}.attack-browser-footer{max-height:32dvh;overflow:auto}}
+
+.attack-browser-library{flex-basis:100%;border:1px solid #52697a;border-radius:6px;padding:6px}.attack-browser-library[open]{max-height:180px;overflow:auto}.attack-browser-library label{display:inline-flex;margin:8px}.attack-browser-library button{margin:4px;min-height:40px}
+
+.attack-browser.attack-browser-docked[open]{position:static;margin:0;width:100%;max-width:100%;height:80dvh;max-height:none;padding:10px;border:0;border-radius:0}
+.attack-browser-docked .attack-browser-body{display:flex;flex-direction:column;overflow:auto}
+.attack-browser-docked .attack-browser-preview{max-height:none;overflow:visible;order:-1}
+.attack-browser-docked .attack-browser-cards{overflow:visible;grid-template-columns:repeat(2,minmax(0,1fr))}
+.attack-browser-docked .attack-browser-filters{max-height:22dvh;overflow:auto}
+.attack-browser-docked .attack-browser-filters label{min-width:100px;flex:1 1 100px}
+.attack-browser-docked .attack-browser-preview canvas{max-height:140px;object-fit:contain}
+.attack-browser-docked .attack-browser-heading{align-items:start;font-size:12px}

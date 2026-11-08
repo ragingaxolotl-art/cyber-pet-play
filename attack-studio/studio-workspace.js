@@ -1,3 +1,5 @@
+import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261108-workflow';
+import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
 import {installAccessibility} from './editor-accessibility.js?v=20261108-scheduled-sequences';
 const KEY='cyber-pet-studio-layout-v1';
@@ -20,6 +22,7 @@ export function installStudioWorkspace(){
  for(const id of ['open','save','download'])file.append($(id));
  for(const link of [...nav.children].filter(e=>e.tagName==='A'))tools.append(link);
  const controls=$('editorMode').closest('label');controls.classList.add('workspace-controls');$('export').after(controls);
+ const buildPath=make('a','Build paths');buildPath.href='skill-tree.html?workspace=build-path';tools.append(buildPath);
  const reset=make('button','Reset workspace layout');windows.append(reset);
  const hint=make('p','Drag a panel title to float it. Resize its corner; use Dock to return it to a column.');hint.className='hint';windows.append(hint);
  const originalPanels=[document.querySelector('.library'),document.querySelector('.preview'),...[...document.querySelector('.editor-scroll').children].filter(e=>e.classList.contains('panel')),document.querySelector('.inspector')];
@@ -64,6 +67,17 @@ export function installStudioWorkspace(){
  applyLayout.onclick=()=>{const named=presets.find(p=>p.id===presetPicker.value);applyState(named?.layout||builtIn(presetPicker.value));$('status').textContent='Workspace layout opened. Hidden panels remain available in the Workspace menu.';if(presetPicker.value==='browse')$('findAttacks')?.click();};
  saveLayout.onclick=async()=>{const name=await requestEditorName('Name this workspace layout');if(!name?.trim())return;if(name.trim().length>80){$('status').textContent='Use a layout name under 80 characters.';return;}const id=crypto.randomUUID();presets.push({id,name:name.trim(),layout:structuredClone(state)});if(persistPresets()){fillPresets(id);$('status').textContent='Saved '+name.trim()+' in this browser.';}};
  renameLayout.onclick=async()=>{const preset=presets.find(p=>p.id===presetPicker.value);if(!preset){$('status').textContent='Choose one of your saved layouts to rename. Built-in layouts keep their names.';return;}const name=await requestEditorName('Layout name',preset.name);if(!name?.trim()||name.trim().length>80)return;preset.name=name.trim();if(persistPresets())fillPresets(preset.id);};
+ const updateLayout=make('button','Update this layout'),duplicateLayout=make('button','Duplicate layout'),deleteLayout=make('button','Delete saved layout'),restoreLayout=make('button','Restore deleted layout'),exportLayouts=make('button','Export saved layouts'),importLayouts=make('button','Import layouts'),layoutFile=make('input');layoutFile.type='file';layoutFile.accept='.json';layoutFile.hidden=true;restoreLayout.hidden=true;presetBox.append(updateLayout,duplicateLayout,deleteLayout,restoreLayout,exportLayouts,importLayouts,layoutFile);
+ let lastDeleted=null;
+ function selectedPreset(){const preset=presets.find(p=>p.id===presetPicker.value);if(!preset)throw Error('Choose one of your saved layouts first.');return preset;}
+ function writePresets(next,selected){localStorage.setItem(PRESETS_KEY,JSON.stringify(next));presets=next;fillPresets(selected);}
+ const manage=fn=>async()=>{try{await fn();}catch(error){$('status').textContent=error.message;}};
+ updateLayout.onclick=manage(()=>{const preset=selectedPreset();writePresets(presets.map(p=>p.id===preset.id?{...p,layout:structuredClone(state)}:p),preset.id);$('status').textContent='Updated '+preset.name+'.';});
+ duplicateLayout.onclick=manage(async()=>{const original=presets.find(p=>p.id===presetPicker.value),name=await requestEditorName('Name the copied layout',(original?.name||presetPicker.options[presetPicker.selectedIndex]?.textContent||'Workspace')+' copy');if(!name)return;const copy={id:crypto.randomUUID(),name,layout:structuredClone(original?.layout||builtIn(presetPicker.value))};writePresets([...presets,copy],copy.id);$('status').textContent='Created independent layout '+name+'.';});
+ deleteLayout.onclick=manage(()=>{const preset=selectedPreset();writePresets(presets.filter(p=>p.id!==preset.id),'default');lastDeleted=preset;restoreLayout.hidden=false;$('status').textContent='Removed '+preset.name+'. Restore deleted layout can undo this during this session.';});
+ restoreLayout.onclick=manage(()=>{if(!lastDeleted)return;writePresets([...presets,lastDeleted],lastDeleted.id);lastDeleted=null;restoreLayout.hidden=true;$('status').textContent='Restored deleted layout.';});
+ exportLayouts.onclick=manage(()=>{if(!presets.length)throw Error('Save a named layout first.');downloadJson(workspaceBundle(presets),'cyber-pet-workspace-layouts.json');$('status').textContent='Downloaded '+presets.length+' saved layouts.';});
+ importLayouts.onclick=()=>layoutFile.click();layoutFile.onchange=manage(async()=>{try{const file=layoutFile.files[0];if(!file)return;if(file.size>1024*1024)throw Error('Choose a layout backup under 1 MiB.');const bundle=validateWorkspaceBundle(JSON.parse(await file.text()));if(!await reviewImport({title:'Import workspace layouts',description:'Imported layouts get separate copies. Your saved layouts stay in place.',items:bundle.layouts.map(item=>item.name),action:'Import layouts'}))return;const added=bundle.layouts.map(item=>({id:crypto.randomUUID(),name:item.name,layout:safeLayout(item.layout)}));writePresets([...presets,...added],added[0].id);$('status').textContent='Imported '+added.length+' layouts. Choose Open layout to use one.';}finally{layoutFile.value='';}});
  lockBox.onchange=()=>{state.locked=lockBox.checked;document.body.classList.toggle('workspace-locked',state.locked);records.forEach(show);persist();};document.body.classList.toggle('workspace-locked',!!state.locked);fillPresets();
  window.addEventListener('resize' ,()=>records.forEach(show));
  document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const d of nav.querySelectorAll('.workspace-menu'))d.open=false;});

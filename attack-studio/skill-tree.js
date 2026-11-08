@@ -1,7 +1,10 @@
+import {readTreeSession,writeTreeSession,restoreTreeHistory} from './tree-session.js?v=20261108-workflow';
+import {BUNDLE_FORMAT,exportDataSet,importDataSet,validateBundle,bundleSummary} from './tree-bundle.js?v=20261108-workflow';
+import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
 import {installAccessibility} from './editor-accessibility.js?v=20261108-scheduled-sequences';
-import {catalogEntries} from './attack-browser-model.js?v=20261108-scheduled-sequences';
-import {installAttackBrowser} from './attack-browser.js?v=20261108-scheduled-sequences';
+import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
+import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
 import {readSavedBrowserAttacks} from './browser-saved-attacks.js?v=20261108-scheduled-sequences';
 import {MAIN_TREE,treeStorageKey,readCabinet,createTree,renameTree,relatedNodeIds,treeBounds} from './tree-cabinet.js?v=20261108-scheduled-sequences';
 import {DATASETS_KEY,dataSetKey,readDataSets,pathNodeIds} from './tree-datasets.js';
@@ -15,7 +18,7 @@ import {validateAttack} from './combat-model.js?v=20261108-scheduled-sequences';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let dataSets=[],dataSetId='original',treeId=MAIN_TREE,treeKey=TREE_KEY;
-let navigationMode='all',zoomControls;const treeViews=new Map(),openTreeTabs=new Map();
+let navigationMode='all',zoomControls,treeBrowser;const savedTreeSession=readTreeSession(localStorage),treeViews=new Map(savedTreeSession.views),openTreeTabs=new Map(),treeHistories=new Map();
 let connections,paths,starters;const history=[];
 const images=new Map(),nodeViews=new Map();
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
@@ -52,7 +55,19 @@ $('editor').onsubmit=guarded(event=>{event.preventDefault();applyPending();inspe
 $('prerequisiteSearch').oninput=prerequisites;
 $('save').onclick=guarded(save);
 $('download').onclick=guarded(()=>{applyPending();check(tree);const url=URL.createObjectURL(new Blob([JSON.stringify(tree,null,2)],{type:'application/json'}));const link=el('a');link.href=url;link.download=(dataSets.find(d=>d.id===dataSetId)?.trees.find(t=>t.id===treeId)?.name||'skill-tree').replace(/[^a-z0-9_-]/gi,'-')+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Tree download started, including saved attack and animation edits.');});
-$('open').onclick=()=>$('file').click();$('file').onchange=guarded(async()=>{const f=$('file').files[0];if(!f)return;if(f.size>8*1024*1024)throw Error('Choose a tree under 8 MiB.');const candidate=check(JSON.parse(await f.text()));save();createDataSet(f.name.replace(/\.json$/i,'').slice(0,80),candidate);$('file').value='';say('Imported into a separate data set.');});
+const downloadSet=el('button','Download entire data set');downloadSet.id='downloadDataSet';$('download').after(downloadSet);
+downloadSet.onclick=guarded(()=>{save();const bundle=exportDataSet(localStorage,dataSetId,check),url=URL.createObjectURL(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'})),link=el('a');link.href=url;link.download=bundle.name.replace(/[^a-z0-9_-]/gi,'-')+'-data-set.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Downloaded all '+bundle.trees.length+' trees in '+bundle.name+'.');});
+$('open').textContent='Import tree or data set';$('open').onclick=()=>$('file').click();
+$('file').onchange=guarded(async()=>{
+ const f=$('file').files[0];if(!f)return;
+ try{
+  if(f.size>64*1024*1024)throw Error('Choose a backup under 64 MiB.');
+  const value=JSON.parse(await f.text()),isBundle=value?.format===BUNDLE_FORMAT;
+  const bundle=isBundle?validateBundle(value,check):{format:BUNDLE_FORMAT,version:1,name:f.name.replace(/\.json$/i,'').slice(0,80)||'Imported tree',trees:[{id:MAIN_TREE,name:'Main tree',tree:check(value)}]};
+  const accepted=await reviewImport({title:'Import '+bundle.name,description:'This creates a separate data set. Your existing trees stay in place.',items:bundleSummary(bundle).map(item=>item.name+' — '+item.attacks+' attacks, '+item.paths+' paths')});
+  if(!accepted)return;save();const id=importDataSet(localStorage,bundle,check);openDataSet(id);say('Imported '+bundle.trees.length+' trees into '+bundle.name+'.');
+ }finally{$('file').value='';}
+});
 
 $('branch').onchange=guarded(()=>{applyPending();render();});$('search').oninput=guarded(()=>{applyPending();render();});zoomControls=installTreeZoom($);
 $('arrange').onclick=guarded(()=>{applyPending();const candidate=structuredClone(tree),shown=new Set(visible().map(n=>n.id)),nodes=candidate.nodes.filter(n=>shown.has(n.id));const local={nodes:nodes.map(n=>({...n,requires:n.requires.filter(id=>shown.has(id))}))};const offset=nodes.length?Math.max(0,Math.min(...nodes.map(n=>n.y))-40):0;arrange(local);for(const pos of local.nodes){const n=candidate.nodes.find(n=>n.id===pos.id);n.x=pos.x;n.y=pos.y+offset;}commit(candidate);});
@@ -74,11 +89,11 @@ $('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause cli
 function tick(now){if(playing&&current()){const effect=effects.get(current().effectId);clipElapsed+=Math.min(now-last,100);if(clipElapsed>=(effect.times[clipFrame]||100)){clipElapsed=0;clipFrame=(clipFrame+1)%effect.times.length;showFrame();}}last=now;requestAnimationFrame(tick);}
 $('editor').addEventListener('input',event=>{if(!['frame','prerequisiteSearch'].includes(event.target.id))dirty=true;});$('treeNotes').oninput=()=>dirty=true;
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
-try{const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));dataSets=readCabinet(localStorage);dataSetId=new URLSearchParams(location.search).get('dataSet')||'original';if(!dataSets.some(d=>d.id===dataSetId))dataSetId=dataSets[0].id;treeId=new URLSearchParams(location.search).get('tree')||MAIN_TREE;if(!dataSets.find(d=>d.id===dataSetId).trees.some(t=>t.id===treeId))throw Error('The requested tree is not in this browser. Import its backup to open it.');treeKey=treeStorageKey(dataSetId,treeId);rememberTab();refreshDataSets();baseSaved=localStorage.getItem(treeKey);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
+try{const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));dataSets=readCabinet(localStorage);dataSetId=new URLSearchParams(location.search).get('dataSet')||savedTreeSession.active?.dataSetId||'original';if(!dataSets.some(d=>d.id===dataSetId))dataSetId=dataSets[0].id;treeId=new URLSearchParams(location.search).get('tree')||(!new URLSearchParams(location.search).has('dataSet')?savedTreeSession.active?.treeId:null)||MAIN_TREE;if(!dataSets.find(d=>d.id===dataSetId).trees.some(t=>t.id===treeId)){if(new URLSearchParams(location.search).has('tree'))throw Error('The requested tree is not in this browser. Import its backup to open it.');treeId=MAIN_TREE;}for(const tab of savedTreeSession.tabs)if(dataSets.find(d=>d.id===tab.dataSetId)?.trees.some(t=>t.id===tab.treeId))openTreeTabs.set(treeStorageKey(tab.dataSetId,tab.treeId),tab);treeKey=treeStorageKey(dataSetId,treeId);rememberTab();refreshDataSets();baseSaved=localStorage.getItem(treeKey);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
 connections=installConnections({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,undo,canUndo:()=>history.length>0,paths});
 starters=installStarters({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,effects});
 installTreeCatalog();
-installAccessibility($('treeAccessibility'));render();inspect();libraryOptions();say(`${tree.nodes.length} attacks in the learning tree. ${baseSaved?'Restored saved edits.':'Proposed order — edit and save to keep it.'}`);requestAnimationFrame(tick);}catch(e){say('Could not open tree: '+e.message);}
+installAccessibility($('treeAccessibility'));render();restoreView(treeViews.get(treeKey));inspect();libraryOptions();say(`${tree.nodes.length} attacks in the learning tree. ${baseSaved?'Restored saved edits.':'Proposed order — edit and save to keep it.'}`);requestAnimationFrame(tick);}catch(e){say('Could not open tree: '+e.message);}
 
 function refreshDataSets(){
  $('dataSet').replaceChildren(...dataSets.map(d=>new Option(d.name,d.id)));$('dataSet').value=dataSetId;
@@ -88,19 +103,27 @@ function refreshPathPicker(){
  if((tree.paths||[]).some(p=>p.id===old))$('viewPath').value=old;
 }
 function rememberTab(){openTreeTabs.set(treeKey,{dataSetId,treeId});}
-function rememberView(){treeViews.set(treeKey,{selected,branch:$('branch').value,search:$('search').value,path:$('viewPath').value,active:$('activePath').value,left:$('viewport').scrollLeft,top:$('viewport').scrollTop,zoom:Number($('zoom').value),mode:navigationMode});}
+function rememberView(){treeViews.set(treeKey,{selected,branch:$('branch').value,search:$('search').value,path:$('viewPath').value,active:$('activePath').value,left:$('viewport').scrollLeft,top:$('viewport').scrollTop,zoom:Number($('zoom').value),mode:navigationMode,display:$('treeViewMode').value});}
 function openDataSet(id,nextTree=MAIN_TREE){
  const cabinet=readCabinet(localStorage),entry=cabinet.find(d=>d.id===id)?.trees.find(t=>t.id===nextTree);if(!entry)throw Error('That tree is no longer listed. Reload to refresh the sidebar.');
  const key=treeStorageKey(id,nextTree),raw=localStorage.getItem(key);if(!raw)throw Error('This tree has no saved data. Import its backup to restore it.');const next=check(JSON.parse(raw));
- rememberView();connections?.cancel();tree=next;treeKey=key;dataSetId=id;treeId=nextTree;dataSets=cabinet;baseSaved=raw;dirty=false;history.length=0;playing=false;
+ rememberView();treeHistories.set(treeKey,{base:baseSaved,items:structuredClone(history)});connections?.cancel();tree=next;treeKey=key;dataSetId=id;treeId=nextTree;dataSets=cabinet;baseSaved=raw;dirty=false;history.splice(0,history.length,...restoreTreeHistory(treeHistories.get(key),raw,check));playing=false;
  const view=treeViews.get(key);selected=next.nodes.some(n=>n.id===view?.selected)?view.selected:next.nodes[0]?.id;navigationMode=view?.mode||'all';
  $('branch').value='';$('search').value=view?.search||'';$('viewPath').value='';$('activePath').value='';$('treeNotes').value=tree.notes||'';
  rememberTab();refreshDataSets();render();
  if(view){$('branch').value=view.branch;$('viewPath').value=view.path;$('activePath').value=view.active;render();}
- inspect();zoomControls?.setZoom(view?.zoom||1);$('viewport').scrollTo(view?.left||0,view?.top||0);
+ restoreView(view);inspect();persistTreeSession();
  const url=new URL(location.href);url.searchParams.set('dataSet',id);url.searchParams.set('tree',nextTree);window.history.replaceState(null,'',url);
  say('Opened '+entry.name+' in '+dataSets.find(d=>d.id===id).name+'.');
 }
+function restoreView(view){
+ if(!view){$('treeViewMode').value='tree';$('viewport').hidden=false;$('treeList').hidden=true;zoomControls?.setZoom(1);$('viewport').scrollTo(0,0);return;}
+ selected=tree.nodes.some(n=>n.id===view.selected)?view.selected:tree.nodes[0]?.id;navigationMode=view.mode||'all';$('branch').value=view.branch;$('search').value=view.search;$('viewPath').value=view.path;$('activePath').value=view.active;$('treeViewMode').value=view.display||'tree';$('viewport').hidden=view.display==='list';$('treeList').hidden=view.display!=='list';render();zoomControls?.setZoom(view.zoom);$('viewport').scrollTo(view.left,view.top);
+}
+function persistTreeSession(){if(!tree)return;rememberView();try{writeTreeSession(localStorage,{tabs:[...openTreeTabs.values()],views:[...treeViews],active:{dataSetId,treeId}});}catch{ /* View preferences must never block saving tree content. */ }}
+window.addEventListener('pagehide',persistTreeSession);window.addEventListener('beforeunload',persistTreeSession);
+let sessionTimer;const scheduleSession=()=>{clearTimeout(sessionTimer);sessionTimer=setTimeout(persistTreeSession,250);};
+document.addEventListener('click',scheduleSession);document.addEventListener('change',scheduleSession);document.addEventListener('input',scheduleSession);$('viewport').addEventListener('scroll',scheduleSession);$('viewport').addEventListener('pointerup',scheduleSession);$('viewport').addEventListener('wheel',scheduleSession);
 function createDataSet(name,next){
  const latest=readDataSets(localStorage),id=crypto.randomUUID();check(next);
  localStorage.setItem(dataSetKey(id),JSON.stringify(next));
@@ -120,6 +143,7 @@ function refreshTreeNavigation(){
   }explorer.append(group);
  }
  const tabs=$('treeTabs');tabs.replaceChildren();for(const [key,tab] of openTreeTabs){const set=dataSets.find(d=>d.id===tab.dataSetId),item=set?.trees.find(t=>t.id===tab.treeId);if(!item)continue;const button=el('button',set.name+' / '+item.name);button.setAttribute('aria-pressed',String(key===treeKey));button.onclick=guarded(()=>{save();openDataSet(tab.dataSetId,tab.treeId);});tabs.append(button);}
+ treeBrowser?.refreshDestination();
  $('treeBreadcrumb').textContent=dataSets.find(d=>d.id===dataSetId)?.name+' / '+dataSets.find(d=>d.id===dataSetId)?.trees.find(t=>t.id===treeId)?.name;
 }
 function renderTreeList(){const list=$('treeList');list.replaceChildren();for(const node of visible()){
@@ -137,11 +161,17 @@ for(const [id,dx,dy] of [['moveNodeLeft',-40,0],['moveNodeRight',40,0],['moveNod
 
 function installTreeCatalog(){
  let saved=[],savedLabel='Saved attacks',attachNext=false;
- const browser=installAttackBrowser({getEntries:()=>{let drafts=[];try{const p=JSON.parse(localStorage.getItem('cyber-pet-combat-design-v1-recovery')||localStorage.getItem('cyber-pet-combat-design-v1')||'null');drafts=(p?.attacks||[]).filter(a=>{try{validateAttack(a,ids);return true;}catch{return false;}});}catch{}return catalogEntries({effects,setups,drafts,saved,savedLabel});},loadSaved:async()=>{const result=await readSavedBrowserAttacks(a=>validateAttack(a,ids));saved=result.attacks;savedLabel=result.label;if(result.notice)say(result.notice);},status:say,actions:[
+ const browser=treeBrowser=installAttackBrowser({allowKeepAdding:true,getDestination:()=>{const dataSet=dataSets.find(d=>d.id===dataSetId),board=dataSet?.trees.find(t=>t.id===treeId),path=(tree.paths||[]).find(p=>p.id===$('activePath').value);return 'Destination: '+dataSet?.name+' / '+board?.name+(path?' / '+path.name:'')+(attachNext&&current()?' → next after '+current().name:' → independent attack');},getEntries:()=>{let drafts=[];try{const p=JSON.parse(localStorage.getItem('cyber-pet-combat-design-v1-recovery')||localStorage.getItem('cyber-pet-combat-design-v1')||'null');drafts=(p?.attacks||[]).filter(a=>{try{validateAttack(a,ids);return true;}catch{return false;}});}catch{}return catalogEntries({effects,setups,drafts,saved,savedLabel});},loadSaved:async()=>{const result=await readSavedBrowserAttacks(a=>validateAttack(a,ids));saved=result.attacks;savedLabel=result.label;if(result.notice)say(result.notice);},status:say,actions:[
   {label:()=>attachNext?'Add after selected attack':'Add independent copy to tree',available:e=>!!e.effect,run:e=>{applyPending();addEffect(e.effect.id,attachNext?'attached':'standalone',e.attack);say('Added '+e.name+(attachNext?' after the selected attack.':' as an independent tree attack.'));}},
   {label:'Add after selected attack',available:e=>!!e.effect&&!!current()&&!attachNext,run:e=>{applyPending();addEffect(e.effect.id,'attached',e.attack);say('Added '+e.name+' after the selected attack.');}},
   {label:'Add to starter skills',available:e=>!!e.effect,run:e=>{applyPending();addEffect(e.effect.id,'starter',e.attack);}}
  ]});
- $('browseAttacks').textContent='Find attacks to add';$('browseAttacks').onclick=guarded(()=>{applyPending();attachNext=false;browser.open();});
+ const buildButton=el('button','Build-path workspace'),placementLabel=el('label','Add attacks as'),placement=el('select'),finderHost=el('aside');buildButton.id='buildPathWorkspace';buildButton.setAttribute('aria-pressed','false');placement.setAttribute('aria-label','Build-path placement');placement.append(new Option('Next after selected attack','attached'),new Option('Independent attacks','standalone'));placementLabel.append(placement);placementLabel.hidden=true;finderHost.className='tree-builder-finder';finderHost.hidden=true;document.querySelector('.workspace').prepend(finderHost);$('browseAttacks').after(buildButton);buildButton.after(placementLabel);
+ let building=false;
+ const setBuilding=on=>{const pageUrl=new URL(location.href);pageUrl.searchParams.delete('workspace');window.history.replaceState(null,'',pageUrl);building=on;document.querySelector('.tree-layout').classList.toggle('build-path',on);buildButton.setAttribute('aria-pressed',String(on));buildButton.textContent=on?'Standard tree workspace':'Build-path workspace';placementLabel.hidden=!on;finderHost.hidden=!on;if(on){attachNext=placement.value==='attached'&&!!current();browser.dock(finderHost);}else browser.undock();try{localStorage.setItem('cyber-pet-build-path-workspace',String(on));}catch{}};
+ buildButton.onclick=guarded(()=>{applyPending();setBuilding(!building);});placement.onchange=()=>{attachNext=placement.value==='attached'&&!!current();browser.refresh();};
+ const refreshDestination=browser.refreshDestination;browser.refreshDestination=()=>{const previous=attachNext;if(building)attachNext=placement.value==='attached'&&!!current();refreshDestination();if(previous!==attachNext)browser.refresh();};
+ if(new URLSearchParams(location.search).get('workspace')==='build-path'||localStorage.getItem('cyber-pet-build-path-workspace')==='true')setBuilding(true);
+ $('browseAttacks').textContent='Find attacks to add';$('browseAttacks').onclick=guarded(()=>{applyPending();attachNext=building&&placement.value==='attached'&&!!current();browser.open();});
  $('addNextAttack').onclick=guarded(()=>{applyPending();if(!current())throw Error('Select an attack to add its next step.');attachNext=true;browser.open();});
 }

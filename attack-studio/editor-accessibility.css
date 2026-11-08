@@ -1,3 +1,8 @@
 .editor-large-controls button,.editor-large-controls input,.editor-large-controls select,.editor-large-controls summary{min-height:44px!important}.editor-large-controls button{padding:10px!important}.editor-large-text :is(label,button,input,select,textarea,summary,p,small){font-size:16px!important;line-height:1.55!important}:is(button,a,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid #f3cf75!important;outline-offset:3px!important}.workspace-panel-bar button:disabled{cursor:default;opacity:.65}.workspace-presets{border-bottom:1px solid #52697a;padding-bottom:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px}.workspace-presets input[type=checkbox]{width:auto}.workspace-locked .workspace-drag,.workspace-locked .workspace-resize,.workspace-locked .workspace-splitter{cursor:default}.workspace-locked .workspace-resize{display:none!important}
 
 .editor-name-dialog{width:min(90vw,420px);border:1px solid #8fe1d1;border-radius:12px;background:#142333;color:#eef8ff;padding:24px}.editor-name-dialog::backdrop{background:#0009}.editor-name-dialog label{display:block;margin-bottom:20px}.editor-name-dialog input{display:block;width:100%;box-sizing:border-box;margin-top:8px}.editor-name-dialog button{margin-right:10px}
+
+.editor-import-dialog{width:min(90vw,560px);max-height:85dvh;overflow:auto;border:1px solid #8fe1d1;border-radius:12px;background:#142333;color:#eef8ff;padding:24px}.editor-import-dialog::backdrop{background:#0009}.editor-import-dialog li{margin:8px 0}.editor-import-dialog button{min-height:44px;margin:8px}
+
+/* Preserve hidden semantics when component display rules use flex or grid. */
+[hidden]{display:none!important}
