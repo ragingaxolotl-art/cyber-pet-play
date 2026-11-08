@@ -1,6 +1,6 @@
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-reaction-templates';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-combo-tracking';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
-import {validateAttack} from './combat-model.js?v=20261108-impact-timing';
+import {validateAttack} from './combat-model.js?v=20261108-combo-tracking';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-impact-timing';
 import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-shared-juggle';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
@@ -60,6 +60,7 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
   }
   function results(){const output=document.getElementById('hitResults');output.replaceChildren();const sim=getSimulation();if(!sim)return;
     const summary=el('strong',`${sim.frames.at(-1).hits} contact(s) · ${sim.cost} energy · impact ${sim.impactFrame===null?'not reached':sim.impactFrame+'f'}`);output.append(summary);
+    if(sim.combos?.length){const combo=sim.combos.find(c=>c.attacker==='self');if(combo)output.append(el('p',`Outgoing damage chain: up to ${combo.bestHits} hit(s); maximum chain HP damage ${combo.bestDamage}. Guard contacts are excluded. This single-attack preview does not test a follow-up attack; use Arena comparison for cross-attack combos.`));}
     if(sim.hitResults){const table=el('table');const head=el('tr');for(const title of ['Hit','Expected','Actual','Result'])head.append(el('th',title));table.append(head);
       sim.hitResults.forEach((r,i)=>{const row=el('tr');for(const value of [i+1,(getAttack().sequenceTiming==='cast'?'startup + ':'contact + ')+r.offset,r.frame??'—',r.result+(r.reason?' · '+r.reason:'')])row.append(el('td',String(value)));table.append(row);});output.append(table);
     }else{const p=el('p',sim.events.at(-1)?.text||'Run a test to see the result.');output.append(p);}

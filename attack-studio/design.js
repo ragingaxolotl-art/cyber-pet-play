@@ -19,9 +19,9 @@ import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './att
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
 import {installAttackBank} from './attack-bank.js?v=20261108-impact-timing';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-impact-timing';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-combo-tracking';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
-import {installSequenceEditor} from './sequence-editor.js?v=20261108-reaction-templates';
+import {installSequenceEditor} from './sequence-editor.js?v=20261108-combo-tracking';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');

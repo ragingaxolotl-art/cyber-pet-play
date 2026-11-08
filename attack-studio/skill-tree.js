@@ -14,7 +14,7 @@ import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree
 import {installTreeGallery} from './tree-gallery.js?v=20261108-scheduled-sequences';
 import {installStarters,setStarter} from './tree-starters.js?v=20261108-scheduled-sequences';
 import {TREE_KEY,validateTree,starterTree,ancestors,arrange,treeVersion} from './skill-tree-model.js?v=20261108-impact-timing';
-import {validateAttack} from './combat-model.js?v=20261108-impact-timing';
+import {validateAttack} from './combat-model.js?v=20261108-combo-tracking';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let dataSets=[],dataSetId='original',treeId=MAIN_TREE,treeKey=TREE_KEY;

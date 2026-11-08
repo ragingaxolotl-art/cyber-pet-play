@@ -1,8 +1,9 @@
+import {ComboTracker} from './combo-tracker.js?v=20261108-combo-tracking';
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-impact-timing';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-combo-tracking';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-shared-juggle';
 
@@ -12,6 +13,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   const other={x:(options.targetSide===-1?-1:1)*(options.distance??100),y:-(options.targetHeight??0),vy:0,hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,stun:0};
   const cost=Math.ceil(attack.cost*av.cost),cast=self.energy>=cost;
   if(cast)self.energy-=cost;
+  const combos=new ComboTracker();
   const defenseCast={a:attack,defenseState:createDefenseState()};
   tm.active=sequenceDuration(attack);
   const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false;const independent=attack.projectileLifetime!==undefined;
@@ -22,6 +24,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(independent&&launched&&frame>=tm.startup+attack.projectileLifetime&&!state.cancelled&&state.results.length<attack.hitEvents.length)state.cancelled='Projectile lifetime expired.';
     if(independent&&self.hp<=0)state.cancelled='Attacker defeated.';
     if(!advancePulseReaction(other,frame,-220,220)&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){resetGroundedJuggle(other);other.reaction='standing';other.reactionLandFrame=frame;}}
+    combos.beginFrame(frame,new Map([['target',{defeated:other.hp<=0,locked:other.stun>frame||!!other.pulseMotion}]]));
     let box=worldBox(attack,(state.startFrame!==null?frame:state.contactFrame??frame),attacker,direction);
     if(state.attached&&attack.projectileMode==='attached')box={...box,x:other.x-box.w/2,y:other.y-box.h};
     const targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
@@ -48,6 +51,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
         const guarded=!!options.guard&&attack.blockable;
         const damage=Math.round(event.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1));
         const actual=Math.min(other.hp,damage);other.hp-=actual;hits++;
+        combos.contact('self','target',guarded?'block':'hit',actual);
         hitResult(state,event,frame,guarded?'Blocked':'Connected');
         events.push({frame,text:`${guarded?'Blocked hit':'Hit'} ${hits}: ${actual} damage.`});
         if(guarded){if(state.startFrame===null)state.cancelled='First contact was blocked; attachment cancelled.';other.reactionGuardFrame=frame;if(attack.contactFeedback?.blockstun>0)other.blockstunUntil=Math.max(other.blockstunUntil||0,frame+attack.contactFeedback.blockstun+1);}
@@ -59,9 +63,10 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if((state.startFrame??state.contactFrame)!==null)end=(state.startFrame??state.contactFrame)+sequenceDuration(attack)+Math.max(120,tm.recovery);
     for(const who of [self,other])who.canAct=who.hp>0&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
     const impactStop=hits>hitsBeforeFeedback?(options.guard&&attack.blockable?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
-    frames.push({frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
+    if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');
+    frames.push({combos:combos.snapshot(),frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
     if(!cast)break;
   }
   const results=attack.hitEvents.map(event=>state.results.find(r=>r.id===event.id)||{id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.cancelled||(state.startFrame===null&&state.contactFrame===null?'Projectile did not reach the target.':'No eligible contact during this hit window.')});
-  return {frames,presentationFrames:presentationFrames(frames),events,hitResults:results,cost,cast,contactMode:state.startFrame===null,impactFrame:state.startFrame??state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm))};
+  return {combos:combos.snapshot(),frames,presentationFrames:presentationFrames(frames),events,hitResults:results,cost,cast,contactMode:state.startFrame===null,impactFrame:state.startFrame??state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm))};
 }

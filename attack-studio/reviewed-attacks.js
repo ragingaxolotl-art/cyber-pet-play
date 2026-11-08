@@ -1,4 +1,4 @@
-import {freshAttack,validateAttack} from './combat-model.js?v=20261108-impact-timing';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261108-combo-tracking';
 import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261108-scheduled-sequences';
 // Reviewed setups always open as new drafts; bank entries and existing edits are untouched.
 export function openReviewedAttack(setup,effects){
