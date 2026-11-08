@@ -1,5 +1,5 @@
 {
-  "release": "20261108-projectile-defense",
+  "release": "20261108-scheduled-sequences",
   "attackDefinitionVersions": [
     1,
     2,
@@ -9,7 +9,8 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
   "sequenceTransport": "project-download",
   "classroomBankVersions": [
@@ -21,7 +22,8 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
   "cloudSequencePublishing": true,
   "skillTreeSequencePublishing": true,
@@ -34,7 +36,8 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
   "multipleHitboxes": "timed-damage-and-contact-sequences",
   "groupSequenceSupport": true,
@@ -57,7 +60,8 @@
     6,
     7,
     8,
-    9
+    9,
+    10
   ],
   "defenseKinds": [
     "armor",
@@ -70,5 +74,6 @@
   "studioComparisonTransfer": true,
   "automaticFollowups": true,
   "independentProjectileLifetime": true,
-  "projectileClashes": true
+  "projectileClashes": true,
+  "scheduledMeleeAreaSequences": true
 }

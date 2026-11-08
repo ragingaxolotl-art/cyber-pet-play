@@ -1,4 +1,4 @@
-import {BROWSER_PREFS,filterCatalog,readBrowserPreferences,recordRecent} from './attack-browser-model.js?v=20261108-usability';
+import {BROWSER_PREFS,filterCatalog,readBrowserPreferences,recordRecent} from './attack-browser-model.js?v=20261108-scheduled-sequences';
 // Shared, read-only browsing UI. Only the explicit action callbacks change drafts/trees.
 export function installAttackBrowser({getEntries,actions,status=()=>{},loadSaved}){
  const make=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};

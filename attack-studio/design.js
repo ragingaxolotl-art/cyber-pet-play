@@ -1,26 +1,26 @@
-import {catalogEntries} from './attack-browser-model.js?v=20261108-usability';
-import {installAttackBrowser} from './attack-browser.js?v=20261108-usability';
-import {installStudioWorkspace} from './studio-workspace.js?v=20261108-usability';
-import {renderProjectileEditor} from './projectile-editor.js?v=20261108-projectile-defense';
-import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-projectile-defense';
-import {remapSelfCancels} from './cancel-windows.js?v=20261108-projectile-defense';
-import {renderCancelEditor} from './cancel-editor.js?v=20261108-projectile-defense';
-import {renderDefenseEditor} from './defense-editor.js?v=20261108-projectile-defense';
-import {renderAttackTimeline} from './attack-timeline.js?v=20261108-projectile-defense';
-import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-projectile-defense';
-import {attacksVersion} from './attack-format.js?v=20261108-projectile-defense';
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-projectile-defense';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-usability';
-import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-projectile-defense';
-import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-projectile-defense';
-import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-projectile-defense';
-import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-projectile-defense';
-import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-projectile-defense';
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-projectile-defense';
-import {installAttackBank} from './attack-bank.js?v=20261108-bank-recovery';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-projectile-defense';
-import {EditHistory} from './edit-history.js?v=20261108-projectile-defense';
-import {installSequenceEditor} from './sequence-editor.js?v=20261108-projectile-defense';
+import {catalogEntries} from './attack-browser-model.js?v=20261108-scheduled-sequences';
+import {installAttackBrowser} from './attack-browser.js?v=20261108-scheduled-sequences';
+import {installStudioWorkspace} from './studio-workspace.js?v=20261108-scheduled-sequences';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261108-scheduled-sequences';
+import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-scheduled-sequences';
+import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
+import {renderCancelEditor} from './cancel-editor.js?v=20261108-scheduled-sequences';
+import {renderDefenseEditor} from './defense-editor.js?v=20261108-scheduled-sequences';
+import {renderAttackTimeline} from './attack-timeline.js?v=20261108-scheduled-sequences';
+import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-scheduled-sequences';
+import {attacksVersion} from './attack-format.js?v=20261108-scheduled-sequences';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-scheduled-sequences';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-scheduled-sequences';
+import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-scheduled-sequences';
+import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-scheduled-sequences';
+import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
+import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
+import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
+import {installAttackBank} from './attack-bank.js?v=20261108-scheduled-sequences';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-scheduled-sequences';
+import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
+import {installSequenceEditor} from './sequence-editor.js?v=20261108-scheduled-sequences';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
@@ -54,7 +54,7 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  field($('identity'),'Required character motion',a,'motion','select',MOTIONS,0,0,1,()=>{delete a.poseFrames;delete a.poseDurations;a.poseImpact=0;changed();refresh();});
  field($('identity'),'Pose impact frame (0 = middle)',a,'poseImpact','number',null,0,a.poseFrames?.length||library.examples[a.motion]?.count||300);
  field($('identity'),'Element tag',a,'element','select',['earth','water','air','fire','metal','ice','electric','plant','light','dark','mixed']);
- const c=$('combat');field(c,'Delivery',a,'delivery','select',[['melee','Melee'],['projectile','Projectile'],['area','Area'],['self','Self'],['ally','Ally in hitbox']],0,0,1,()=>{changed();renderSettings();});field(c,'Result on contact',a,'payload','select',[['damage','Damage'],['heal','Heal'],['shield','Shield'],['energy','Restore energy'],['push','Push only · no damage'],['block','Block · no outgoing damage'],['dodge','Dodge · evade incoming hits']],0,0,1,()=>{if(['block','dodge'].includes(a.payload)){a.delivery='self';a.motion=a.payload==='dodge'?'dodge_side':'block_side';delete a.poseFrames;delete a.poseDurations;a.poseImpact=0;}if(a.payload==='push'&&a.delivery==='self')a.delivery='melee';if(['push','block','dodge'].includes(a.payload))a.status='none';changed();refresh();});
+ const c=$('combat');field(c,'Delivery',a,'delivery','select',[['melee','Melee'],['projectile','Projectile'],['area','Area'],['self','Self'],['ally','Ally in hitbox']],0,0,1,()=>{changed();refresh();});field(c,'Result on contact',a,'payload','select',[['damage','Damage'],['heal','Heal'],['shield','Shield'],['energy','Restore energy'],['push','Push only · no damage'],['block','Block · no outgoing damage'],['dodge','Dodge · evade incoming hits']],0,0,1,()=>{if(['block','dodge'].includes(a.payload)){a.delivery='self';a.motion=a.payload==='dodge'?'dodge_side':'block_side';delete a.poseFrames;delete a.poseDurations;a.poseImpact=0;}if(a.payload==='push'&&a.delivery==='self')a.delivery='melee';if(['push','block','dodge'].includes(a.payload))a.status='none';changed();refresh();});
  field(c,'Base amount',a,'base');field(c,'Training stat',a,'scaling','select',STATS);field(c,'Amount per stat level',a,'coefficient','number',null,0,5,.05);field(c,'Energy cost',a,'cost','number',null,0,200);
  field(c,'Push direction',a,'pushAxis','select',[['x','X · horizontal'],['y','Y · vertical'],['both','X + Y · combined']]);field(c,'Block damage reduction (%)',a,'blockPercent','number',null,0,100);
  field(c,'Knockback distance (px)',a,'knockback','number',null,0,150);field(c,'Launch height (px)',a,'launchHeight','number',null,0,500);field(c,'Push / flight duration (frames)',a,'flightFrames','number',null,1,120);field(c,'Smash into wall',a,'wallSlam','checkbox');field(c,'Smash into floor on landing',a,'floorSlam','checkbox');field(c,'Hitstun (frames)',a,'hitstun','number',null,0,120);field(c,'Can be blocked',a,'blockable','checkbox');
@@ -70,7 +70,7 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  field($('hitbox'),'Projectile px / frame',a,'projectileSpeed','number',null,0,12,.25);
  const s=$('statusFields');field(s,'Secondary status',a,'status','select',['none','burn','poison','regen','slow','haste','weaken','stun']);field(s,'Tick amount / modifier %',a,'statusPower','number',null,0,100);field(s,'Status duration (frames)',a,'statusDuration','number',null,1,900);field(s,'Tick interval (frames)',a,'statusInterval','number',null,1,300);field(s,'Shield lifetime (frames)',a,'shieldDuration','number',null,1,900);
  if(a.hitboxGroups)for(const key of ['hitLimit','hitInterval']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Edit these settings in the selected hit group.';}}
- if(a.hitEvents)for(const key of ['base','coefficient','knockback','launchHeight','flightFrames','hitLimit','hitInterval','active','wallSlam','floorSlam','payload','delivery','status','impactTrigger']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Controlled by the Hit sequence editor; return to ordinary projectile to edit this.';}}
+ if(a.hitEvents)for(const key of ['base','coefficient','knockback','launchHeight','flightFrames','hitLimit','hitInterval','active','wallSlam','floorSlam','payload','delivery','status','impactTrigger']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Controlled by the Hit sequence editor; return to an ordinary attack to edit this.';}}
  $('tags').value=a.tags.join(', ');$('notes').value=a.notes;
 }
 function renderLayers(){renderReskinGroup();const root=$('layers');root.replaceChildren();const a=attack();if(!a.visuals.length){const p=document.createElement('p');p.className='hint';p.textContent='No VFX yet. The hitbox and motion can still be tested.';root.append(p);}
@@ -253,7 +253,7 @@ function restoreEdit(direction){
 function installEditing(){
  if(['127.0.0.1','localhost'].includes(new URL(location.href).hostname))$('arenaLink').href='/arena/';
  history=new EditHistory(project);installLibraryTabs();
- sequenceEditor=installSequenceEditor({getAttack:attack,getAttacks:()=>project.attacks,getSimulation:()=>simulation,seek:n=>{frame=Math.max(0,Math.min(n,simulation.frames.length-1));playing=false;draw();},commit:next=>{Object.assign(attack(),next);for(const k of ['hitEvents','behaviorVersion','projectileMode'])if(next[k]===undefined)delete attack()[k];changed();refresh();}});
+ sequenceEditor=installSequenceEditor({getAttack:attack,getAttacks:()=>project.attacks,getSimulation:()=>simulation,seek:n=>{frame=Math.max(0,Math.min(n,simulation.frames.length-1));playing=false;draw();},commit:next=>{Object.assign(attack(),next);for(const k of ['hitEvents','behaviorVersion','projectileMode','sequenceTiming'])if(next[k]===undefined)delete attack()[k];changed();refresh();}});
  $('undo').onclick=()=>restoreEdit('undo');$('redo').onclick=()=>restoreEdit('redo');
  document.addEventListener('keydown',e=>{if(!(e.metaKey||e.ctrlKey)||e.key.toLowerCase()!=='z'||e.target.closest('input,textarea'))return;e.preventDefault();restoreEdit(e.shiftKey?'redo':'undo');});
  $('editorMode').onchange=()=>document.body.classList.toggle('basic-mode',$('editorMode').value==='basic');

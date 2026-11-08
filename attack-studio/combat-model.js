@@ -1,17 +1,17 @@
-import {validateProjectileLifetime} from './projectile-lifetime.js?v=20261108-projectile-defense';
-import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-projectile-defense';
-import {castEnd,activeEnd} from './contact-timing.js?v=20261108-projectile-defense';
-import {validateCancelWindows} from './cancel-windows.js?v=20261108-projectile-defense';
-import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-projectile-defense';
-import {requireGroupVersion} from './attack-format.js?v=20261108-projectile-defense';
-import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-projectile-defense';
-import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-projectile-defense';
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-projectile-defense';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-projectile-defense';
-import {pathSample} from './attack-motion.js?v=20261108-projectile-defense';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-projectile-defense';
-import {validateHitSequence} from './hit-sequence.js?v=20261108-projectile-defense';
-import {simulateSequence} from './sequence-preview.js?v=20261108-projectile-defense';
+import {validateProjectileLifetime} from './projectile-lifetime.js?v=20261108-scheduled-sequences';
+import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-scheduled-sequences';
+import {castEnd,activeEnd} from './contact-timing.js?v=20261108-scheduled-sequences';
+import {validateCancelWindows} from './cancel-windows.js?v=20261108-scheduled-sequences';
+import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-scheduled-sequences';
+import {requireGroupVersion} from './attack-format.js?v=20261108-scheduled-sequences';
+import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-scheduled-sequences';
+import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-scheduled-sequences';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-scheduled-sequences';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-scheduled-sequences';
+import {pathSample} from './attack-motion.js?v=20261108-scheduled-sequences';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
+import {validateHitSequence} from './hit-sequence.js?v=20261108-scheduled-sequences';
+import {simulateSequence} from './sequence-preview.js?v=20261108-scheduled-sequences';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -34,7 +34,7 @@ export function validateAttack(a,ids){
  if(a.hitboxGroups!==undefined){
   validateHitboxGroups(a.hitboxGroups);
   if((!a.hitEvents&&a.impactTrigger==='contact')||a.payload!=='damage'||a.delivery==='self')fail('Hitbox groups require timed damage or an independent hit sequence.');
-  if(a.hitEvents){if(a.hitEvents.some(e=>!e.hitboxGroup))fail('Assign a hitbox group to every sequence hit.');const first=a.hitboxGroups.find(g=>g.id===a.hitEvents[0].hitboxGroup);if(!first?.boxes.some(b=>b.start===0))fail('First contact needs a hitbox active at contact + 0.');}
+  if(a.hitEvents){if(a.hitEvents.some(e=>!e.hitboxGroup))fail('Assign a hitbox group to every sequence hit.');const first=a.hitboxGroups.find(g=>g.id===a.hitEvents[0].hitboxGroup);if(a.sequenceTiming!=='cast'&&!first?.boxes.some(b=>b.start===0))fail('First contact needs a hitbox active at contact + 0.');}
   if(a.hitboxGroups.some(g=>g.boxes.some(b=>b.start+b.duration>a.active)))fail('Hitbox windows must fit within the attack active duration.');
  }
  if(!/^attack_[a-zA-Z0-9_]{1,80}$/.test(a.id)||typeof a.name!=='string'||!a.name.trim()||a.name.length>48)fail('Attack needs an ID and a name (1–48 characters).');
@@ -62,7 +62,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–9 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–10 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');

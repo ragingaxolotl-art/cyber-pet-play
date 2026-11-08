@@ -26,7 +26,8 @@ export function attackDiagnostics(attack,simulation=null,attacks=null) {
   add('group-transfer','info','Multiple hitboxes require at least a version 3 project, bank or skill tree.','Use the updated Studio and Arena. Earlier versions cannot play this definition.');
  }
  if(attack.hitEvents){
-  add('sequence-transfer','info','Save this sequence locally or to the upgraded classroom bank after teacher sign-in.','For Arena, download the project and use Open attack design. Version 2 skill trees can also be downloaded from Studio and opened in Arena.');
+  if(attack.sequenceTiming==='cast')add('scheduled-sequence','info','Melee/area hit windows count from the end of startup. A miss does not delay later hits; every hit still needs overlap.','Requires version 10 project, tree and bank support. Older classroom servers refuse this save; keep a downloaded backup.');
+  else add('sequence-transfer','info','Save this sequence locally or to the upgraded classroom bank after teacher sign-in.','For Arena, download the project and use Open attack design. Version 2 skill trees can also be downloaded from Studio and opened in Arena.');
   add('sequence-damage','info','Damage is authored per hit; base damage, stat scaling and ordinary hit-limit settings do not apply.','Edit damage and reactions in the selected-hit inspector.');
   if(attack.projectileLifetime===undefined)add('sequence-lifetime','info','Follow-up hits end when the attacker is interrupted or the target is defeated.','Test interruption before relying on the full sequence.');
  }else{

@@ -1,4 +1,4 @@
-import {activeEnd} from './contact-timing.js?v=20261108-projectile-defense';
+import {activeEnd} from './contact-timing.js?v=20261108-scheduled-sequences';
 // Cancel windows are absolute cast frames, with an exclusive end.
 export function validateCancelWindows(windows){
  if(windows===undefined)return;

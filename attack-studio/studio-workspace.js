@@ -1,5 +1,5 @@
-import {requestEditorName} from './editor-name-dialog.js?v=20261108-usability';
-import {installAccessibility} from './editor-accessibility.js?v=20261108-usability';
+import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
+import {installAccessibility} from './editor-accessibility.js?v=20261108-scheduled-sequences';
 const KEY='cyber-pet-studio-layout-v1';
 export const PRESETS_KEY='cyber-pet-studio-presets-v1';
 export function safeLayout(value){

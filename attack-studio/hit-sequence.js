@@ -1,18 +1,25 @@
-import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-projectile-defense';
-export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-projectile-defense';
+import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-scheduled-sequences';
+export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-scheduled-sequences';
 // Version 2: a bounded sequence of hits timed from first projectile contact.
 // Shared by the editor preview and the Arena. All times are 60 Hz frames.
 export const SEQUENCE_LIMITS = Object.freeze({hits:10, duration:300, suspension:30, gravity:.48});
 export const REACTIONS = ['launch','suspend','relaunch','spike','knockback','none'];
 const integer=(value,min,max)=>Number.isInteger(value)&&value>=min&&value<=max;
 export function validateHitSequence(attack) {
+  if(attack.sequenceTiming!==undefined&&attack.sequenceTiming!=='cast')throw Error('Invalid sequence timing.');
+  const scheduled=attack.sequenceTiming==='cast';
   if (attack.hitEvents===undefined) {
+    if(scheduled)throw Error('Scheduled timing requires hit events.');
     if (attack.behaviorVersion!==undefined&&attack.behaviorVersion!==1) throw Error('Missing version 2 hit sequence.');
     return;
   }
-  if (attack.behaviorVersion!==2||attack.delivery!=='projectile'||attack.payload!=='damage'||attack.status!=='none'||attack.impactTrigger!=='contact')
-    throw Error('Hit sequences require version 2, a contact-triggered damage projectile, and no secondary status.');
-  if (!['attached','contact'].includes(attack.projectileMode)) throw Error('Choose attached or repeated-contact projectile behavior.');
+  if(scheduled){
+    if(attack.behaviorVersion!==2||!['melee','area'].includes(attack.delivery)||attack.payload!=='damage'||attack.status!=='none'||attack.impactTrigger!=='timed'||attack.projectileMode!==undefined)throw Error('Scheduled hits require timed melee or area damage, no secondary status, and no projectile mode.');
+  }else{
+    if (attack.behaviorVersion!==2||attack.delivery!=='projectile'||attack.payload!=='damage'||attack.status!=='none'||attack.impactTrigger!=='contact')
+      throw Error('Hit sequences require version 2, a contact-triggered damage projectile, and no secondary status.');
+    if (!['attached','contact'].includes(attack.projectileMode)) throw Error('Choose attached or repeated-contact projectile behavior.');
+  }
   if (!Array.isArray(attack.hitEvents)||!integer(attack.hitEvents.length,1,SEQUENCE_LIMITS.hits)) throw Error('Use 1–10 independent hits.');
   const ids=new Set(); let previous=-1;
   for (const event of attack.hitEvents) {
@@ -26,7 +33,7 @@ export function validateHitSequence(attack) {
     if (!['any','grounded','airborne'].includes(event.target)) throw Error('Invalid hit target restriction.');
     previous=event.offset;
   }
-  if (attack.hitEvents[0].offset!==0) throw Error('The first hit starts at contact + 0.');
+  if (!scheduled&&attack.hitEvents[0].offset!==0) throw Error('The first hit starts at contact + 0.');
 }
 export const sequenceDuration=attack=>Math.max(...attack.hitEvents.map(e=>e.offset+e.duration));
 export function jugglePreset(count=5,interval=5) {
@@ -39,27 +46,32 @@ export function jugglePreset(count=5,interval=5) {
 // Existing hit values and IDs survive Quick Edit. New hits precede the finisher.
 export function resizeHits(events,count,interval,mode='extend') {
   if (!integer(count,1,10)||!integer(interval,1,25)||!['extend','fit'].includes(mode)) throw Error('Invalid Quick Edit settings.');
-  const result=structuredClone(events),lastTime=events.at(-1).offset;
+  const result=structuredClone(events),firstTime=events[0].offset,lastTime=events.at(-1).offset-firstTime;
   while(result.length<count) {
     const last=result.pop(),sample=result.at(-1)||last;
     result.push({...structuredClone(sample),id:'hit_'+crypto.randomUUID().replaceAll('-',''),reaction:'suspend',damage:3,knockback:0},last);
   }
   while(result.length>count) result.splice(Math.max(0,result.length-2),1);
-  result.forEach((e,i)=>{e.offset=mode==='fit'&&count>1?Math.round(i*Math.max(lastTime,count-1)/(count-1)):i*interval;});
+  result.forEach((e,i)=>{e.offset=firstTime+(mode==='fit'&&count>1?Math.round(i*Math.max(lastTime,count-1)/(count-1)):i*interval);});
   return result;
 }
-export function sequenceState(){return {contactFrame:null,attached:false,consumed:new Set(),juggleBlocked:new Set(),results:[],cancelled:null};}
+// An explicit start frame schedules melee/area windows even when the first hit misses.
+// Omit it for existing projectile sequences, whose clock starts on contact.
+export function sequenceState(startFrame=null){
+  if(startFrame!==null&&(!Number.isInteger(startFrame)||startFrame<0))throw Error('Sequence start must be a nonnegative frame.');
+  return {startFrame,contactFrame:null,attached:false,consumed:new Set(),juggleBlocked:new Set(),results:[],cancelled:null};
+}
 export function sequenceOpportunities(attack,state,age,overlap,target) {
   if(state.cancelled)return [];
   const touches=event=>typeof overlap==='function'?overlap(event):overlap;
-  if(state.contactFrame===null){if(!touches(attack.hitEvents[0]))return [];state.contactFrame=age;}
-  const elapsed=age-state.contactFrame,ready=[];
+  if(state.startFrame==null&&state.contactFrame===null){if(!touches(attack.hitEvents[0]))return [];state.contactFrame=age;}
+  const elapsed=age-(state.startFrame??state.contactFrame),ready=[];
   for(const event of attack.hitEvents){
     if(state.consumed.has(event.id)||elapsed<event.offset)continue;
     if(elapsed>=event.offset+event.duration){state.consumed.add(event.id);state.results.push({id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.juggleBlocked?.has(event.id)?'Juggle limit reached while the target was airborne.':'No eligible contact during this hit window.'});continue;}
     if(target.juggleLocked&&target.y<0){state.juggleBlocked??=new Set();state.juggleBlocked.add(event.id);}
     const eligible=!(target.juggleLocked&&target.y<0)&&(event.target==='any'||(event.target==='airborne'?target.y<0:target.y>=0));
-    if(eligible&&(touches(event)||(!event.hitboxGroup&&attack.projectileMode==='attached'&&state.attached))){state.consumed.add(event.id);ready.push(event);}
+    if(eligible&&(touches(event)||(!event.hitboxGroup&&attack.projectileMode==='attached'&&state.attached))){state.contactFrame??=age;state.consumed.add(event.id);ready.push(event);}
   }
   return ready;
 }
