@@ -40,7 +40,7 @@ export function pasteTimelineEvents(attack,tracks,clipboard,start){
    value.id=uniqueId('box');value.start=frame-tracks.geometryBase;group.boxes.push(value);
   }
  }
- if(next.hitEvents){next.hitEvents.sort((a,b)=>a.offset-b.offset);next.active=Math.max(...next.hitEvents.map(h=>h.offset+h.duration));}
+ if(next.hitEvents){next.hitEvents.sort((a,b)=>a.offset-b.offset);next.active=Math.max(next.active,...next.hitEvents.map(h=>h.offset+h.duration));}
  if(next.hitboxGroups)next.active=Math.max(next.active,...next.hitboxGroups.flatMap(g=>g.boxes.map(b=>b.start+b.duration)));
  validateAttack(next);return next;
 }

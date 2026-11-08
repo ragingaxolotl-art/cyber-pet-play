@@ -1,4 +1,4 @@
-import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js';
+import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261108-clipboard-duration';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-shared-juggle';
 import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-timeline-clipboard';
 import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-shared-juggle';
