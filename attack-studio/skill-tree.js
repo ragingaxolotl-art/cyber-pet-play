@@ -1,3 +1,4 @@
+import {addIndependentAttacks} from './tree-batch.js?v=20261108-tree-batch';
 import {createTreeStore,treeStorageMessage} from './tree-storage.js?v=20261108-tree-storage';
 import {readTreeSession,writeTreeSession,restoreTreeHistory} from './tree-session.js?v=20261108-workflow';
 import {BUNDLE_FORMAT,exportDataSet,importDataSet,validateBundle,bundleSummary} from './tree-bundle.js?v=20261108-explosion';
@@ -5,7 +6,7 @@ import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
 import {installAccessibility} from './editor-accessibility.js?v=20261108-scheduled-sequences';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
-import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
+import {installAttackBrowser} from './attack-browser.js?v=20261108-tree-batch';
 import {readSavedBrowserAttacks} from './browser-saved-attacks.js?v=20261108-explosion';
 import {MAIN_TREE,treeStorageKey,readCabinet,createTree,renameTree,relatedNodeIds,treeBounds} from './tree-cabinet.js?v=20261108-explosion';
 import {DATASETS_KEY,dataSetKey,readDataSets,pathNodeIds} from './tree-datasets.js?v=20261108-explosion';
@@ -161,7 +162,7 @@ for(const [id,dx,dy] of [['moveNodeLeft',-40,0],['moveNodeRight',40,0],['moveNod
 
 function installTreeCatalog(){
  let saved=[],savedLabel='Saved attacks',attachNext=false;
- const browser=treeBrowser=installAttackBrowser({allowKeepAdding:true,getDestination:()=>{const dataSet=dataSets.find(d=>d.id===dataSetId),board=dataSet?.trees.find(t=>t.id===treeId),path=(tree.paths||[]).find(p=>p.id===$('activePath').value);return 'Destination: '+dataSet?.name+' / '+board?.name+(path?' / '+path.name:'')+(attachNext&&current()?' → next after '+current().name:' → independent attack');},getEntries:()=>{let drafts=[];try{const p=JSON.parse(localStorage.getItem('cyber-pet-combat-design-v1-recovery')||localStorage.getItem('cyber-pet-combat-design-v1')||'null');drafts=(p?.attacks||[]).filter(a=>{try{validateAttack(a,ids);return true;}catch{return false;}});}catch{}return catalogEntries({effects,setups,drafts,saved,savedLabel});},loadSaved:async()=>{const result=await readSavedBrowserAttacks(a=>validateAttack(a,ids));saved=result.attacks;savedLabel=result.label;if(result.notice)say(result.notice);},status:say,actions:[
+ const browser=treeBrowser=installAttackBrowser({allowKeepAdding:true,batchAction:{available:e=>!!e.effect,run:entries=>{applyPending();const next=addIndependentAttacks(tree,entries,paths.active());commit(next);selected=next.nodes[next.nodes.length-entries.length].id;navigationMode='all';$('branch').value='';$('search').value='';$('viewPath').value='';render();inspect();fitTree();say('Added '+entries.length+' independent attacks. Select an attack and use Attach next attack on tree to connect them. Save this tree to keep your changes.');}},getDestination:()=>{const dataSet=dataSets.find(d=>d.id===dataSetId),board=dataSet?.trees.find(t=>t.id===treeId),path=(tree.paths||[]).find(p=>p.id===$('activePath').value);return 'Destination: '+dataSet?.name+' / '+board?.name+(path?' / '+path.name:'')+(attachNext&&current()?' → next after '+current().name:' → independent attack');},getEntries:()=>{let drafts=[];try{const p=JSON.parse(localStorage.getItem('cyber-pet-combat-design-v1-recovery')||localStorage.getItem('cyber-pet-combat-design-v1')||'null');drafts=(p?.attacks||[]).filter(a=>{try{validateAttack(a,ids);return true;}catch{return false;}});}catch{}return catalogEntries({effects,setups,drafts,saved,savedLabel});},loadSaved:async()=>{const result=await readSavedBrowserAttacks(a=>validateAttack(a,ids));saved=result.attacks;savedLabel=result.label;if(result.notice)say(result.notice);},status:say,actions:[
   {label:()=>attachNext?'Add after selected attack':'Add independent copy to tree',available:e=>!!e.effect,run:e=>{applyPending();addEffect(e.effect.id,attachNext?'attached':'standalone',e.attack);say('Added '+e.name+(attachNext?' after the selected attack.':' as an independent tree attack.'));}},
   {label:'Add after selected attack',available:e=>!!e.effect&&!!current()&&!attachNext,run:e=>{applyPending();addEffect(e.effect.id,'attached',e.attack);say('Added '+e.name+' after the selected attack.');}},
   {label:'Add to starter skills',available:e=>!!e.effect,run:e=>{applyPending();addEffect(e.effect.id,'starter',e.attack);}}
