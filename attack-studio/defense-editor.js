@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261107-parry';
+import {validateAttack} from './combat-model.js?v=20261108-cancels';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

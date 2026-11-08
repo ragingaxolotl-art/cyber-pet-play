@@ -1,8 +1,9 @@
-import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261107-parry';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261107-parry';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261107-parry';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261107-parry';
-import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261107-parry';
+import {contactDeadline,castEnd} from './contact-timing.js?v=20261108-cancels';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-cancels';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-cancels';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-cancels';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-cancels';
+import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-cancels';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
@@ -11,7 +12,8 @@ export function simulateSequence(attack,attacker,target,options={}) {
   const cost=Math.ceil(attack.cost*av.cost),cast=self.energy>=cost;
   if(cast)self.energy-=cost;
   const defenseCast={a:attack,defenseState:createDefenseState()};
-  const state=sequenceState(),events=[],frames=[];let hits=0,end=tm.startup+600;
+  tm.active=sequenceDuration(attack);
+  const state=sequenceState(),events=[],frames=[];let hits=0,end=castEnd(null,tm);
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
   for(let frame=0;frame<=end;frame++){
     if(!advancePulseReaction(other,frame,-220,220)&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){other.reaction='standing';other.reactionLandFrame=frame;}}
@@ -26,14 +28,14 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(options.incomingDamage>0&&frame===(options.incomingFrame??30)){
       if(other.stun>frame)events.push({frame,text:'Incoming attack interrupted — opponent is stunned.'});
       else {
-       const castAlive=cast&&!state.cancelled&&frame<(state.contactFrame===null?tm.startup+600:state.contactFrame+sequenceDuration(attack)+tm.recovery),defense=defenseSnapshot(castAlive?defenseCast:null,frame),incoming={payload:'damage',delivery:'melee'};
+       const castAlive=cast&&!state.cancelled&&frame<castEnd(state.contactFrame,tm),defense=defenseSnapshot(castAlive?defenseCast:null,frame),incoming={payload:'damage',delivery:'melee'};
        const invulnerable=isInvulnerable(defense,incoming),parry=!invulnerable&&claimParry(defense,incoming),armored=!parry&&!invulnerable&&claimArmor(defense,incoming);
        if(parry)other.stun=Math.max(other.stun,frame+parry.stun);
        self.hp=Math.max(0,self.hp-(parry||invulnerable?0:options.incomingDamage));incomingInterrupted=(!parry&&!invulnerable&&!armored)||self.hp<=0;
        events.push({frame,text:parry?'Incoming attack parried; no damage.':invulnerable?'Incoming attack invulnerable; no damage.':incomingInterrupted?'Incoming attack interrupted this sequence.':'Incoming attack armored; damage still applies.'});
       }
     }
-    const active=cast&&frame>=tm.startup&&!state.cancelled&&(state.contactFrame===null||frame<state.contactFrame+sequenceDuration(attack));
+    const active=cast&&frame>=tm.startup&&!state.cancelled&&(state.contactFrame===null?frame<=contactDeadline(tm):frame<state.contactFrame+sequenceDuration(attack));
     if(active){
       for(const event of sequenceOpportunities(attack,state,frame,overlap,other)){
         const guarded=!!options.guard&&attack.blockable;
@@ -52,5 +54,5 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(!cast)break;
   }
   const results=attack.hitEvents.map(event=>state.results.find(r=>r.id===event.id)||{id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.cancelled||(state.contactFrame===null?'Projectile did not reach the target.':'No eligible contact during this hit window.')});
-  return {frames,events,hitResults:results,cost,cast,contactMode:true,impactFrame:state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,(state.contactFrame??tm.startup+600)+sequenceDuration(attack)+tm.recovery)};
+  return {frames,events,hitResults:results,cost,cast,contactMode:true,impactFrame:state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,castEnd(state.contactFrame,tm))};
 }

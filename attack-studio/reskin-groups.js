@@ -1,3 +1,4 @@
+import {remapSelfCancels} from './cancel-windows.js?v=20261108-cancels';
 // A linked family shares behavior; each member keeps its own identity and artwork.
 export function familyKey(effect){return ['reskin','detailed-reskin'].includes(effect?.collection)?`${effect.collection}:${effect.slot}:${effect.variant}`:null;}
 export function matchingReskins(effect,effects){const key=familyKey(effect);return key?effects.filter(e=>familyKey(e)===key).sort((a,b)=>a.element.localeCompare(b.element)):[];}
@@ -24,6 +25,7 @@ function mappedVisuals(source,element,effects){
 export function updateReskinMember(source,target,effects){
  const copy=structuredClone(source);
  for(const key of ['id','name','notes','tags','element','reskinGroupId','reskinElement']){if(target[key]===undefined)delete copy[key];else copy[key]=structuredClone(target[key]);}
+ remapSelfCancels(copy,source.id);
  copy.visuals=mappedVisuals(source,target.reskinElement||target.element,effects);return copy;
 }
 export function synchronizeReskins(attacks,source,effects){

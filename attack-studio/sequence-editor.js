@@ -1,8 +1,8 @@
-import {validateAttack} from './combat-model.js?v=20261107-parry';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261107-parry';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261107-parry';
+import {validateAttack} from './combat-model.js?v=20261108-cancels';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-cancels';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-cancels';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
+export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
   function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));validateAttack(next);commit(next);render();}
   function render(){
@@ -49,7 +49,7 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek}) {
       sim.hitResults.forEach((r,i)=>{const row=el('tr');for(const value of [i+1,'contact + '+r.offset,r.frame??'—',r.result+(r.reason?' · '+r.reason:'')])row.append(el('td',String(value)));table.append(row);});output.append(table);
     }else{const p=el('p',sim.events.at(-1)?.text||'Run a test to see the result.');output.append(p);}
     const diagnostics=el('section');diagnostics.setAttribute('aria-label','Attack compatibility and test checks');diagnostics.append(el('h3','Compatibility & test checks'));
-    const list=el('ul');for(const finding of attackDiagnostics(getAttack(),sim)){const item=el('li');item.dataset.diagnostic=finding.code;item.append(el('strong',finding.level==='warning'?'Check: ':'Note: '),el('span',finding.message+' '+finding.action));list.append(item);}diagnostics.append(list);output.append(diagnostics);
+    const list=el('ul');for(const finding of attackDiagnostics(getAttack(),sim,getAttacks())){const item=el('li');item.dataset.diagnostic=finding.code;item.append(el('strong',finding.level==='warning'?'Check: ':'Note: '),el('span',finding.message+' '+finding.action));list.append(item);}diagnostics.append(list);output.append(diagnostics);
   }
   render();return {render,results};
 }

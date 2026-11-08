@@ -1,5 +1,5 @@
-import {freshAttack,validateAttack} from './combat-model.js?v=20261107-parry';
-import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261107-parry';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261108-cancels';
+import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261108-cancels';
 // Reviewed setups always open as new drafts; bank entries and existing edits are untouched.
 export function openReviewedAttack(setup,effects){
  const attack=structuredClone(setup.attack),effect=effects.find(e=>e.id===setup.effectId);

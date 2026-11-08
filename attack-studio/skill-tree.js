@@ -1,9 +1,9 @@
-import {installConnections} from './tree-connections.js?v=20261107-parry';
-import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261107-parry';
-import {installTreeGallery} from './tree-gallery.js?v=20261107-parry';
-import {installStarters,setStarter} from './tree-starters.js?v=20261107-parry';
-import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261107-parry';
-import {validateAttack} from './combat-model.js?v=20261107-parry';
+import {installConnections} from './tree-connections.js?v=20261108-cancels';
+import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-cancels';
+import {installTreeGallery} from './tree-gallery.js?v=20261108-cancels';
+import {installStarters,setStarter} from './tree-starters.js?v=20261108-cancels';
+import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261108-cancels';
+import {validateAttack} from './combat-model.js?v=20261108-cancels';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let connections,paths,starters;const history=[];

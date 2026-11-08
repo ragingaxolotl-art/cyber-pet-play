@@ -1,7 +1,15 @@
 // Diagnostics describe inspected runtime capabilities, not a guarantee of visual parity.
-export function attackDiagnostics(attack,simulation=null) {
+export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.cancelWindows){
+  add('cancel-transfer','info','Follow-up windows require a version 5 project, bank or skill tree.','Classroom saving checks for version 5 support before writing.');
+  add('cancel-preview','warning','The single-attack preview does not execute a follow-up attack. A displayed window alone does not prove a combo connects.','Test the named follow-up in Arena during the window, with enough energy and the attack equipped.');
+  add('cancel-rules','info','Follow-ups are manual and still obey cooldown, energy, stun and recovery checks. Hit, block and parry conditions use this cast’s results.','Choose timing and allowed attacks in Follow-up windows. A miss condition waits for active timing to finish.');
+  if(attacks){const available=new Set(attacks.map(a=>a.id)),missing=[...new Set(attack.cancelWindows.flatMap(w=>w.attacks).filter(id=>!available.has(id)))];if(missing.length)add('cancel-missing','warning',`${missing.length} follow-up attack reference(s) are missing from this project: ${missing.join(', ')}.`,'Import the named attacks or select replacements. References are preserved when saving.');}
+  if(!['damage','push'].includes(attack.payload)&&attack.cancelWindows.some(w=>w.condition==='whiff'))add('cancel-whiff-payload','warning','A miss condition cannot activate on a support or defensive move.','Choose Any result, or After parrying for a parry move.');
+ }
+
  if(attack.defenseWindows){
   if(attack.defenseWindows.some(w=>w.kind==='parry'))add('parry-behavior','info','Parry prevents an eligible hit and interrupts its attacker for the authored number of frames. It does not automatically launch a counterattack.','Edit timing, hit limits, interruption and attack types in Defense windows. Classroom saving requires explicit parry support.');
   if(attack.defenseWindows.some(w=>w.kind==='invulnerability'))add('invulnerability-behavior','info','Invulnerability prevents eligible damage, push reactions and statuses carried by those hits during its window. Existing status effects continue.','Choose attack types in Defense windows. Classroom saving requires a server that advertises invulnerability support.');
