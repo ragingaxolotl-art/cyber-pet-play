@@ -3,7 +3,7 @@ import {renderHitstunEditor} from './hitstun-editor.js?v=20261108-hitstun';
 import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261108-counter-hit';
 import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261108-combo-scaling';
 import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261108-impact-timing';
-import {validateAttack} from './combat-model.js?v=20261108-bounces';
+import {validateAttack} from './combat-model.js?v=20261108-steering';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

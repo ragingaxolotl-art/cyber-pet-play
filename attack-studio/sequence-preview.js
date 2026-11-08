@@ -1,3 +1,4 @@
+import {createSteeringState,advanceSteering} from './projectile-steering.js?v=20261108-steering';
 import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
 import {scaledHitEvent} from './hitstun-scaling.js?v=20261108-hitstun';
 import {scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
@@ -6,9 +7,9 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-bounces';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-steering';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-bounces';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   validateRecoveryFrame(options.recoveryFrame);
@@ -20,7 +21,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   const combos=new ComboTracker();
   const defenseCast={a:attack,defenseState:createDefenseState()};
   tm.active=sequenceDuration(attack);
-  const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let recovery=null;let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false;const independent=attack.projectileLifetime!==undefined;
+  const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let recovery=null;let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false,steering=null;const independent=attack.projectileLifetime!==undefined;
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
   for(let frame=0;frame<=end;frame++){
     const hitsBeforeFeedback=hits;
@@ -30,6 +31,12 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(!advancePulseReaction(other,frame,-220,220)&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){resetGroundedJuggle(other);other.reaction='standing';other.reactionLandFrame=frame;}}
     combos.beginFrame(frame,new Map([['target',{defeated:other.hp<=0,locked:other.stun>frame||!!other.pulseMotion}]]));
     let box=worldBox(attack,(state.startFrame!==null?frame:state.contactFrame??frame),attacker,direction);
+    if(attack.projectileSteering&&independent&&launched){
+     steering??=createSteeringState({x:box.x+box.w/2,y:box.y+box.h/2},direction,frame);
+     if(state.attached&&attack.projectileMode==='attached')steering.lastFrame=frame;
+     else if(!state.cancelled){advanceSteering(steering,attack.projectileSteering,attack.projectileSpeed,frame,{x:other.x,y:other.y-30},{x:self.x,y:self.y-30});box={...box,x:steering.x-box.w/2,y:steering.y-box.h/2};}
+     if(steering.caught&&!state.cancelled){state.cancelled='Projectile returned to owner.';events.push({frame,text:state.cancelled});}
+    }
     if(state.attached&&attack.projectileMode==='attached')box={...box,x:other.x-box.w/2,y:other.y-box.h};
     const targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
     const base=worldBox(attack,(state.startFrame!==null?frame:state.contactFrame??frame),attacker,direction),elapsed=(state.startFrame??state.contactFrame)===null?0:frame-(state.startFrame??state.contactFrame);
@@ -75,7 +82,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     for(const who of [self,other])who.canAct=who.hp>0&&!who.pulseMotion&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
     const impactStop=hits>hitsBeforeFeedback?(options.guard&&attack.blockable?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
     if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');
-    frames.push({combos:combos.snapshot(),frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
+    frames.push({steering:steering?{...steering}:null,combos:combos.snapshot(),frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
     if(!cast)break;
   }
   const results=attack.hitEvents.map(event=>state.results.find(r=>r.id===event.id)||{id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.cancelled||(state.startFrame===null&&state.contactFrame===null?'Projectile did not reach the target.':'No eligible contact during this hit window.')});

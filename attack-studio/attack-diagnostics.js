@@ -2,6 +2,14 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.projectileSteering){
+  add('steering-version','info','Homing and return steering require version 17 support and an independent projectile lifetime.','Keep a downloaded backup. Authored movement paths and steering cannot be combined.');
+  add('steering-motion','info',`Projectile speed stays constant; heading changes by at most ${attack.projectileSteering.turnRate} degrees per combat frame.`, 'Homing aims at the opponent. Return mode turns toward the current owner after its delay and disappears when caught. Reflection changes ownership without renewing travel age or lifetime.');
+  if(attack.projectileMode==='attached')add('steering-attachment','info','After attachment, the effect follows its target instead of steering or returning.','Use repeated contact when the projectile should keep flying.');
+  if(attack.projectileSteering.mode==='return'&&attack.impactTrigger!=='contact'&&attack.projectileSteering.returnAfter>=attack.active)add('steering-return-window','warning','The active window ends before this projectile can start returning.','Extend Damage / effect lasts or shorten the return delay. Independent lifetime does not extend the active window.');
+  if(attack.projectileSteering.mode==='return'&&attack.projectileSteering.returnAfter>=attack.projectileLifetime)add('steering-return-expiry','warning','This projectile expires before its return phase can begin.','Shorten the return delay or extend lifetime; active windows can also end the projectile earlier.');
+ }
+
  if(attack.bounces||attack.hitEvents?.some(e=>e.bounces)){
   add('bounce-version','info','Boundary bounces require version 16 support in Studio, Arena and classroom saving.','Download a backup. Older classroom servers refuse unsupported writes.');
   add('bounce-budget','info','Each airborne chain permits one wall rebound and one floor rebound. Rebounds add no damage or new hitstun and preserve the spent juggle and air-recovery limits.','Only final landing resets bounce limits. A later hit cannot replenish them; the forced juggle landing disables bounces.');

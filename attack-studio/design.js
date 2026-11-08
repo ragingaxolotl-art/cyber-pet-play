@@ -1,15 +1,16 @@
+import {steeringVisualPosition} from './projectile-steering.js?v=20261108-steering';
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
 import {installStudioWorkspace} from './studio-workspace.js?v=20261108-workflow';
-import {renderProjectileEditor} from './projectile-editor.js?v=20261108-scheduled-sequences';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261108-steering';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-scheduled-sequences';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
 import {renderCancelEditor} from './cancel-editor.js?v=20261108-movement-cancels';
 import {renderDefenseEditor} from './defense-editor.js?v=20261108-bounces';
 import {renderAttackTimeline} from './attack-timeline.js?v=20261108-movement-cancels';
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-scheduled-sequences';
-import {attacksVersion} from './attack-format.js?v=20261108-bounces';
+import {attacksVersion} from './attack-format.js?v=20261108-steering';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-scheduled-sequences';
 import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-scheduled-sequences';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-scheduled-sequences';
@@ -18,8 +19,8 @@ import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
-import {installAttackBank} from './attack-bank.js?v=20261108-bounces';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-bounces';
+import {installAttackBank} from './attack-bank.js?v=20261108-steering';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-steering';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
 import {installSequenceEditor} from './sequence-editor.js?v=20261108-bounces';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
@@ -67,7 +68,7 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  for(const [key,title,min,max] of [['x','Forward offset',-500,500],['y','Vertical offset',-500,500],['w','Width',1,500],['h','Height',1,500]])field($('hitbox'),title,a.box,key,'number',null,min,max);
  }
  renderHitboxEditor({root:$('hitbox'),attack:a,status,commit:(next,edited=true)=>{if(next.hitEvents)a.hitEvents=next.hitEvents;if(next.hitboxGroups)a.hitboxGroups=next.hitboxGroups;else{delete a.hitboxGroups;Object.assign(a,{box:next.box,hitLimit:next.hitLimit,hitInterval:next.hitInterval});}if(edited)changed();refresh();}});
- renderProjectileEditor({root:$('hitbox'),attack:a,status,commit:next=>{if(next.projectileLifetime===undefined)delete a.projectileLifetime;else a.projectileLifetime=next.projectileLifetime;if(next.projectileStart===undefined)delete a.projectileStart;if(next.projectileDurability===undefined)delete a.projectileDurability;else a.projectileDurability=next.projectileDurability;changed();refresh();}});
+ renderProjectileEditor({root:$('hitbox'),attack:a,status,commit:next=>{if(next.projectileSteering===undefined)delete a.projectileSteering;else a.projectileSteering=next.projectileSteering;if(next.projectileLifetime===undefined)delete a.projectileLifetime;else a.projectileLifetime=next.projectileLifetime;if(next.projectileStart===undefined)delete a.projectileStart;if(next.projectileDurability===undefined)delete a.projectileDurability;else a.projectileDurability=next.projectileDurability;changed();refresh();}});
  field($('hitbox'),'Projectile px / frame',a,'projectileSpeed','number',null,0,12,.25);
  const s=$('statusFields');field(s,'Secondary status',a,'status','select',['none','burn','poison','regen','slow','haste','weaken','stun']);field(s,'Tick amount / modifier %',a,'statusPower','number',null,0,100);field(s,'Status duration (frames)',a,'statusDuration','number',null,1,900);field(s,'Tick interval (frames)',a,'statusInterval','number',null,1,300);field(s,'Shield lifetime (frames)',a,'shieldDuration','number',null,1,900);
  if(a.hitboxGroups)for(const key of ['hitLimit','hitInterval']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Edit these settings in the selected hit group.';}}
@@ -111,7 +112,7 @@ function draw(){if(!simulation)return;const state=simulation.frames[frame],a=att
  if(!sprite(library.examples[reaction.pose]||library.examples.ready_side,0,-options.targetSide,reaction.progress,reaction.sequence,a.wallSlam&&!state.target.reactionInFlight?state.target.x+reaction.offsetX:null))mannequin(0,'#7b9bbd');ctx.restore();
  if(a.wallSlam){ctx.strokeStyle='#8a9bb0';ctx.strokeRect(options.targetSide*234+(options.targetSide<0?-4:0),-100,4,100);}
  for(const e of simulation.events.filter(e=>frame>=e.frame&&frame<e.frame+12&&e.text.includes('smash!'))){ctx.strokeStyle='#ffda90';ctx.lineWidth=2;ctx.beginPath();ctx.arc(state.target.x,e.text.startsWith('Floor')?-3:(state.target.y||0)-30,8+(frame-e.frame),0,Math.PI*2);ctx.stroke();}
- a.visuals.forEach((v,index)=>{const e=effectMap.get(v.effectId);if(!e||!simulation.cast||(a.projectileLifetime!==undefined&&!state.projectileAlive))return;const fi=!v.loopUntilImpact&&(v.loop??e.loop)&&frame>=total&&a.projectileLifetime===undefined?-1:visualFrame(e,v,frame,simulation.impactFrame??Infinity);const travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,motionFrame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0;const attached=a.hitEvents&&a.projectileMode==='attached'&&simulation.impactFrame!==null&&frame>=simulation.impactFrame&&simulation.hitResults?.[0]?.result==='Connected';const x=attached?state.target.x+v.x*options.facing:(v.x+travel+path.x)*options.facing,y=attached?state.target.y+v.y:v.y+path.y;
+ a.visuals.forEach((v,index)=>{const e=effectMap.get(v.effectId);if(!e||!simulation.cast||(a.projectileLifetime!==undefined&&!state.projectileAlive))return;const fi=!v.loopUntilImpact&&(v.loop??e.loop)&&frame>=total&&a.projectileLifetime===undefined?-1:visualFrame(e,v,frame,simulation.impactFrame??Infinity);const travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,motionFrame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0;const attached=a.hitEvents&&a.projectileMode==='attached'&&simulation.impactFrame!==null&&frame>=simulation.impactFrame&&simulation.hitResults?.[0]?.result==='Connected';const steered=state.steering&&!attached?steeringVisualPosition(state.steering,a.box,v,options.facing):null;const x=attached?state.target.x+v.x*options.facing:steered?steered.x:(v.x+travel+path.x)*options.facing,y=attached?state.target.y+v.y:steered?steered.y:v.y+path.y;
  if(fi>=0){const source=v.frames?.[fi]??fi;const image=img(e.sheet||e.frames[source]);if(image.complete&&image.naturalWidth){ctx.save();ctx.globalAlpha=visualOpacity(e,v,frame,simulation.impactFrame??Infinity);ctx.translate(x,y);ctx.scale(options.facing,1);ctx.rotate((v.followPath&&a.motionPath?.length?Math.atan2(path.dy,path.dx):0)-(v.forwardAngle||0)*Math.PI/180);ctx.scale(v.scale*(v.stretchX??1),v.scale*(v.stretchY??1));const [w,h]=e.canvas,[ax,ay]=e.anchor;if(e.sheet)ctx.drawImage(image,source%e.columns*w,Math.floor(source/e.columns)*h,w,h,-ax,-ay,w,h);else ctx.drawImage(image,-ax,-ay,w,h);ctx.restore();}}
  if($('showBoxes').checked&&index===layerIndex){ctx.strokeStyle='#b7f3ce';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);ctx.stroke();}
  });
