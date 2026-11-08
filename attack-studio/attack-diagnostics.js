@@ -2,6 +2,7 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.defenseWindows?.some(w=>w.energyGain!==undefined))add('absorption-energy','info','Absorption energy rewards require version 18 saving. Each absorbed independent projectile awards the configured amount, capped at maximum energy.','Use Arena comparison to inspect the actual reward. The Studio incoming-hit probe is melee-only. Keep a downloaded backup; older classroom servers refuse this save.');
  if(attack.projectileSteering){
   add('steering-version','info','Homing and return steering require version 17 support and an independent projectile lifetime.','Keep a downloaded backup. Authored movement paths and steering cannot be combined.');
   add('steering-motion','info',`Projectile speed stays constant; heading changes by at most ${attack.projectileSteering.turnRate} degrees per combat frame.`, 'Homing aims at the opponent. Return mode turns toward the current owner after its delay and disappears when caught. Reflection changes ownership without renewing travel age or lifetime.');

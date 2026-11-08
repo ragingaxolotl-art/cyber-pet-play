@@ -7,10 +7,10 @@ import {renderProjectileEditor} from './projectile-editor.js?v=20261108-steering
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-scheduled-sequences';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
 import {renderCancelEditor} from './cancel-editor.js?v=20261108-movement-cancels';
-import {renderDefenseEditor} from './defense-editor.js?v=20261108-bounces';
+import {renderDefenseEditor} from './defense-editor.js?v=20261108-absorption';
 import {renderAttackTimeline} from './attack-timeline.js?v=20261108-movement-cancels';
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-scheduled-sequences';
-import {attacksVersion} from './attack-format.js?v=20261108-steering';
+import {attacksVersion} from './attack-format.js?v=20261108-absorption';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-scheduled-sequences';
 import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-scheduled-sequences';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-scheduled-sequences';
@@ -19,8 +19,8 @@ import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
-import {installAttackBank} from './attack-bank.js?v=20261108-steering';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-steering';
+import {installAttackBank} from './attack-bank.js?v=20261108-absorption';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-absorption';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
 import {installSequenceEditor} from './sequence-editor.js?v=20261108-bounces';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';

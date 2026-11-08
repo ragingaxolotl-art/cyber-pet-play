@@ -8,6 +8,7 @@ export function validateDefenseWindows(windows) {
  for(const w of windows){
   if(!w||!/^defense_[a-zA-Z0-9_]{1,80}$/.test(w.id)||ids.has(w.id))throw Error('Each defense window needs a unique ID.');
   ids.add(w.id);
+  if(w.energyGain!==undefined&&(w.kind!=='absorb'||!Number.isInteger(w.energyGain)||w.energyGain<0||w.energyGain>100))throw Error('Absorption energy must be 0–100 whole points and belongs only to absorb windows.');
   if(['reflect','absorb'].includes(w.kind)&&w.against!=='projectile')throw Error('Reflection and absorption protect against projectiles only.');
   if(w.kind==='parry'&&(!Number.isInteger(w.stun)||w.stun<1||w.stun>60))throw Error('Parry interruption must last 1–60 frames.');
   if(!['armor','invulnerability','parry','reflect','absorb'].includes(w.kind)||!['all','melee','projectile','area'].includes(w.against))throw Error('Invalid defense window type or attack filter.');
