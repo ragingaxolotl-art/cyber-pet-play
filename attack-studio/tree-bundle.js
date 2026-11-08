@@ -1,5 +1,5 @@
-import {DATASETS_KEY} from './tree-datasets.js';
-import {MAIN_TREE,readCabinet,treeStorageKey} from './tree-cabinet.js';
+import {DATASETS_KEY} from './tree-datasets.js?v=20261108-area-final';
+import {MAIN_TREE,readCabinet,treeStorageKey} from './tree-cabinet.js?v=20261108-area-final';
 export const BUNDLE_FORMAT='cyber-pet-tree-data-set';
 // Validate the entire bundle before any new tree is written or made visible.
 export function validateBundle(value,validateTree){
