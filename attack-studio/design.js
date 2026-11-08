@@ -1,3 +1,4 @@
+import {installStudioWorkspace} from './studio-workspace.js?v=20261108-workspace';
 import {renderProjectileEditor} from './projectile-editor.js?v=20261108-persistence';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-persistence';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-persistence';
@@ -7,7 +8,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261108-persistence'
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-persistence';
 import {attacksVersion} from './attack-format.js?v=20261108-persistence';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-persistence';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-persistence';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-workspace';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-persistence';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-persistence';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-persistence';
@@ -256,7 +257,7 @@ function installEditing(){
  $('scenario').onchange=()=>{const presets={standing:{guard:false,distance:72,targetHeight:0},blocking:{guard:true,distance:72,targetHeight:0},airborne:{guard:false,distance:72,targetHeight:40},distant:{guard:false,distance:190,targetHeight:0}};Object.assign(options,presets[$('scenario').value]);installSandbox();changed();};
  $('saveScenario').onclick=()=>{try{localStorage.setItem(storageKey+'-scenario',JSON.stringify(options));status('Test scenario saved in this browser.');}catch(e){status(e.message);}};
  $('loadScenario').onclick=()=>{try{const saved=JSON.parse(localStorage.getItem(storageKey+'-scenario')||'null');if(!saved)throw Error('Save a scenario first.');const candidate=structuredClone(project);candidate.testBench.options=saved;validateDesign(candidate,ids);Object.assign(options,saved);installSandbox();changed();}catch(e){status(e.message);}};
- sequenceEditor.results();recordEdit();
+ sequenceEditor.results();recordEdit();installStudioWorkspace();
 }
 
 function installLibraryTabs(){

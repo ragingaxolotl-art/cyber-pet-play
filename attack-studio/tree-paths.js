@@ -9,6 +9,7 @@ export function validateExtras(tree) {
   if(!Array.isArray(paths)||paths.length>128||!Array.isArray(details)||details.length>10000)throw Error('Too many named paths or connection notes.');
   const pathIds=new Set(),edges=new Set();
   for(const path of paths){if(!text(path.id,160)||!path.id||pathIds.has(path.id)||!text(path.name,80)||!path.name.trim()||!PATH_KINDS.includes(path.kind)||!/^#[a-f\d]{6}$/i.test(path.color)||!text(path.notes||'',4000))throw Error('Invalid named path.');pathIds.add(path.id);}
+  for(const node of tree.nodes)if(node.pathIds!==undefined&&(!Array.isArray(node.pathIds)||node.pathIds.some(id=>!pathIds.has(id))||new Set(node.pathIds).size!==node.pathIds.length))throw Error('Invalid attack path membership.');
   for(const edge of details){const key=JSON.stringify([edge.from,edge.to]);if(edges.has(key)||!tree.nodes.find(n=>n.id===edge.to)?.requires.includes(edge.from)|| (edge.pathId&&!pathIds.has(edge.pathId))||!text(edge.notes||'',2000))throw Error('Invalid connection path or notes.');edges.add(key);}
   return tree;
 }

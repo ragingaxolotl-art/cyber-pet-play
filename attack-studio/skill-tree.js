@@ -1,23 +1,26 @@
+import {DATASETS_KEY,dataSetKey,readDataSets,pathNodeIds} from './tree-datasets.js';
+import {installTreeZoom} from './tree-zoom.js';
 import {installConnections} from './tree-connections.js?v=20261108-persistence';
 import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-persistence';
 import {installTreeGallery} from './tree-gallery.js?v=20261108-persistence';
 import {installStarters,setStarter} from './tree-starters.js?v=20261108-persistence';
-import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261108-persistence';
+import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js';
 import {validateAttack} from './combat-model.js?v=20261108-persistence';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
+let dataSets=[],dataSetId='original',treeKey=TREE_KEY;
 let connections,paths,starters;const history=[];
 const images=new Map(),nodeViews=new Map();
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 const current=()=>tree.nodes.find(n=>n.id===selected);
 function check(value){return validateExtras(validateTree(value,ids,validateAttack));}
-function save(){applyPending();check(tree);const existing=localStorage.getItem(TREE_KEY);if(existing!==baseSaved)throw Error('This tree changed in another tab. Download your edits, then reload before saving.');const data=JSON.stringify(tree);localStorage.setItem(TREE_KEY,data);baseSaved=data;dirty=false;say('Tree saved in this browser. Download a copy to move it to another device.');}
+function save(){applyPending();check(tree);const existing=localStorage.getItem(treeKey);if(existing!==baseSaved)throw Error('This tree changed in another tab. Download your edits, then reload before saving.');const data=JSON.stringify(tree);localStorage.setItem(treeKey,data);baseSaved=data;dirty=false;say('Tree saved in this browser. Download a copy to move it to another device.');}
 function commit(candidate){trimEdgeDetails(candidate);candidate.starterSkills=(candidate.starterSkills||[]).filter(id=>candidate.nodes.some(n=>n.id===id));check(candidate);if(JSON.stringify(candidate)===JSON.stringify(tree))return;history.push(structuredClone(tree));if(history.length>20)history.shift();tree=candidate;dirty=true;render();}
-function selectNode(id,reveal=false){selected=id;playing=false;if(reveal){$('branch').value='';$('search').value='';}render();inspect();if(reveal)nodeViews.get(id)?.scrollIntoView({block:'nearest',inline:'center'});}
+function selectNode(id,reveal=false){selected=id;playing=false;if(reveal){$('branch').value='';$('search').value='';$('viewPath').value='';}render();inspect();if(reveal)nodeViews.get(id)?.scrollIntoView({block:'nearest',inline:'center'});}
 function applyPending(){if(!tree)return;const candidate=structuredClone(tree),n=candidate.nodes.find(n=>n.id===selected);candidate.notes=$('treeNotes').value;if(n&&!$('editor').hidden){for(const key of ['name','description','state','requirement'])n[key]=$(key).value.trim();n.branch=$('nodeBranch').value.trim();n.notes=$('attackNotes').value;n.requires=[...$('prerequisites').querySelectorAll('input:checked')].map(input=>input.value);if(JSON.stringify(n.requires)!==JSON.stringify(current().requires)&&n.state==='ready')n.state='draft';}commit(candidate);}
 function undo(){if(!history.length)return;tree=history.pop();if(!tree.nodes.some(n=>n.id===selected))selected=tree.nodes[0]?.id;dirty=true;render();}
 
-function visible(){const query=$('search').value.toLowerCase();return tree.nodes.filter(n=>(!$('branch').value||n.branch===$('branch').value)&&(!query||(n.name+' '+n.description).toLowerCase().includes(query)));}
+function visible(){const pathIds=pathNodeIds(tree,$('viewPath').value);const query=$('search').value.toLowerCase();return tree.nodes.filter(n=>(!pathIds||pathIds.has(n.id))&&(!$('branch').value||n.branch===$('branch').value)&&(!query||(n.name+' '+n.description).toLowerCase().includes(query)));}
 function branches(){const old=$('branch').value;$('branch').replaceChildren(new Option('All branches',''));for(const branch of [...new Set(tree.nodes.map(n=>n.branch))].sort())$('branch').add(new Option(branch,branch));$('branch').value=[...$('branch').options].some(o=>o.value===old)?old:'';}
 function paint(canvas,effect,index){
  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);if(!effect)return;
@@ -26,7 +29,7 @@ function paint(canvas,effect,index){
  const draw=()=>{if(!image.naturalWidth)return;const [w,h]=effect.canvas||[image.naturalWidth,image.naturalHeight],cols=effect.columns||1,sx=effect.sheet?index%cols*w:0,sy=effect.sheet?Math.floor(index/cols)*h:0,scale=Math.min(canvas.width/w,canvas.height/h)*.9;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,sx,sy,w,h,(canvas.width-w*scale)/2,(canvas.height-h*scale)/2,w*scale,h*scale);};if(image.complete)draw();else image.addEventListener('load',draw,{once:true});
 }
 function drawEdges(nodes){const svg=$('connections');svg.replaceChildren();const ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs'),marker=document.createElementNS(ns,'marker');marker.id='arrow';for(const [k,v] of Object.entries({viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'}))marker.setAttribute(k,v);const arrow=document.createElementNS(ns,'path');arrow.setAttribute('d','M 0 0 L 10 5 L 0 10 z');arrow.setAttribute('fill','#7db6bd');marker.append(arrow);defs.append(marker);svg.append(defs);const map=new Map(nodes.map(n=>[n.id,n]));for(const n of nodes)for(const p of n.requires){const source=map.get(p);if(!source)continue;const path=document.createElementNS(ns,'path'),x=source.x+244,y=source.y+100,tx=n.x,ty=n.y+100,bend=Math.max(45,Math.abs(tx-x)/2);path.setAttribute('d',`M ${x} ${y} C ${x+bend} ${y}, ${tx-bend} ${ty}, ${tx} ${ty}`);path.setAttribute('class','edge');const title=document.createElementNS(ns,'title');title.textContent=source.name+' → '+n.name;path.append(title);svg.append(path);const route=paths?.decorate(path,p,n.id);if(route){const text=document.createElementNS(ns,'text');text.textContent=route.name;text.setAttribute('x',(x+tx)/2);text.setAttribute('y',Math.min(source.y,n.y)-10);text.setAttribute('class','path-label');svg.append(text);}const hit=path.cloneNode(true);hit.setAttribute('class','edge-hit');hit.removeAttribute('style');hit.removeAttribute('stroke-dasharray');connections?.edge(hit,p,n.id);svg.append(hit);}}
-function render(){branches();const nodes=visible();nodeViews.clear();$('nodes').replaceChildren();const minY=nodes.length?Math.min(...nodes.map(n=>n.y))-40:0;const view=nodes.map(n=>({...n,y:n.y-minY}));const width=Math.max(700,...view.map(n=>n.x+280)),height=Math.max(480,...view.map(n=>n.y+240));$('board').style.width=width+'px';$('board').style.height=height+'px';$('connections').setAttribute('width',width);$('connections').setAttribute('height',height);drawEdges(view);
+function render(){refreshPathPicker();branches();const nodes=visible();nodeViews.clear();$('nodes').replaceChildren();const minY=nodes.length?Math.min(...nodes.map(n=>n.y))-40:0;const view=nodes.map(n=>({...n,y:n.y-minY}));const width=Math.max(700,...view.map(n=>n.x+280)),height=Math.max(480,...view.map(n=>n.y+240));$('board').style.width=width+'px';$('board').style.height=height+'px';$('connections').setAttribute('width',width);$('connections').setAttribute('height',height);drawEdges(view);
  for(const n of view){const card=el('article');card.className='node'+(selected===n.id?' selected':'');card.style.left=n.x+'px';card.style.top=n.y+'px';const canvas=el('canvas');canvas.width=80;canvas.height=80;canvas.setAttribute('aria-label',n.name+' clip shot');paint(canvas,effects.get(n.effectId),Math.max(0,(effects.get(n.effectId).impact||1)-1));const choose=el('button',n.name);choose.className='choose';choose.onclick=()=>{try{if(connections?.choose(n.id))return;applyPending();selectNode(n.id);}catch(error){say(error.message);}};if((tree.starterSkills||[]).includes(n.id)){card.classList.add('starter');choose.textContent='★ '+n.name;}const detail=el('p',n.description),state=el('small',`${n.branch} · ${n.state==='needs-edit'?'Animation needs editing':n.state==='ready'?'Ready':'Draft'}`),rule=el('small',(tree.starterSkills||[]).includes(n.id)?'Given at start · starter bank':n.requires.length?`Learn ${n.requirement==='all'?'all':'any'} of ${n.requires.length} prerequisites${n.requires.some(id=>!view.some(p=>p.id===id))?' · some hidden':''}`:'Available to learn · no prerequisites');const move=el('button','↔ Move');move.className='move';move.setAttribute('aria-label','Move '+n.name);card.append(canvas,choose,detail,state,rule,move);$('nodes').append(card);nodeViews.set(n.id,card);
  move.onpointerdown=e=>{e.preventDefault();move.setPointerCapture(e.pointerId);const origin={x:e.clientX,y:e.clientY,nx:n.x,ny:n.y},zoom=Number($('zoom').value);move.onpointermove=event=>{n.x=Math.max(0,Math.min(50000,origin.nx+(event.clientX-origin.x)/zoom));n.y=Math.max(0,Math.min(50000-minY,origin.ny+(event.clientY-origin.y)/zoom));card.style.left=n.x+'px';card.style.top=n.y+'px';drawEdges(view);};const end=()=>{const candidate=structuredClone(tree),original=candidate.nodes.find(v=>v.id===n.id);original.x=n.x;original.y=Math.max(0,n.y+minY);move.onpointermove=null;commit(candidate);};move.onpointerup=end;move.onpointercancel=end;};
  }
@@ -42,14 +45,16 @@ $('editor').onsubmit=guarded(event=>{event.preventDefault();applyPending();inspe
 $('prerequisiteSearch').oninput=prerequisites;
 $('save').onclick=guarded(save);
 $('download').onclick=guarded(()=>{applyPending();check(tree);const url=URL.createObjectURL(new Blob([JSON.stringify(tree,null,2)],{type:'application/json'}));const link=el('a');link.href=url;link.download='cyber-pet-attack-skill-tree.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Tree download started, including saved attack and animation edits.');});
-$('open').onclick=()=>$('file').click();$('file').onchange=guarded(async()=>{const f=$('file').files[0];if(!f)return;if(f.size>8*1024*1024)throw Error('Choose a tree under 8 MiB.');const candidate=check(JSON.parse(await f.text()));if(dirty&&!confirm('Replace the unsaved tree?'))return;connections?.cancel();commit(candidate);selected=tree.nodes[0]?.id;render();inspect();$('file').value='';say('Opened tree. Save it to retain it in this browser.');});
-$('branch').onchange=guarded(()=>{applyPending();render();});$('search').oninput=guarded(()=>{applyPending();render();});$('zoom').onchange=()=>{$('board').style.zoom=$('zoom').value;};
+$('open').onclick=()=>$('file').click();$('file').onchange=guarded(async()=>{const f=$('file').files[0];if(!f)return;if(f.size>8*1024*1024)throw Error('Choose a tree under 8 MiB.');const candidate=check(JSON.parse(await f.text()));save();createDataSet(f.name.replace(/\.json$/i,'').slice(0,80),candidate);$('file').value='';say('Imported into a separate data set.');});
+
+$('branch').onchange=guarded(()=>{applyPending();render();});$('search').oninput=guarded(()=>{applyPending();render();});installTreeZoom($);
 $('arrange').onclick=guarded(()=>{applyPending();const candidate=structuredClone(tree),shown=new Set(visible().map(n=>n.id)),nodes=candidate.nodes.filter(n=>shown.has(n.id));const local={nodes:nodes.map(n=>({...n,requires:n.requires.filter(id=>shown.has(id))}))};const offset=nodes.length?Math.max(0,Math.min(...nodes.map(n=>n.y))-40):0;arrange(local);for(const pos of local.nodes){const n=candidate.nodes.find(n=>n.id===pos.id);n.x=pos.x;n.y=pos.y+offset;}commit(candidate);});
 $('librarySearch').oninput=libraryOptions;
 function addEffect(effectId,placement='attached'){
  if(tree.nodes.length>=512)throw Error('A tree can hold 512 attacks.');
  const e=effects.get(effectId),setup=setups.get(e.id),parent=placement==='attached'?current():null;
  const node={id:crypto.randomUUID(),name:e.name,description:e.description||'Describe what this attack does and why it follows its prerequisites.',branch:parent?.branch||e.element,effectId:e.id,state:'needs-edit',requirement:'all',requires:parent?[parent.id]:[],x:parent?Math.min(49500,parent.x+300):32,y:Math.min(49500,Math.max(0,...tree.nodes.map(n=>n.y))+244),...(setup?{attack:structuredClone(setup.attack)}:{})};
+ if(paths.active())node.pathIds=[paths.active()];
  let candidate=structuredClone(tree);candidate.nodes.push(node);
  if(parent&&paths.active())candidate=setEdgeDetails(candidate,parent.id,node.id,paths.active());
  if(placement==='starter')candidate=setStarter(candidate,node.id,true);
@@ -57,13 +62,38 @@ function addEffect(effectId,placement='attached'){
 }
 $('add').onclick=guarded(()=>{applyPending();addEffect($('effect').value);say('Added animation as an editable attack. Review its description and prerequisites.');});
 $('remove').onclick=guarded(()=>{applyPending();if(!confirm('Remove this attack and its direct prerequisite connections? Dependent attacks will need their learning rules reviewed.'))return;const candidate=structuredClone(tree);candidate.nodes=candidate.nodes.filter(n=>n.id!==selected);for(const n of candidate.nodes)if(n.requires.includes(selected)){n.requires=n.requires.filter(id=>id!==selected);n.state='draft';}selected=candidate.nodes[0]?.id;commit(candidate);inspect();});
-$('editAnimation').onclick=guarded(()=>{save();location.href='design.html?treeNode='+encodeURIComponent(selected);});
+$('editAnimation').onclick=guarded(()=>{save();location.href='design.html?treeNode='+encodeURIComponent(selected)+'&dataSet='+encodeURIComponent(dataSetId);});
 $('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause clip':'Play clip';};$('frame').oninput=()=>{playing=false;$('play').textContent='Play clip';clipFrame=Number($('frame').value);showFrame();};
 function tick(now){if(playing&&current()){const effect=effects.get(current().effectId);clipElapsed+=Math.min(now-last,100);if(clipElapsed>=(effect.times[clipFrame]||100)){clipElapsed=0;clipFrame=(clipFrame+1)%effect.times.length;showFrame();}}last=now;requestAnimationFrame(tick);}
 $('editor').addEventListener('input',event=>{if(!['frame','prerequisiteSearch'].includes(event.target.id))dirty=true;});$('treeNotes').oninput=()=>dirty=true;
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
-try{const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));baseSaved=localStorage.getItem(TREE_KEY);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
+try{const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));dataSets=readDataSets(localStorage);dataSetId=new URLSearchParams(location.search).get('dataSet')||'original';if(!dataSets.some(d=>d.id===dataSetId))dataSetId=dataSets[0].id;treeKey=dataSetKey(dataSetId);refreshDataSets();baseSaved=localStorage.getItem(treeKey);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
 connections=installConnections({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,undo,canUndo:()=>history.length>0,paths});
 starters=installStarters({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,effects});
 installTreeGallery({effects,getTree:()=>tree,add:addEffect,status:say,applyPending});
 render();inspect();libraryOptions();say(`${tree.nodes.length} attacks in the learning tree. ${baseSaved?'Restored saved edits.':'Proposed order — edit and save to keep it.'}`);requestAnimationFrame(tick);}catch(e){say('Could not open tree: '+e.message);}
+
+function refreshDataSets(){
+ $('dataSet').replaceChildren(...dataSets.map(d=>new Option(d.name,d.id)));$('dataSet').value=dataSetId;
+}
+function refreshPathPicker(){
+ const old=$('viewPath').value;$('viewPath').replaceChildren(new Option('All paths',''),...(tree.paths||[]).map(p=>new Option(p.name,p.id)));
+ if((tree.paths||[]).some(p=>p.id===old))$('viewPath').value=old;
+}
+function openDataSet(id){
+ const key=dataSetKey(id),raw=localStorage.getItem(key),next=check(JSON.parse(raw));
+ connections?.cancel();tree=next;treeKey=key;dataSetId=id;baseSaved=raw;dirty=false;history.length=0;selected=tree.nodes[0]?.id;playing=false;
+ $('branch').value='';$('search').value='';$('viewPath').value='';$('activePath').value='';$('treeNotes').value=tree.notes||'';
+ refreshDataSets();render();inspect();$('viewport').scrollTo(0,0);
+ const url=new URL(location.href);url.searchParams.set('dataSet',id);window.history.replaceState(null,'',url);
+ say('Opened '+dataSets.find(d=>d.id===id).name+'.');
+}
+function createDataSet(name,next){
+ const latest=readDataSets(localStorage),id=crypto.randomUUID();check(next);
+ localStorage.setItem(dataSetKey(id),JSON.stringify(next));
+ latest.push({id,name});localStorage.setItem(DATASETS_KEY,JSON.stringify(latest));dataSets=latest;openDataSet(id);
+}
+$('dataSet').onchange=guarded(()=>{const id=$('dataSet').value;try{save();openDataSet(id);}finally{refreshDataSets();}});
+$('newDataSet').onclick=guarded(()=>{const name=prompt('New data set name');if(!name?.trim())return;if(name.trim().length>80)throw Error('Use a name under 80 characters.');save();createDataSet(name.trim(),{format:'cyber-pet-attack-skill-tree',version:1,nodes:[],paths:[],edgeDetails:[],notes:''});});
+$('renameDataSet').onclick=guarded(()=>{const name=prompt('Data set name',dataSets.find(d=>d.id===dataSetId).name);if(!name?.trim())return;if(name.trim().length>80)throw Error('Use a name under 80 characters.');const latest=readDataSets(localStorage);latest.find(d=>d.id===dataSetId).name=name.trim();localStorage.setItem(DATASETS_KEY,JSON.stringify(latest));dataSets=latest;refreshDataSets();});
+$('viewPath').onchange=guarded(()=>{applyPending();$('activePath').value=$('viewPath').value;$('branch').value='';$('search').value='';render();});
