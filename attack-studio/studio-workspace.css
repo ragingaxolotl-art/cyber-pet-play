@@ -2,3 +2,6 @@ header nav{align-items:center}.workspace-controls{display:flex;flex-direction:ro
 @media(max-width:760px){.custom-workspace{display:flex!important;flex-direction:column;overflow:visible}.workspace-column{overflow:visible}.workspace-splitter{display:none}.workspace-panel-bar .workspace-drag{flex-basis:auto}.workspace-panel.floating{max-height:85dvh}.workspace-menu-body{position:fixed;top:100px;left:12px;right:12px;min-width:0}.workspace-panel-body>.preview{top:auto}}
 
 .workspace-panel[hidden]{display:none!important}
+
+/* Stacked phone panels must shrink to the viewport, not their content width. */
+@media(max-width:760px){.custom-workspace>.workspace-column{width:100%;max-width:100%}.workspace-panel-body{max-width:100%}}
