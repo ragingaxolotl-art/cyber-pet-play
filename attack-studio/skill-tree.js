@@ -1,11 +1,11 @@
 import {DATASETS_KEY,dataSetKey,readDataSets,pathNodeIds} from './tree-datasets.js';
-import {installTreeZoom} from './tree-zoom.js?v=20261108-workspace-trackpad';
-import {installConnections} from './tree-connections.js?v=20261108-persistence';
-import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-persistence';
-import {installTreeGallery} from './tree-gallery.js?v=20261108-persistence';
-import {installStarters,setStarter} from './tree-starters.js?v=20261108-persistence';
+import {installTreeZoom} from './tree-zoom.js?v=20261108-durability';
+import {installConnections} from './tree-connections.js?v=20261108-durability';
+import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-durability';
+import {installTreeGallery} from './tree-gallery.js?v=20261108-durability';
+import {installStarters,setStarter} from './tree-starters.js?v=20261108-durability';
 import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js';
-import {validateAttack} from './combat-model.js?v=20261108-persistence';
+import {validateAttack} from './combat-model.js?v=20261108-durability';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let dataSets=[],dataSetId='original',treeKey=TREE_KEY;

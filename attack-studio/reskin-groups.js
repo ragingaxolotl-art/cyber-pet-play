@@ -1,4 +1,4 @@
-import {remapSelfCancels} from './cancel-windows.js?v=20261108-persistence';
+import {remapSelfCancels} from './cancel-windows.js?v=20261108-durability';
 // A linked family shares behavior; each member keeps its own identity and artwork.
 export function familyKey(effect){return ['reskin','detailed-reskin'].includes(effect?.collection)?`${effect.collection}:${effect.slot}:${effect.variant}`:null;}
 export function matchingReskins(effect,effects){const key=familyKey(effect);return key?effects.filter(e=>familyKey(e)===key).sort((a,b)=>a.element.localeCompare(b.element)):[];}

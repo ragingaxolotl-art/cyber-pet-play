@@ -1,8 +1,12 @@
-import {activeEnd} from './contact-timing.js?v=20261108-persistence';
+import {activeEnd} from './contact-timing.js?v=20261108-durability';
 
 // Classroom safety bounds; lifetime uses 60 Hz simulation frames from launch.
 export const PROJECTILE_LIMITS=Object.freeze({perOwner:16,lifetime:600});
 export function validateProjectileLifetime(attack){
+ if(attack.projectileDurability!==undefined){
+  if(attack.projectileLifetime===undefined)throw Error('Projectile durability requires independent lifetime.');
+  if(!Number.isInteger(attack.projectileDurability)||attack.projectileDurability<1||attack.projectileDurability>10)throw Error('Projectile durability must be 1–10 whole points.');
+ }
  if(attack.projectileLifetime===undefined)return;
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))throw Error('Independent lifetime requires a damage or push projectile.');
  if(!Number.isInteger(attack.projectileLifetime)||attack.projectileLifetime<1||attack.projectileLifetime>PROJECTILE_LIMITS.lifetime)throw Error('Projectile lifetime must be 1–600 frames.');
@@ -20,7 +24,7 @@ export class ProjectileRegistry{
   if(cast.projectileLaunched)throw Error('This cast already launched its projectile.');
   if(owner.hp<=0||target.hp<=0)throw Error('Projectile requires living fighters.');
   if(this.entries.filter(p=>p.owner===owner).length>=PROJECTILE_LIMITS.perOwner)throw Error('Projectile limit reached.');
-  const entity={id:this.nextId++,owner,target,cast,spawnFrame:frame,expires:frame+lifetime};
+  const entity={id:this.nextId++,owner,target,cast,durability:cast.a.projectileDurability,spawnFrame:frame,expires:frame+lifetime};
   this.entries.push(entity);cast.projectileLaunched=true;return entity;
  }
  remove(entity){this.entries=this.entries.filter(p=>p!==entity);}
