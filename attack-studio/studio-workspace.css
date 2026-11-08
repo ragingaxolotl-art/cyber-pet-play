@@ -5,3 +5,13 @@ header nav{align-items:center}.workspace-controls{display:flex;flex-direction:ro
 
 /* Stacked phone panels must shrink to the viewport, not their content width. */
 @media(max-width:760px){.custom-workspace>.workspace-column{width:100%;max-width:100%}.workspace-panel-body{max-width:100%}}
+
+/* Docked columns and floating panel bodies own scrolling. The original
+   library/inspector must not trap wheel gestures in a non-scrolling child. */
+.workspace-panel-body>.panel{overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto}
+.workspace-column{min-height:0}
+
+.context-help-button{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;margin-left:8px;border:1px solid var(--mint);border-radius:4px;font:700 15px system-ui;vertical-align:middle}
+.context-help-dialog{width:min(540px,calc(100vw - 32px));max-height:80dvh;overflow:auto;padding:22px;background:var(--panel);color:#edf3fa;border:1px solid var(--mint);border-radius:10px;line-height:1.6}.context-help-dialog::backdrop{background:#0009}.context-help-dialog p{font-size:14px}.context-help-dialog button{min-height:40px}
+
+.context-help-button::before{content:'i'}

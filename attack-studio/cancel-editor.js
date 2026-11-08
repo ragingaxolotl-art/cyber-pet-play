@@ -1,5 +1,6 @@
-import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261108-movement-cancels';
-import {validateAttack} from './combat-model.js?v=20261108-absorption';
+import {compactSectionHelp} from './context-help.js?v=20261108-scroll-info';
+import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261108-scroll-info';
+import {validateAttack} from './combat-model.js?v=20261108-hitstun';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCancelEditor({root,attack,attacks,commit,status,test}){
  root.replaceChildren();root.append(make('h2','Follow-up windows'));
@@ -24,4 +25,5 @@ export function renderCancelEditor({root,attack,attacks,commit,status,test}){
   const remove=make('button',`Delete follow-up ${index+1}`);remove.type='button';remove.onclick=()=>mutate(next=>{next.cancelWindows.splice(index,1);if(!next.cancelWindows.length)delete next.cancelWindows;});section.append(remove);root.append(section);
  }
  const movement=make('section');root.append(movement);renderMovementCancelEditor({root:movement,attack,commit,status});
+ compactSectionHelp(root);
 }

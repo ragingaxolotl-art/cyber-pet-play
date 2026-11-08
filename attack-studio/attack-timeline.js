@@ -1,8 +1,9 @@
-import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261108-movement-cancels';
+import {addContextHelp} from './context-help.js?v=20261108-scroll-info';
+import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261108-group-drag-lanes';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-shared-juggle';
 import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-group-drag-lanes';
 import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-shared-juggle';
-import {validateAttack} from './combat-model.js?v=20261108-absorption';
+import {validateAttack} from './combat-model.js?v=20261108-hitstun';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
  const startup=simulation.timing.startup,contact=simulation.impactFrame??startup,geometryBase=attack.hitEvents?contact:startup,groups=[];
  if(attack.hitboxGroups)for(const [i,g] of attack.hitboxGroups.entries())groups.push({id:g.id,boxes:g.boxes.map((b,j)=>({...b,start:geometryBase+b.start,minStart:geometryBase,maxStart:geometryBase+attack.active-b.duration,label:`G${i+1} · Box ${j+1}`}))});
@@ -61,4 +62,5 @@ export function renderAttackTimeline({root,attack,simulation,effects,commit,pose
  const tracks=timelineTracks(attack,simulation,effects,poseCount),note=document.createElement('p');note.textContent=`All tracks use frames since attack start. Startup ends at ${tracks.startup}. ${attack.hitEvents?(attack.sequenceTiming==='cast'?`Hit windows start from startup at ${tracks.startup}; misses do not shift them.`:simulation.impactFrame===null?'Contact was not reached; hit tracks use startup as a provisional anchor.':`Contact occurs at ${tracks.contact}; hit tracks remain relative to it.`):''} Repeating effects show one cycle. Synced animation follows combat; choose Custom frame durations to resize it independently. Visual edits do not move damage windows.`;root.append(note);
  const error=document.createElement('p');error.setAttribute('role','status');
  if(tracks.groups.length)renderHitboxTimeline({root,groups:tracks.groups,frames:tracks.frames,title:'Combined attack timing tracks',clockLabel:'Attack frames',selectionKey:attack.id,copySelection:selection=>copyTimelineEvents(attack,tracks,selection),pasteSelection:(clipboard,start)=>commit(pasteTimelineEvents(attack,tracks,clipboard,start)),moveSelection:(selection,delta)=>commit(moveTimelineSelection(attack,tracks,effects,selection,delta)),onError:m=>error.textContent=m,commit:(g,b,w)=>commit(editTimeline(attack,tracks,effects,g,b,w))});else{const p=document.createElement('p');p.textContent='Add hitbox groups, a hit sequence, effects or a movement path to edit their timing here.';root.append(p);}root.append(error);
+ const instructions=root.querySelector('.group-timeline')?.querySelector('p');addContextHelp(root,title,[note,instructions]);note.hidden=false;note.textContent=`Startup ${tracks.startup}f · Attack frames 0–${tracks.frames-1}`;
 }
