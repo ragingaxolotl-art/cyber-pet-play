@@ -1,3 +1,5 @@
+// View state stays separate from attack data and survives editor rerenders.
+const timelineViews=new WeakMap();
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function adjustWindow(box,delta,mode,frames){
  delta=Math.round(delta);
@@ -9,6 +11,16 @@ export function adjustWindow(box,delta,mode,frames){
 export function renderHitboxTimeline({root,groups,frames,commit,title='Hitbox timing tracks',clockLabel='Active frames',onError=()=>{}}){
  const timeline=el('div');timeline.className='group-timeline';timeline.setAttribute('aria-label',title);
  timeline.append(el('p',`${clockLabel} 0–${frames-1}. Drag a bar to move it; drag its end to resize. Arrow keys move one frame; Shift + arrow resizes.`));
+ let views=timelineViews.get(root);if(!views){views=new Map();timelineViews.set(root,views);}
+ let view=views.get(title);if(!view){view={zoom:1,scroll:0};views.set(title,view);}
+ const tools=el('div'),zoomLabel=el('label','Timeline zoom '),zoom=el('select'),fit=el('button','Fit timeline');
+ zoom.setAttribute('aria-label',title+' zoom');for(const factor of [1,2,4,8])zoom.add(new Option(factor+'×',factor));zoom.value=String(view.zoom);fit.type='button';
+ const viewport=el('div'),content=el('div');viewport.className='timeline-viewport';viewport.style.overflowX='auto';content.style.width=view.zoom*100+'%';content.style.minWidth='100%';
+ viewport.setAttribute('aria-label',title+' scroll area');viewport.tabIndex=0;
+ zoom.onchange=()=>{const value=Number(zoom.value);if(![1,2,4,8].includes(value))return;view.zoom=value;content.style.width=value*100+'%';};
+ fit.onclick=()=>{view.zoom=1;view.scroll=0;zoom.value='1';content.style.width='100%';viewport.scrollLeft=0;};
+ viewport.addEventListener('scroll',()=>{view.scroll=viewport.scrollLeft;});zoomLabel.append(zoom);tools.append(zoomLabel,fit);timeline.append(tools);viewport.append(content);timeline.append(viewport);
+
  groups.forEach((group,gi)=>group.boxes.forEach((box,bi)=>{
   const row=el('div');row.className='group-timeline-row';const label=el('span',box.label||`G${gi+1} · Box ${bi+1}`),track=el('div');track.className='group-timeline-track';
   const bar=el('button'),end=el('button','↔');bar.type=end.type='button';bar.className='group-timeline-bar';end.className='group-timeline-end';end.disabled=!!box.lockDuration;
@@ -23,6 +35,6 @@ export function renderHitboxTimeline({root,groups,frames,commit,title='Hitbox ti
    control.onpointercancel=()=>{drag=null;proposal={...box};paint();};
    control.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();proposal=adjustWindow(box,e.key==='ArrowLeft'?-1:1,e.shiftKey?'resize':mode,frames);const label=control.getAttribute('aria-label');apply();[...document.querySelectorAll('button')].find(n=>n.getAttribute('aria-label')===label)?.focus();};
   }
-  paint();track.append(bar,end);row.append(label,track);timeline.append(row);
- }));root.append(timeline);
+  paint();track.append(bar,end);row.append(label,track);content.append(row);
+ }));root.append(timeline);viewport.scrollLeft=view.scroll;
 }

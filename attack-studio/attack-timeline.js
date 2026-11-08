@@ -1,5 +1,5 @@
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
-import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-scheduled-sequences';
+import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-timeline-zoom';
 import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-scheduled-sequences';
 import {validateAttack} from './combat-model.js?v=20261108-scheduled-sequences';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
