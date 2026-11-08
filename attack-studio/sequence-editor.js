@@ -1,8 +1,8 @@
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-combo-scaling';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-hitstun';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
-import {validateAttack} from './combat-model.js?v=20261108-counter-hit';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-counter-hit';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-shared-juggle';
+import {validateAttack} from './combat-model.js?v=20261108-hitstun';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-hitstun';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-hitstun';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -55,6 +55,9 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
       const l=el('label',title),input=el('select');for(const choice of choices)input.add(new Option(choice,choice));input.value=event[key];input.onchange=()=>mutate(n=>n.hitEvents.find(e=>e.id===selected)[key]=input.value);l.append(input);fields.append(l);
     }
     if(a.hitboxGroups){const label=el('label','Hitbox group for this hit'),select=el('select');select.setAttribute('aria-label','Hitbox group for this hit');a.hitboxGroups.forEach((g,i)=>select.add(new Option('Group '+(i+1),g.id)));select.value=event.hitboxGroup;select.onchange=()=>{try{mutate(n=>n.hitEvents.find(e=>e.id===selected).hitboxGroup=select.value);}catch(e){error.textContent=e.message;select.value=event.hitboxGroup;}};label.append(select);fields.append(label);}
+    const stunLabel=el('label','Hitstun override (frames; blank uses reaction timing)'),stunInput=el('input');Object.assign(stunInput,{type:'number',min:0,max:120,step:1,value:event.hitstun??''});stunInput.setAttribute('aria-label','Selected hit hitstun frames');
+    stunInput.onchange=()=>{try{mutate(n=>{const hit=n.hitEvents.find(e=>e.id===selected);if(stunInput.value==='')delete hit.hitstun;else hit.hitstun=Number(stunInput.value);});}catch(e){error.textContent=e.message;stunInput.value=event.hitstun??'';}};stunLabel.append(stunInput);fields.append(stunLabel);
+    fields.append(el('p','Blank preserves reaction-based hitstun; zero adds no hitstun. Movement or suspension can still lock the target. Explicit values require version 15.'));
     root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
     const legacy=el('button','Return to ordinary '+a.delivery);legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.sequenceTiming;delete n.behaviorVersion;delete n.projectileMode;if(n.hitboxGroups)n.impactTrigger='timed';});root.append(legacy);
   }

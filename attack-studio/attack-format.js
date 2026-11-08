@@ -1,7 +1,8 @@
 // Container versions protect combat behavior from silent loss in older clients.
-export const attackVersion=attack=>attack?.counterHit!==undefined?14:attack?.comboScaling!==undefined?13:attack?.contactFeedback!==undefined?12:attack?.movementCancels!==undefined?11:attack?.sequenceTiming==='cast'?10:attack?.defenseWindows?.some(w=>['reflect','absorb'].includes(w.kind))?9:attack?.projectileDurability!==undefined?8:attack?.projectileLifetime!==undefined?7:attack?.cancelWindows?.some(w=>w.automatic===true)?6:attack?.cancelWindows!==undefined?5:attack?.defenseWindows!==undefined?4:attack?.hitboxGroups!==undefined?3:attack?.hitEvents?2:1;
+export const attackVersion=attack=>(attack?.hitstunScaling!==undefined||attack?.hitEvents?.some(e=>e.hitstun!==undefined))?15:attack?.counterHit!==undefined?14:attack?.comboScaling!==undefined?13:attack?.contactFeedback!==undefined?12:attack?.movementCancels!==undefined?11:attack?.sequenceTiming==='cast'?10:attack?.defenseWindows?.some(w=>['reflect','absorb'].includes(w.kind))?9:attack?.projectileDurability!==undefined?8:attack?.projectileLifetime!==undefined?7:attack?.cancelWindows?.some(w=>w.automatic===true)?6:attack?.cancelWindows!==undefined?5:attack?.defenseWindows!==undefined?4:attack?.hitboxGroups!==undefined?3:attack?.hitEvents?2:1;
 export const attacksVersion=attacks=>Math.max(1,...attacks.map(attackVersion));
 export function requireGroupVersion(version,attacks){
+ if(version<15&&attacks.some(a=>a?.hitstunScaling!==undefined||a?.hitEvents?.some(e=>e.hitstun!==undefined)))throw Error('Hitstun scaling requires a version 15 file.');
  if(version<14&&attacks.some(a=>a?.counterHit!==undefined))throw Error('Counter-hit rules require a version 14 file.');
  if(version<13&&attacks.some(a=>a?.comboScaling!==undefined))throw Error('Combo scaling requires a version 13 file.');
  if(version<12&&attacks.some(a=>a?.contactFeedback!==undefined))throw Error('Contact feedback requires a version 12 file.');

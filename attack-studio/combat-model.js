@@ -1,3 +1,4 @@
+import {validateHitstunScaling,scaledHitReaction} from './hitstun-scaling.js?v=20261108-hitstun';
 import {validateCounterHit} from './counter-hit.js?v=20261108-counter-hit';
 import {validateComboScaling,scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
 import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
@@ -9,15 +10,15 @@ import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=2026
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
 import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-durability';
-import {requireGroupVersion} from './attack-format.js?v=20261108-counter-hit';
+import {requireGroupVersion} from './attack-format.js?v=20261108-hitstun';
 import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-durability';
 import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-durability';
 import {hasLegacyMotion,sampleLegacyMotion} from './legacy-motion.js?v=20261108-durability';
 import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-durability';
 import {pathSample} from './attack-motion.js?v=20261108-durability';
 import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-durability';
-import {validateHitSequence} from './hit-sequence.js?v=20261108-durability';
-import {simulateSequence} from './sequence-preview.js?v=20261108-combo-scaling';
+import {validateHitSequence} from './hit-sequence.js?v=20261108-hitstun';
+import {simulateSequence} from './sequence-preview.js?v=20261108-hitstun';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -35,7 +36,7 @@ export function validateAttack(a,ids){
  if(!a||typeof a!=='object')fail('Invalid attack.');
  validateHitSequence(a);
  validateMovementCancels(a.movementCancels);
- validateContactFeedback(a.contactFeedback);validateComboScaling(a.comboScaling);validateCounterHit(a.counterHit);
+ validateContactFeedback(a.contactFeedback);validateComboScaling(a.comboScaling);validateCounterHit(a.counterHit);validateHitstunScaling(a.hitstunScaling);
  validateProjectileLifetime(a);
  validateCancelWindows(a.cancelWindows);
  validateDefenseWindows(a.defenseWindows);
@@ -70,7 +71,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–14 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–15 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
@@ -98,7 +99,7 @@ export function simulate(a,attacker,target,options={}){
  function event(frame,text){events.push({frame,text});}
  function heal(who,n){const old=who.hp;who.hp=Math.min(who.maxHP,who.hp+n);return who.hp-old;}
  function startReaction(who,f){
-  const reaction=juggleLegacyReaction(who,a);if(!reaction)return false;
+  const reaction=juggleLegacyReaction(who,scaledHitReaction(a,combos.priorHits('self','target')));if(!reaction)return false;
   flight={who,x:who.x,y:who.y,start:f,wall:false,attack:reaction};
   who.stun=Math.max(who.stun,legacyRecoveryEnd(who,reaction,f));
   who.reactionHitFrame=f;who.reactionDirection=facing;who.reactionWallFrame=null;who.reactionLandFrame=null;

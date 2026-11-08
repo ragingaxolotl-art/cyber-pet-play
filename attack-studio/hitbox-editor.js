@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-counter-hit';
+import {validateAttack} from './combat-model.js?v=20261108-hitstun';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const unique=prefix=>prefix+crypto.randomUUID().replaceAll('-','');
 let selectedBox=null;

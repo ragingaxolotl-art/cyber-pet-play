@@ -1,5 +1,5 @@
-import {validateAttack} from './combat-model.js?v=20261108-counter-hit';
-import {REACTIONS} from './hit-sequence.js?v=20261108-shared-juggle';
+import {validateAttack} from './combat-model.js?v=20261108-hitstun';
+import {REACTIONS} from './hit-sequence.js?v=20261108-hitstun';
 export const REACTION_BLOCKS=['hit',...REACTIONS.filter(r=>r!=='none')];
 // Authoring helper only: exports ordinary hit events understood by both runtimes.
 // It never changes delivery, geometry, artwork, defense or follow-up definitions.

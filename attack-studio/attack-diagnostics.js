@@ -4,6 +4,14 @@ export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
  if(attack.projectileLifetime!==undefined)add('projectile-lifetime','info',`Projectile launches at startup and can survive interruption for up to ${attack.projectileLifetime} frames. Owner recovery runs independently. Defeat, expiry and parry remove the projectile.`, 'Requires version 7 saving. Test simultaneous contacts and interruption in Arena; classroom saving remains subject to server compatibility.');
  if(attack.hitEvents||(attack.launchHeight>0&&attack.pushAxis!=='x'))add('shared-juggle-budget','info','Ordinary and sequence reactions share a ten-reaction airborne budget. The grounded launcher counts as one; landing resets the budget.','At the limit, the target is forced toward the floor. Ordinary damage can still connect without restarting the launch. Guard, armor, invulnerability and parry interruptions do not spend this budget. Retest older long launch combos in Arena.');
+ if(attack.hitstunScaling!==undefined||attack.hitEvents?.some(e=>e.hitstun!==undefined)){
+  add('hitstun-version','info','Hitstun deterioration and explicit per-hit hitstun require version 15 support.','Keep a downloaded backup; unsupported classroom servers refuse writes.');
+  add('hitstun-recovery','info','Hitstun is one recovery requirement. Launch motion, suspension, knockdown and status stun can keep the defender locked after hitstun ends.','Inspect action availability in the preview and test complete chains in Arena. Reducing hitstun does not shorten authored movement or guarantee an airborne escape.');
+  if(attack.hitstunScaling!==undefined){
+   add('hitstun-scaling','info',`Each earlier uninterrupted hit removes ${attack.hitstunScaling.step} hitstun frames, down to ${attack.hitstunScaling.minimum} frames. A shorter authored hitstun is never increased.`, 'Counts span attacks and reset at an actionable gap. Same-frame hits share the prior count. Guard, armor, push and support effects do not apply this reduction.');
+   if(attack.payload!=='damage')add('hitstun-payload','warning','This move does not deal direct damage, so its hitstun deterioration has no effect.','Remove deterioration or use a damage move.');
+  }
+ }
  if(attack.counterHit!==undefined){
   add('counter-hit-version','info','Counter-hit rules require version 14 support in Studio, Arena and the classroom bank.','Keep a downloaded backup; unsupported servers refuse the save before writing.');
   add('counter-hit-rules','info',`Direct damage is ${attack.counterHit.damagePercent}% when hitting an offensive opponent during: ${attack.counterHit.phases.join(', ')}.`, 'Phases are captured before contacts resolve. Guard, armor and periodic damage are excluded; combo scaling and shields apply after the bonus. Recovery is eligible only when selected.');

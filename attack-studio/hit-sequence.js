@@ -1,5 +1,5 @@
-import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-scheduled-sequences';
-export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-scheduled-sequences';
+import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-shared-juggle';
+export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-shared-juggle';
 // Version 2: a bounded sequence of hits timed from first projectile contact.
 // Shared by the editor preview and the Arena. All times are 60 Hz frames.
 export const SEQUENCE_LIMITS = Object.freeze({hits:10, duration:300, suspension:30, gravity:.48});
@@ -28,6 +28,7 @@ export function validateHitSequence(attack) {
     if(event.hitboxGroup!==undefined&&(!attack.hitboxGroups||!attack.hitboxGroups.some(g=>g.id===event.hitboxGroup)))throw Error('Hit references a missing hitbox group.');
     if (!integer(event.offset,0,SEQUENCE_LIMITS.duration)||event.offset<=previous) throw Error('Hit offsets must increase, starting at contact + 0.');
     if (!integer(event.duration,1,60)||event.offset+event.duration>SEQUENCE_LIMITS.duration) throw Error('Hit windows must end within 300 frames of contact.');
+    if(event.hitstun!==undefined&&!integer(event.hitstun,0,120))throw Error('Hit-event hitstun must be whole frames from 0 to 120.');
     if (!Number.isFinite(event.damage)||event.damage<0||event.damage>500) throw Error('Hit damage must be 0–500.');
     if (!REACTIONS.includes(event.reaction)||!integer(event.height,0,150)||!integer(event.knockback,0,150)||!integer(event.frames,1,120)||!integer(event.hold,1,SEQUENCE_LIMITS.suspension)) throw Error('Invalid hit reaction.');
     if (!['any','grounded','airborne'].includes(event.target)) throw Error('Invalid hit target restriction.');
@@ -78,7 +79,7 @@ export function sequenceOpportunities(attack,state,age,overlap,target) {
 export function applyPulseReaction(target,event,direction,frame) {
   resetGroundedJuggle(target);
   target.lastHit=frame;
-  if(event.reaction==='none')return;
+  if(event.reaction==='none'){if(event.hitstun!==undefined)target.stun=Math.max(target.stun||0,frame+event.hitstun);return;}
   const budget=recordJuggleReaction(target,event.height>0&&event.reaction!=='suspend'&&event.reaction!=='spike');
   if(budget==='locked')return;
   target.legacyMotion=null;
@@ -88,7 +89,7 @@ export function applyPulseReaction(target,event,direction,frame) {
   target.reactionStart=frame;target.lastHit=frame;target.vy=0;target.vx=0;
   target.reactionHitFrame=frame;target.reactionDirection=direction;target.reactionLaunched=target.reaction==='airborne';
   target.reactionInFlight=true;target.reactionFlightFrames=event.frames;
-  target.stun=Math.max(target.stun||0,frame+(event.reaction==='suspend'?event.hold:event.frames));
+  target.stun=Math.max(target.stun||0,frame+(event.hitstun??(event.reaction==='suspend'?event.hold:event.frames)));
 }
 // Returns true while this shared motion owns position, including its landing frame.
 export function advancePulseReaction(target,frame,minX=-Infinity,maxX=Infinity) {
