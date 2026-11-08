@@ -1,9 +1,9 @@
-import {installConnections} from './tree-connections.js?v=20261108-juggle-reset';
-import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-juggle-reset';
-import {installTreeGallery} from './tree-gallery.js?v=20261108-juggle-reset';
-import {installStarters,setStarter} from './tree-starters.js?v=20261108-juggle-reset';
-import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261108-juggle-reset';
-import {validateAttack} from './combat-model.js?v=20261108-juggle-reset';
+import {installConnections} from './tree-connections.js?v=20261108-persistence';
+import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-persistence';
+import {installTreeGallery} from './tree-gallery.js?v=20261108-persistence';
+import {installStarters,setStarter} from './tree-starters.js?v=20261108-persistence';
+import {TREE_KEY,validateTree,starterTree,ancestors,arrange} from './skill-tree-model.js?v=20261108-persistence';
+import {validateAttack} from './combat-model.js?v=20261108-persistence';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let connections,paths,starters;const history=[];

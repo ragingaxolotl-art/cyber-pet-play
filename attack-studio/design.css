@@ -119,3 +119,5 @@ body:has(.layout) #arena { width:min(100%, calc(var(--viewer-height,28dvh) * 2))
 /* Playback precedes the canvas so testing stays discoverable in a short preview. */
 .preview .playback{position:sticky;top:0;z-index:4;background:var(--panel,#151b22);padding:6px 0;gap:6px;flex-wrap:wrap}
 .preview .playback button{font-size:12px;padding:7px 9px}
+
+.projectile-lifetime-editor{grid-column:1/-1;min-width:0;margin:8px 0;padding:12px;border:1px solid var(--edge);border-radius:8px}.projectile-lifetime-editor label{display:grid;gap:6px}.projectile-lifetime-editor select,.projectile-lifetime-editor input{width:100%;min-width:0}.projectile-lifetime-editor p{line-height:1.5;margin:10px 0}

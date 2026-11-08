@@ -6,7 +6,7 @@ export function poseDurations(attack, count) {
 export function posePlayback(attack, count, frame, combatTiming, contactFrame) {
  const durations = poseDurations(attack, count);
  if (attack.poseTiming !== 'custom') {
-  const impactTime = contactFrame ?? combatTiming.startup;
+  const impactTime = attack.projectileLifetime!==undefined ? combatTiming.startup : contactFrame ?? combatTiming.startup;
   const total = impactTime + combatTiming.active + combatTiming.recovery;
   const impact = Math.min(durations.length - 1, Math.max(0, (attack.poseImpact || Math.ceil(durations.length / 2)) - 1));
   let index;

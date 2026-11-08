@@ -2,6 +2,7 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.projectileLifetime!==undefined)add('projectile-lifetime','info',`Projectile launches at startup and can survive interruption for up to ${attack.projectileLifetime} frames. Owner recovery runs independently. Defeat, expiry and parry remove the projectile.`, 'Requires version 7 saving. Test simultaneous contacts and interruption in Arena; classroom saving remains subject to server compatibility.');
  if(attack.hitEvents||(attack.launchHeight>0&&attack.pushAxis!=='x'))add('shared-juggle-budget','info','Ordinary and sequence reactions share a ten-reaction airborne budget. The grounded launcher counts as one; landing resets the budget.','At the limit, the target is forced toward the floor. Ordinary damage can still connect without restarting the launch. Guard, armor, invulnerability and parry interruptions do not spend this budget. Retest older long launch combos in Arena.');
  if(attack.cancelWindows){
   if(attack.cancelWindows.some(w=>w.automatic))add('automatic-followup','info','Automatic follow-ups start after both fighters resolve contact. The first eligible window has priority; chains stop after eight transitions.','Choose one target per automatic window and equip that attack. Arena comparison reports automatic transitions, contacts and resource or availability failures.');
@@ -27,7 +28,7 @@ export function attackDiagnostics(attack,simulation=null,attacks=null) {
  if(attack.hitEvents){
   add('sequence-transfer','info','Save this sequence locally or to the upgraded classroom bank after teacher sign-in.','For Arena, download the project and use Open attack design. Version 2 skill trees can also be downloaded from Studio and opened in Arena.');
   add('sequence-damage','info','Damage is authored per hit; base damage, stat scaling and ordinary hit-limit settings do not apply.','Edit damage and reactions in the selected-hit inspector.');
-  add('sequence-lifetime','info','Follow-up hits end when the attacker is interrupted or the target is defeated.','Test interruption before relying on the full sequence.');
+  if(attack.projectileLifetime===undefined)add('sequence-lifetime','info','Follow-up hits end when the attacker is interrupted or the target is defeated.','Test interruption before relying on the full sequence.');
  }else{
   if(attack.knockback>0||attack.launchHeight>0||attack.wallSlam||attack.floorSlam)
    add('legacy-recovery','warning','Authored travel is shared, but recovery timing and stage boundaries still differ between Studio and Arena.','Test this move in Arena, including near a wall, before balancing a follow-up combo.');

@@ -1,22 +1,23 @@
-import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-shared-juggle';
-import {remapSelfCancels} from './cancel-windows.js?v=20261108-shared-juggle';
-import {renderCancelEditor} from './cancel-editor.js?v=20261108-shared-juggle';
-import {renderDefenseEditor} from './defense-editor.js?v=20261108-shared-juggle';
-import {renderAttackTimeline} from './attack-timeline.js?v=20261108-shared-juggle';
-import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-shared-juggle';
-import {attacksVersion} from './attack-format.js?v=20261108-shared-juggle';
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-shared-juggle';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-shared-juggle';
-import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-shared-juggle';
-import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-shared-juggle';
-import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-shared-juggle';
-import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-shared-juggle';
-import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-shared-juggle';
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-shared-juggle';
-import {installAttackBank} from './attack-bank.js?v=20261108-shared-juggle';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-shared-juggle';
-import {EditHistory} from './edit-history.js?v=20261108-shared-juggle';
-import {installSequenceEditor} from './sequence-editor.js?v=20261108-shared-juggle';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261108-persistence';
+import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-persistence';
+import {remapSelfCancels} from './cancel-windows.js?v=20261108-persistence';
+import {renderCancelEditor} from './cancel-editor.js?v=20261108-persistence';
+import {renderDefenseEditor} from './defense-editor.js?v=20261108-persistence';
+import {renderAttackTimeline} from './attack-timeline.js?v=20261108-persistence';
+import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-persistence';
+import {attacksVersion} from './attack-format.js?v=20261108-persistence';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-persistence';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-persistence';
+import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-persistence';
+import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-persistence';
+import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-persistence';
+import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-persistence';
+import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-persistence';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-persistence';
+import {installAttackBank} from './attack-bank.js?v=20261108-persistence';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-persistence';
+import {EditHistory} from './edit-history.js?v=20261108-persistence';
+import {installSequenceEditor} from './sequence-editor.js?v=20261108-persistence';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
@@ -49,7 +50,7 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  field($('identity'),'Required character motion',a,'motion','select',MOTIONS,0,0,1,()=>{delete a.poseFrames;delete a.poseDurations;a.poseImpact=0;changed();refresh();});
  field($('identity'),'Pose impact frame (0 = middle)',a,'poseImpact','number',null,0,a.poseFrames?.length||library.examples[a.motion]?.count||300);
  field($('identity'),'Element tag',a,'element','select',['earth','water','air','fire','metal','ice','electric','plant','light','dark','mixed']);
- const c=$('combat');field(c,'Delivery',a,'delivery','select',[['melee','Melee'],['projectile','Projectile'],['area','Area'],['self','Self'],['ally','Ally in hitbox']]);field(c,'Result on contact',a,'payload','select',[['damage','Damage'],['heal','Heal'],['shield','Shield'],['energy','Restore energy'],['push','Push only · no damage'],['block','Block · no outgoing damage'],['dodge','Dodge · evade incoming hits']],0,0,1,()=>{if(['block','dodge'].includes(a.payload)){a.delivery='self';a.motion=a.payload==='dodge'?'dodge_side':'block_side';delete a.poseFrames;delete a.poseDurations;a.poseImpact=0;}if(a.payload==='push'&&a.delivery==='self')a.delivery='melee';if(['push','block','dodge'].includes(a.payload))a.status='none';changed();refresh();});
+ const c=$('combat');field(c,'Delivery',a,'delivery','select',[['melee','Melee'],['projectile','Projectile'],['area','Area'],['self','Self'],['ally','Ally in hitbox']],0,0,1,()=>{changed();renderSettings();});field(c,'Result on contact',a,'payload','select',[['damage','Damage'],['heal','Heal'],['shield','Shield'],['energy','Restore energy'],['push','Push only · no damage'],['block','Block · no outgoing damage'],['dodge','Dodge · evade incoming hits']],0,0,1,()=>{if(['block','dodge'].includes(a.payload)){a.delivery='self';a.motion=a.payload==='dodge'?'dodge_side':'block_side';delete a.poseFrames;delete a.poseDurations;a.poseImpact=0;}if(a.payload==='push'&&a.delivery==='self')a.delivery='melee';if(['push','block','dodge'].includes(a.payload))a.status='none';changed();refresh();});
  field(c,'Base amount',a,'base');field(c,'Training stat',a,'scaling','select',STATS);field(c,'Amount per stat level',a,'coefficient','number',null,0,5,.05);field(c,'Energy cost',a,'cost','number',null,0,200);
  field(c,'Push direction',a,'pushAxis','select',[['x','X · horizontal'],['y','Y · vertical'],['both','X + Y · combined']]);field(c,'Block damage reduction (%)',a,'blockPercent','number',null,0,100);
  field(c,'Knockback distance (px)',a,'knockback','number',null,0,150);field(c,'Launch height (px)',a,'launchHeight','number',null,0,500);field(c,'Push / flight duration (frames)',a,'flightFrames','number',null,1,120);field(c,'Smash into wall',a,'wallSlam','checkbox');field(c,'Smash into floor on landing',a,'floorSlam','checkbox');field(c,'Hitstun (frames)',a,'hitstun','number',null,0,120);field(c,'Can be blocked',a,'blockable','checkbox');
@@ -61,6 +62,7 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  for(const [key,title,min,max] of [['x','Forward offset',-500,500],['y','Vertical offset',-500,500],['w','Width',1,500],['h','Height',1,500]])field($('hitbox'),title,a.box,key,'number',null,min,max);
  }
  renderHitboxEditor({root:$('hitbox'),attack:a,status,commit:(next,edited=true)=>{if(next.hitEvents)a.hitEvents=next.hitEvents;if(next.hitboxGroups)a.hitboxGroups=next.hitboxGroups;else{delete a.hitboxGroups;Object.assign(a,{box:next.box,hitLimit:next.hitLimit,hitInterval:next.hitInterval});}if(edited)changed();refresh();}});
+ renderProjectileEditor({root:$('hitbox'),attack:a,status,commit:next=>{if(next.projectileLifetime===undefined)delete a.projectileLifetime;else a.projectileLifetime=next.projectileLifetime;if(next.projectileStart===undefined)delete a.projectileStart;changed();refresh();}});
  field($('hitbox'),'Projectile px / frame',a,'projectileSpeed','number',null,0,12,.25);
  const s=$('statusFields');field(s,'Secondary status',a,'status','select',['none','burn','poison','regen','slow','haste','weaken','stun']);field(s,'Tick amount / modifier %',a,'statusPower','number',null,0,100);field(s,'Status duration (frames)',a,'statusDuration','number',null,1,900);field(s,'Tick interval (frames)',a,'statusInterval','number',null,1,300);field(s,'Shield lifetime (frames)',a,'shieldDuration','number',null,1,900);
  if(a.hitboxGroups)for(const key of ['hitLimit','hitInterval']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Edit these settings in the selected hit group.';}}
@@ -92,10 +94,10 @@ function sprite(reference,x,face,progress,sequence=null,wallPosition=null){
  ctx.save();ctx.translate(x,0);ctx.scale(face,1);ctx.drawImage(image,b.f*128+b.left,b.top,b.w,b.h,-b.w*scale/2,-b.h*scale,b.w*scale,b.h*scale);ctx.restore();return true;
 }
 function mannequin(x,color){ctx.fillStyle=color;ctx.fillRect(x-8,-58,16,16);ctx.fillRect(x-12,-40,24,27);ctx.fillRect(x-11,-13,8,13);ctx.fillRect(x+3,-13,8,13);}
-function draw(){if(!simulation)return;const state=simulation.frames[frame],a=attack(),tm=simulation.timing,total=(simulation.impactFrame??simulation.frames.length)+tm.active+tm.recovery,motionFrame=simulation.contactMode&&simulation.impactFrame!==null?Math.min(frame,simulation.impactFrame):frame,path=pathSample(a,motionFrame);ctx.clearRect(0,0,960,480);ctx.fillStyle='#101a26';ctx.fillRect(0,0,960,480);ctx.save();ctx.translate(150,375);ctx.scale(3,3);ctx.imageSmoothingEnabled=false;
+function draw(){if(!simulation)return;const state=simulation.frames[frame],a=attack(),tm=simulation.timing,total=(a.projectileLifetime!==undefined?tm.startup:(simulation.impactFrame??simulation.frames.length))+tm.active+tm.recovery,motionFrame=simulation.contactMode&&simulation.impactFrame!==null?Math.min(frame,simulation.impactFrame):frame,path=pathSample(a,motionFrame);ctx.clearRect(0,0,960,480);ctx.fillStyle='#101a26';ctx.fillRect(0,0,960,480);ctx.save();ctx.translate(150,375);ctx.scale(3,3);ctx.imageSmoothingEnabled=false;
  ctx.strokeStyle='#213142';ctx.lineWidth=.3;for(let x=-50;x<=270;x+=16){ctx.beginPath();ctx.moveTo(x,-120);ctx.lineTo(x,28);ctx.stroke();}for(let y=-112;y<=32;y+=16){ctx.beginPath();ctx.moveTo(-50,y);ctx.lineTo(270,y);ctx.stroke();}ctx.strokeStyle='#586b81';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-50,0);ctx.lineTo(270,0);ctx.stroke();
  const route=pathDraft||a.motionPath;if(route?.length){ctx.strokeStyle='#63d7ed';ctx.lineWidth=1;ctx.setLineDash([3,2]);ctx.beginPath();route.forEach((p,i)=>i?ctx.lineTo(p.x*options.facing,p.y):ctx.moveTo(p.x*options.facing,p.y));ctx.stroke();ctx.setLineDash([]);}
- const pose=posePlayback(a,library.examples[a.motion]?.count||1,frame,tm,simulation.contactMode?(simulation.impactFrame??Infinity):undefined),standing=pose.finished&&a.poseFinish==='stand';
+ const pose=posePlayback(a,library.examples[a.motion]?.count||1,frame,tm,simulation.contactMode?(simulation.impactFrame??Infinity):undefined),standing=(a.projectileLifetime!==undefined&&!state.ownerActive)||(pose.finished&&a.poseFinish==='stand');
  const reference=standing?(library.examples.ready_side||library.examples[a.motion]):library.examples[a.motion];
  const poseOrder=standing?null:a.poseFrames,poseCount=poseOrder?.length||reference?.count||1,progress=standing?.1:(pose.index+.01)/poseCount;
 
@@ -104,7 +106,7 @@ function draw(){if(!simulation)return;const state=simulation.frames[frame],a=att
  if(!sprite(library.examples[reaction.pose]||library.examples.ready_side,0,-options.targetSide,reaction.progress,reaction.sequence,a.wallSlam&&!state.target.reactionInFlight?state.target.x+reaction.offsetX:null))mannequin(0,'#7b9bbd');ctx.restore();
  if(a.wallSlam){ctx.strokeStyle='#8a9bb0';ctx.strokeRect(options.targetSide*234+(options.targetSide<0?-4:0),-100,4,100);}
  for(const e of simulation.events.filter(e=>frame>=e.frame&&frame<e.frame+12&&e.text.includes('smash!'))){ctx.strokeStyle='#ffda90';ctx.lineWidth=2;ctx.beginPath();ctx.arc(state.target.x,e.text.startsWith('Floor')?-3:(state.target.y||0)-30,8+(frame-e.frame),0,Math.PI*2);ctx.stroke();}
- a.visuals.forEach((v,index)=>{const e=effectMap.get(v.effectId);if(!e||!simulation.cast)return;const fi=!v.loopUntilImpact&&(v.loop??e.loop)&&frame>=total?-1:visualFrame(e,v,frame,simulation.impactFrame??Infinity);const travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,motionFrame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0;const attached=a.hitEvents&&a.projectileMode==='attached'&&simulation.impactFrame!==null&&frame>=simulation.impactFrame&&simulation.hitResults?.[0]?.result==='Connected';const x=attached?state.target.x+v.x*options.facing:(v.x+travel+path.x)*options.facing,y=attached?state.target.y+v.y:v.y+path.y;
+ a.visuals.forEach((v,index)=>{const e=effectMap.get(v.effectId);if(!e||!simulation.cast||(a.projectileLifetime!==undefined&&!state.projectileAlive))return;const fi=!v.loopUntilImpact&&(v.loop??e.loop)&&frame>=total&&a.projectileLifetime===undefined?-1:visualFrame(e,v,frame,simulation.impactFrame??Infinity);const travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,motionFrame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0;const attached=a.hitEvents&&a.projectileMode==='attached'&&simulation.impactFrame!==null&&frame>=simulation.impactFrame&&simulation.hitResults?.[0]?.result==='Connected';const x=attached?state.target.x+v.x*options.facing:(v.x+travel+path.x)*options.facing,y=attached?state.target.y+v.y:v.y+path.y;
  if(fi>=0){const source=v.frames?.[fi]??fi;const image=img(e.sheet||e.frames[source]);if(image.complete&&image.naturalWidth){ctx.save();ctx.globalAlpha=visualOpacity(e,v,frame,simulation.impactFrame??Infinity);ctx.translate(x,y);ctx.scale(options.facing,1);ctx.rotate((v.followPath&&a.motionPath?.length?Math.atan2(path.dy,path.dx):0)-(v.forwardAngle||0)*Math.PI/180);ctx.scale(v.scale*(v.stretchX??1),v.scale*(v.stretchY??1));const [w,h]=e.canvas,[ax,ay]=e.anchor;if(e.sheet)ctx.drawImage(image,source%e.columns*w,Math.floor(source/e.columns)*h,w,h,-ax,-ay,w,h);else ctx.drawImage(image,-ax,-ay,w,h);ctx.restore();}}
  if($('showBoxes').checked&&index===layerIndex){ctx.strokeStyle='#b7f3ce';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);ctx.moveTo(x,y-4);ctx.lineTo(x,y+4);ctx.stroke();}
  });
@@ -115,7 +117,7 @@ function draw(){if(!simulation)return;const state=simulation.frames[frame],a=att
  ctx.restore();ctx.font='12px system-ui';ctx.fillStyle='#a4b5c7';ctx.fillText('ATTACKER',115,430);ctx.fillText(a.delivery==='ally'?'ALLY TARGET':'TEST TARGET',Math.max(15,Math.min(850,150+state.target.x*3-32)),430);
  function hpbar(x,y,w,who,color){ctx.fillStyle='#293645';ctx.fillRect(x,y,w,7);ctx.fillStyle=color;ctx.fillRect(x,y,w*who.hp/who.maxHP,7);ctx.fillStyle='#edf3fa';ctx.fillText(`${Math.round(who.hp)} / ${who.maxHP} HP${who.shield?' + '+who.shield+' shield':''}`,x,y-8);}
  hpbar(24,35,250,state.self,'#b7f3ce');hpbar(686,35,250,state.target,'#78b9ff');
- $('timeline').value=frame;$('phase').textContent=`${frame}f · ${(frame/60).toFixed(2)}s · ${!simulation.cast?'NO ENERGY':frame<tm.startup?'STARTUP':simulation.contactMode&&(simulation.impactFrame===null||frame<simulation.impactFrame)?'WAITING FOR CONTACT':state.active?'ACTIVE':frame<total?'RECOVERY':'AFTER EFFECTS'}`;
+ $('timeline').value=frame;$('phase').textContent=`${frame}f · ${(frame/60).toFixed(2)}s · ${!simulation.cast?'NO ENERGY':a.projectileLifetime!==undefined&&!state.ownerActive&&!state.projectileAlive?'MOVE ENDED':a.projectileLifetime!==undefined&&!state.ownerActive&&state.projectileAlive?'PROJECTILE TRAVELING':frame<tm.startup?'STARTUP':simulation.contactMode&&(simulation.impactFrame===null||frame<simulation.impactFrame)?'WAITING FOR CONTACT':state.active?'ACTIVE':frame<total?'RECOVERY':'AFTER EFFECTS'}`;
  const mods=state.modifiers.map(m=>`${m.recipient} ${m.kind}${['slow','haste','weaken'].includes(m.kind)?' '+m.power+'%':''} ${m.remaining}f`).join(' · ');$('liveState').textContent=`Energy: ${state.self.energy} · Target ${reaction.label}${mods?' · '+mods:''}`;$('play').textContent=playing?'Ⅱ Pause':'▶ Test attack';
 }
 function statsUI(parent,obj){for(const stat of STATS){const row=document.createElement('label');row.className='stat';row.textContent=stat;const input=document.createElement('input');input.type='range';input.min=0;input.max=99;input.value=obj[stat];input.setAttribute('aria-label',(parent.id==='attackerStats'?'Attacker ':'Target ')+stat);const out=document.createElement('output');out.textContent=obj[stat];input.oninput=()=>{obj[stat]=Number(input.value);out.textContent=input.value;playing=false;mark();recompute();};row.append(input,out);parent.append(row);}}
