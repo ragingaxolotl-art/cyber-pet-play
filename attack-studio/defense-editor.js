@@ -1,4 +1,4 @@
-import {compactSectionHelp} from './context-help.js?v=20261108-scroll-info';
+import {compactSectionHelp} from './context-help.js?v=20261108-static-help';
 import {renderBounceEditor} from './bounce-editor.js?v=20261108-area-final';
 import {renderHitstunEditor} from './hitstun-editor.js?v=20261108-area-final';
 import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261108-area-final';

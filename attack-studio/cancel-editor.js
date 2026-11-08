@@ -1,5 +1,5 @@
-import {compactSectionHelp} from './context-help.js?v=20261108-scroll-info';
-import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261108-area-final';
+import {compactSectionHelp} from './context-help.js?v=20261108-static-help';
+import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261108-static-help';
 import {validateAttack} from './combat-model.js?v=20261108-area-final';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCancelEditor({root,attack,attacks,commit,status,test}){

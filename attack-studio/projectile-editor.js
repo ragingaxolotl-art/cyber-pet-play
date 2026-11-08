@@ -1,6 +1,6 @@
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261108-area-final';
-import {addContextHelp} from './context-help.js';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-area-final';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261108-static-help';
+import {addContextHelp} from './context-help.js?v=20261108-static-help';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-static-help';
 import {validateAttack} from './combat-model.js?v=20261108-area-final';
 export function renderProjectileEditor({root,attack,commit,status}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;

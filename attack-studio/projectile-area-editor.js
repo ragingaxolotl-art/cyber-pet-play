@@ -1,4 +1,4 @@
-import {addContextHelp} from './context-help.js';
+import {addContextHelp} from './context-help.js?v=20261108-static-help';
 import {validateAttack} from './combat-model.js?v=20261108-area-final';
 export function renderProjectileAreaEditor({root,attack,commit,status}){
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Impact area';section.append(legend);

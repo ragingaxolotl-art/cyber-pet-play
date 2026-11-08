@@ -1,4 +1,4 @@
-import {addContextHelp} from './context-help.js?v=20261108-scroll-info';
+import {addContextHelp} from './context-help.js?v=20261108-static-help';
 import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261108-area-final';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-shared-juggle';
 import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-group-drag-lanes';

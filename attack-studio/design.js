@@ -1,19 +1,20 @@
+import {installStaticHelp} from './static-help.js?v=20261108-static-help';
 import {effectDragHit,attackerDragPlacement} from './preview-drag.js?v=20261108-drag';
 import {steeringVisualPosition} from './projectile-steering.js?v=20261108-steering';
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
 import {installStudioWorkspace} from './studio-workspace.js?v=20261108-workflow';
-import {renderProjectileEditor} from './projectile-editor.js?v=20261108-area-final';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261108-static-help';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-area-final';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
-import {renderCancelEditor} from './cancel-editor.js?v=20261108-area-final';
-import {renderDefenseEditor} from './defense-editor.js?v=20261108-area-final';
-import {renderAttackTimeline} from './attack-timeline.js?v=20261108-area-final';
+import {renderCancelEditor} from './cancel-editor.js?v=20261108-static-help';
+import {renderDefenseEditor} from './defense-editor.js?v=20261108-static-help';
+import {renderAttackTimeline} from './attack-timeline.js?v=20261108-static-help';
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-area-final';
 import {attacksVersion} from './attack-format.js?v=20261108-area-final';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-area-final';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-area-final';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-static-help';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-area-final';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-area-final';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -263,7 +264,7 @@ function restoreEdit(direction){
 function installEditing(){
  if(['127.0.0.1','localhost'].includes(new URL(location.href).hostname))$('arenaLink').href='/arena/';
  const moveTools=document.createElement('div');moveTools.className='row playback';moveTools.setAttribute('aria-label','Move preview objects');for(const [label,id,mode] of [['Move hitbox','moveHitbox','hitbox'],['Move animation','moveEffect','effect'],['Move target','moveTarget','target'],['Move attacker',null,'attacker']]){const button=document.createElement('button');button.type='button';button.textContent=label;button.onclick=()=>{if(id)$(id).click();else{editMode=mode;playing=false;frame=0;recompute();status('Drag sideways to place the attacker on the floor. Target stays in place; test distance updates.');}for(const b of moveTools.children)b.setAttribute('aria-pressed',String(b===button));};moveTools.append(button);}document.querySelector('.preview').append(moveTools);
- history=new EditHistory(project);installLibraryTabs();
+ history=new EditHistory(project);installStaticHelp();installLibraryTabs();
  sequenceEditor=installSequenceEditor({getAttack:attack,getAttacks:()=>project.attacks,getSimulation:()=>simulation,seek:n=>{frame=Math.max(0,Math.min(n,simulation.frames.length-1));playing=false;draw();},commit:next=>{Object.assign(attack(),next);for(const k of ['hitEvents','behaviorVersion','projectileMode','sequenceTiming','bounces'])if(next[k]===undefined)delete attack()[k];changed();refresh();}});
  $('undo').onclick=()=>restoreEdit('undo');$('redo').onclick=()=>restoreEdit('redo');
  document.addEventListener('keydown',e=>{if(!(e.metaKey||e.ctrlKey)||e.key.toLowerCase()!=='z'||e.target.closest('input,textarea'))return;e.preventDefault();restoreEdit(e.shiftKey?'redo':'undo');});
