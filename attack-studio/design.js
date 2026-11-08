@@ -20,7 +20,7 @@ import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-
 import {installAttackBank} from './attack-bank.js?v=20261108-scheduled-sequences';
 import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-scheduled-sequences';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
-import {installSequenceEditor} from './sequence-editor.js?v=20261108-hit-batch';
+import {installSequenceEditor} from './sequence-editor.js?v=20261108-reaction-builder';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');

@@ -1,3 +1,4 @@
+import {renderReactionBuilder} from './behavior-sequence-editor.js';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
 import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-shared-juggle';
@@ -18,6 +19,7 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
       });
       root.append(create);return;
     }
+    renderReactionBuilder(root,a,next=>{commit(next);render();});
     if(!scheduled){const mode=el('label','Projectile contact behavior'),select=el('select');
     select.add(new Option('Attach after first unblocked hit','attached'));select.add(new Option('Each hit must overlap the target','contact'));select.value=a.projectileMode;
     select.onchange=()=>mutate(n=>n.projectileMode=select.value);mode.append(select);root.append(mode);}
