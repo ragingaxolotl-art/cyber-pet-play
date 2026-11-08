@@ -1,15 +1,17 @@
 // Read-only combat telemetry: this does not alter damage or reaction balance.
 // Call beginFrame after recovery advancement and before any contact resolves.
 export class ComboTracker {
- constructor(){this.chains=new Map();}
+ constructor(){this.chains=new Map();this.frameHits=new Map();}
  beginFrame(frame,states){
   for(const targets of this.chains.values())for(const chain of targets.values()){
    const state=states.get(chain.target);
    if(state?.defeated)this.end(chain,'Defeated');
    else if(!state?.locked)this.end(chain,'Defender regained control');
   }
+  this.frameHits=new Map([...this.chains].map(([attacker,targets])=>[attacker,new Map([...targets].map(([target,chain])=>[target,chain.hits]))]));
   this.frame=frame;
  }
+ priorHits(attacker,target){return this.frameHits.get(attacker)?.get(target)||0;}
  end(chain,reason){if(chain.hits){chain.last={hits:chain.hits,damage:chain.damage,reason};chain.hits=0;chain.damage=0;}}
  recordFrame(contacts){
   // Resolve defensive breaks before counting this frame's eligible hits. Mixed
@@ -30,5 +32,5 @@ export class ComboTracker {
  }
  snapshot(){return [...this.chains.values()].flatMap(targets=>[...targets.values()].map(({attacker,target,...values})=>({attacker,target,...values,last:values.last?{...values.last}:null})));}
  endAll(reason){for(const targets of this.chains.values())for(const chain of targets.values())this.end(chain,reason);}
- clear(){this.chains.clear();}
+ clear(){this.chains.clear();this.frameHits.clear();}
 }

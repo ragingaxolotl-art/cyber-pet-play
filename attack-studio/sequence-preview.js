@@ -1,9 +1,10 @@
-import {ComboTracker} from './combo-tracker.js?v=20261108-combo-tracking';
+import {scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
+import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-combo-tracking';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-combo-scaling';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-shared-juggle';
 
@@ -49,7 +50,8 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(active){
       for(const event of sequenceOpportunities(attack,state,frame,overlap,other)){
         const guarded=!!options.guard&&attack.blockable;
-        const damage=Math.round(event.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1));
+        const rawDamage=Math.round(event.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1));
+        const damage=scaledComboDamage(rawDamage,combos.priorHits('self','target'),attack.comboScaling,guarded?'block':'hit');
         const actual=Math.min(other.hp,damage);other.hp-=actual;hits++;
         combos.contact('self','target',guarded?'block':'hit',actual);
         hitResult(state,event,frame,guarded?'Blocked':'Connected');

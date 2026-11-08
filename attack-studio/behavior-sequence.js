@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-combo-tracking';
+import {validateAttack} from './combat-model.js?v=20261108-combo-scaling';
 import {REACTIONS} from './hit-sequence.js?v=20261108-shared-juggle';
 export const REACTION_BLOCKS=['hit',...REACTIONS.filter(r=>r!=='none')];
 // Authoring helper only: exports ordinary hit events understood by both runtimes.
