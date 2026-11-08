@@ -17,7 +17,7 @@ import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-projectile-defense';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-projectile-defense';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-projectile-defense';
-import {installAttackBank} from './attack-bank.js?v=20261108-projectile-defense';
+import {installAttackBank} from './attack-bank.js?v=20261108-bank-recovery';
 import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-projectile-defense';
 import {EditHistory} from './edit-history.js?v=20261108-projectile-defense';
 import {installSequenceEditor} from './sequence-editor.js?v=20261108-projectile-defense';

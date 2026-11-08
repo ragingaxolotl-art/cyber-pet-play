@@ -26,7 +26,13 @@ export function createClassroomBank(validate,request=fetch){
  const headers=()=>({'Content-Type':'application/json','X-Attack-Bank-Version':'2',...(session?{'X-Attack-Bank-Session':session.token}:{})});
  async function call(path='',options={}){
   const response=await request(API+path,{cache:'no-store',...options,headers:{...headers(),...options.headers}});
-  const data=await response.json();if(!response.ok){if(response.status===401)session=null;const error=Error(data.error||'Classroom saving is unavailable. Keep this page open and download a project backup.');error.status=response.status;throw error;}return data;
+  // Gate session handling on HTTP status even when a proxy returns an HTML error page.
+  if(response.status===401)session=null;
+  let data;try{data=await response.json();}catch{
+   const error=Error(response.status===401?'Your teacher connection expired. Sign in again; your open edits are preserved.':'The classroom server returned an unreadable response. Keep your edits open and download a project backup before trying again.');
+   error.status=response.status;throw error;
+  }
+  if(!response.ok){const fallback=response.status===409?'The classroom bank changed on another device. Your open edits are preserved; refresh the bank and review before saving again.':response.status===401?'Your teacher connection expired. Sign in again; your open edits are preserved.':'Classroom saving is unavailable. Keep this page open and download a project backup.';const error=Error(typeof data?.error==='string'?data.error:fallback);error.status=response.status;throw error;}return data;
  }
  return {
   restore(value){session=value&&/^[a-f0-9]{64}$/.test(value.token)&&value.expires>Date.now()/1000?value:null;},
