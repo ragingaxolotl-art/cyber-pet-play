@@ -1,4 +1,4 @@
-import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-automatic';
+import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-handoff-cleanup';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-automatic';
 import {renderCancelEditor} from './cancel-editor.js?v=20261108-automatic';
 import {renderDefenseEditor} from './defense-editor.js?v=20261108-automatic';
@@ -16,7 +16,7 @@ import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-automatic'
 import {installAttackBank} from './attack-bank.js?v=20261108-automatic';
 import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-automatic';
 import {EditHistory} from './edit-history.js?v=20261108-automatic';
-import {installSequenceEditor} from './sequence-editor.js?v=20261108-automatic';
+import {installSequenceEditor} from './sequence-editor.js?v=20261108-handoff-cleanup';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};

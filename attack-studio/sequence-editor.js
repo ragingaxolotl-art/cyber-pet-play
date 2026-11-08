@@ -1,5 +1,5 @@
 import {validateAttack} from './combat-model.js?v=20261108-automatic';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-automatic';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-handoff-cleanup';
 import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-automatic';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
