@@ -1,5 +1,5 @@
 import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-steering';
-import {validateAttack} from './combat-model.js?v=20261108-absorption';
+import {validateAttack} from './combat-model.js?v=20261108-drag-recovery';
 export function renderProjectileEditor({root,attack,commit,status}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);

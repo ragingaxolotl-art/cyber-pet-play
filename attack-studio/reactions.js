@@ -1,4 +1,4 @@
-import {freshAttack,defaultStats,simulate} from './combat-model.js?v=20261108-absorption';
+import {freshAttack,defaultStats,simulate} from './combat-model.js?v=20261108-drag-recovery';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-scheduled-sequences';
 const examples=(await(await fetch('vfx-library.json',{cache:'no-store'})).json()).examples,poses=new Map();
 for(const key of ['ready_side','hurt_side','guard_side','knocked_down_side','get_up_side','jump_side','defeated_side']){
