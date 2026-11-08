@@ -1,10 +1,12 @@
-import {validateMovementCancels} from './movement-cancels.js?v=20261108-movement-cancels';
+import {validateContactFeedback} from './contact-feedback.js?v=20261108-impact-timing';
+import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
+import {validateMovementCancels} from './movement-cancels.js';
 import {validateProjectileLifetime} from './projectile-lifetime.js?v=20261108-durability';
 import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-durability';
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
 import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-durability';
-import {requireGroupVersion} from './attack-format.js?v=20261108-movement-cancels';
+import {requireGroupVersion} from './attack-format.js?v=20261108-impact-timing';
 import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-durability';
 import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-durability';
 import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-durability';
@@ -12,7 +14,7 @@ import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-dura
 import {pathSample} from './attack-motion.js?v=20261108-durability';
 import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-durability';
 import {validateHitSequence} from './hit-sequence.js?v=20261108-durability';
-import {simulateSequence} from './sequence-preview.js?v=20261108-durability';
+import {simulateSequence} from './sequence-preview.js?v=20261108-impact-timing';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -30,6 +32,7 @@ export function validateAttack(a,ids){
  if(!a||typeof a!=='object')fail('Invalid attack.');
  validateHitSequence(a);
  validateMovementCancels(a.movementCancels);
+ validateContactFeedback(a.contactFeedback);
  validateProjectileLifetime(a);
  validateCancelWindows(a.cancelWindows);
  validateDefenseWindows(a.defenseWindows);
@@ -64,7 +67,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–11 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–12 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
@@ -120,7 +123,8 @@ export function simulate(a,attacker,target,options={}){
   if(self.evading&&f===tm.startup)event(f,'Dodge window opened.');
   if(self.blocking&&f===tm.startup)event(f,'Block window opened.');
   if(incomingDamage>0&&f===incomingFrame&&f<other.stun)event(f,'Incoming attack interrupted — opponent is stunned.');
-  if(incomingDamage>0&&f===incomingFrame&&f>=other.stun){
+  if(incomingDamage>0&&f===incomingFrame&&f>=other.stun&&f<(other.blockstunUntil||0))event(f,'Incoming attack interrupted — opponent is recovering from a block.');
+  if(incomingDamage>0&&f===incomingFrame&&f>=other.stun&&f>=(other.blockstunUntil||0)){
    const blocked=self.blocking&&facing===side,evaded=self.evading;
    const castAlive=cast&&!interrupted&&f<(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm)),defense=defenseSnapshot(castAlive?defenseCast:null,f),incoming={payload:'damage',delivery:'melee'};
    const invulnerable=isInvulnerable(defense,incoming),parry=!invulnerable&&!evaded&&claimParry(defense,incoming),armored=!parry&&!invulnerable&&!evaded&&!blocked&&claimArmor(defense,incoming);
@@ -132,15 +136,16 @@ export function simulate(a,attacker,target,options={}){
   }
   const eligibleGroups=groupContacts?groupContacts.filter(g=>active&&recipient.hp>0&&groupTracker.claim('target',g,f)):null;
   const opportunities=eligibleGroups?eligibleGroups.length:(!['block','dodge'].includes(a.payload)&&active&&contact&&hits<a.hitLimit&&f-lastHit>=a.hitInterval&&recipient.hp>0?1:0);
+  const hitsBeforeFeedback=hits;
   for(let opportunity=0;opportunity<opportunities&&recipient.hp>0;opportunity++){
    hits++;lastHit=f;let amount=magnitude(a,attacker);
    const guarding=['damage','push'].includes(a.payload)&&options.guard&&a.blockable&&a.delivery!=='self';
    if(a.payload==='damage'){
     amount=Math.round(amount*(1-clamp(options.resistance??0,-50,75)/100)*(guarding?1-tv.guard:1));
     event(f,`${guarding?'Blocked hit':'Hit'} ${hits}: ${hurt(recipient,amount)} damage.`);
-    if(guarding)recipient.reactionGuardFrame=f;
+    if(guarding){recipient.reactionGuardFrame=f;if(a.contactFeedback?.blockstun>0)recipient.blockstunUntil=Math.max(recipient.blockstunUntil||0,f+a.contactFeedback.blockstun+1);}
     if(!guarding){startReaction(recipient,f);}
-   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(guarding)recipient.reactionGuardFrame=f;if(!guarding){startReaction(recipient,f);}}
+   }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(guarding){recipient.reactionGuardFrame=f;if(a.contactFeedback?.blockstun>0)recipient.blockstunUntil=Math.max(recipient.blockstunUntil||0,f+a.contactFeedback.blockstun+1);}if(!guarding){startReaction(recipient,f);}}
    else if(a.payload==='heal')event(f,`Healed ${heal(recipient,amount)} HP.`);
    else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=f+a.shieldDuration;event(f,`Shield: ${amount} HP (refresh; does not stack).`);}
    else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${recipient.energy-old} energy.`);}
@@ -158,11 +163,12 @@ export function simulate(a,attacker,target,options={}){
    if(['burn','poison','regen'].includes(s.kind)){const n=s.kind==='regen'?heal(s.who,s.power):hurt(s.who,s.power);event(f,`${s.kind} tick: ${n} ${s.kind==='regen'?'healing':'damage'}.`);}s.next+=a.statusInterval;
   }
   const modifiers=statuses.filter(s=>f>=s.start&&f<s.end).map(s=>({recipient:s.who===self?'self':'target',kind:s.kind,power:s.power,remaining:s.end-f}));
-  for(const who of [self,other])who.canAct=who.hp>0&&f>=who.stun;
-  frames.push({frame:f,active,ownerActive:cast&&!interrupted&&self.hp>0&&f<(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm)),projectileAlive:independent&&launched&&self.hp>0&&other.hp>0&&f<tm.startup+a.projectileLifetime&&f<activeEnd(contactMode?impactFrame:tm.startup,tm),box,boxes:a.hitboxGroups?activeGroupBoxes(a.hitboxGroups,f-tm.startup,b=>worldBox({...a,box:b},f,attacker,facing)):null,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
+  for(const who of [self,other])who.canAct=who.hp>0&&f>=who.stun&&f>=(who.blockstunUntil||0);
+  const impactStop=hits>hitsBeforeFeedback&&['damage','push'].includes(a.payload)?(options.guard&&a.blockable&&a.delivery!=='self'?a.contactFeedback?.blockstop:a.contactFeedback?.hitstop)??0:0;
+  frames.push({frame:f,impactStop,active,ownerActive:cast&&!interrupted&&self.hp>0&&f<(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm)),projectileAlive:independent&&launched&&self.hp>0&&other.hp>0&&f<tm.startup+a.projectileLifetime&&f<activeEnd(contactMode?impactFrame:tm.startup,tm),box,boxes:a.hitboxGroups?activeGroupBoxes(a.hitboxGroups,f-tm.startup,b=>worldBox({...a,box:b},f,attacker,facing)):null,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
  }
  if(cast&&!hits&&!['block','dodge'].includes(a.payload))event(contactMode?contactDeadline:tm.startup+tm.active,contactMode?'Miss — no opponent contact before travel timeout.':'Miss — no hitbox contact during the active window.');
- return {frames,events,cost,impactFrame:contactMode?impactFrame:tm.startup,contactMode,timing:tm,power:magnitude(a,attacker),nextCast:Math.max(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm),a.cooldown),cast};
+ return {frames,presentationFrames:presentationFrames(frames),events,cost,impactFrame:contactMode?impactFrame:tm.startup,contactMode,timing:tm,power:magnitude(a,attacker),nextCast:Math.max(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm),a.cooldown),cast};
 }
 export function effectFrame(effect,elapsedMs){
  if(elapsedMs<0)return -1;const total=effect.times.reduce((a,b)=>a+b,0);

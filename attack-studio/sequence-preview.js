@@ -1,9 +1,10 @@
-import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-scheduled-sequences';
-import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-scheduled-sequences';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-scheduled-sequences';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-movement-cancels';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-scheduled-sequences';
+import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
+import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-impact-timing';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-shared-juggle';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
@@ -16,6 +17,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false;const independent=attack.projectileLifetime!==undefined;
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
   for(let frame=0;frame<=end;frame++){
+    const hitsBeforeFeedback=hits;
     if(independent&&cast&&!ownerInterrupted&&frame>=tm.startup)launched=true;
     if(independent&&launched&&frame>=tm.startup+attack.projectileLifetime&&!state.cancelled&&state.results.length<attack.hitEvents.length)state.cancelled='Projectile lifetime expired.';
     if(independent&&self.hp<=0)state.cancelled='Attacker defeated.';
@@ -31,6 +33,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     let incomingInterrupted=false;
     if(options.incomingDamage>0&&frame===(options.incomingFrame??30)){
       if(other.stun>frame)events.push({frame,text:'Incoming attack interrupted — opponent is stunned.'});
+      else if((other.blockstunUntil||0)>frame)events.push({frame,text:'Incoming attack interrupted — opponent is recovering from a block.'});
       else {
        const castAlive=cast&&!ownerInterrupted&&!state.cancelled&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),defense=defenseSnapshot(castAlive?defenseCast:null,frame),incoming={payload:'damage',delivery:'melee'};
        const invulnerable=isInvulnerable(defense,incoming),parry=!invulnerable&&claimParry(defense,incoming),armored=!parry&&!invulnerable&&claimArmor(defense,incoming);
@@ -47,16 +50,18 @@ export function simulateSequence(attack,attacker,target,options={}) {
         const actual=Math.min(other.hp,damage);other.hp-=actual;hits++;
         hitResult(state,event,frame,guarded?'Blocked':'Connected');
         events.push({frame,text:`${guarded?'Blocked hit':'Hit'} ${hits}: ${actual} damage.`});
-        if(guarded){if(state.startFrame===null)state.cancelled='First contact was blocked; attachment cancelled.';other.reactionGuardFrame=frame;}
+        if(guarded){if(state.startFrame===null)state.cancelled='First contact was blocked; attachment cancelled.';other.reactionGuardFrame=frame;if(attack.contactFeedback?.blockstun>0)other.blockstunUntil=Math.max(other.blockstunUntil||0,frame+attack.contactFeedback.blockstun+1);}
         else {state.attached=true;applyPulseReaction(other,event,direction,frame);}
         if(other.hp<=0)state.cancelled='Target defeated.';
       }
     }
     if(incomingInterrupted){ownerInterrupted=true;if(!independent||!launched||self.hp<=0)state.cancelled='Attacker interrupted.';}
     if((state.startFrame??state.contactFrame)!==null)end=(state.startFrame??state.contactFrame)+sequenceDuration(attack)+Math.max(120,tm.recovery);
-    frames.push({frame,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
+    for(const who of [self,other])who.canAct=who.hp>0&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
+    const impactStop=hits>hitsBeforeFeedback?(options.guard&&attack.blockable?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
+    frames.push({frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
     if(!cast)break;
   }
   const results=attack.hitEvents.map(event=>state.results.find(r=>r.id===event.id)||{id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.cancelled||(state.startFrame===null&&state.contactFrame===null?'Projectile did not reach the target.':'No eligible contact during this hit window.')});
-  return {frames,events,hitResults:results,cost,cast,contactMode:state.startFrame===null,impactFrame:state.startFrame??state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm))};
+  return {frames,presentationFrames:presentationFrames(frames),events,hitResults:results,cost,cast,contactMode:state.startFrame===null,impactFrame:state.startFrame??state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm))};
 }

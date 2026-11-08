@@ -1,4 +1,5 @@
-import {validateAttack} from './combat-model.js?v=20261108-movement-cancels';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261108-impact-timing';
+import {validateAttack} from './combat-model.js?v=20261108-impact-timing';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));
@@ -20,4 +21,5 @@ export function renderDefenseEditor({root,attack,commit,status}){
   for(const [value,text] of [['all','All attack types'],['melee','Melee'],['projectile','Projectiles'],['area','Area attacks']])select.add(new Option(text,value));select.value=window.against;select.disabled=['reflect','absorb'].includes(window.kind);select.onchange=()=>mutate(next=>next.defenseWindows[index].against=select.value);label.append(select);section.append(label);
   const remove=make('button',`Delete ${window.kind} ${index+1}`);remove.type='button';remove.onclick=()=>mutate(next=>{next.defenseWindows.splice(index,1);if(!next.defenseWindows.length)delete next.defenseWindows;});section.append(remove);root.append(section);
  }
+ const feedback=make('section');root.append(feedback);renderContactFeedbackEditor({root:feedback,attack,commit,status});
 }

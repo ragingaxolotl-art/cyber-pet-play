@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-movement-cancels';
+import {validateAttack} from './combat-model.js?v=20261108-impact-timing';
 const PREFIX='cyber-pet-comparison-transfer:',MAX_BYTES=2*1024*1024,MAX_AGE=10*60*1000;
 export function validateComparisonTransfer(data,now=Date.now()){
  if(!data||data.version!==1||!Number.isFinite(data.created)||now-data.created>MAX_AGE||data.created>now+60000)throw Error('This Studio test has expired. Open it again from Studio.');
