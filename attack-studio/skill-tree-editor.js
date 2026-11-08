@@ -1,11 +1,12 @@
+import {treeStorageKey} from './tree-cabinet.js?v=20261108-usability';
 import {dataSetKey} from './tree-datasets.js';
 import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261108-projectile-defense';
 import {freshAttack,validateAttack} from './combat-model.js?v=20261108-projectile-defense';
 // Tree attacks are independent copies. Explicit save updates only the chosen node.
 export function connectTreeEditor({effects,open,current,status}){
  const id=new URLSearchParams(location.search).get('treeNode');if(!id)return;
- const treeKey=dataSetKey(new URLSearchParams(location.search).get('dataSet')||'original');
- const link=document.querySelector('a[href="skill-tree.html"]');if(link)link.href='skill-tree.html?dataSet='+encodeURIComponent(new URLSearchParams(location.search).get('dataSet')||'original');
+ const treeKey=treeStorageKey(new URLSearchParams(location.search).get('dataSet')||'original',new URLSearchParams(location.search).get('tree')||'main');
+ const link=document.querySelector('a[href="skill-tree.html"]');if(link)link.href='skill-tree.html?dataSet='+encodeURIComponent(new URLSearchParams(location.search).get('dataSet')||'original')+'&tree='+encodeURIComponent(new URLSearchParams(location.search).get('tree')||'main');
  const ids=new Set(effects.map(e=>e.id)),read=()=>validateTree(JSON.parse(localStorage.getItem(treeKey)),ids,validateAttack);
  try{
   const tree=read(),node=tree.nodes.find(n=>n.id===id);if(!node)throw Error('The selected tree attack no longer exists.');

@@ -1,4 +1,4 @@
-export const clampZoom=value=>Math.max(.25,Math.min(2,value));
+export const clampZoom=value=>Math.max(.01,Math.min(2,value));
 export function installTreeZoom($){
  const viewport=$('viewport'),board=$('board'),picker=$('zoom');let zoom=1,gesture=null,nativeZoom=null;
  function setZoom(value,x=viewport.clientWidth/2,y=viewport.clientHeight/2){
@@ -28,4 +28,6 @@ export function installTreeZoom($){
  },true);
  function end(event){points.delete(event.pointerId);gesture=null;if(points.size===1){const a=[...points.values()][0];gesture={x:a.x,y:a.y,left:viewport.scrollLeft,top:viewport.scrollTop};}}
  for(const type of ['pointerup','pointercancel','lostpointercapture'])viewport.addEventListener(type,end,true);
+ return {setZoom,fit(bounds){const z=Math.min(1.25,(viewport.clientWidth-48)/(bounds.width+32),(viewport.clientHeight-48)/(bounds.height+32));setZoom(Math.max(.01,z),0,0);viewport.scrollLeft=Math.max(0,bounds.x*zoom-24);viewport.scrollTop=Math.max(0,bounds.y*zoom-24);}};
+
 }

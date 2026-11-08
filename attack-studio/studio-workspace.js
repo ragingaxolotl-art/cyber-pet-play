@@ -1,10 +1,13 @@
+import {requestEditorName} from './editor-name-dialog.js?v=20261108-usability';
+import {installAccessibility} from './editor-accessibility.js?v=20261108-usability';
 const KEY='cyber-pet-studio-layout-v1';
+export const PRESETS_KEY='cyber-pet-studio-presets-v1';
 export function safeLayout(value){
  if(!value||value.version!==1)return {version:1,panels:{},widths:[24,48,28]};
  const panels={};
  for(const [id,p] of Object.entries(value.panels||{}))if(p&&['left','center','right'].includes(p.dock))panels[id]={dock:p.dock,floating:!!p.floating,hidden:!!p.hidden,collapsed:!!p.collapsed,x:Number.isFinite(p.x)?p.x:30,y:Number.isFinite(p.y)?p.y:100,w:Number.isFinite(p.w)?p.w:480,h:Number.isFinite(p.h)?p.h:400};
  const widths=Array.isArray(value.widths)&&value.widths.length===3&&value.widths.every(n=>Number.isFinite(n)&&n>=15&&n<=70)?value.widths:[24,48,28];
- return {version:1,panels,widths};
+ return {version:1,panels,widths,locked:value.locked===true};
 }
 export function fitWindow(p,width,height){return {...p,w:Math.max(240,Math.min(p.w,width-16)),h:Math.max(120,Math.min(p.h,height-16)),x:Math.max(0,Math.min(p.x,width-Math.min(p.w,width-16))),y:Math.max(0,Math.min(p.y,height-48))};}
 export function installStudioWorkspace(){
@@ -25,7 +28,7 @@ export function installStudioWorkspace(){
  const records=[];let front=20;
  function columnWidths(){layout.style.gridTemplateColumns=`minmax(190px,${state.widths[0]}fr) 8px minmax(260px,${state.widths[1]}fr) 8px minmax(190px,${state.widths[2]}fr)`;}
  function show(r){
-  const p=r.state;r.shell.hidden=p.hidden;r.body.hidden=p.collapsed;r.collapse.textContent=p.collapsed?'Expand':'Collapse';r.collapse.setAttribute('aria-expanded',String(!p.collapsed));r.checkbox.checked=!p.hidden;r.dock.value=p.floating?'float':p.dock;
+  const p=r.state;r.shell.hidden=p.hidden;r.body.hidden=p.collapsed;r.collapse.textContent=p.collapsed?'Expand':'Collapse';r.collapse.setAttribute('aria-expanded',String(!p.collapsed));r.checkbox.checked=!p.hidden;r.dock.value=p.floating?'float':p.dock;r.dock.disabled=state.locked===true;
   r.shell.classList.toggle('floating',p.floating);r.shell.classList.toggle('collapsed',p.collapsed);
   if(p.floating){Object.assign(p,fitWindow(p,innerWidth,innerHeight));Object.assign(r.shell.style,{left:p.x+'px',top:p.y+'px',width:p.w+'px',height:p.collapsed?'auto':p.h+'px'});}
   else{r.shell.removeAttribute('style');if(r.shell.parentElement!==columns[p.dock])columns[p.dock].append(r.shell);}
@@ -43,15 +46,26 @@ export function installStudioWorkspace(){
   const label=make('label'),checkbox=make('input');checkbox.type='checkbox';label.append(checkbox,document.createTextNode(handle.textContent));windows.append(label);
   const r={shell,body,state:p,collapse,checkbox,dock};records.push(r);
   checkbox.onchange=()=>{p.hidden=!checkbox.checked;show(r);persist();};hide.onclick=()=>{p.hidden=true;show(r);persist();};collapse.onclick=()=>{p.collapsed=!p.collapsed;show(r);persist();};dock.onchange=()=>{if(dock.value==='float')float(r);else{p.floating=false;p.dock=dock.value;}show(r);persist();};
-  function drag(target,resizing){target.onpointerdown=e=>{if(e.button!==0)return;e.preventDefault();float(r);shell.style.zIndex=String(++front);const start={x:e.clientX,y:e.clientY,...{px:p.x,py:p.y,w:p.w,h:p.h}};target.setPointerCapture(e.pointerId);target.onpointermove=v=>{if(resizing){p.w=start.w+v.clientX-start.x;p.h=start.h+v.clientY-start.y;}else{p.x=start.px+v.clientX-start.x;p.y=start.py+v.clientY-start.y;}show(r);};const end=()=>{target.onpointermove=null;persist();};target.onpointerup=end;target.onpointercancel=end;};target.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();float(r);const dx=e.key==='ArrowLeft'?-20:e.key==='ArrowRight'?20:0,dy=e.key==='ArrowUp'?-20:e.key==='ArrowDown'?20:0;if(resizing){p.w+=dx;p.h+=dy;}else{p.x+=dx;p.y+=dy;}show(r);persist();};}
-  drag(handle,false);drag(resize,true);show(r);r.home=home;
+  function drag(target,resizing){target.onpointerdown=e=>{if(state.locked||e.button!==0)return;e.preventDefault();float(r);shell.style.zIndex=String(++front);const start={x:e.clientX,y:e.clientY,...{px:p.x,py:p.y,w:p.w,h:p.h}};target.setPointerCapture(e.pointerId);target.onpointermove=v=>{if(resizing){p.w=start.w+v.clientX-start.x;p.h=start.h+v.clientY-start.y;}else{p.x=start.px+v.clientX-start.x;p.y=start.py+v.clientY-start.y;}show(r);};const end=()=>{target.onpointermove=null;persist();};target.onpointerup=end;target.onpointercancel=end;};target.onkeydown=e=>{if(state.locked)return;if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();float(r);const dx=e.key==='ArrowLeft'?-20:e.key==='ArrowRight'?20:0,dy=e.key==='ArrowUp'?-20:e.key==='ArrowDown'?20:0;if(resizing){p.w+=dx;p.h+=dy;}else{p.x+=dx;p.y+=dy;}show(r);persist();};}
+  drag(handle,false);drag(resize,true);show(r);r.home=home;r.id=id;
  }
  function splitter(index){const s=make('div');s.className='workspace-splitter';s.tabIndex=0;s.setAttribute('role','separator');s.setAttribute('aria-orientation','vertical');s.setAttribute('aria-label','Resize workspace columns');
  const change=delta=>{const amount=Math.max(15-state.widths[index],Math.min(state.widths[index+1]-15,delta));state.widths[index]+=amount;state.widths[index+1]-=amount;columnWidths();};
- s.onpointerdown=e=>{e.preventDefault();s.setPointerCapture(e.pointerId);let x=e.clientX;s.onpointermove=v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;};s.onpointerup=s.onpointercancel=()=>{s.onpointermove=null;persist();};};s.onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}};return s;}
+ s.onpointerdown=e=>{if(state.locked)return;e.preventDefault();s.setPointerCapture(e.pointerId);let x=e.clientX;s.onpointermove=v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;};s.onpointerup=s.onpointercancel=()=>{s.onpointermove=null;persist();};};s.onkeydown=e=>{if(state.locked)return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}};return s;}
  layout.replaceChildren(columns.left,splitter(0),columns.center,splitter(1),columns.right);columnWidths();
- reset.onclick=()=>{state.widths=[24,48,28];for(const r of records){Object.assign(r.state,{dock:r.home,floating:false,hidden:false,collapsed:false});columns[r.home].append(r.shell);show(r);}columnWidths();persist();};
- window.addEventListener('resize',()=>records.forEach(show));
+ reset.onclick=()=>{state.locked=false;lockBox.checked=false;document.body.classList.remove('workspace-locked');state.widths=[24,48,28];for(const r of records){Object.assign(r.state,{dock:r.home,floating:false,hidden:false,collapsed:false});columns[r.home].append(r.shell);show(r);}columnWidths();persist();};
+
+ const presetBox=make('div');presetBox.className='workspace-presets';const presetLabel=make('label','Workspace layout'),presetPicker=make('select'),applyLayout=make('button','Open layout'),saveLayout=make('button','Save layout as…'),renameLayout=make('button','Rename saved layout'),lockLabel=make('label'),lockBox=make('input');lockBox.type='checkbox';lockBox.checked=state.locked===true;lockLabel.append(lockBox,document.createTextNode('Lock panel positions and sizes'));presetLabel.append(presetPicker);presetBox.append(presetLabel,applyLayout,saveLayout,renameLayout,lockLabel);windows.prepend(presetBox);installAccessibility(windows);
+ let presets=[];try{const stored=JSON.parse(localStorage.getItem(PRESETS_KEY)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.name.length<=80&&p.layout?.version===1).map(p=>({...p,layout:safeLayout(p.layout)}));}catch{}
+ function fillPresets(selected='default'){presetPicker.replaceChildren();for(const [id,name] of [['default','Default workspace'],['browse','Find attacks'],['animate','Animate'],['balance','Balance and test']])presetPicker.add(new Option(name,id));for(const preset of presets)presetPicker.add(new Option(preset.name,preset.id));presetPicker.value=selected;}
+ function persistPresets(){try{localStorage.setItem(PRESETS_KEY,JSON.stringify(presets));}catch{$('status').textContent='Could not save this layout. Browser storage is full.';return false;}return true;}
+ function applyState(next){const clean=safeLayout(next);state.widths=clean.widths;state.locked=clean.locked;lockBox.checked=!!state.locked;document.body.classList.toggle('workspace-locked',!!state.locked);for(const r of records){Object.assign(r.state,clean.panels[r.id]||{dock:r.home,floating:false,hidden:false,collapsed:false,x:30,y:100,w:480,h:400});state.panels[r.id]=r.state;show(r);}columnWidths();persist();}
+ function builtIn(kind){const layout={version:1,widths:kind==='browse'?[40,40,20]:kind==='balance'?[18,52,30]:[20,55,25],panels:{},locked:false};for(const r of records){const showIds=kind==='animate'?['library','preview','attackTimeline','panel-9','panel-10']:kind==='balance'?['preview','attackTimeline','sequenceEditor','defenseEditor','cancelEditor','panel-6','panel-11','panel-12']:kind==='browse'?['library','preview']:records.map(r=>r.id);layout.panels[r.id]={dock:r.home,floating:false,collapsed:false,hidden:!showIds.includes(r.id),x:30,y:100,w:480,h:400};}return layout;}
+ applyLayout.onclick=()=>{const named=presets.find(p=>p.id===presetPicker.value);applyState(named?.layout||builtIn(presetPicker.value));$('status').textContent='Workspace layout opened. Hidden panels remain available in the Workspace menu.';if(presetPicker.value==='browse')$('findAttacks')?.click();};
+ saveLayout.onclick=async()=>{const name=await requestEditorName('Name this workspace layout');if(!name?.trim())return;if(name.trim().length>80){$('status').textContent='Use a layout name under 80 characters.';return;}const id=crypto.randomUUID();presets.push({id,name:name.trim(),layout:structuredClone(state)});if(persistPresets()){fillPresets(id);$('status').textContent='Saved '+name.trim()+' in this browser.';}};
+ renameLayout.onclick=async()=>{const preset=presets.find(p=>p.id===presetPicker.value);if(!preset){$('status').textContent='Choose one of your saved layouts to rename. Built-in layouts keep their names.';return;}const name=await requestEditorName('Layout name',preset.name);if(!name?.trim()||name.trim().length>80)return;preset.name=name.trim();if(persistPresets())fillPresets(preset.id);};
+ lockBox.onchange=()=>{state.locked=lockBox.checked;document.body.classList.toggle('workspace-locked',state.locked);records.forEach(show);persist();};document.body.classList.toggle('workspace-locked',!!state.locked);fillPresets();
+ window.addEventListener('resize' ,()=>records.forEach(show));
  document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const d of nav.querySelectorAll('.workspace-menu'))d.open=false;});
  document.addEventListener('pointerdown',e=>{for(const d of nav.querySelectorAll('.workspace-menu'))if(!d.contains(e.target))d.open=false;});
 }

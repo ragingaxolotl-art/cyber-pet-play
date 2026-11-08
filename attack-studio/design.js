@@ -1,4 +1,6 @@
-import {installStudioWorkspace} from './studio-workspace.js?v=20261108-projectile-defense';
+import {catalogEntries} from './attack-browser-model.js?v=20261108-usability';
+import {installAttackBrowser} from './attack-browser.js?v=20261108-usability';
+import {installStudioWorkspace} from './studio-workspace.js?v=20261108-usability';
 import {renderProjectileEditor} from './projectile-editor.js?v=20261108-projectile-defense';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-projectile-defense';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-projectile-defense';
@@ -8,7 +10,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261108-projectile-d
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-projectile-defense';
 import {attacksVersion} from './attack-format.js?v=20261108-projectile-defense';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-projectile-defense';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-projectile-defense';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-usability';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-projectile-defense';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-projectile-defense';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-projectile-defense';
@@ -19,6 +21,7 @@ import {installAttackBank} from './attack-bank.js?v=20261108-projectile-defense'
 import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-projectile-defense';
 import {EditHistory} from './edit-history.js?v=20261108-projectile-defense';
 import {installSequenceEditor} from './sequence-editor.js?v=20261108-projectile-defense';
+let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
@@ -188,7 +191,7 @@ function frameEditor(parent,owner,key,count,asset){
 }
 
 function renderPoseTimingSelection(){const select=$('poseControls').querySelector('[data-field="poseTiming"]');if(select)select.value=attack().poseTiming;}
-installAttackBank({current:attack,currentMany:()=>{ensureAllSkins();return groupMembers(project.attacks,attack());},validate:a=>validateAttack(a,ids),status,open:(a,companions=[])=>{if(dirty&&!confirm('Open this saved attack? Unsaved edits to the matching working attack will be replaced.'))return false;const incoming=[a,...companions.filter(v=>v.id!==a.id)];if(project.attacks.length+incoming.filter(v=>!project.attacks.some(old=>old.id===v.id)).length>256)throw Error('The workspace is full. Open a new project first.');for(const member of incoming){const old=project.attacks.findIndex(v=>v.id===member.id);if(old>=0)project.attacks[old]=member;else project.attacks.push(member);}selected=a.id;frame=0;playing=false;mark();refresh();return true;}});
+bankController=installAttackBank({onChange:(attacks,label)=>{browserSaved=attacks;browserSavedLabel=label;catalogBrowser?.refresh();},current:attack,currentMany:()=>{ensureAllSkins();return groupMembers(project.attacks,attack());},validate:a=>validateAttack(a,ids),status,open:(a,companions=[])=>{if(dirty&&!confirm('Open this saved attack? Unsaved edits to the matching working attack will be replaced.'))return false;const incoming=[a,...companions.filter(v=>v.id!==a.id)];if(project.attacks.length+incoming.filter(v=>!project.attacks.some(old=>old.id===v.id)).length>256)throw Error('The workspace is full. Open a new project first.');for(const member of incoming){const old=project.attacks.findIndex(v=>v.id===member.id);if(old>=0)project.attacks[old]=member;else project.attacks.push(member);}selected=a.id;frame=0;playing=false;mark();refresh();return true;}});
 
 $('drawPath').onclick=()=>{editMode='path';status('Drag a line in the viewer. Its coordinates are relative to the attacker’s feet.');};
 $('moveHitbox').onclick=()=>{editMode='hitbox';$('showBoxes').checked=true;draw();status('Drag inside the orange hitbox to move it, or drag its resize handles.');};
@@ -257,11 +260,22 @@ function installEditing(){
  $('scenario').onchange=()=>{const presets={standing:{guard:false,distance:72,targetHeight:0},blocking:{guard:true,distance:72,targetHeight:0},airborne:{guard:false,distance:72,targetHeight:40},distant:{guard:false,distance:190,targetHeight:0}};Object.assign(options,presets[$('scenario').value]);installSandbox();changed();};
  $('saveScenario').onclick=()=>{try{localStorage.setItem(storageKey+'-scenario',JSON.stringify(options));status('Test scenario saved in this browser.');}catch(e){status(e.message);}};
  $('loadScenario').onclick=()=>{try{const saved=JSON.parse(localStorage.getItem(storageKey+'-scenario')||'null');if(!saved)throw Error('Save a scenario first.');const candidate=structuredClone(project);candidate.testBench.options=saved;validateDesign(candidate,ids);Object.assign(options,saved);installSandbox();changed();}catch(e){status(e.message);}};
- sequenceEditor.results();recordEdit();installStudioWorkspace();
+ sequenceEditor.results();recordEdit();installUnifiedBrowser();installStudioWorkspace();
 }
 
 function installLibraryTabs(){
  const libraryPanel=document.querySelector('.library'),nodes=[...libraryPanel.children],sections={},nav=document.createElement('nav');nav.className='library-tabs';nav.setAttribute('aria-label','Library categories');
  for(const key of ['Attacks','Templates','Effects']){const section=document.createElement('section');section.hidden=key!=='Attacks';sections[key]=section;const button=document.createElement('button');button.textContent=key;button.setAttribute('aria-pressed',String(key==='Attacks'));button.onclick=()=>{for(const [name,part] of Object.entries(sections))part.hidden=name!==key;for(const b of nav.children)b.setAttribute('aria-pressed',String(b===button));};nav.append(button);}
  let group='Attacks';for(const child of nodes){if(child.tagName==='H2'&&child.textContent.startsWith('Tuned attacks'))group='Templates';if(child.tagName==='H2'&&child.textContent.startsWith('Effect atlas'))group='Effects';sections[group].append(child);}libraryPanel.append(nav,...Object.values(sections));
+}
+
+function installUnifiedBrowser(){
+ const openCopy=entry=>{if(project.attacks.length>=256)throw Error('Workspace full. Download a backup and remove an unused draft first.');const copy=structuredClone(entry.attack);copy.id=freshAttack().id;delete copy.reskinGroupId;delete copy.reskinFamily;validateAttack(copy,ids);project.attacks.push(copy);selected=copy.id;frame=0;playing=false;mark();refresh();status('Opened an independent copy of '+copy.name+'.');};
+ catalogBrowser=installAttackBrowser({getEntries:()=>catalogEntries({effects:effectMap,setups:reviewedSetups,drafts:project.attacks,saved:browserSaved,savedLabel:browserSavedLabel}),status,loadSaved:async()=>{await bankController?.refresh();},actions:[
+  {label:'Open working draft',available:e=>e.source==='draft',run:e=>{selected=e.attack.id;frame=0;playing=false;refresh();}},
+  {label:'Edit independent copy',available:e=>!!e.attack,run:openCopy},
+  {label:'Create attack from artwork',available:e=>!e.attack&&!!e.effect,run:e=>{const a=freshAttack(['heal','shield','projectile','area','melee'].includes(e.effect.kind)?e.effect.kind:'melee');a.name=e.name.slice(0,48);a.motion=e.effect.slot;a.element=e.effect.element;a.visuals=[{effectId:e.effect.id,x:0,y:0,scale:e.effect.default_scale||1,start:0,rate:1}];openCopy({...e,attack:a});}},
+  {label:'Add artwork to current attack',available:e=>!!e.effect,run:e=>{if(attack().visuals.length>=12)throw Error('This attack already has twelve artwork layers.');attack().visuals.push({effectId:e.effect.id,x:0,y:0,scale:e.effect.default_scale||1,start:attack().startup,rate:1});layerIndex=attack().visuals.length-1;mark();renderLayers();renderSettings();recompute();status('Added artwork from '+e.name+'.');}}
+ ]});
+ const button=document.createElement('button');button.id='findAttacks';button.textContent='Find attacks';button.className='primary';button.onclick=()=>catalogBrowser.open();document.querySelector('header nav').prepend(button);
 }
