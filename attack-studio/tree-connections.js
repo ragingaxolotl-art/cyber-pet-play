@@ -1,4 +1,4 @@
-import {ancestors} from './skill-tree-model.js?v=20261108-area-final';
+import {ancestors} from './skill-tree-model.js?v=20261108-explosion';
 import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261108-scheduled-sequences';
 
 // Connection edits return a copy and never delete attacks or their descendants.

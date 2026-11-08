@@ -5,7 +5,8 @@ export function validateProjectileArea(attack){
  if(!rule||typeof rule!=='object'||Array.isArray(rule))throw Error('Use a projectile area definition.');
  if(attack.delivery!=='projectile'||attack.payload!=='damage'||attack.projectileLifetime===undefined||attack.projectileContact!=='single')throw Error('Impact areas require a single-contact independent damage projectile.');
  const bounds={width:[1,500],height:[1,500],duration:[1,600],interval:[1,300],hitLimit:[1,10],damage:[0,500]};
- for(const key of Object.keys(rule))if(!Object.hasOwn(bounds,key))throw Error('Unexpected projectile area setting: '+key);
+ for(const key of Object.keys(rule))if(key!=='blastFrames'&&!Object.hasOwn(bounds,key))throw Error('Unexpected projectile area setting: '+key);
+ if(rule.blastFrames!==undefined&&(!Number.isInteger(rule.blastFrames)||rule.blastFrames<1||rule.blastFrames>rule.duration||rule.hitLimit!==1))throw Error('Explosions require one hit per target and expansion frames from 1 through the area lifetime.');
  for(const [key,[min,max]] of Object.entries(bounds))if(!Number.isInteger(rule[key])||rule[key]<min||rule[key]>max)throw Error(`Area ${key} must be a whole number from ${min} to ${max}.`);
 }
 export function createImpactArea(attack,box,frame){
@@ -22,3 +23,11 @@ export function claimAreaHit(area,target,frame,overlap){
 export const areaAlive=(area,frame)=>frame<area.end;
 
 export const impactAreaAnchor=(boxes,groupId,hurt,fallback)=>boxes?.find(box=>box.groupId===groupId&&shapeHitsRectangle(box,hurt))??fallback;
+
+// Keep the authored bounds immutable; expansion is sampled from the combat clock.
+export function impactAreaBox(area,frame){
+ const box=area.box;if(area.rule.blastFrames===undefined)return {...box};
+ const progress=Math.max(0,Math.min(1,(frame-area.start+1)/area.rule.blastFrames));
+ const w=box.w*progress,h=box.h*progress;
+ return {x:box.x+(box.w-w)/2,y:box.y+(box.h-h)/2,w,h,shape:'ellipse'};
+}

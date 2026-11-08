@@ -1,7 +1,7 @@
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261108-static-help';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261108-explosion';
 import {addContextHelp} from './context-help.js?v=20261108-static-help';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-static-help';
-import {validateAttack} from './combat-model.js?v=20261108-area-final';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-explosion';
+import {validateAttack} from './combat-model.js?v=20261108-explosion';
 export function renderProjectileEditor({root,attack,commit,status}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);

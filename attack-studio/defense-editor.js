@@ -1,10 +1,10 @@
 import {compactSectionHelp} from './context-help.js?v=20261108-static-help';
-import {renderBounceEditor} from './bounce-editor.js?v=20261108-area-final';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261108-area-final';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261108-area-final';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261108-area-final';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261108-area-final';
-import {validateAttack} from './combat-model.js?v=20261108-area-final';
+import {renderBounceEditor} from './bounce-editor.js?v=20261108-explosion';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261108-explosion';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261108-explosion';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261108-explosion';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261108-explosion';
+import {validateAttack} from './combat-model.js?v=20261108-explosion';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

@@ -1,5 +1,5 @@
-import {renderReactionTemplates} from './reaction-template-editor.js?v=20261108-area-final';
-import {buildReactionSequence,REACTION_BLOCKS} from './behavior-sequence.js?v=20261108-area-final';
+import {renderReactionTemplates} from './reaction-template-editor.js?v=20261108-explosion';
+import {buildReactionSequence,REACTION_BLOCKS} from './behavior-sequence.js?v=20261108-explosion';
 const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderReactionBuilder(root,attack,commit){
  const panel=el('details'),summary=el('summary','Build a reaction sequence');panel.append(summary,el('p','Arrange reaction blocks, preview, then replace the current hits. Each repeat makes one editable hit. Artwork and other attack settings stay unchanged. With grouped hitboxes, new hits use the first hit’s group; review contact in the test results.'));

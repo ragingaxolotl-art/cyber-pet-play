@@ -1,3 +1,4 @@
+import {drawImpactArea} from './impact-area-view.js?v=20261108-explosion';
 import {installStaticHelp} from './static-help.js?v=20261108-static-help';
 import {effectDragHit,attackerDragPlacement} from './preview-drag.js?v=20261108-drag';
 import {steeringVisualPosition} from './projectile-steering.js?v=20261108-steering';
@@ -5,26 +6,26 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
 import {installStudioWorkspace} from './studio-workspace.js?v=20261108-workflow';
-import {renderProjectileEditor} from './projectile-editor.js?v=20261108-static-help';
-import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-area-final';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261108-explosion';
+import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-explosion';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
-import {renderCancelEditor} from './cancel-editor.js?v=20261108-static-help';
-import {renderDefenseEditor} from './defense-editor.js?v=20261108-static-help';
-import {renderAttackTimeline} from './attack-timeline.js?v=20261108-static-help';
-import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-area-final';
-import {attacksVersion} from './attack-format.js?v=20261108-area-final';
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-area-final';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-static-help';
-import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-area-final';
-import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-area-final';
+import {renderCancelEditor} from './cancel-editor.js?v=20261108-explosion';
+import {renderDefenseEditor} from './defense-editor.js?v=20261108-explosion';
+import {renderAttackTimeline} from './attack-timeline.js?v=20261108-explosion';
+import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-explosion';
+import {attacksVersion} from './attack-format.js?v=20261108-explosion';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-explosion';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-explosion';
+import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-explosion';
+import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261108-explosion';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
-import {installAttackBank} from './attack-bank.js?v=20261108-area-final';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-area-final';
+import {installAttackBank} from './attack-bank.js?v=20261108-explosion';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-explosion';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
-import {installSequenceEditor} from './sequence-editor.js?v=20261108-area-final';
+import {installSequenceEditor} from './sequence-editor.js?v=20261108-explosion';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
@@ -114,7 +115,7 @@ function draw(){if(!simulation)return;previewOrigin=options.previewOrigin??150;c
  if(!sprite(library.examples[reaction.pose]||library.examples.ready_side,0,-options.targetSide,reaction.progress,reaction.sequence,a.wallSlam&&!state.target.reactionInFlight?state.target.x+reaction.offsetX:null))mannequin(0,'#7b9bbd');ctx.restore();
  if(a.wallSlam){ctx.strokeStyle='#8a9bb0';ctx.strokeRect(options.targetSide*234+(options.targetSide<0?-4:0),-100,4,100);}
  for(const e of simulation.events.filter(e=>frame>=e.frame&&frame<e.frame+12&&e.text.includes('smash!'))){ctx.strokeStyle='#ffda90';ctx.lineWidth=2;ctx.beginPath();ctx.arc(state.target.x,e.text.startsWith('Floor')?-3:(state.target.y||0)-30,8+(frame-e.frame),0,Math.PI*2);ctx.stroke();}
- for(const area of state.areas||[]){ctx.fillStyle='#d6f48a38';ctx.strokeStyle='#d6f48a';ctx.lineWidth=.6;ctx.fillRect(area.x,area.y,area.w,area.h);ctx.strokeRect(area.x,area.y,area.w,area.h);}
+ for(const area of state.areas||[]){drawImpactArea(ctx,area);}
  a.visuals.forEach((v,index)=>{const e=effectMap.get(v.effectId);if(!e||!simulation.cast||(a.projectileLifetime!==undefined&&!state.projectileAlive))return;const fi=!v.loopUntilImpact&&(v.loop??e.loop)&&frame>=total&&a.projectileLifetime===undefined?-1:visualFrame(e,v,frame,simulation.impactFrame??Infinity);const travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,motionFrame-Math.round((a.projectileStart??a.startup)*statsFor(attacker).timing))*a.projectileSpeed:0;const attached=a.hitEvents&&a.projectileMode==='attached'&&simulation.impactFrame!==null&&frame>=simulation.impactFrame&&simulation.hitResults?.[0]?.result==='Connected';const steered=state.steering&&!attached?steeringVisualPosition(state.steering,a.box,v,options.facing):null;const x=attached?state.target.x+v.x*options.facing:steered?steered.x:(v.x+travel+path.x)*options.facing,y=attached?state.target.y+v.y:steered?steered.y:v.y+path.y;
  effectDragTargets.push({index,x,y,facing:options.facing,angle:(v.followPath&&a.motionPath?.length?Math.atan2(path.dy,path.dx):0)-(v.forwardAngle||0)*Math.PI/180,scaleX:v.scale*(v.stretchX??1),scaleY:v.scale*(v.stretchY??1),anchor:e.anchor,size:e.canvas,visible:fi>=0});
  if(fi>=0){const source=v.frames?.[fi]??fi;const image=img(e.sheet||e.frames[source]);if(image.complete&&image.naturalWidth){ctx.save();ctx.globalAlpha=visualOpacity(e,v,frame,simulation.impactFrame??Infinity);ctx.translate(x,y);ctx.scale(options.facing,1);ctx.rotate((v.followPath&&a.motionPath?.length?Math.atan2(path.dy,path.dx):0)-(v.forwardAngle||0)*Math.PI/180);ctx.scale(v.scale*(v.stretchX??1),v.scale*(v.stretchY??1));const [w,h]=e.canvas,[ax,ay]=e.anchor;if(e.sheet)ctx.drawImage(image,source%e.columns*w,Math.floor(source/e.columns)*h,w,h,-ax,-ay,w,h);else ctx.drawImage(image,-ax,-ay,w,h);ctx.restore();}}
