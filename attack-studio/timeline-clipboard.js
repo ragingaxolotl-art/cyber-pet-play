@@ -17,24 +17,43 @@ export function copyTimelineEvents(attack,tracks,selection){
   if(!value)throw Error('Animation, movement paths and the main block/dodge window cannot be duplicated.');
   entries.push({...item,start:box.start,value:structuredClone(value)});
  }
- return {attackId:attack.id,entries,origin:Math.min(...entries.map(e=>e.start))};
+ return {attackId:attack.id,entries,origin:Math.min(...entries.map(e=>e.start)),sequenceTiming:attack.sequenceTiming??'contact',geometryBase:tracks.geometryBase,groups:structuredClone(attack.hitboxGroups||[])};
 }
-// Paste within the source attack preserves group budgets and follow-up references.
-// Cross-attack transfer needs explicit group/attack-reference remapping first.
+// Cross-attack copies remap group IDs and self follow-ups; existing destination
+// behavior is never converted implicitly. Referenced geometry travels with hits.
 export function pasteTimelineEvents(attack,tracks,clipboard,start){
  if(!clipboard?.entries?.length)throw Error('Copy timeline events before pasting.');
- if(clipboard.attackId!==attack.id)throw Error('Paste into the attack these events were copied from. Cross-attack timeline transfer is not supported yet.');
+ const crossAttack=clipboard.attackId!==attack.id;
+ if(crossAttack&&clipboard.entries.some(e=>e.groupId==='sequence')&&(clipboard.sequenceTiming!==(attack.sequenceTiming??'contact')||!attack.hitEvents))throw Error('Create a compatible hit sequence in the destination before pasting hits.');
+ if(crossAttack){
+  const hits=clipboard.entries.filter(e=>e.groupId==='sequence');
+  const bringsGroups=hits.some(e=>e.value.hitboxGroup)||clipboard.entries.some(e=>clipboard.groups.some(g=>g.id===e.groupId));
+  if(bringsGroups&&attack.hitEvents?.some(h=>!h.hitboxGroup))throw Error('Add multiple hitboxes and assign every destination hit to a group before pasting grouped events.');
+  if(attack.hitboxGroups&&hits.some(e=>!e.value.hitboxGroup))throw Error('Assign hitbox groups to the source hits, then copy again before pasting into a grouped attack.');
+ }
  if(!Number.isInteger(start)||start<0)throw Error('Choose a whole attack frame at or after zero.');
- const next=structuredClone(attack);
+ const next=structuredClone(attack),groupIds=new Map();
+ if(crossAttack){
+  const referenced=new Set(clipboard.entries.filter(e=>e.groupId==='sequence').map(e=>e.value.hitboxGroup).filter(Boolean));
+  const selectedGroups=new Set(clipboard.entries.map(e=>e.groupId).filter(id=>clipboard.groups.some(g=>g.id===id)));
+  for(const id of new Set([...referenced,...selectedGroups])){
+   const source=clipboard.groups.find(g=>g.id===id);if(!source)throw Error('Copied hitbox geometry is missing.');
+   const group=structuredClone(source);group.id=uniqueId('group');groupIds.set(id,group.id);
+   group.boxes=group.boxes.filter(b=>referenced.has(id)||clipboard.entries.some(e=>e.groupId===id&&e.boxId===b.id)).map(b=>({...b,id:uniqueId('box'),start:b.start+clipboard.geometryBase+start-clipboard.origin-tracks.geometryBase}));
+   (next.hitboxGroups??=[]).push(group);
+  }
+ }
+
  for(const entry of clipboard.entries){
   const value=structuredClone(entry.value),frame=start+entry.start-clipboard.origin;
   if(entry.groupId==='sequence'){
    if(!next.hitEvents)throw Error('Restore a hit sequence before pasting these hits.');
-   value.id=uniqueId('hit');value.offset=frame-tracks.contact;next.hitEvents.push(value);
+   value.id=uniqueId('hit');value.offset=frame-tracks.contact;if(crossAttack&&value.hitboxGroup)value.hitboxGroup=groupIds.get(value.hitboxGroup);next.hitEvents.push(value);
   }else if(entry.groupId==='effects'){value.start=frame;next.visuals.push(value);}
   else if(entry.groupId==='armor'){value.id=uniqueId('defense');value.start=frame;(next.defenseWindows??=[]).push(value);}
-  else if(entry.groupId==='cancels'){value.id=uniqueId('cancel');value.start=frame;(next.cancelWindows??=[]).push(value);}
+  else if(entry.groupId==='cancels'){value.id=uniqueId('cancel');value.start=frame;if(crossAttack)value.attacks=value.attacks.map(id=>id===clipboard.attackId?attack.id:id);(next.cancelWindows??=[]).push(value);}
   else{
+   if(crossAttack)continue; // Geometry was copied once above, including dependencies.
    const group=next.hitboxGroups?.find(g=>g.id===entry.groupId);
    if(!group)throw Error('A copied hitbox group no longer exists.');
    value.id=uniqueId('box');value.start=frame-tracks.geometryBase;group.boxes.push(value);

@@ -40,7 +40,7 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
    const copy=el('button','Copy selected events'),paste=el('button','Paste copied events'),at=el('input'),atLabel=el('label','Paste first event at attack frame ');
    copy.type=paste.type='button';at.type='number';at.min=0;at.step=1;at.value=0;at.setAttribute('aria-label','Paste first event at attack frame');atLabel.append(at);
    paste.disabled=!view.clipboard;
-   copy.onclick=()=>{try{const selected=[...view.selected.values()];if(selected.some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock selected tracks before copying.');view.clipboard=copySelection(selected);paste.disabled=false;at.value=view.clipboard.origin;onError('Copied '+view.clipboard.entries.length+' events. Choose the first pasted frame.');}catch(error){onError(error.message);}};
+   copy.onclick=()=>{try{const selected=[...view.selected.values()];if(selected.some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock selected tracks before copying.');view.clipboard=copySelection(selected);paste.disabled=false;at.value=view.clipboard.origin;onError('Copied '+view.clipboard.entries.length+' events. Choose the first pasted frame. Pasting into another attack also copies referenced hitbox groups and redirects self follow-ups; other follow-up targets stay unchanged.');}catch(error){onError(error.message);}};
    paste.onclick=()=>{try{if(view.clipboard?.entries.some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock destination tracks before pasting.');pasteSelection(view.clipboard,Number(at.value));}catch(error){onError(error.message);}};
    tools.append(copy,atLabel,paste);
   }
