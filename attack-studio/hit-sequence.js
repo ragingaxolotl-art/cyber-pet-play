@@ -1,5 +1,6 @@
-import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-air-recovery';
-export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-air-recovery';
+import {startBoundaryBounce,validateBounces} from './bounce-rules.js?v=20261108-bounces';
+import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-bounces';
+export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-bounces';
 // Version 2: a bounded sequence of hits timed from first projectile contact.
 // Shared by the editor preview and the Arena. All times are 60 Hz frames.
 export const SEQUENCE_LIMITS = Object.freeze({hits:10, duration:300, suspension:30, gravity:.48});
@@ -23,6 +24,8 @@ export function validateHitSequence(attack) {
   if (!Array.isArray(attack.hitEvents)||!integer(attack.hitEvents.length,1,SEQUENCE_LIMITS.hits)) throw Error('Use 1–10 independent hits.');
   const ids=new Set(); let previous=-1;
   for (const event of attack.hitEvents) {
+    validateBounces(event.bounces);
+    if(event.bounces&&['none','suspend'].includes(event.reaction))throw Error('Bounces require a moving hit reaction.');
     if (!event||typeof event.id!=='string'||!/^hit_[a-zA-Z0-9_]{1,80}$/.test(event.id)||ids.has(event.id)) throw Error('Every hit needs a unique ID.');
     ids.add(event.id);
     if(event.hitboxGroup!==undefined&&(!attack.hitboxGroups||!attack.hitboxGroups.some(g=>g.id===event.hitboxGroup)))throw Error('Hit references a missing hitbox group.');
@@ -98,8 +101,9 @@ export function advancePulseReaction(target,frame,minX=-Infinity,maxX=Infinity) 
   const motion=target.pulseMotion;if(!motion)return false;
   const e=motion.event,elapsed=frame-motion.start,duration=e.reaction==='suspend'?e.hold:e.frames;
   const t=Math.max(0,Math.min(1,elapsed/duration));
-  target.x=Math.max(minX,Math.min(maxX,motion.x+motion.direction*e.knockback*t));
-  target.y=e.reaction==='suspend'?motion.y:e.reaction==='spike'?motion.y*(1-t):motion.y*(1-t)-4*e.height*t*(1-t);
+  const next={x:motion.x+motion.direction*e.knockback*t,y:e.reaction==='suspend'?motion.y:e.reaction==='spike'?motion.y*(1-t):motion.y*(1-t)-4*e.height*t*(1-t)};
+  if(startBoundaryBounce(target,e.bounces,next,motion.direction,frame,minX,maxX))return true;
+  target.x=Math.max(minX,Math.min(maxX,next.x));target.y=next.y;
   if(t===1){target.pulseMotion=null;target.reactionInFlight=false;target.vy=0;target.reaction=target.y<0?'airborne':'standing';if(target.y===0){target.reactionLandFrame=frame;resetGroundedJuggle(target);}}
   return true;
 }

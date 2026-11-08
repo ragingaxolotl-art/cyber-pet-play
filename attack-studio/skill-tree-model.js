@@ -1,8 +1,8 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261108-hitstun';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261108-bounces';
 // Learning order is a directed acyclic graph. Edges point from prerequisite to attack.
 export const TREE_KEY='cyber-pet-attack-skill-tree-v1';
 export function validateTree(tree,effectIds,validateAttack){
- if(tree?.format!=='cyber-pet-attack-skill-tree'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].includes(tree.version)||!Array.isArray(tree.nodes)||tree.nodes.length>512)throw Error('Choose a version 1–15 attack tree with at most 512 attacks.');
+ if(tree?.format!=='cyber-pet-attack-skill-tree'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].includes(tree.version)||!Array.isArray(tree.nodes)||tree.nodes.length>512)throw Error('Choose a version 1–16 attack tree with at most 512 attacks.');
  requireGroupVersion(tree.version,tree.nodes.map(n=>n?.attack));
  if(tree.version===1&&tree.nodes.some(n=>n?.attack?.hitEvents))throw Error('Hit sequences require a version 2 skill tree.');
  const ids=new Set();

@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-air-recovery';
+import {validateAttack} from './combat-model.js?v=20261108-bounces';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderComboScalingEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h3','Combo damage scaling'));

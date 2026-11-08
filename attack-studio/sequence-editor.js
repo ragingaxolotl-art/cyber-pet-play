@@ -1,8 +1,9 @@
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-hitstun';
+import {renderBounceEditor} from './bounce-editor.js?v=20261108-bounces';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-bounces';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
-import {validateAttack} from './combat-model.js?v=20261108-air-recovery';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-hitstun';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-air-recovery';
+import {validateAttack} from './combat-model.js?v=20261108-bounces';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-bounces';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-bounces';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -14,9 +15,12 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
       const timed=['melee','area'].includes(a.delivery);
       const create=el('button',timed?'Create three-hit '+a.delivery+' sequence':'Create five-hit juggling projectile');create.type='button';create.disabled=!!a.hitboxGroups;if(a.hitboxGroups)create.title='Return to one hitbox before creating a contact sequence.';
       create.onclick=()=>mutate(n=>{
+        const bounces=n.bounces;delete n.bounces;
         if(timed){Object.assign(n,{behaviorVersion:2,sequenceTiming:'cast',payload:'damage',status:'none',impactTrigger:'timed',coefficient:0,hitEvents:jugglePreset(3,5).map((e,i)=>({...e,offset:e.offset+(n.delivery==='area'?6:0),reaction:i===2?'knockback':'none',height:0,knockback:i===2?25:0}))});delete n.projectileMode;}
         else Object.assign(n,{behaviorVersion:2,delivery:'projectile',payload:'damage',status:'none',impactTrigger:'contact',projectileMode:'attached',hitEvents:jugglePreset(),active:21,coefficient:0});
+        if(bounces){const moving=n.hitEvents.findLast(e=>!['none','suspend'].includes(e.reaction));if(moving)moving.bounces=bounces;}
       });
+      if(a.bounces)root.append(el('p','Creating a sequence moves these bounce settings to its final moving hit. Undo restores the ordinary attack.'));
       root.append(create);return;
     }
     renderReactionBuilder(root,a,next=>{commit(next);render();});
@@ -52,13 +56,14 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
       input.onchange=()=>{try{if(!input.checkValidity()||input.value==='')throw Error('Enter a value in the displayed range.');mutate(n=>n.hitEvents.find(e=>e.id===selected)[key]=Number(input.value));}catch(e){error.textContent=e.message;input.value=event[key];}};l.append(input);fields.append(l);
     }
     for(const [key,title,choices] of [['reaction','Reaction',REACTIONS],['target','Eligible target',['any','grounded','airborne']]]){
-      const l=el('label',title),input=el('select');for(const choice of choices)input.add(new Option(choice,choice));input.value=event[key];input.onchange=()=>mutate(n=>n.hitEvents.find(e=>e.id===selected)[key]=input.value);l.append(input);fields.append(l);
+      const l=el('label',title),input=el('select');for(const choice of choices)input.add(new Option(choice,choice));input.value=event[key];input.onchange=()=>{try{mutate(n=>n.hitEvents.find(e=>e.id===selected)[key]=input.value);}catch(e){error.textContent=e.message;input.value=event[key];}};l.append(input);fields.append(l);
     }
     if(a.hitboxGroups){const label=el('label','Hitbox group for this hit'),select=el('select');select.setAttribute('aria-label','Hitbox group for this hit');a.hitboxGroups.forEach((g,i)=>select.add(new Option('Group '+(i+1),g.id)));select.value=event.hitboxGroup;select.onchange=()=>{try{mutate(n=>n.hitEvents.find(e=>e.id===selected).hitboxGroup=select.value);}catch(e){error.textContent=e.message;select.value=event.hitboxGroup;}};label.append(select);fields.append(label);}
     const stunLabel=el('label','Hitstun override (frames; blank uses reaction timing)'),stunInput=el('input');Object.assign(stunInput,{type:'number',min:0,max:120,step:1,value:event.hitstun??''});stunInput.setAttribute('aria-label','Selected hit hitstun frames');
     stunInput.onchange=()=>{try{mutate(n=>{const hit=n.hitEvents.find(e=>e.id===selected);if(stunInput.value==='')delete hit.hitstun;else hit.hitstun=Number(stunInput.value);});}catch(e){error.textContent=e.message;stunInput.value=event.hitstun??'';}};stunLabel.append(stunInput);fields.append(stunLabel);
     fields.append(el('p','Blank preserves reaction-based hitstun; zero adds no hitstun. Movement or suspension can still lock the target. Explicit values require version 15.'));
     root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
+    const bounce=el('section');root.append(bounce);renderBounceEditor({root:bounce,attack:a,eventId:event.id,commit:next=>{commit(next);render();},status:message=>error.textContent=message});
     const legacy=el('button','Return to ordinary '+a.delivery);legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.sequenceTiming;delete n.behaviorVersion;delete n.projectileMode;if(n.hitboxGroups)n.impactTrigger='timed';});root.append(legacy);
   }
   function results(){const output=document.getElementById('hitResults');output.replaceChildren();const sim=getSimulation();if(!sim)return;

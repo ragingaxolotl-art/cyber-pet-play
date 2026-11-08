@@ -2,6 +2,12 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.bounces||attack.hitEvents?.some(e=>e.bounces)){
+  add('bounce-version','info','Boundary bounces require version 16 support in Studio, Arena and classroom saving.','Download a backup. Older classroom servers refuse unsupported writes.');
+  add('bounce-budget','info','Each airborne chain permits one wall rebound and one floor rebound. Rebounds add no damage or new hitstun and preserve the spent juggle and air-recovery limits.','Only final landing resets bounce limits. A later hit cannot replenish them; the forced juggle landing disables bounces.');
+  add('bounce-contact','info','A bounce requires the reaction to reach its configured boundary. Wall rebounds turn inward; floor rebounds continue the reaction direction.','Use Arena comparison near a wall and inspect the replay. Preview stage bounds are relative to the attacker; Arena uses its actual stage.');
+ }
+
  if(attack.projectileLifetime!==undefined)add('projectile-lifetime','info',`Projectile launches at startup and can survive interruption for up to ${attack.projectileLifetime} frames. Owner recovery runs independently. Defeat, expiry and parry remove the projectile.`, 'Requires version 7 saving. Test simultaneous contacts and interruption in Arena; classroom saving remains subject to server compatibility.');
  if(attack.hitEvents||(attack.launchHeight>0&&attack.pushAxis!=='x'))add('shared-juggle-budget','info','Ordinary and sequence reactions share a ten-reaction airborne budget. The grounded launcher counts as one; landing resets the budget.','At the limit, the target is forced toward the floor. Ordinary damage can still connect without restarting the launch. Guard, armor, invulnerability and parry interruptions do not spend this budget. Retest older long launch combos in Arena.');
  if(attack.hitstunScaling!==undefined||attack.hitEvents?.some(e=>e.hitstun!==undefined)){

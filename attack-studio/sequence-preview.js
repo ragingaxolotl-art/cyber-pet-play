@@ -1,4 +1,4 @@
-import {recoverInAir,validateRecoveryFrame} from './air-recovery.js?v=20261108-air-recovery';
+import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
 import {scaledHitEvent} from './hitstun-scaling.js?v=20261108-hitstun';
 import {scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
 import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
@@ -6,9 +6,9 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-air-recovery';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-bounces';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-air-recovery';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-bounces';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   validateRecoveryFrame(options.recoveryFrame);
@@ -66,10 +66,12 @@ export function simulateSequence(attack,attacker,target,options={}) {
     }
     if(incomingInterrupted){ownerInterrupted=true;if(!independent||!launched||self.hp<=0)state.cancelled='Attacker interrupted.';}
     if((state.startFrame??state.contactFrame)!==null)end=(state.startFrame??state.contactFrame)+sequenceDuration(attack)+Math.max(120,tm.recovery);
+    if(other.pulseMotion)end=Math.max(end,other.pulseMotion.start+other.pulseMotion.event.frames+1);
     if(options.recoveryFrame!==undefined&&options.recoveryFrame!==null&&frame===options.recoveryFrame){
       const reason=recoverInAir(other,frame);recovery={attempted:true,recovered:!reason,reason,combatFrame:frame};
       events.push({frame,text:reason?'Air recovery rejected: '+reason:'Air recovery succeeded; control restored without invulnerability'});
     }
+    if(other.reactionBounceFrame===frame)events.push({frame,text:other.reactionBounceKind==='wall'?'Wall bounce':'Floor bounce'});
     for(const who of [self,other])who.canAct=who.hp>0&&!who.pulseMotion&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
     const impactStop=hits>hitsBeforeFeedback?(options.guard&&attack.blockable?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
     if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');

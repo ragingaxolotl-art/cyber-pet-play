@@ -1,5 +1,5 @@
-import {validateAttack} from './combat-model.js?v=20261108-air-recovery';
-import {REACTIONS} from './hit-sequence.js?v=20261108-air-recovery';
+import {validateAttack} from './combat-model.js?v=20261108-bounces';
+import {REACTIONS} from './hit-sequence.js?v=20261108-bounces';
 export const REACTION_BLOCKS=['hit',...REACTIONS.filter(r=>r!=='none')];
 // Authoring helper only: exports ordinary hit events understood by both runtimes.
 // It never changes delivery, geometry, artwork, defense or follow-up definitions.
