@@ -1,9 +1,9 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261108-durability';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261108-projectile-defense';
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}
 export function validateBank(bank,validate){
- if(bank?.format!=='cyber-pet-attack-bank'||![1,2,3,4,5,6,7,8].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
+ if(bank?.format!=='cyber-pet-attack-bank'||![1,2,3,4,5,6,7,8,9].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
  requireGroupVersion(bank.version,bank.attacks);
  if(bank.version===1&&bank.attacks.some(a=>a.hitEvents))throw Error('Hit sequences require a version 2 attack bank.');
  const ids=new Set();for(const a of bank.attacks){validate(a);if(ids.has(a.id))throw Error('Duplicate saved attack ID.');ids.add(a.id);}return bank;
@@ -33,7 +33,7 @@ export function createClassroomBank(validate,request=fetch){
   connected:()=>!!session&&session.expires>Date.now()/1000,
   async connect(password){session=await call('/connect',{method:'POST',headers:{'X-Teacher-Password':password}});return session;},
   async disconnect(){try{if(session)await call('/disconnect',{method:'POST'});}finally{session=null;}},
-  async read(){const capabilities=await call('/capabilities');const version=capabilities.bankVersions?.includes(8)?'8':capabilities.bankVersions?.includes(7)?'7':capabilities.bankVersions?.includes(6)?'6':capabilities.bankVersions?.includes(5)?'5':capabilities.bankVersions?.includes(4)?'4':capabilities.bankVersions?.includes(3)?'3':'2';const data=await call('',{headers:{'X-Attack-Bank-Version':version}});validateBank(data.bank,validate);return data;},
+  async read(){const capabilities=await call('/capabilities');const version=capabilities.bankVersions?.includes(9)?'9':capabilities.bankVersions?.includes(8)?'8':capabilities.bankVersions?.includes(7)?'7':capabilities.bankVersions?.includes(6)?'6':capabilities.bankVersions?.includes(5)?'5':capabilities.bankVersions?.includes(4)?'4':capabilities.bankVersions?.includes(3)?'3':'2';const data=await call('',{headers:{'X-Attack-Bank-Version':version}});validateBank(data.bank,validate);return data;},
   async write(bank,revision){validateBank(bank,validate);if(bank.version>=2){const capabilities=await call('/capabilities');if(bank.attacks.some(a=>a.defenseWindows?.some(w=>w.kind==='parry'))&&!capabilities.defenseKinds?.includes('parry'))throw Error('This server does not yet support parry windows. Download a project backup; your local copy is preserved.');if(bank.attacks.some(a=>a.defenseWindows?.some(w=>w.kind==='invulnerability'))&&!capabilities.defenseKinds?.includes('invulnerability'))throw Error('This server does not yet support invulnerability windows. Download a project backup; your local copy is preserved.');if(bank.attacks.some(a=>a.hitEvents&&a.hitboxGroups)&&capabilities.groupedSequences!==true)throw Error('This server does not yet support hitbox groups in sequences. Download a project backup; your local copy is preserved.');if(!capabilities.bankVersions?.includes(bank.version)||!capabilities.attackVersions?.includes(bank.version)||capabilities.revisionProtection!==true)throw Error(`This classroom server cannot safely save version ${bank.version} attacks yet. Your local recovery copy is preserved; download a project backup.`);}return call('',{method:'PUT',headers:{'X-Attack-Bank-Version':String(Math.max(2,bank.version))},body:JSON.stringify({bank,revision})});}
  };
 }
@@ -48,12 +48,12 @@ export function createLocalBankStore(storage=localStorage,database=indexedDB){
  };
 }
 
-export function installAttackBank({current,currentMany=()=>[current()],validate,status,open}){
+export function installAttackBank({current,currentMany=()=>[current()],validate,status,open,onChange=()=>{}}){
  const $=id=>document.getElementById(id),remote=createClassroomBank(validate),localStore=createLocalBankStore();let bank=emptyBank(),busy=false,pendingSave=false;
  try{remote.restore(JSON.parse(localStorage.getItem(SESSION_KEY)||'null'));}catch{}
  const message=text=>{$('bankStatus').textContent=text;status(text);};
  async function local(){return validateBank(await localStore.read(),validate);}
- function render(){const selected=$('bankList').value;$('bankList').replaceChildren();for(const a of bank.attacks){const option=document.createElement('option');option.value=a.id;option.textContent=a.name;$('bankList').append(option);}if(bank.attacks.some(a=>a.id===selected))$('bankList').value=selected;$('openAttack').disabled=busy||!bank.attacks.length;$('connectBank').textContent=remote.connected()?'Teacher connection':'Teacher sign in';}
+ function render(){onChange(structuredClone(bank.attacks),$('bankSource').value==='classroom'&&remote.connected()?'Classroom bank':'Saved on this device');const selected=$('bankList').value;$('bankList').replaceChildren();for(const a of bank.attacks){const option=document.createElement('option');option.value=a.id;option.textContent=a.name;$('bankList').append(option);}if(bank.attacks.some(a=>a.id===selected))$('bankList').value=selected;$('openAttack').disabled=busy||!bank.attacks.length;$('connectBank').textContent=remote.connected()?'Teacher connection':'Teacher sign in';}
  async function task(action){if(busy)return;busy=true;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){if(e.status===401)localStorage.removeItem(SESSION_KEY);message(e.message);}finally{busy=false;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
  function signIn(){ $('bankPassword').value='';$('bankConnection').showModal(); }
  async function refresh(){
@@ -84,6 +84,7 @@ export function installAttackBank({current,currentMany=()=>[current()],validate,
   else pendingSave=false;
  });
  task(refresh);
+ return {refresh:()=>task(refresh)};
 }
 
 export function saveManyToBank(bank,attacks,validate){

@@ -1,4 +1,4 @@
-import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-durability';
+import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-projectile-defense';
 export function cycleFrames(effect,visual){return (visual.frames||effect.times.map((_,i)=>i)).reduce((n,i)=>n+(effect.times[i]??effect.times[0]),0)*60/1000;}
 export function retimeVisual(effect,visual,window){
  if(!Number.isInteger(window.start)||window.start<0||window.start>600)throw Error('Effect start must be between 0 and 600 frames.');

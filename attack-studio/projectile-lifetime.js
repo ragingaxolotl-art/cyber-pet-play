@@ -1,4 +1,4 @@
-import {activeEnd} from './contact-timing.js?v=20261108-durability';
+import {activeEnd} from './contact-timing.js?v=20261108-projectile-defense';
 
 // Classroom safety bounds; lifetime uses 60 Hz simulation frames from launch.
 export const PROJECTILE_LIMITS=Object.freeze({perOwner:16,lifetime:600});

@@ -8,10 +8,11 @@ export function validateDefenseWindows(windows) {
  for(const w of windows){
   if(!w||!/^defense_[a-zA-Z0-9_]{1,80}$/.test(w.id)||ids.has(w.id))throw Error('Each defense window needs a unique ID.');
   ids.add(w.id);
+  if(['reflect','absorb'].includes(w.kind)&&w.against!=='projectile')throw Error('Reflection and absorption protect against projectiles only.');
   if(w.kind==='parry'&&(!Number.isInteger(w.stun)||w.stun<1||w.stun>60))throw Error('Parry interruption must last 1–60 frames.');
-  if(!['armor','invulnerability','parry'].includes(w.kind)||!['all','melee','projectile','area'].includes(w.against))throw Error('Invalid defense window type or attack filter.');
+  if(!['armor','invulnerability','parry','reflect','absorb'].includes(w.kind)||!['all','melee','projectile','area'].includes(w.against))throw Error('Invalid defense window type or attack filter.');
   if(!Number.isInteger(w.start)||w.start<0||!Number.isInteger(w.duration)||w.duration<1||w.start+w.duration>900)throw Error('Defense windows must fit within 900 frames.');
-  if(['armor','parry'].includes(w.kind)&&(!Number.isInteger(w.hits)||w.hits<1||w.hits>10))throw Error('Armor absorbs reactions from 1–10 hits per window.');
+  if(['armor','parry','reflect','absorb'].includes(w.kind)&&(!Number.isInteger(w.hits)||w.hits<1||w.hits>10))throw Error('Armor absorbs reactions from 1–10 hits per window.');
  }
 }
 export const createDefenseState=()=>new Map();
@@ -44,6 +45,19 @@ export function claimParry(snapshot,attack){
   if(w.kind!=='parry'||(w.against!=='all'&&w.against!==attack.delivery))continue;
   const used=snapshot.state.get(w.id)||0;if(used>=w.hits)continue;
   snapshot.state.set(w.id,used+1);return w;
+ }
+ return null;
+}
+
+// Only independently launched projectiles can change ownership or be absorbed.
+// Dodge/invulnerability are resolved first by the caller, then these windows,
+// then parry, guard and armor. Overlapping projectile defenses use list order.
+export function claimProjectileDefense(snapshot,attack){
+ if(!snapshot?.state||attack.delivery!=='projectile'||attack.projectileLifetime===undefined||!['damage','push'].includes(attack.payload))return null;
+ for(const window of snapshot.windows){
+  if(!['reflect','absorb'].includes(window.kind))continue;
+  const used=snapshot.state.get(window.id)||0;if(used>=window.hits)continue;
+  snapshot.state.set(window.id,used+1);return window;
  }
  return null;
 }

@@ -1,5 +1,5 @@
-import {ancestors} from './skill-tree-model.js?v=20261108-durability';
-import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261108-durability';
+import {ancestors} from './skill-tree-model.js?v=20261108-projectile-defense';
+import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261108-projectile-defense';
 
 // Connection edits return a copy and never delete attacks or their descendants.
 export function editConnection(tree, action, prerequisiteId, attackId) {

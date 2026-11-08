@@ -1,6 +1,6 @@
 import {dataSetKey} from './tree-datasets.js';
-import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261108-durability';
-import {freshAttack,validateAttack} from './combat-model.js?v=20261108-durability';
+import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261108-projectile-defense';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261108-projectile-defense';
 // Tree attacks are independent copies. Explicit save updates only the chosen node.
 export function connectTreeEditor({effects,open,current,status}){
  const id=new URLSearchParams(location.search).get('treeNode');if(!id)return;

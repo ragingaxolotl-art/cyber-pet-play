@@ -1,9 +1,9 @@
-import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
-import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-durability';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-durability';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-durability';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-durability';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-durability';
+import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-projectile-defense';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-projectile-defense';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-projectile-defense';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-projectile-defense';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-projectile-defense';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-projectile-defense';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
