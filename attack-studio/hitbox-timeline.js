@@ -8,7 +8,7 @@ export function adjustWindow(box,delta,mode,frames){
  if(box.lockStart)return {...box};
  return {...box,start:Math.max(box.minStart??0,Math.min(box.maxStart??Infinity,frames-box.duration,box.start+delta))};
 }
-export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=null,selectionKey=null,title='Hitbox timing tracks',clockLabel='Active frames',onError=()=>{}}){
+export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=null,copySelection=null,pasteSelection=null,selectionKey=null,title='Hitbox timing tracks',clockLabel='Active frames',onError=()=>{}}){
  const timeline=el('div');timeline.className='group-timeline';timeline.setAttribute('aria-label',title);
  timeline.append(el('p',`${clockLabel} 0–${frames-1}. Drag a bar to move it; drag its end to resize. Arrow keys move one frame; Shift + arrow resizes.`));
  let views=timelineViews.get(root);if(!views){views=new Map();timelineViews.set(root,views);}
@@ -36,6 +36,15 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
   }catch(error){onError(error.message);}};
   earlier.onclick=()=>move(-1);later.onclick=()=>move(1);clear.onclick=()=>{view.selected.clear();for(const input of selectionInputs)input.checked=false;};
   tools.append(amountLabel,earlier,later,clear);
+  if(copySelection&&pasteSelection){
+   const copy=el('button','Copy selected events'),paste=el('button','Paste copied events'),at=el('input'),atLabel=el('label','Paste first event at attack frame ');
+   copy.type=paste.type='button';at.type='number';at.min=0;at.step=1;at.value=0;at.setAttribute('aria-label','Paste first event at attack frame');atLabel.append(at);
+   paste.disabled=!view.clipboard;
+   copy.onclick=()=>{try{const selected=[...view.selected.values()];if(selected.some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock selected tracks before copying.');view.clipboard=copySelection(selected);paste.disabled=false;at.value=view.clipboard.origin;onError('Copied '+view.clipboard.entries.length+' events. Choose the first pasted frame.');}catch(error){onError(error.message);}};
+   paste.onclick=()=>{try{if(view.clipboard?.entries.some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock destination tracks before pasting.');pasteSelection(view.clipboard,Number(at.value));}catch(error){onError(error.message);}};
+   tools.append(copy,atLabel,paste);
+  }
+
  }
 
  const trackOptions=el('details'),summary=el('summary','Track visibility and locks');trackOptions.append(summary);timeline.append(trackOptions);
