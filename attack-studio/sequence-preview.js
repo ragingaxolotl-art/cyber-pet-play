@@ -1,7 +1,7 @@
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-scheduled-sequences';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-scheduled-sequences';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-scheduled-sequences';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-scheduled-sequences';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-movement-cancels';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-scheduled-sequences';
 

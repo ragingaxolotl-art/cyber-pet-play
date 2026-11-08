@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
+import {validateAttack} from './combat-model.js?v=20261108-movement-cancels';
 const uniqueId=prefix=>prefix+'_'+crypto.randomUUID().replaceAll('-','');
 // Clipboard is an immutable snapshot, never a reference to the editable attack.
 export function copyTimelineEvents(attack,tracks,selection){
@@ -12,6 +12,7 @@ export function copyTimelineEvents(attack,tracks,selection){
   if(item.groupId==='sequence')value=attack.hitEvents?.find(h=>h.id===item.boxId);
   else if(item.groupId==='effects')value=attack.visuals[Number(item.boxId)];
   else if(item.groupId==='armor')value=attack.defenseWindows?.find(w=>w.id===item.boxId);
+  else if(item.groupId==='movementCancels')value=attack.movementCancels?.find(w=>w.id===item.boxId);
   else if(item.groupId==='cancels')value=attack.cancelWindows?.find(w=>w.id===item.boxId);
   else value=attack.hitboxGroups?.find(g=>g.id===item.groupId)?.boxes.find(b=>b.id===item.boxId);
   if(!value)throw Error('Animation, movement paths and the main block/dodge window cannot be duplicated.');
@@ -51,6 +52,7 @@ export function pasteTimelineEvents(attack,tracks,clipboard,start){
    value.id=uniqueId('hit');value.offset=frame-tracks.contact;if(crossAttack&&value.hitboxGroup)value.hitboxGroup=groupIds.get(value.hitboxGroup);next.hitEvents.push(value);
   }else if(entry.groupId==='effects'){value.start=frame;next.visuals.push(value);}
   else if(entry.groupId==='armor'){value.id=uniqueId('defense');value.start=frame;(next.defenseWindows??=[]).push(value);}
+  else if(entry.groupId==='movementCancels'){value.id=uniqueId('movement');value.start=frame;(next.movementCancels??=[]).push(value);}
   else if(entry.groupId==='cancels'){value.id=uniqueId('cancel');value.start=frame;if(crossAttack)value.attacks=value.attacks.map(id=>id===clipboard.attackId?attack.id:id);(next.cancelWindows??=[]).push(value);}
   else{
    if(crossAttack)continue; // Geometry was copied once above, including dependencies.

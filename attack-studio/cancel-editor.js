@@ -1,4 +1,5 @@
-import {validateAttack} from './combat-model.js?v=20261108-scheduled-sequences';
+import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261108-movement-cancels';
+import {validateAttack} from './combat-model.js?v=20261108-movement-cancels';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCancelEditor({root,attack,attacks,commit,status,test}){
  root.replaceChildren();root.append(make('h2','Follow-up windows'));
@@ -22,4 +23,5 @@ export function renderCancelEditor({root,attack,attacks,commit,status,test}){
   if(test){const link=make('a','Test this follow-up in Arena');link.href='#';link.target='_blank';link.rel='noopener';link.onclick=event=>{try{link.href=test(window);}catch(error){event.preventDefault();status(error.message);}};section.append(link);section.append(make('p',window.automatic?'Opens an isolated comparison with automatic rules enabled and no scheduled manual follow-up. Choose the opponent in Arena.':'Opens an isolated comparison at this window’s start using its first allowed attack. Adjust the attempt frame and opponent in Arena.'));}
   const remove=make('button',`Delete follow-up ${index+1}`);remove.type='button';remove.onclick=()=>mutate(next=>{next.cancelWindows.splice(index,1);if(!next.cancelWindows.length)delete next.cancelWindows;});section.append(remove);root.append(section);
  }
+ const movement=make('section');root.append(movement);renderMovementCancelEditor({root:movement,attack,commit,status});
 }
