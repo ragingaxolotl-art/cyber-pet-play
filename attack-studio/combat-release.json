@@ -1,11 +1,12 @@
 {
-  "release": "20261108-cancels",
+  "release": "20261108-automatic",
   "attackDefinitionVersions": [
     1,
     2,
     3,
     4,
-    5
+    5,
+    6
   ],
   "sequenceTransport": "project-download",
   "classroomBankVersions": [
@@ -13,7 +14,8 @@
     2,
     3,
     4,
-    5
+    5,
+    6
   ],
   "cloudSequencePublishing": true,
   "skillTreeSequencePublishing": true,
@@ -22,7 +24,8 @@
     2,
     3,
     4,
-    5
+    5,
+    6
   ],
   "multipleHitboxes": "timed-damage-and-contact-sequences",
   "groupSequenceSupport": true,
@@ -41,7 +44,8 @@
     2,
     3,
     4,
-    5
+    5,
+    6
   ],
   "defenseKinds": [
     "armor",
@@ -49,5 +53,6 @@
     "parry"
   ],
   "cancelWindows": true,
-  "studioComparisonTransfer": true
+  "studioComparisonTransfer": true,
+  "automaticFollowups": true
 }

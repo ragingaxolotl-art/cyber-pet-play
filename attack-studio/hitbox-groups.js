@@ -1,4 +1,4 @@
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-cancels';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-automatic';
 // Runtime foundation; authoring and format negotiation are integrated separately.
 export function validateHitboxGroups(groups) {
  if(!Array.isArray(groups)||!groups.length||groups.length>8)throw Error('Use 1–8 hit groups.');

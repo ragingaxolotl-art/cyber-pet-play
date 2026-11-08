@@ -3,9 +3,10 @@ export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
  if(attack.cancelWindows){
-  add('cancel-transfer','info','Follow-up windows require a version 5 project, bank or skill tree.','Classroom saving checks for version 5 support before writing.');
+  if(attack.cancelWindows.some(w=>w.automatic))add('automatic-followup','info','Automatic follow-ups start after both fighters resolve contact. The first eligible window has priority; chains stop after eight transitions.','Choose one target per automatic window and equip that attack. Arena comparison reports automatic transitions, contacts and resource or availability failures.');
+  add('cancel-transfer','info','Manual follow-up windows require version 5; automatic follow-ups require version 6.','Classroom saving checks the required version before writing.');
   add('cancel-preview','warning','The single-attack preview does not execute a follow-up attack. A displayed window alone does not prove a combo connects.','Test the named follow-up in Arena during the window, with enough energy and the attack equipped.');
-  add('cancel-rules','info','Follow-ups are manual and still obey cooldown, energy, stun and recovery checks. Hit, block and parry conditions use this cast’s results.','Choose timing and allowed attacks in Follow-up windows. A miss condition waits for active timing to finish.');
+  add('cancel-rules','info','Manual and automatic follow-ups obey cooldown, energy, stun and recovery checks. Hit, block and parry conditions use this cast’s results.','Choose timing and allowed attacks in Follow-up windows. A miss condition waits for active timing to finish.');
   if(attacks){const available=new Set(attacks.map(a=>a.id)),missing=[...new Set(attack.cancelWindows.flatMap(w=>w.attacks).filter(id=>!available.has(id)))];if(missing.length)add('cancel-missing','warning',`${missing.length} follow-up attack reference(s) are missing from this project: ${missing.join(', ')}.`,'Import the named attacks or select replacements. References are preserved when saving.');}
   if(!['damage','push'].includes(attack.payload)&&attack.cancelWindows.some(w=>w.condition==='whiff'))add('cancel-whiff-payload','warning','A miss condition cannot activate on a support or defensive move.','Choose Any result, or After parrying for a parry move.');
  }

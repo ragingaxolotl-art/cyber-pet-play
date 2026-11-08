@@ -1,7 +1,7 @@
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-cancels';
-import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-cancels';
-import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-cancels';
-import {validateAttack} from './combat-model.js?v=20261108-cancels';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-automatic';
+import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-automatic';
+import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-automatic';
+import {validateAttack} from './combat-model.js?v=20261108-automatic';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
  const startup=simulation.timing.startup,contact=simulation.impactFrame??startup,geometryBase=attack.hitEvents?contact:startup,groups=[];
  if(attack.hitboxGroups)for(const [i,g] of attack.hitboxGroups.entries())groups.push({id:g.id,boxes:g.boxes.map((b,j)=>({...b,start:geometryBase+b.start,minStart:geometryBase,maxStart:geometryBase+attack.active-b.duration,label:`G${i+1} · Box ${j+1}`}))});
@@ -9,7 +9,7 @@ export function timelineTracks(attack,simulation,effects,poseCount=0){
  const visuals=attack.visuals.flatMap((v,i)=>{const e=effects.get(v.effectId);return e?[{id:String(i),start:v.start,duration:Math.ceil(cycleFrames(e,v)/v.rate),maxStart:600,lockDuration:!!(v.loopUntilImpact||(v.loop??e.loop)),label:`Effect ${i+1}${v.loopUntilImpact?' · to contact':(v.loop??e.loop)?' · repeating cycle':''}`}]:[];});if(visuals.length)groups.push({id:'effects',boxes:visuals});
  if(['block','dodge'].includes(attack.payload))groups.push({id:'defense',boxes:[{id:'window',start:startup,duration:attack.active,lockStart:true,label:attack.payload==='block'?'Block window':'Dodge window'}]});
  if(attack.defenseWindows)groups.push({id:'armor',boxes:attack.defenseWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:w.kind==='armor'?`Armor ${i+1} · ${w.hits} hits · ${w.against}`:w.kind==='parry'?`Parry ${i+1} · ${w.hits} hits · ${w.stun}f interruption`:`Invulnerability ${i+1} · ${w.against}`}))});
- if(attack.cancelWindows)groups.push({id:'cancels',boxes:attack.cancelWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:`Follow-up ${i+1} · ${w.condition}`}))});
+ if(attack.cancelWindows)groups.push({id:'cancels',boxes:attack.cancelWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:`Follow-up ${i+1} · ${w.automatic?'automatic · ':''}${w.condition}`}))});
  if(attack.motionPath?.length)groups.push({id:'movement',boxes:[{id:'path',start:0,duration:attack.pathDuration||60,lockStart:true,label:'Movement path'}]});
  if(poseCount>0){const playback=posePlayback(attack,poseCount,0,simulation.timing,simulation.impactFrame);groups.unshift({id:'animation',boxes:[{id:'pose',start:0,duration:Math.max(1,playback.end),lockStart:true,lockDuration:attack.poseTiming!=='custom',label:attack.poseTiming==='custom'?'Animation · custom':'Animation · synced'}]});}
  return {groups,startup,contact,geometryBase,poseCount,frames:Math.max(120,...groups.flatMap(g=>g.boxes.map(b=>b.start+b.duration+30)))};
