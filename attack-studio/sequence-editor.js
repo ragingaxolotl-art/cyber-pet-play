@@ -1,6 +1,7 @@
-import {validateAttack} from './combat-model.js?v=20261108-scheduled-sequences';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-scheduled-sequences';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-scheduled-sequences';
+import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
+import {validateAttack} from './combat-model.js?v=20261108-shared-juggle';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-shared-juggle';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-shared-juggle';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -34,6 +35,14 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
     for(const [i,event] of a.hitEvents.entries()){
       const b=el('button',`${i+1} · +${event.offset}f`);b.setAttribute('aria-pressed',String(selected===event.id));b.onclick=()=>{selected=event.id;const sim=getSimulation();seek((sim?.impactFrame??sim?.timing.startup??0)+event.offset);render();};strip.append(b);
     }root.append(strip);
+    const batch=el('details'),batchSummary=el('summary','Edit several hits'),chosen=new Set();batch.append(batchSummary,el('p','Choose hits and one property. Timing and all other properties stay unchanged. One Undo restores the whole edit.'));
+    for(const [i,hit] of a.hitEvents.entries()){const label=el('label','Hit '+(i+1)+' '),check=el('input');check.type='checkbox';check.setAttribute('aria-label','Batch edit Hit '+(i+1));check.onchange=()=>check.checked?chosen.add(hit.id):chosen.delete(hit.id);label.append(check);batch.append(label);}
+    const property=el('select'),valueHost=el('span'),batchError=el('p'),batchApply=el('button','Apply to selected hits');let value;
+    property.setAttribute('aria-label','Batch hit property');for(const [key,name] of Object.entries(BATCH_HIT_FIELDS))property.add(new Option(name,key));property.value='damage';batchError.setAttribute('role','status');batchApply.type='button';
+    const showValue=()=>{valueHost.replaceChildren();const key=property.value;value=el(['reaction','target'].includes(key)?'select':'input');value.setAttribute('aria-label','Batch hit value');if(key==='reaction'||key==='target'){for(const choice of key==='reaction'?REACTIONS:['any','grounded','airborne'])value.add(new Option(choice,choice));}else{value.type='number';value.step=key==='damage'?'any':'1';}value.value=String(a.hitEvents[0][key]);valueHost.append(value);};
+    property.onchange=showValue;showValue();
+    batchApply.onclick=()=>{try{if(value.value==='')throw Error('Enter a value before applying.');const key=property.value,next=editHitBatch(getAttack(),[...chosen],key,['reaction','target'].includes(key)?value.value:Number(value.value));commit(next);render();}catch(e){batchError.textContent=e.message;}};
+    batch.append(property,valueHost,batchApply,batchError);root.append(batch);
     const event=a.hitEvents.find(e=>e.id===selected),fields=el('div');fields.className='fields';
     const error=el('p');error.setAttribute('role','status');
     for(const [key,title,min,max] of [['offset',scheduled?'Frames after startup':'Frames after contact',0,299],['duration','Contact window (frames)',1,60],['damage','Damage for this hit',0,500],['height','Launch height (px)',0,150],['knockback','Knockback (px)',0,150],['frames','Reaction travel (frames)',1,120],['hold','Suspend time (frames)',1,30]]){
