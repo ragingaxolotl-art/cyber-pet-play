@@ -1,3 +1,4 @@
+import {validateCounterHit} from './counter-hit.js?v=20261108-counter-hit';
 import {validateComboScaling,scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
 import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
 import {validateContactFeedback} from './contact-feedback.js?v=20261108-impact-timing';
@@ -8,7 +9,7 @@ import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=2026
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
 import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-durability';
-import {requireGroupVersion} from './attack-format.js?v=20261108-combo-scaling';
+import {requireGroupVersion} from './attack-format.js?v=20261108-counter-hit';
 import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-durability';
 import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-durability';
 import {hasLegacyMotion,sampleLegacyMotion} from './legacy-motion.js?v=20261108-durability';
@@ -34,7 +35,7 @@ export function validateAttack(a,ids){
  if(!a||typeof a!=='object')fail('Invalid attack.');
  validateHitSequence(a);
  validateMovementCancels(a.movementCancels);
- validateContactFeedback(a.contactFeedback);validateComboScaling(a.comboScaling);
+ validateContactFeedback(a.contactFeedback);validateComboScaling(a.comboScaling);validateCounterHit(a.counterHit);
  validateProjectileLifetime(a);
  validateCancelWindows(a.cancelWindows);
  validateDefenseWindows(a.defenseWindows);
@@ -69,7 +70,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–13 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–14 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');

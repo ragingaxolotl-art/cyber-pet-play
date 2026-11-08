@@ -1,6 +1,7 @@
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261108-counter-hit';
 import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261108-combo-scaling';
 import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261108-impact-timing';
-import {validateAttack} from './combat-model.js?v=20261108-combo-scaling';
+import {validateAttack} from './combat-model.js?v=20261108-counter-hit';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));
@@ -23,5 +24,6 @@ export function renderDefenseEditor({root,attack,commit,status}){
   const remove=make('button',`Delete ${window.kind} ${index+1}`);remove.type='button';remove.onclick=()=>mutate(next=>{next.defenseWindows.splice(index,1);if(!next.defenseWindows.length)delete next.defenseWindows;});section.append(remove);root.append(section);
  }
  const feedback=make('section');root.append(feedback);renderContactFeedbackEditor({root:feedback,attack,commit,status});
+ const counter=make('section');root.append(counter);renderCounterHitEditor({root:counter,attack,commit,status});
  const scaling=make('section');root.append(scaling);renderComboScalingEditor({root:scaling,attack,commit,status});
 }
