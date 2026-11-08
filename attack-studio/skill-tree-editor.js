@@ -1,8 +1,8 @@
 import {createTreeStore,treeStorageMessage} from './tree-storage.js?v=20261108-tree-storage';
 import {treeStorageKey} from './tree-cabinet.js?v=20261108-scheduled-sequences';
 import {dataSetKey} from './tree-datasets.js';
-import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261108-absorption';
-import {freshAttack,validateAttack} from './combat-model.js?v=20261108-drag-recovery';
+import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261108-contact';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261108-contact';
 // Tree attacks are independent copies. Explicit save updates only the chosen node.
 export async function connectTreeEditor({effects,open,current,status}){
  const id=new URLSearchParams(location.search).get('treeNode');if(!id)return;

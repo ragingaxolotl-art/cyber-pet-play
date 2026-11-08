@@ -1,3 +1,4 @@
+import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-contact';
 import {createSteeringState,advanceSteering} from './projectile-steering.js?v=20261108-steering';
 import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
 import {scaledHitEvent} from './hitstun-scaling.js?v=20261108-hitstun';
@@ -7,7 +8,7 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-drag-recovery';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-contact';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 
@@ -69,6 +70,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
         if(guarded){if(state.startFrame===null)state.cancelled='First contact was blocked; attachment cancelled.';other.reactionGuardFrame=frame;if(attack.contactFeedback?.blockstun>0)other.blockstunUntil=Math.max(other.blockstunUntil||0,frame+attack.contactFeedback.blockstun+1);}
         else {state.attached=true;applyPulseReaction(other,scaledHitEvent(event,combos.priorHits('self','target'),attack.hitstunScaling),direction,frame);}
         if(other.hp<=0)state.cancelled='Target defeated.';
+        if(consumesProjectile(attack,guarded?'block':'hit')){state.cancelled=CONTACT_END_REASON;events.push({frame,text:state.cancelled});break;}
       }
     }
     if(incomingInterrupted){ownerInterrupted=true;if(!independent||!launched||self.hp<=0)state.cancelled='Attacker interrupted.';}

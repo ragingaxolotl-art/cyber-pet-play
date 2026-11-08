@@ -4,14 +4,14 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
 import {installStudioWorkspace} from './studio-workspace.js?v=20261108-workflow';
-import {renderProjectileEditor} from './projectile-editor.js?v=20261108-projectile-help';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261108-contact';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261108-scheduled-sequences';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
 import {renderCancelEditor} from './cancel-editor.js?v=20261108-scroll-info';
 import {renderDefenseEditor} from './defense-editor.js?v=20261108-scroll-info';
 import {renderAttackTimeline} from './attack-timeline.js?v=20261108-scroll-info';
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261108-scheduled-sequences';
-import {attacksVersion} from './attack-format.js?v=20261108-absorption';
+import {attacksVersion} from './attack-format.js?v=20261108-contact';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261108-scheduled-sequences';
 import {connectTreeEditor} from './skill-tree-editor.js?v=20261108-tree-storage';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261108-scheduled-sequences';
@@ -20,8 +20,8 @@ import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
 import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
-import {installAttackBank} from './attack-bank.js?v=20261108-absorption';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-drag-recovery';
+import {installAttackBank} from './attack-bank.js?v=20261108-contact';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261108-contact';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
 import {installSequenceEditor} from './sequence-editor.js?v=20261108-bounces';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
@@ -69,7 +69,7 @@ function renderSettings(){const a=attack();a.impactTrigger??='timed';a.poseImpac
  for(const [key,title,min,max] of [['x','Forward offset',-500,500],['y','Vertical offset',-500,500],['w','Width',1,500],['h','Height',1,500]])field($('hitbox'),title,a.box,key,'number',null,min,max);
  }
  renderHitboxEditor({root:$('hitbox'),attack:a,status,commit:(next,edited=true)=>{if(next.hitEvents)a.hitEvents=next.hitEvents;if(next.hitboxGroups)a.hitboxGroups=next.hitboxGroups;else{delete a.hitboxGroups;Object.assign(a,{box:next.box,hitLimit:next.hitLimit,hitInterval:next.hitInterval});}if(edited)changed();refresh();}});
- renderProjectileEditor({root:$('hitbox'),attack:a,status,commit:next=>{if(next.projectileSteering===undefined)delete a.projectileSteering;else a.projectileSteering=next.projectileSteering;if(next.projectileLifetime===undefined)delete a.projectileLifetime;else a.projectileLifetime=next.projectileLifetime;if(next.projectileStart===undefined)delete a.projectileStart;if(next.projectileDurability===undefined)delete a.projectileDurability;else a.projectileDurability=next.projectileDurability;changed();refresh();}});
+ renderProjectileEditor({root:$('hitbox'),attack:a,status,commit:next=>{if(next.projectileContact===undefined)delete a.projectileContact;else a.projectileContact=next.projectileContact;if(next.projectileSteering===undefined)delete a.projectileSteering;else a.projectileSteering=next.projectileSteering;if(next.projectileLifetime===undefined)delete a.projectileLifetime;else a.projectileLifetime=next.projectileLifetime;if(next.projectileStart===undefined)delete a.projectileStart;if(next.projectileDurability===undefined)delete a.projectileDurability;else a.projectileDurability=next.projectileDurability;changed();refresh();}});
  field($('hitbox'),'Projectile px / frame',a,'projectileSpeed','number',null,0,12,.25);
  const s=$('statusFields');field(s,'Secondary status',a,'status','select',['none','burn','poison','regen','slow','haste','weaken','stun']);field(s,'Tick amount / modifier %',a,'statusPower','number',null,0,100);field(s,'Status duration (frames)',a,'statusDuration','number',null,1,900);field(s,'Tick interval (frames)',a,'statusInterval','number',null,1,300);field(s,'Shield lifetime (frames)',a,'shieldDuration','number',null,1,900);
  if(a.hitboxGroups)for(const key of ['hitLimit','hitInterval']){const input=document.querySelector('[data-field="'+key+'"]');if(input){input.disabled=true;input.title='Edit these settings in the selected hit group.';}}

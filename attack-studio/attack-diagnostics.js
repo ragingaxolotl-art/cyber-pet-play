@@ -2,6 +2,7 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.projectileContact!==undefined)add('projectile-contact','info','Explicit projectile contact rules require version 19 saving. Single contact ends on hit, block or armor; evasion and invulnerability do not spend its contact.','Keep current hit rules to preserve legacy behavior. Repeated contact still requires overlap and obeys hit limits and intervals.');
  if(attack.defenseWindows?.some(w=>w.energyGain!==undefined))add('absorption-energy','info','Absorption energy rewards require version 18 saving. Each absorbed independent projectile awards the configured amount, capped at maximum energy.','Use Arena comparison to inspect the actual reward. The Studio incoming-hit probe is melee-only. Keep a downloaded backup; older classroom servers refuse this save.');
  if(attack.projectileSteering){
   add('steering-version','info','Homing and return steering require version 17 support and an independent projectile lifetime.','Keep a downloaded backup. Authored movement paths and steering cannot be combined.');
