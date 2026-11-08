@@ -1,5 +1,5 @@
 import {DATASETS_KEY,dataSetKey,readDataSets,pathNodeIds} from './tree-datasets.js';
-import {installTreeZoom} from './tree-zoom.js';
+import {installTreeZoom} from './tree-zoom.js?v=20261108-workspace-trackpad';
 import {installConnections} from './tree-connections.js?v=20261108-persistence';
 import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree-paths.js?v=20261108-persistence';
 import {installTreeGallery} from './tree-gallery.js?v=20261108-persistence';

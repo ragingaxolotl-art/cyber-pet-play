@@ -1,6 +1,6 @@
 export const clampZoom=value=>Math.max(.25,Math.min(2,value));
 export function installTreeZoom($){
- const viewport=$('viewport'),board=$('board'),picker=$('zoom');let zoom=1,gesture=null;
+ const viewport=$('viewport'),board=$('board'),picker=$('zoom');let zoom=1,gesture=null,nativeZoom=null;
  function setZoom(value,x=viewport.clientWidth/2,y=viewport.clientHeight/2){
   const next=clampZoom(value),worldX=(viewport.scrollLeft+x)/zoom,worldY=(viewport.scrollTop+y)/zoom;
   zoom=next;board.style.zoom=String(zoom);
@@ -9,8 +9,12 @@ export function installTreeZoom($){
   viewport.scrollLeft=worldX*zoom-x;viewport.scrollTop=worldY*zoom-y;
  }
  picker.onchange=()=>setZoom(Number(picker.value));$('zoomIn').onclick=()=>setZoom(zoom*1.2);$('zoomOut').onclick=()=>setZoom(zoom/1.2);$('zoomReset').onclick=()=>setZoom(1);
- viewport.addEventListener('wheel',event=>{if(!event.ctrlKey)return;event.preventDefault();const r=viewport.getBoundingClientRect();setZoom(zoom*Math.exp(-event.deltaY*.01),event.clientX-r.left,event.clientY-r.top);},{passive:false});
+ viewport.addEventListener('wheel',event=>{if(!event.ctrlKey)return;if(nativeZoom!==null){event.preventDefault();return;}event.preventDefault();const r=viewport.getBoundingClientRect();setZoom(zoom*Math.exp(-event.deltaY*.01),event.clientX-r.left,event.clientY-r.top);},{passive:false});
  const points=new Map();let movingCard=false;
+ // WebKit trackpads emit gesture events rather than Ctrl-wheel events.
+ viewport.addEventListener('gesturestart',event=>{event.preventDefault();if(points.size<2)nativeZoom=zoom;},{passive:false});
+ viewport.addEventListener('gesturechange',event=>{event.preventDefault();if(nativeZoom===null||points.size>1||!Number.isFinite(event.scale))return;const r=viewport.getBoundingClientRect();setZoom(nativeZoom*event.scale,Number.isFinite(event.clientX)?event.clientX-r.left:undefined,Number.isFinite(event.clientY)?event.clientY-r.top:undefined);},{passive:false});
+ viewport.addEventListener('gestureend',event=>{event.preventDefault();nativeZoom=null;},{passive:false});
  viewport.addEventListener('pointerdown',event=>{
   if(event.pointerType==='mouse'&&event.button!==0)return;
   points.set(event.pointerId,{x:event.clientX,y:event.clientY});
