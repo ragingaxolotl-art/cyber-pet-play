@@ -8,7 +8,7 @@ export function adjustWindow(box,delta,mode,frames){
  if(box.lockStart)return {...box};
  return {...box,start:Math.max(box.minStart??0,Math.min(box.maxStart??Infinity,frames-box.duration,box.start+delta))};
 }
-export function renderHitboxTimeline({root,groups,frames,commit,title='Hitbox timing tracks',clockLabel='Active frames',onError=()=>{}}){
+export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=null,selectionKey=null,title='Hitbox timing tracks',clockLabel='Active frames',onError=()=>{}}){
  const timeline=el('div');timeline.className='group-timeline';timeline.setAttribute('aria-label',title);
  timeline.append(el('p',`${clockLabel} 0–${frames-1}. Drag a bar to move it; drag its end to resize. Arrow keys move one frame; Shift + arrow resizes.`));
  let views=timelineViews.get(root);if(!views){views=new Map();timelineViews.set(root,views);}
@@ -20,7 +20,24 @@ export function renderHitboxTimeline({root,groups,frames,commit,title='Hitbox ti
  zoom.onchange=()=>{const value=Number(zoom.value);if(![1,2,4,8].includes(value))return;view.zoom=value;content.style.width=value*100+'%';};
  fit.onclick=()=>{view.zoom=1;view.scroll=0;zoom.value='1';content.style.width='100%';viewport.scrollLeft=0;};
  viewport.addEventListener('scroll',()=>{view.scroll=viewport.scrollLeft;});zoomLabel.append(zoom);tools.append(zoomLabel,fit);timeline.append(tools);viewport.append(content);timeline.append(viewport);
- view.locked??=new Set();view.hidden??=new Set();
+ view.locked??=new Set();view.hidden??=new Set();view.selected??=new Map();
+ if(view.selectionKey!==selectionKey){view.selected.clear();view.selectionKey=selectionKey;}
+ const selectionInputs=[];
+ const available=new Set(groups.flatMap(g=>g.boxes.map(b=>JSON.stringify([g.id,b.id]))));
+ for(const key of view.selected.keys())if(!available.has(key))view.selected.delete(key);
+ if(moveSelection){
+  const amount=el('input'),amountLabel=el('label','Move selected by frames '),earlier=el('button','Move selected earlier'),later=el('button','Move selected later'),clear=el('button','Clear selection');
+  amount.type='number';amount.min=1;amount.max=300;amount.value=1;amount.setAttribute('aria-label','Selected event movement frames');amountLabel.append(amount);
+  earlier.type=later.type=clear.type='button';
+  const move=direction=>{try{
+   const delta=Number(amount.value);if(!Number.isInteger(delta)||delta<1||delta>300)throw Error('Choose 1–300 whole frames.');
+   const selected=[...view.selected.values()];if(selected.some(e=>view.locked.has(e.groupId)||view.hidden.has(e.groupId)))throw Error('Show and unlock selected tracks before moving them, or clear the selection.');
+   moveSelection(selected,direction*delta);
+  }catch(error){onError(error.message);}};
+  earlier.onclick=()=>move(-1);later.onclick=()=>move(1);clear.onclick=()=>{view.selected.clear();for(const input of selectionInputs)input.checked=false;};
+  tools.append(amountLabel,earlier,later,clear);
+ }
+
  const trackOptions=el('details'),summary=el('summary','Track visibility and locks');trackOptions.append(summary);timeline.append(trackOptions);
  const rowsByGroup=new Map(),controlsByGroup=new Map();
  for(const [index,group] of groups.entries()){
@@ -35,6 +52,7 @@ export function renderHitboxTimeline({root,groups,frames,commit,title='Hitbox ti
 
  groups.forEach((group,gi)=>group.boxes.forEach((box,bi)=>{
   const row=el('div');row.className='group-timeline-row';const label=el('span',box.label||`G${gi+1} · Box ${bi+1}`),track=el('div');track.className='group-timeline-track';
+  if(moveSelection){const selected=el('input');selected.type='checkbox';const key=JSON.stringify([group.id,box.id]);selected.checked=view.selected.has(key);selected.disabled=!!box.lockStart;selected.setAttribute('aria-label','Select '+(box.label||`group ${gi+1} box ${bi+1}`));selected.onchange=()=>{selected.checked?view.selected.set(key,{groupId:group.id,boxId:box.id}):view.selected.delete(key);};label.append(selected);selectionInputs.push(selected);}
   const bar=el('button'),end=el('button','↔');bar.type=end.type='button';bar.className='group-timeline-bar';end.className='group-timeline-end';end.disabled=!!box.lockDuration;
   bar.setAttribute('aria-label',box.label?`Move ${box.label}`:`Move group ${gi+1} box ${bi+1}`);end.setAttribute('aria-label',box.label?`Resize ${box.label}`:`Resize group ${gi+1} box ${bi+1}`);
   bar.disabled=view.locked.has(group.id);end.disabled=view.locked.has(group.id)||!!box.lockDuration;row.hidden=view.hidden.has(group.id);
