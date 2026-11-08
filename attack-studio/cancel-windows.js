@@ -1,4 +1,4 @@
-import {activeEnd} from './contact-timing.js?v=20261108-automatic';
+import {activeEnd} from './contact-timing.js?v=20261108-juggle-reset';
 // Cancel windows are absolute cast frames, with an exclusive end.
 export function validateCancelWindows(windows){
  if(windows===undefined)return;

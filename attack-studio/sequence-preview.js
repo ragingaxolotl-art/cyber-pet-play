@@ -1,9 +1,9 @@
-import {contactDeadline,castEnd} from './contact-timing.js?v=20261108-automatic';
-import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-automatic';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-automatic';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-automatic';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-automatic';
-import {sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-automatic';
+import {contactDeadline,castEnd} from './contact-timing.js?v=20261108-juggle-reset';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-juggle-reset';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-juggle-reset';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-juggle-reset';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-juggle-reset';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-juggle-reset';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
@@ -16,7 +16,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   const state=sequenceState(),events=[],frames=[];let hits=0,end=castEnd(null,tm);
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
   for(let frame=0;frame<=end;frame++){
-    if(!advancePulseReaction(other,frame,-220,220)&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){other.reaction='standing';other.reactionLandFrame=frame;}}
+    if(!advancePulseReaction(other,frame,-220,220)&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){resetGroundedJuggle(other);other.reaction='standing';other.reactionLandFrame=frame;}}
     let box=worldBox(attack,state.contactFrame??frame,attacker,direction);
     if(state.attached&&attack.projectileMode==='attached')box={...box,x:other.x-box.w/2,y:other.y-box.h};
     const targetBox={x:other.x-14,y:other.y-60,w:28,h:60};

@@ -1,7 +1,7 @@
-import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-automatic';
-import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-automatic';
-import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-automatic';
-import {validateAttack} from './combat-model.js?v=20261108-automatic';
+import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-juggle-reset';
+import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-juggle-reset';
+import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-juggle-reset';
+import {validateAttack} from './combat-model.js?v=20261108-juggle-reset';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
  const startup=simulation.timing.startup,contact=simulation.impactFrame??startup,geometryBase=attack.hitEvents?contact:startup,groups=[];
  if(attack.hitboxGroups)for(const [i,g] of attack.hitboxGroups.entries())groups.push({id:g.id,boxes:g.boxes.map((b,j)=>({...b,start:geometryBase+b.start,minStart:geometryBase,maxStart:geometryBase+attack.active-b.duration,label:`G${i+1} · Box ${j+1}`}))});

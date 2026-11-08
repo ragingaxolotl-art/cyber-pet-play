@@ -46,7 +46,7 @@ export function resizeHits(events,count,interval,mode='extend') {
   result.forEach((e,i)=>{e.offset=mode==='fit'&&count>1?Math.round(i*Math.max(lastTime,count-1)/(count-1)):i*interval;});
   return result;
 }
-export function sequenceState(){return {contactFrame:null,attached:false,consumed:new Set(),results:[],cancelled:null};}
+export function sequenceState(){return {contactFrame:null,attached:false,consumed:new Set(),juggleBlocked:new Set(),results:[],cancelled:null};}
 export function sequenceOpportunities(attack,state,age,overlap,target) {
   if(state.cancelled)return [];
   const touches=event=>typeof overlap==='function'?overlap(event):overlap;
@@ -54,14 +54,16 @@ export function sequenceOpportunities(attack,state,age,overlap,target) {
   const elapsed=age-state.contactFrame,ready=[];
   for(const event of attack.hitEvents){
     if(state.consumed.has(event.id)||elapsed<event.offset)continue;
-    if(elapsed>=event.offset+event.duration){state.consumed.add(event.id);state.results.push({id:event.id,offset:event.offset,frame:null,result:'Missed',reason:'No eligible contact during this hit window.'});continue;}
+    if(elapsed>=event.offset+event.duration){state.consumed.add(event.id);state.results.push({id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.juggleBlocked?.has(event.id)?'Juggle limit reached while the target was airborne.':'No eligible contact during this hit window.'});continue;}
+    if(target.juggleLocked&&target.y<0){state.juggleBlocked??=new Set();state.juggleBlocked.add(event.id);}
     const eligible=!(target.juggleLocked&&target.y<0)&&(event.target==='any'||(event.target==='airborne'?target.y<0:target.y>=0));
     if(eligible&&(touches(event)||(!event.hitboxGroup&&attack.projectileMode==='attached'&&state.attached))){state.consumed.add(event.id);ready.push(event);}
   }
   return ready;
 }
+export function resetGroundedJuggle(target){if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;}}
 export function applyPulseReaction(target,event,direction,frame) {
-  if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;}
+  resetGroundedJuggle(target);
   target.lastHit=frame;
   if(event.reaction==='none')return;
   target.legacyMotion=null;
@@ -81,7 +83,7 @@ export function advancePulseReaction(target,frame,minX=-Infinity,maxX=Infinity) 
   const t=Math.max(0,Math.min(1,elapsed/duration));
   target.x=Math.max(minX,Math.min(maxX,motion.x+motion.direction*e.knockback*t));
   target.y=e.reaction==='suspend'?motion.y:e.reaction==='spike'?motion.y*(1-t):motion.y*(1-t)-4*e.height*t*(1-t);
-  if(t===1){target.pulseMotion=null;target.reactionInFlight=false;target.vy=0;target.reaction=target.y<0?'airborne':'standing';if(target.y===0)target.reactionLandFrame=frame;}
+  if(t===1){target.pulseMotion=null;target.reactionInFlight=false;target.vy=0;target.reaction=target.y<0?'airborne':'standing';if(target.y===0){target.reactionLandFrame=frame;resetGroundedJuggle(target);}}
   return true;
 }
 export function hitResult(state,event,age,result,reason='') {

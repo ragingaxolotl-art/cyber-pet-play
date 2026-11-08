@@ -1,4 +1,4 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261108-automatic';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261108-juggle-reset';
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}

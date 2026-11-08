@@ -1,15 +1,15 @@
-import {castEnd} from './contact-timing.js?v=20261108-automatic';
-import {validateCancelWindows} from './cancel-windows.js?v=20261108-automatic';
-import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-automatic';
-import {requireGroupVersion} from './attack-format.js?v=20261108-automatic';
-import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-automatic';
-import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-automatic';
-import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-automatic';
-import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-automatic';
-import {pathSample} from './attack-motion.js?v=20261108-automatic';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-automatic';
-import {validateHitSequence} from './hit-sequence.js?v=20261108-automatic';
-import {simulateSequence} from './sequence-preview.js?v=20261108-automatic';
+import {castEnd} from './contact-timing.js?v=20261108-juggle-reset';
+import {validateCancelWindows} from './cancel-windows.js?v=20261108-juggle-reset';
+import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-juggle-reset';
+import {requireGroupVersion} from './attack-format.js?v=20261108-juggle-reset';
+import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-juggle-reset';
+import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-juggle-reset';
+import {sampleLegacyMotion} from './legacy-motion.js?v=20261108-juggle-reset';
+import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-juggle-reset';
+import {pathSample} from './attack-motion.js?v=20261108-juggle-reset';
+import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-juggle-reset';
+import {validateHitSequence} from './hit-sequence.js?v=20261108-juggle-reset';
+import {simulateSequence} from './sequence-preview.js?v=20261108-juggle-reset';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
