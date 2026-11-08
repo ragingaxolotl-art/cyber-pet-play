@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-hitstun';
+import {validateAttack} from './combat-model.js?v=20261108-air-recovery';
 import {CONTACT_FEEDBACK_LIMITS} from './contact-feedback.js?v=20261108-impact-timing';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderContactFeedbackEditor({root,attack,commit,status}){

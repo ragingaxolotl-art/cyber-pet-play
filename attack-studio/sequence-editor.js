@@ -1,8 +1,8 @@
 import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-hitstun';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js';
-import {validateAttack} from './combat-model.js?v=20261108-hitstun';
+import {validateAttack} from './combat-model.js?v=20261108-air-recovery';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-hitstun';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-hitstun';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-air-recovery';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;

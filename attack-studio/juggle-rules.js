@@ -1,7 +1,7 @@
 // Classroom balance: initial grounded launch counts as reaction one.
 // The budget belongs to the target and resets only on floor contact.
 export const JUGGLE_RULES=Object.freeze({reactions:10,releaseFrames:15,releaseDistance:30});
-export function resetGroundedJuggle(target){if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;}}
+export function resetGroundedJuggle(target){if(target.y>=0){target.juggleHits=0;target.juggleLocked=false;target.airRecoveryUsed=false;}}
 export function recordJuggleReaction(target,launches=false){
  resetGroundedJuggle(target);
  if(target.juggleLocked&&target.y<0)return 'locked';

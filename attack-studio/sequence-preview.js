@@ -1,3 +1,4 @@
+import {recoverInAir,validateRecoveryFrame} from './air-recovery.js?v=20261108-air-recovery';
 import {scaledHitEvent} from './hitstun-scaling.js?v=20261108-hitstun';
 import {scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
 import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
@@ -5,11 +6,12 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-shared-juggle';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-hitstun';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-air-recovery';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-air-recovery';
 
 export function simulateSequence(attack,attacker,target,options={}) {
+  validateRecoveryFrame(options.recoveryFrame);
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
   const self={x:0,y:0,hp:Math.round(av.maxHP*(options.selfHP??.6)),maxHP:av.maxHP,energy:Math.round(av.maxEnergy*(options.energy??1)),shield:0,stun:0};
   const other={x:(options.targetSide===-1?-1:1)*(options.distance??100),y:-(options.targetHeight??0),vy:0,hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,stun:0};
@@ -18,7 +20,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   const combos=new ComboTracker();
   const defenseCast={a:attack,defenseState:createDefenseState()};
   tm.active=sequenceDuration(attack);
-  const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false;const independent=attack.projectileLifetime!==undefined;
+  const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let recovery=null;let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false;const independent=attack.projectileLifetime!==undefined;
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
   for(let frame=0;frame<=end;frame++){
     const hitsBeforeFeedback=hits;
@@ -64,6 +66,10 @@ export function simulateSequence(attack,attacker,target,options={}) {
     }
     if(incomingInterrupted){ownerInterrupted=true;if(!independent||!launched||self.hp<=0)state.cancelled='Attacker interrupted.';}
     if((state.startFrame??state.contactFrame)!==null)end=(state.startFrame??state.contactFrame)+sequenceDuration(attack)+Math.max(120,tm.recovery);
+    if(options.recoveryFrame!==undefined&&options.recoveryFrame!==null&&frame===options.recoveryFrame){
+      const reason=recoverInAir(other,frame);recovery={attempted:true,recovered:!reason,reason,combatFrame:frame};
+      events.push({frame,text:reason?'Air recovery rejected: '+reason:'Air recovery succeeded; control restored without invulnerability'});
+    }
     for(const who of [self,other])who.canAct=who.hp>0&&!who.pulseMotion&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
     const impactStop=hits>hitsBeforeFeedback?(options.guard&&attack.blockable?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
     if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');
@@ -71,5 +77,5 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(!cast)break;
   }
   const results=attack.hitEvents.map(event=>state.results.find(r=>r.id===event.id)||{id:event.id,offset:event.offset,frame:null,result:'Missed',reason:state.cancelled||(state.startFrame===null&&state.contactFrame===null?'Projectile did not reach the target.':'No eligible contact during this hit window.')});
-  return {combos:combos.snapshot(),frames,presentationFrames:presentationFrames(frames),events,hitResults:results,cost,cast,contactMode:state.startFrame===null,impactFrame:state.startFrame??state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm))};
+  return {recovery:recovery??(options.recoveryFrame==null?null:{attempted:false,recovered:false,reason:'Test ended before the recovery attempt.'}),combos:combos.snapshot(),frames,presentationFrames:presentationFrames(frames),events,hitResults:results,cost,cast,contactMode:state.startFrame===null,impactFrame:state.startFrame??state.contactFrame,timing:{...tm,active:sequenceDuration(attack)},power:attack.hitEvents[0].damage,nextCast:Math.max(attack.cooldown,independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm))};
 }

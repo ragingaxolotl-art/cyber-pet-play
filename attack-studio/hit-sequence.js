@@ -1,5 +1,5 @@
-import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-shared-juggle';
-export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-shared-juggle';
+import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-air-recovery';
+export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-air-recovery';
 // Version 2: a bounded sequence of hits timed from first projectile contact.
 // Shared by the editor preview and the Arena. All times are 60 Hz frames.
 export const SEQUENCE_LIMITS = Object.freeze({hits:10, duration:300, suspension:30, gravity:.48});
@@ -79,7 +79,7 @@ export function sequenceOpportunities(attack,state,age,overlap,target) {
 export function applyPulseReaction(target,event,direction,frame) {
   resetGroundedJuggle(target);
   target.lastHit=frame;
-  if(event.reaction==='none'){if(event.hitstun!==undefined)target.stun=Math.max(target.stun||0,frame+event.hitstun);return;}
+  if(event.reaction==='none'){if(event.hitstun!==undefined){target.hitstunUntil=Math.max(target.hitstunUntil||0,frame+event.hitstun);target.stun=Math.max(target.stun||0,frame+event.hitstun);}return;}
   const budget=recordJuggleReaction(target,event.height>0&&event.reaction!=='suspend'&&event.reaction!=='spike');
   if(budget==='locked')return;
   target.legacyMotion=null;
@@ -89,7 +89,9 @@ export function applyPulseReaction(target,event,direction,frame) {
   target.reactionStart=frame;target.lastHit=frame;target.vy=0;target.vx=0;
   target.reactionHitFrame=frame;target.reactionDirection=direction;target.reactionLaunched=target.reaction==='airborne';
   target.reactionInFlight=true;target.reactionFlightFrames=event.frames;
-  target.stun=Math.max(target.stun||0,frame+(event.hitstun??(event.reaction==='suspend'?event.hold:event.frames)));
+  const hitstunEnd=frame+(event.hitstun??(event.reaction==='suspend'?event.hold:event.frames));
+  target.hitstunUntil=Math.max(target.hitstunUntil||0,hitstunEnd);
+  target.stun=Math.max(target.stun||0,hitstunEnd);
 }
 // Returns true while this shared motion owns position, including its landing frame.
 export function advancePulseReaction(target,frame,minX=-Infinity,maxX=Infinity) {

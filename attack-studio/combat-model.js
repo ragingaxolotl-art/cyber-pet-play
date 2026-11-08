@@ -1,3 +1,4 @@
+import {recoverInAir,validateRecoveryFrame} from './air-recovery.js?v=20261108-air-recovery';
 import {validateHitstunScaling,scaledHitReaction} from './hitstun-scaling.js?v=20261108-hitstun';
 import {validateCounterHit} from './counter-hit.js?v=20261108-counter-hit';
 import {validateComboScaling,scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
@@ -6,7 +7,7 @@ import {validateContactFeedback} from './contact-feedback.js?v=20261108-impact-t
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {validateMovementCancels} from './movement-cancels.js';
 import {validateProjectileLifetime} from './projectile-lifetime.js?v=20261108-durability';
-import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-durability';
+import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-air-recovery';
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
 import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-durability';
@@ -17,8 +18,8 @@ import {hasLegacyMotion,sampleLegacyMotion} from './legacy-motion.js?v=20261108-
 import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-durability';
 import {pathSample} from './attack-motion.js?v=20261108-durability';
 import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-durability';
-import {validateHitSequence} from './hit-sequence.js?v=20261108-hitstun';
-import {simulateSequence} from './sequence-preview.js?v=20261108-hitstun';
+import {validateHitSequence} from './hit-sequence.js?v=20261108-air-recovery';
+import {simulateSequence} from './sequence-preview.js?v=20261108-air-recovery';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -77,19 +78,19 @@ export function validateDesign(p,ids){
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
  const unique=new Set();for(const a of p.attacks){validateAttack(a,ids);if(unique.has(a.id))fail('Duplicate attack ID.');unique.add(a.id);}return p;
 }
-export function validateSandbox(o){if(!o||typeof o.guard!=='boolean'||![1,-1].includes(o.facing)||![1,-1].includes(o.targetSide))fail('Invalid test scenario.');for(const [key,min,max] of [['distance',0,245],['resistance',-50,75],['selfHP',.05,1],['targetHP',.05,1],['energy',0,1]])num(o,key,min,max);for(const [key,min,max] of [['incomingDamage',0,500],['incomingFrame',0,1800],['targetHeight',0,60]])if(o[key]!==undefined)num(o,key,min,max,true);}
+export function validateSandbox(o){validateRecoveryFrame(o?.recoveryFrame);if(!o||typeof o.guard!=='boolean'||![1,-1].includes(o.facing)||![1,-1].includes(o.targetSide))fail('Invalid test scenario.');for(const [key,min,max] of [['distance',0,245],['resistance',-50,75],['selfHP',.05,1],['targetHP',.05,1],['energy',0,1]])num(o,key,min,max);for(const [key,min,max] of [['incomingDamage',0,500],['incomingFrame',0,1800],['targetHeight',0,60]])if(o[key]!==undefined)num(o,key,min,max,true);}
 export function statsFor(s){if(!s||typeof s!=='object')fail('Missing test stats.');for(const k of STATS)num(s,k,0,99,true);const b=BALANCE;return {maxHP:b.baseHP+b.hpPerStamina*s.stamina,maxEnergy:b.baseEnergy+b.energyPerStamina*s.stamina,timing:1-b.maxSpeedReduction*s.speed/b.statCap,cost:1-b.maxFocusCostReduction*s.focus/b.statCap,guard:b.baseGuardReduction+b.maxFocusGuardBonus*s.focus/b.statCap,support:1+b.maxCharismaShieldBonus*s.charisma/b.statCap,resistance:1-b.maxFocusStatusReduction*s.focus/b.statCap};}
 export function timing(a,s){const scale=statsFor(s).timing;return {startup:Math.round(a.startup*scale),active:a.active,recovery:Math.round(a.recovery*scale),cooldown:a.cooldown};}
 export function magnitude(a,s){if(['push','block','dodge'].includes(a.payload))return 0;return Math.round((a.base+a.coefficient*s[a.scaling])*(a.payload==='shield'?statsFor(s).support:1));}
 export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-Math.round((a.projectileStart??a.startup)*statsFor(s).timing))*a.projectileSpeed:0;return {x:facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x,y:a.box.y+path.y,w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing};}
 export const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 export function simulate(a,attacker,target,options={}){
- validateAttack(a);if(a.hitEvents)return simulateSequence(a,attacker,target,options);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
+ validateRecoveryFrame(options.recoveryFrame);validateAttack(a);if(a.hitEvents)return simulateSequence(a,attacker,target,options);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
  const distance=options.distance??100,side=options.targetSide===-1?-1:1;
  let self={hp:Math.round(av.maxHP*(options.selfHP??.6)),maxHP:av.maxHP,energy:Math.round(av.maxEnergy*(options.energy??1)),shield:0,shieldUntil:0,x:0,stun:0,y:0};
  let other={hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,shieldUntil:0,x:side*distance,stun:0,y:-(options.targetHeight??0)};
  const combos=new ComboTracker();
- const cost=Math.ceil(a.cost*av.cost),events=[],frames=[],statuses=[];let hits=0,lastHit=-Infinity,flight=null;
+ const cost=Math.ceil(a.cost*av.cost),events=[],frames=[],statuses=[];let hits=0,lastHit=-Infinity,flight=null,recovery=null;
  const groupTracker=createGroupHitTracker(),defenseCast={a,defenseState:createDefenseState()};let interrupted=false,launched=false;const independent=a.projectileLifetime!==undefined;
  const incomingDamage=options.incomingDamage??0,incomingFrame=options.incomingFrame??30;num({incomingDamage},'incomingDamage',0,500);num({incomingFrame},'incomingFrame',0,1800,true);
  const contactMode=a.impactTrigger==='contact'&&a.delivery!=='self'&&!['block','dodge'].includes(a.payload);let impactFrame=null;const contactDeadline=tm.startup+(independent?Math.min(600,a.projectileLifetime-1):600);
@@ -101,6 +102,8 @@ export function simulate(a,attacker,target,options={}){
  function startReaction(who,f){
   const reaction=juggleLegacyReaction(who,scaledHitReaction(a,combos.priorHits('self','target')));if(!reaction)return false;
   flight={who,x:who.x,y:who.y,start:f,wall:false,attack:reaction};
+  who.lastHit=f;who.reaction=(reaction.pushAxis!=='x'&&reaction.launchHeight>0)||who.y<0?'airborne':'hurt';who.needsFall=!!reaction.floorSlam&&who.reaction==='airborne';
+  who.hitstunUntil=Math.max(who.hitstunUntil||0,f+reaction.hitstun);
   who.stun=Math.max(who.stun,legacyRecoveryEnd(who,reaction,f));
   who.reactionHitFrame=f;who.reactionDirection=facing;who.reactionWallFrame=null;who.reactionLandFrame=null;
   who.reactionLaunched=(reaction.pushAxis!=='x'&&reaction.launchHeight>0)||who.y<0;who.reactionInFlight=true;who.reactionFlightFrames=reaction.flightFrames;who.reactionKnockedDown=false;
@@ -113,9 +116,10 @@ export function simulate(a,attacker,target,options={}){
   if(flight){
    const who=flight.who,a=flight.attack,sample=sampleLegacyMotion(flight,a,facing,f-flight.start);
    const t=sample.done?1:0;who.x=sample.x;who.y=sample.y;
-   if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');who.stun=Math.max(who.stun,legacyRecoveryEnd(flight,a,flight.start,true));flight.wall=true;who.reactionWallFrame=f;}}
-   if(t===1){who.y=0;resetGroundedJuggle(who);who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
+   if(a.wallSlam&&Math.abs(who.x)>=220){who.x=clamp(who.x,-220,220);if(!flight.wall){event(f,'Wall smash!');who.stun=Math.max(who.stun,legacyRecoveryEnd(flight,a,flight.start,true));flight.wall=true;who.reaction='wall';who.reactionWallFrame=f;}}
+   if(t===1){who.reaction='standing';who.y=0;resetGroundedJuggle(who);who.reactionInFlight=false;if(who.reactionLaunched||flight.wall){who.reactionLandFrame=f;who.reactionKnockedDown=!!(a.floorSlam||flight.wall);end=Math.max(end,f+(who.reactionKnockedDown?62:18)+(flight.wall?10:0));}if(a.floorSlam&&a.pushAxis!=='x'&&a.launchHeight>0)event(f,'Floor smash!');flight=null;}
   }
+  if(!flight&&other.airRecoveryFrame!==undefined&&other.y<0){other.vy=(other.vy||0)+.48;other.y=Math.min(0,other.y+other.vy);if(other.y===0){other.vy=0;resetGroundedJuggle(other);}}
   combos.beginFrame(f,new Map([['target',{defeated:other.hp<=0,locked:other.stun>f||(flight?.who===other&&hasLegacyMotion(flight,flight.attack))}]]));
   for(const who of [self,other])if(who.shield&&f>=who.shieldUntil){who.shield=0;event(f,'Shield expired.');}
   const box=worldBox(a,contactMode&&impactFrame!==null?Math.min(f,impactFrame):f,attacker,facing),targetBox={x:other.x-14,y:other.y-60,w:28,h:60};
@@ -170,6 +174,12 @@ export function simulate(a,attacker,target,options={}){
   for(const s of statuses)if(f>=s.next&&f<=s.end){
    if(['burn','poison','regen'].includes(s.kind)){const n=s.kind==='regen'?heal(s.who,s.power):hurt(s.who,s.power);event(f,`${s.kind} tick: ${n} ${s.kind==='regen'?'healing':'damage'}.`);}s.next+=a.statusInterval;
   }
+  if(options.recoveryFrame!==undefined&&options.recoveryFrame!==null&&f===options.recoveryFrame){
+   other.statuses=statuses.filter(s=>s.who===other).map(s=>({type:s.kind,until:s.end}));
+   const reason=recoverInAir(other,f);recovery={attempted:true,recovered:!reason,reason,combatFrame:f};
+   if(!reason){if(flight?.who===other)flight=null;end=Math.max(end,f+120);}
+   event(f,reason?'Air recovery rejected: '+reason:'Air recovery succeeded; control restored without invulnerability');
+  }
   const modifiers=statuses.filter(s=>f>=s.start&&f<s.end).map(s=>({recipient:s.who===self?'self':'target',kind:s.kind,power:s.power,remaining:s.end-f}));
   for(const who of [self,other])who.canAct=who.hp>0&&f>=who.stun&&f>=(who.blockstunUntil||0);
   const impactStop=hits>hitsBeforeFeedback&&['damage','push'].includes(a.payload)?(options.guard&&a.blockable&&a.delivery!=='self'?a.contactFeedback?.blockstop:a.contactFeedback?.hitstop)??0:0;
@@ -177,7 +187,7 @@ export function simulate(a,attacker,target,options={}){
   frames.push({combos:combos.snapshot(),frame:f,impactStop,active,ownerActive:cast&&!interrupted&&self.hp>0&&f<(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm)),projectileAlive:independent&&launched&&self.hp>0&&other.hp>0&&f<tm.startup+a.projectileLifetime&&f<activeEnd(contactMode?impactFrame:tm.startup,tm),box,boxes:a.hitboxGroups?activeGroupBoxes(a.hitboxGroups,f-tm.startup,b=>worldBox({...a,box:b},f,attacker,facing)):null,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
  }
  if(cast&&!hits&&!['block','dodge'].includes(a.payload))event(contactMode?contactDeadline:tm.startup+tm.active,contactMode?'Miss — no opponent contact before travel timeout.':'Miss — no hitbox contact during the active window.');
- return {combos:combos.snapshot(),frames,presentationFrames:presentationFrames(frames),events,cost,impactFrame:contactMode?impactFrame:tm.startup,contactMode,timing:tm,power:magnitude(a,attacker),nextCast:Math.max(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm),a.cooldown),cast};
+ return {recovery:recovery??(options.recoveryFrame==null?null:{attempted:false,recovered:false,reason:'Test ended before the recovery attempt.'}),combos:combos.snapshot(),frames,presentationFrames:presentationFrames(frames),events,cost,impactFrame:contactMode?impactFrame:tm.startup,contactMode,timing:tm,power:magnitude(a,attacker),nextCast:Math.max(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm),a.cooldown),cast};
 }
 export function effectFrame(effect,elapsedMs){
  if(elapsedMs<0)return -1;const total=effect.times.reduce((a,b)=>a+b,0);
