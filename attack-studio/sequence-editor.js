@@ -1,14 +1,15 @@
+import {resizeAuthoredHits} from './quick-edit-hits.js?v=20261109-quick-keep-release';
 import {renderTrajectoryEditor} from './trajectory-editor.js?v=20261109-trajectory-release';
 import {renderImpulseEditor} from './impulse-editor.js?v=20261109-momentum-release';
 import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261109-slow-motion-release';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
 import {renderBounceEditor} from './bounce-editor.js?v=20261109-slow-motion-release';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-trajectory-release';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-quick-keep-release';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-slow-motion-release';
 import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-compatibility-audit-release';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261109-slow-motion-release';
+import {jugglePreset,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261109-slow-motion-release';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -36,11 +37,11 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     const quick=el('div');quick.className='sequence-quick';
     const count=el('input');count.type='number';count.min=1;count.max=10;count.value=a.hitEvents.length;
     const interval=el('input');interval.type='number';interval.min=1;interval.max=25;interval.value=a.hitEvents.length>1?a.hitEvents[1].offset-a.hitEvents[0].offset:5;
-    const timing=el('select');timing.add(new Option('Extend duration','extend'));timing.add(new Option('Fit original duration','fit'));
+    const timing=el('select');timing.add(new Option('Even spacing · extend duration','extend'));timing.add(new Option('Keep existing hit frames','keep'));timing.add(new Option('Fit original duration','fit'));
     for(const [title,input] of [['Hit count',count],['Spacing (frames)',interval],['Quick Edit timing',timing]]){const l=el('label',title);l.append(input);quick.append(l);}
     const preview=el('button','Preview Quick Edit'),apply=el('button','Apply changes'),note=el('p');apply.disabled=true;
-    const invalidate=()=>{proposal=null;apply.disabled=true;note.textContent='Preview again to apply these settings.';};count.oninput=interval.oninput=timing.onchange=invalidate;
-    preview.onclick=()=>{try{proposal=resizeHits(a.hitEvents,Number(count.value),Number(interval.value),timing.value);validateHitSequence({...a,hitEvents:proposal});note.textContent=`${a.hitEvents.length} → ${proposal.length} hits; final hit at ${origin} + ${proposal.at(-1).offset}. Existing retained hits keep their damage and reactions; ${Math.max(0,a.hitEvents.length-proposal.length)} hit(s) removed. Undo restores everything.`;apply.disabled=false;}catch(e){note.textContent=e.message;apply.disabled=true;}};
+    const invalidate=()=>{proposal=null;apply.disabled=true;note.textContent='Preview again to apply these settings.';};count.oninput=interval.oninput=invalidate;timing.onchange=()=>{interval.disabled=timing.value==='keep';invalidate();};
+    preview.onclick=()=>{try{proposal=resizeAuthoredHits(a.hitEvents,Number(count.value),Number(interval.value),timing.value);validateHitSequence({...a,hitEvents:proposal});note.textContent=`${a.hitEvents.length} → ${proposal.length} hits; final hit at ${origin} + ${proposal.at(-1).offset}. Existing retained hits keep their damage and reactions; ${Math.max(0,a.hitEvents.length-proposal.length)} hit(s) removed. Undo restores everything.`;apply.disabled=false;}catch(e){note.textContent=e.message;apply.disabled=true;}};
     apply.onclick=()=>mutate(n=>{n.hitEvents=proposal;n.active=Math.max(...proposal.map(e=>e.offset+e.duration));proposal=null;});quick.append(preview,apply,note);root.append(quick);
     if(!a.hitEvents.some(e=>e.id===selected))selected=a.hitEvents[0].id;
     const strip=el('div');strip.className='hit-timeline';strip.setAttribute('aria-label','Select a hit to inspect');
