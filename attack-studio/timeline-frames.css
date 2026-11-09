@@ -1,0 +1,9 @@
+.timeline-frames { margin: .75rem 0 1rem; min-width: 0; }
+.timeline-frames h3, .timeline-frames h4 { margin: .5rem 0; }
+.timeline-frames p { font-size: .85rem; color: #b9c8d5; }
+.timeline-frame-strip { display: flex; gap: .4rem; overflow-x: auto; max-width: 100%; padding: .4rem .2rem .65rem; }
+.timeline-frame { flex: 0 0 92px; padding: .35rem; display: flex; flex-direction: column; align-items: center; gap: .25rem; }
+.timeline-frame canvas { width: 72px; height: 72px; image-rendering: pixelated; background: #101a26; }
+.timeline-frame span { font-size: .75rem; white-space: nowrap; }
+.timeline-frame[aria-pressed="true"] { outline: 2px solid #d5ff76; outline-offset: -2px; background: #263c30; }
+.timeline-frame:focus-visible { outline: 3px solid #9fe7ff; }
