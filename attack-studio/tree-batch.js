@@ -1,3 +1,4 @@
+import {copyAttack} from './tree-operations.js?v=20261109-tree-workspace';
 // Build one candidate so a batch is validated and undone as one tree edit.
 export function addIndependentAttacks(tree, entries, pathId, makeId=()=>crypto.randomUUID()) {
  if (!entries.length) throw Error('Select at least one attack.');
@@ -7,7 +8,7 @@ export function addIndependentAttacks(tree, entries, pathId, makeId=()=>crypto.r
  entries.forEach((entry,index)=>{
   if(!entry.effect) throw Error('An attack in this selection no longer has artwork. Select it again.');
   const effect=entry.effect;
-  next.nodes.push({id:makeId(),name:entry.attack?.name||entry.name,description:effect.description||'Describe this attack and its learning requirements.',branch:effect.element,effectId:effect.id,notes:'',state:'needs-edit',requirement:'all',requires:[],x:32+(index%4)*300,y:Math.min(49500,startY+Math.floor(index/4)*244),...(pathId?{pathIds:[pathId]}:{}),...(entry.attack?{attack:structuredClone(entry.attack)}:{})});
+  next.nodes.push({id:makeId(),name:entry.attack?.name||entry.name,description:effect.description||'Describe this attack and its learning requirements.',branch:effect.element,effectId:effect.id,notes:'',state:'needs-edit',requirement:'all',requires:[],x:32+(index%4)*300,y:Math.min(49500,startY+Math.floor(index/4)*244),...(pathId?{pathIds:[pathId]}:{}),...(entry.attack?{attack:copyAttack(entry.attack)}:{})});
  });
  return next;
 }

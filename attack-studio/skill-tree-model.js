@@ -12,8 +12,10 @@ export function validateTree(tree,effectIds,validateAttack){
   if(!n.name.trim()||!n.branch.trim()||!effectIds.has(n.effectId)||!['draft','needs-edit','ready'].includes(n.state)||!['all','any'].includes(n.requirement))throw Error('Invalid attack artwork or learning rule.');
   if(!Array.isArray(n.requires)||new Set(n.requires).size!==n.requires.length||n.requires.some(id=>typeof id!=='string'))throw Error('Invalid prerequisites.');
   if(!Number.isFinite(n.x)||!Number.isFinite(n.y)||n.x<0||n.y<0||n.x>50000||n.y>50000)throw Error('Invalid tree position.');
+  if(n.cost!==undefined&&(!Number.isInteger(n.cost)||n.cost<0||n.cost>100))throw Error('Learning cost must be a whole number from 0–100.');
   if(n.attack){if(!validateAttack)throw Error('Attack validation is required.');validateAttack(n.attack,effectIds);}
  }
+ if(tree.starterSkills!==undefined&&(!Array.isArray(tree.starterSkills)||new Set(tree.starterSkills).size!==tree.starterSkills.length||tree.starterSkills.some(id=>!ids.has(id))))throw Error('Invalid starter skill list.');
  const byId=new Map(tree.nodes.map(n=>[n.id,n])),visiting=new Set(),done=new Set();
  function visit(id){if(visiting.has(id))throw Error('That connection creates a learning loop.');if(done.has(id))return;visiting.add(id);for(const p of byId.get(id).requires){if(!ids.has(p))throw Error('A prerequisite attack is missing.');visit(p);}visiting.delete(id);done.add(id);}
  for(const id of ids)visit(id);return tree;
