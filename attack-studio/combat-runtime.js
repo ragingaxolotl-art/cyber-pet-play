@@ -20,8 +20,8 @@ import {canCancel,automaticFollowup,MAX_AUTOMATIC_FOLLOWUPS} from './cancel-wind
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,claimProjectileDefense} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-rotation';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
-import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-hurtboxes';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-hurtboxes';
+import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-hit-links';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-hit-links';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261108-bounces';

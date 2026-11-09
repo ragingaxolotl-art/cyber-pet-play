@@ -1,13 +1,16 @@
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-hurtboxes';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-hurtboxes';
-import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-hurtboxes';
-import {validateAttack} from './combat-model.js?v=20261109-hurtboxes';
+import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
+import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-hit-links';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-hit-links';
+import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-hit-links';
+import {validateAttack} from './combat-model.js?v=20261109-hit-links';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-hurtboxes';
 import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-bounces';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
+export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
-  function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));validateAttack(next);commit(next);render();}
+  const commit=next=>{const resolved=reconcileHitPropertyLinks(getAttack(),next);validateAttack(resolved);saveCommit(resolved);};
+  function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));commit(next);render();}
   function render(){
     const a=getAttack(),scheduled=a.sequenceTiming==='cast',origin=scheduled?'startup':'contact';root.replaceChildren();
     root.append(el('h2','Hit sequence'),el('p',(scheduled?'Startup ends, then the hit windows run even if a hit misses.':'Contact starts the projectile clock.')+' Each hit has its own damage, timing and reaction. Up to ten hits.'));
@@ -47,7 +50,7 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
     property.setAttribute('aria-label','Batch hit property');for(const [key,name] of Object.entries(BATCH_HIT_FIELDS))property.add(new Option(name,key));property.value='damage';batchError.setAttribute('role','status');batchApply.type='button';
     const showValue=()=>{valueHost.replaceChildren();const key=property.value;value=el(['reaction','target'].includes(key)?'select':'input');value.setAttribute('aria-label','Batch hit value');if(key==='reaction'||key==='target'){for(const choice of key==='reaction'?REACTIONS:['any','grounded','airborne'])value.add(new Option(choice,choice));}else{value.type='number';value.step=key==='damage'?'any':'1';}value.value=String(a.hitEvents[0][key]);valueHost.append(value);};
     property.onchange=showValue;showValue();
-    batchApply.onclick=()=>{try{if(value.value==='')throw Error('Enter a value before applying.');const key=property.value,next=editHitBatch(getAttack(),[...chosen],key,['reaction','target'].includes(key)?value.value:Number(value.value));commit(next);render();}catch(e){batchError.textContent=e.message;}};
+    batchApply.onclick=()=>{try{if(value.value==='')throw Error('Enter a value before applying.');const key=property.value,next=editHitBatch(getAttack(),[...chosen],key,['reaction','target'].includes(key)?value.value:Number(value.value));saveCommit(next);render();}catch(e){batchError.textContent=e.message;}};
     batch.append(property,valueHost,batchApply,batchError);root.append(batch);
     const event=a.hitEvents.find(e=>e.id===selected),fields=el('div');fields.className='fields';
     const error=el('p');error.setAttribute('role','status');
@@ -63,7 +66,8 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
     stunInput.onchange=()=>{try{mutate(n=>{const hit=n.hitEvents.find(e=>e.id===selected);if(stunInput.value==='')delete hit.hitstun;else hit.hitstun=Number(stunInput.value);});}catch(e){error.textContent=e.message;stunInput.value=event.hitstun??'';}};stunLabel.append(stunInput);fields.append(stunLabel);
     fields.append(el('p','Blank preserves reaction-based hitstun; zero adds no hitstun. Movement or suspension can still lock the target. Explicit values require version 15.'));
     root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
-    const bounce=el('section');root.append(bounce);renderBounceEditor({root:bounce,attack:a,eventId:event.id,commit:next=>{commit(next);render();},status:message=>error.textContent=message});
+    renderHitPropertyLinks(root,a,event.id,next=>{validateAttack(next);saveCommit(next);render();});
+    const bounce=el('section');root.append(bounce);renderBounceEditor({root:bounce,attack:a,eventId:event.id,commit:next=>{saveCommit(next);render();},status:message=>error.textContent=message});
     const legacy=el('button','Return to ordinary '+a.delivery);legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.sequenceTiming;delete n.behaviorVersion;delete n.projectileMode;if(n.hitboxGroups)n.impactTrigger='timed';});root.append(legacy);
   }
   function results(){const output=document.getElementById('hitResults');output.replaceChildren();const sim=getSimulation();if(!sim)return;

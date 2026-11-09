@@ -1,4 +1,5 @@
-import {validateAttack} from './combat-model.js?v=20261109-hurtboxes';
+import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
+import {validateAttack} from './combat-model.js?v=20261109-hit-links';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderBounceEditor({root,attack,eventId=null,commit,status}){
  root.replaceChildren();root.append(make('h3',eventId?'Selected hit bounces':'Boundary bounces'));
@@ -6,7 +7,7 @@ export function renderBounceEditor({root,attack,eventId=null,commit,status}){
  const subject=eventId?attack.hitEvents.find(e=>e.id===eventId):attack;
  const eligible=eventId?!['none','suspend'].includes(subject.reaction):['damage','push'].includes(attack.payload);
  root.append(make('p','One wall rebound and one floor rebound per airborne chain. Landing to bounce preserves juggle and air-recovery limits; final landing resets them. No extra damage is added. Requires version 16 saving.'));
- const mutate=fn=>{try{const next=structuredClone(attack),target=eventId?next.hitEvents.find(e=>e.id===eventId):next;fn(target);validateAttack(next);commit(next);return true;}catch(e){status(e.message);return false;}};
+ const mutate=fn=>{try{const next=structuredClone(attack),target=eventId?next.hitEvents.find(e=>e.id===eventId):next;fn(target);const resolved=reconcileHitPropertyLinks(attack,next);validateAttack(resolved);commit(resolved);return true;}catch(e){status(e.message);return false;}};
  for(const kind of ['wall','floor']){
   const title=kind==='wall'?'Wall':'Floor',rule=subject.bounces?.[kind],section=make('fieldset');section.append(make('legend',title+' bounce'));
   if(!rule){const add=make('button','Add '+kind+' bounce');add.type='button';add.disabled=!eligible||(!eventId&&attack[kind+'Slam']);add.onclick=()=>mutate(n=>{n.bounces??={};n.bounces[kind]={height:30,distance:30,frames:24};});section.append(add);if(add.disabled)section.append(make('p',eligible?'Turn off the matching slam before adding this bounce.':'Choose a moving damage or push reaction first.'));}

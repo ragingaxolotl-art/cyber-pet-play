@@ -1,5 +1,5 @@
-import {renderHitboxRotation} from './hitbox-rotation-editor.js?v=20261109-hurtboxes';
-import {validateAttack} from './combat-model.js?v=20261109-hurtboxes';
+import {renderHitboxRotation} from './hitbox-rotation-editor.js?v=20261109-hit-links';
+import {validateAttack} from './combat-model.js?v=20261109-hit-links';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const unique=prefix=>prefix+crypto.randomUUID().replaceAll('-','');
 let selectedBox=null;

@@ -1,5 +1,5 @@
-import {freshAttack,defaultStats,simulate} from './combat-model.js?v=20261109-hurtboxes';
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-hurtboxes';
+import {freshAttack,defaultStats,simulate} from './combat-model.js?v=20261109-hit-links';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-hit-links';
 const examples=(await(await fetch('vfx-library.json',{cache:'no-store'})).json()).examples,poses=new Map();
 for(const key of ['ready_side','hurt_side','guard_side','knocked_down_side','get_up_side','jump_side','defeated_side']){
  const ref=examples[key],image=new Image();image.src=ref.url;await image.decode();const frames=[];

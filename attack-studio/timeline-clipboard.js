@@ -1,7 +1,9 @@
-import {validateAttack} from './combat-model.js?v=20261109-hurtboxes';
+import {resolveHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
+import {validateAttack} from './combat-model.js?v=20261109-hit-links';
 const uniqueId=prefix=>prefix+'_'+crypto.randomUUID().replaceAll('-','');
 // Clipboard is an immutable snapshot, never a reference to the editable attack.
 export function copyTimelineEvents(attack,tracks,selection){
+ attack=resolveHitPropertyLinks(attack);
  if(!Array.isArray(selection)||!selection.length)throw Error('Select events to copy.');
  const entries=[],seen=new Set();
  for(const item of selection){
@@ -18,7 +20,9 @@ export function copyTimelineEvents(attack,tracks,selection){
   if(!value)throw Error('Animation, movement paths and the main block/dodge window cannot be duplicated.');
   entries.push({...item,start:box.start,value:structuredClone(value)});
  }
- return {attackId:attack.id,entries,origin:Math.min(...entries.map(e=>e.start)),sequenceTiming:attack.sequenceTiming??'contact',geometryBase:tracks.geometryBase,groups:structuredClone(attack.hitboxGroups||[])};
+ const copiedHits=new Set(entries.filter(e=>e.groupId==='sequence').map(e=>e.value.id));
+ const hitPropertyLinks=structuredClone((attack.hitPropertyLinks||[]).filter(link=>copiedHits.has(link.sourceId)&&copiedHits.has(link.targetId)));
+ return {hitPropertyLinks,attackId:attack.id,entries,origin:Math.min(...entries.map(e=>e.start)),sequenceTiming:attack.sequenceTiming??'contact',geometryBase:tracks.geometryBase,groups:structuredClone(attack.hitboxGroups||[])};
 }
 // Cross-attack copies remap group IDs and self follow-ups; existing destination
 // behavior is never converted implicitly. Referenced geometry travels with hits.
@@ -33,7 +37,7 @@ export function pasteTimelineEvents(attack,tracks,clipboard,start){
   if(attack.hitboxGroups&&hits.some(e=>!e.value.hitboxGroup))throw Error('Assign hitbox groups to the source hits, then copy again before pasting into a grouped attack.');
  }
  if(!Number.isInteger(start)||start<0)throw Error('Choose a whole attack frame at or after zero.');
- const next=structuredClone(attack),groupIds=new Map();
+ const next=resolveHitPropertyLinks(attack),groupIds=new Map(),hitIds=new Map();
  if(crossAttack){
   const referenced=new Set(clipboard.entries.filter(e=>e.groupId==='sequence').map(e=>e.value.hitboxGroup).filter(Boolean));
   const selectedGroups=new Set(clipboard.entries.map(e=>e.groupId).filter(id=>clipboard.groups.some(g=>g.id===id)));
@@ -49,7 +53,7 @@ export function pasteTimelineEvents(attack,tracks,clipboard,start){
   const value=structuredClone(entry.value),frame=start+entry.start-clipboard.origin;
   if(entry.groupId==='sequence'){
    if(!next.hitEvents)throw Error('Restore a hit sequence before pasting these hits.');
-   value.id=uniqueId('hit');value.offset=frame-tracks.contact;if(crossAttack&&value.hitboxGroup)value.hitboxGroup=groupIds.get(value.hitboxGroup);next.hitEvents.push(value);
+   const oldId=value.id;value.id=uniqueId('hit');hitIds.set(oldId,value.id);value.offset=frame-tracks.contact;if(crossAttack&&value.hitboxGroup)value.hitboxGroup=groupIds.get(value.hitboxGroup);next.hitEvents.push(value);
   }else if(entry.groupId==='effects'){value.start=frame;next.visuals.push(value);}
   else if(entry.groupId==='armor'){value.id=uniqueId('defense');value.start=frame;(next.defenseWindows??=[]).push(value);}
   else if(entry.groupId==='movementCancels'){value.id=uniqueId('movement');value.start=frame;(next.movementCancels??=[]).push(value);}
@@ -61,7 +65,8 @@ export function pasteTimelineEvents(attack,tracks,clipboard,start){
    value.id=uniqueId('box');value.start=frame-tracks.geometryBase;group.boxes.push(value);
   }
  }
+ for(const link of clipboard.hitPropertyLinks||[]){if(!hitIds.has(link.sourceId)||!hitIds.has(link.targetId))throw Error('A copied property link is missing its hit.');(next.hitPropertyLinks??=[]).push({...structuredClone(link),sourceId:hitIds.get(link.sourceId),targetId:hitIds.get(link.targetId)});}
  if(next.hitEvents){next.hitEvents.sort((a,b)=>a.offset-b.offset);next.active=Math.max(next.active,...next.hitEvents.map(h=>h.offset+h.duration));}
  if(next.hitboxGroups)next.active=Math.max(next.active,...next.hitboxGroups.flatMap(g=>g.boxes.map(b=>b.start+b.duration)));
- validateAttack(next);return next;
+ const resolved=resolveHitPropertyLinks(next);validateAttack(resolved);return resolved;
 }

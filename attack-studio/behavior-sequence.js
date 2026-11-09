@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-hurtboxes';
+import {validateAttack} from './combat-model.js?v=20261109-hit-links';
 import {REACTIONS} from './hit-sequence.js?v=20261108-bounces';
 export const REACTION_BLOCKS=['hit',...REACTIONS.filter(r=>r!=='none')];
 // Authoring helper only: exports ordinary hit events understood by both runtimes.
@@ -18,6 +18,7 @@ export function buildReactionSequence(attack,blocks,{interval=5,start=attack.hit
    events.push(event);
   }
  }
+ delete next.hitPropertyLinks; // Recipe replacement creates new independent hit identities.
  next.hitEvents=events;next.active=Math.max(next.active,...events.map(e=>e.offset+e.duration));
  validateAttack(next);return next;
 }
