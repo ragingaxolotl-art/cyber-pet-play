@@ -15,3 +15,11 @@ export function remapAnchorFrames(frames, positions) {
   used.add(frame.id); return frame;
  });
 }
+
+// Hurtboxes have no cross-frame IDs; copy their full geometry independently.
+export function remapHurtboxFrames(frames, positions) {
+ if (!Array.isArray(positions)||!positions.length||positions.length>300||
+     positions.some(index=>!Number.isInteger(index)||index<0||index>=frames.length))
+  throw Error('Choose valid hurtbox frame positions.');
+ return positions.map(index=>structuredClone(frames[index]));
+}

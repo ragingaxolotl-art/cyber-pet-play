@@ -1,4 +1,4 @@
-import {posePlayback} from './pose-timing.js?v=20261109-anchors';
+import {posePlayback} from './pose-timing.js?v=20261109-hurtboxes';
 
 // Anchor coordinates use the same fighter-origin pixels as hitboxes. Frames are
 // authored sequence positions, not indexes into a particular pet's sprite sheet.

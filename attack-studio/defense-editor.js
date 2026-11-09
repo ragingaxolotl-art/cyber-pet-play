@@ -1,11 +1,11 @@
-import {renderGuardEditor} from './guard-editor.js?v=20261109-anchors';
+import {renderGuardEditor} from './guard-editor.js?v=20261109-hurtboxes';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-anchors';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-anchors';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-anchors';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-anchors';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-anchors';
-import {validateAttack} from './combat-model.js?v=20261109-anchors';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-hurtboxes';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-hurtboxes';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-hurtboxes';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-hurtboxes';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-hurtboxes';
+import {validateAttack} from './combat-model.js?v=20261109-hurtboxes';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

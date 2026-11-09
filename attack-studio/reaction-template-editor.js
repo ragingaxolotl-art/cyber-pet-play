@@ -1,4 +1,4 @@
-import {readReactionTemplates,saveReactionTemplate,importReactionTemplates,reactionTemplateBackup,renameReactionTemplate,removeReactionTemplate,restoreReactionTemplate,removedReactionTemplateCount} from './reaction-templates.js?v=20261109-anchors';
+import {readReactionTemplates,saveReactionTemplate,importReactionTemplates,reactionTemplateBackup,renameReactionTemplate,removeReactionTemplate,restoreReactionTemplate,removedReactionTemplateCount} from './reaction-templates.js?v=20261109-hurtboxes';
 const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderReactionTemplates(root,{getRecipe,loadRecipe,storage=localStorage}){
  const panel=el('details');panel.append(el('summary','Reusable reaction templates'),el('p','Templates save in this browser only, separately from attacks and classroom saves. Download a template backup to move them to another device. Loading changes the builder controls; preview and apply to change an attack.'));

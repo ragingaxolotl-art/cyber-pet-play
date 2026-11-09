@@ -1,4 +1,4 @@
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
+import {shapeHitsRectangle,shapesOverlap} from './hitbox-shapes.js?v=20261109-rotation';
 // Areas begin on the combat frame AFTER contact: impact never double-hits.
 export function validateProjectileArea(attack){
  const rule=attack.projectileArea;if(rule===undefined)return;
@@ -22,7 +22,7 @@ export function claimAreaHit(area,target,frame,overlap){
 }
 export const areaAlive=(area,frame)=>frame<area.end;
 
-export const impactAreaAnchor=(boxes,groupId,hurt,fallback)=>boxes?.find(box=>box.groupId===groupId&&shapeHitsRectangle(box,hurt))??fallback;
+export const impactAreaAnchor=(boxes,groupId,hurt,fallback)=>boxes?.find(box=>box.groupId===groupId&&(Array.isArray(hurt)?hurt.some(region=>shapesOverlap(box,region)):shapeHitsRectangle(box,hurt)))??fallback;
 
 // Keep the authored bounds immutable; expansion is sampled from the combat clock.
 export function impactAreaBox(area,frame){
