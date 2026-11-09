@@ -1,4 +1,4 @@
-import {SOUND_PRESETS} from './presentation-events.js?v=20261109-presentation-release';
+import {SOUND_PRESETS} from './presentation-events.js?v=20261109-slow-motion-release';
 // Small synthesized presets avoid external media requests and keep exports portable.
 const voices={impact:{type:'triangle',from:180,to:45},whoosh:{type:'sine',from:700,to:100},zap:{type:'sawtooth',from:950,to:120},chime:{type:'sine',from:660,to:880}};
 export function createPresentationAudio({createContext=()=>new (globalThis.AudioContext||globalThis.webkitAudioContext)()}={}){

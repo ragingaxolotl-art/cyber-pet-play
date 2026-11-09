@@ -1,7 +1,7 @@
 import {attackerMotionTiming} from './attacker-motion.js?v=20261109-conditional-release';
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-momentum-release';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-momentum-release';
-import {sequenceDuration} from './hit-sequence.js?v=20261109-momentum-release';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-slow-motion-release';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-slow-motion-release';
+import {sequenceDuration} from './hit-sequence.js?v=20261109-slow-motion-release';
 import {presentationFrames} from './preview-clock.js';
 
 // Adapt shared Arena coordinates and ticks to the existing Studio canvas contract.

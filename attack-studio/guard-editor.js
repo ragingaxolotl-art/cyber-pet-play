@@ -1,5 +1,5 @@
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {validateAttack} from './combat-model.js?v=20261109-momentum-release';
+import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
 export function renderGuardEditor({root,attack,commit,status}) {
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Against guarding opponents';section.append(legend);
  const label=document.createElement('label');label.textContent='Guard interaction';const mode=document.createElement('select');mode.setAttribute('aria-label','Guard interaction');

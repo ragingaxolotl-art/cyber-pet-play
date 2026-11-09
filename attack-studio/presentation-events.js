@@ -11,10 +11,11 @@ export function validatePresentationEvents(events){
   if(!e||typeof e!=='object'||Array.isArray(e)||typeof e.id!=='string'||!/^present_[a-zA-Z0-9_]{1,80}$/.test(e.id)||ids.has(e.id))throw Error('Presentation events need unique IDs.');
   ids.add(e.id);
   const keys=e.kind==='sound'?['id','kind','start','duration','preset','volume']:['id','kind','start','duration','amount'];
-  if(Object.keys(e).some(k=>!keys.includes(k))||!['sound','shake','zoom'].includes(e.kind))throw Error('Choose sound, shake or zoom settings.');
+  if(Object.keys(e).some(k=>!keys.includes(k))||!['sound','shake','zoom','slow'].includes(e.kind))throw Error('Choose sound, shake, zoom or slow-motion settings.');
   if(!int(e.start,0,899)||!int(e.duration,1,e.kind==='sound'?60:120)||e.start+e.duration>900)throw Error('Presentation timing must end within 900 combat frames.');
   if(e.kind==='sound'&&(!SOUND_PRESETS.includes(e.preset)||!number(e.volume,0,1)))throw Error('Choose a sound preset and volume 0–1.');
   if(e.kind==='shake'&&!number(e.amount,0,8))throw Error('Shake must be 0–8 arena pixels.');
+  if(e.kind==='slow'&&!number(e.amount,.25,1))throw Error('Slow-motion rate must be 0.25–1 times.');
   if(e.kind==='zoom'&&!number(e.amount,1,1.5))throw Error('Zoom must be 1–1.5 times.');
  }
 }

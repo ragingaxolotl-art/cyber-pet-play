@@ -1,4 +1,4 @@
-import {createPresentationCursor,advancePresentationSounds,presentationFrame} from './presentation-events.js?v=20261109-presentation-release';
+import {createPresentationCursor,advancePresentationSounds,presentationFrame} from './presentation-events.js?v=20261109-slow-motion-release';
 // Adapters supply live cast identities and combat ages. This controller never
 // owns fighters, changes time, or extends an attack to finish an effect.
 export function createPresentationPlayer(audio){
