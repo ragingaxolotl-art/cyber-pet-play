@@ -7,7 +7,7 @@ import {presentationPreferences} from './presentation-preferences.js?v=20261109-
 import {installPresentationControls} from './presentation-controls.js?v=20261109-slow-motion-release';
 import {renderPresentationEditor} from './presentation-editor.js?v=20261109-slow-motion-release';
 import {renderAttackerMotionEditor} from './attacker-motion-editor.js?v=20261109-slow-motion-release';
-import {rememberFrameEditorPosition} from './frame-editor-position.js?v=20261109-frame-position';
+import {rememberFrameEditorPosition,rememberFrameEditorLayout} from './frame-editor-position.js?v=20261109-frame-undo-release';
 import {drawImpactAreaArt} from './impact-area-art.js?v=20261109-area-art';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHurtboxEditor} from './hurtbox-editor.js?v=20261109-slow-motion-release';
@@ -31,7 +31,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261109-slow-motion-
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-slow-motion-release';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-slow-motion-release';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-final-ui-release';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-frame-undo-release';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-slow-motion-release';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-slow-motion-release';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -290,8 +290,9 @@ function recordEdit(){
 }
 function restoreEdit(direction){
  const next=history?.[direction]();if(!next)return;
+ const restoreFrameLayouts=[$('layers'),$('poseFrames')].map(rememberFrameEditorLayout);
  restoringHistory=true;project=next;if(!project.attacks.some(a=>a.id===selected))selected=project.attacks[0].id;
- connectTestBench();installSandbox();playing=false;frame=0;refresh();restoringHistory=false;dirty=true;
+ connectTestBench();installSandbox();playing=false;frame=0;refresh();for(const restore of restoreFrameLayouts)restore();restoringHistory=false;dirty=true;
  try{localStorage.setItem(storageKey+'-recovery',JSON.stringify(project));$('saveState').textContent='Restored edit · recovery saved locally';}catch{}
  recordEdit();
 }

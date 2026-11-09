@@ -17,3 +17,13 @@ export function rememberFrameEditorPosition(strip,parent){
   for(const {node,top,left} of ancestors){node.scrollTop=top;node.scrollLeft=left;}
  };
 }
+
+// Undo rebuilds whole panels. Match frame strips by their owning panel order.
+export function rememberFrameEditorLayout(parent){
+ const strips=[...parent.querySelectorAll('.frame-strip')].map(strip=>({left:strip.scrollLeft,open:strip.closest('details')?.open}));
+ const ancestors=[];for(let node=parent;node;node=node.parentElement)ancestors.push({node,top:node.scrollTop,left:node.scrollLeft});
+ return ()=>{
+  [...parent.querySelectorAll('.frame-strip')].forEach((strip,index)=>{const saved=strips[index];if(!saved)return;const details=strip.closest('details');if(details)details.open=saved.open;strip.scrollLeft=saved.left;});
+  for(const {node,top,left} of ancestors){node.scrollTop=top;node.scrollLeft=left;}
+ };
+}
