@@ -97,7 +97,7 @@ export function attackDiagnostics(attack,simulation=null,attacks=null) {
   if(attack.projectileLifetime===undefined)add('sequence-lifetime','info','Follow-up hits end when the attacker is interrupted or the target is defeated.','Test interruption before relying on the full sequence.');
  }else{
   if(attack.knockback>0||attack.launchHeight>0||attack.wallSlam||attack.floorSlam)
-   add('legacy-recovery','warning','Authored travel is shared, but recovery timing and stage boundaries still differ between Studio and Arena.','Test this move in Arena, including near a wall, before balancing a follow-up combo.');
+   add('legacy-recovery','info','Authored travel and recovery use shared rules. The standalone Studio preview and Arena have different stage boundaries.','Compare equivalent starting positions and wall distances when testing a follow-up combo.');
   if(['slow','haste','weaken'].includes(attack.status))
    add('status-playtest','info','Status power is a percentage. Slow and haste multiply movement speed; weaken reduces outgoing damage.','Test movement in Arena; Studio’s stationary target does not demonstrate speed changes.');
  }
