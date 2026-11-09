@@ -1,6 +1,6 @@
 import {fighterHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
-import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261109-hurtboxes';
+import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaView,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering} from './projectile-steering.js?v=20261108-steering';
 import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
@@ -11,7 +11,7 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261109-rotation';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-hit-links';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-area-art';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 
@@ -96,7 +96,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     for(const who of [self,other])who.canAct=who.hp>0&&!who.pulseMotion&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
     const impactStop=hits>hitsBeforeFeedback?(guardContact.guarded?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
     if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');
-    frames.push({areaHits:impactArea?.targets.get('target')?.hits??0,areas:impactArea&&self.hp>0&&other.hp>0&&frame>=impactArea.start&&frame<impactArea.end?[impactAreaBox(impactArea,frame)]:[],steering:steering?{...steering}:null,combos:combos.snapshot(),frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
+    frames.push({areaHits:impactArea?.targets.get('target')?.hits??0,areas:impactArea&&self.hp>0&&other.hp>0&&frame>=impactArea.start&&frame<impactArea.end?[impactAreaView(impactArea,frame)]:[],steering:steering?{...steering}:null,combos:combos.snapshot(),frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
     const recorded=frames.at(-1);recorded.attackerHurtboxes=fighterHurtboxes({x:0,y:0,facing:options.facing??1},recorded.ownerActive?{attack:attack,frame:frame,timing:tm}:null);
     if(!cast)break;
   }

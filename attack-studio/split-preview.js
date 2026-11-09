@@ -1,5 +1,5 @@
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-hit-links';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-hit-links';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-area-art';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-area-art';
 import {sequenceDuration} from './hit-sequence.js';
 import {presentationFrames} from './preview-clock.js';
 

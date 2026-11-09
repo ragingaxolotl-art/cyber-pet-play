@@ -1,9 +1,9 @@
-import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-hit-links';
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-hit-links';
+import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-area-art';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-area-art';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-hit-links';
-import {validateAttack} from './combat-model.js?v=20261109-hit-links';
-export function renderProjectileEditor({root,attack,commit,status}){
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-area-art';
+import {validateAttack} from './combat-model.js?v=20261109-area-art';
+export function renderProjectileEditor({root,attack,commit,status,effects=new Map()}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);
  const label=document.createElement('label');label.textContent='After attacker interruption';const mode=document.createElement('select');mode.setAttribute('aria-label','Projectile persistence');
@@ -29,7 +29,7 @@ export function renderProjectileEditor({root,attack,commit,status}){
   }
   renderSteeringEditor({root:section,attack,commit,status});
   renderProjectileSplitEditor({root:section,attack,commit,status});
-  if(attack.payload==='damage')renderProjectileAreaEditor({root:section,attack,commit,status});
+  if(attack.payload==='damage')renderProjectileAreaEditor({root:section,attack,commit,status,effects});
   const hint=document.createElement('p');hint.textContent=`60 frames = 1 second. Contact timing and active duration may end the projectile sooner. Saving requires version ${attack.projectileDurability===undefined?7:8} support.`;section.append(hint);
  }
  addContextHelp(section,legend,[...section.children].filter(n=>n.tagName==='P'&&n.getAttribute('role')===null));

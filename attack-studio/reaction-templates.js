@@ -1,4 +1,4 @@
-import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261109-hit-links';
+import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261109-area-art';
 export const REACTION_TEMPLATES_KEY='cyber-pet-reaction-templates-v1';
 export const REACTION_TEMPLATES_FORMAT='cyber-pet-reaction-templates';
 export function validateReactionTemplate(value){

@@ -1,5 +1,5 @@
 // Detached replay data for Studio: never retain mutable fighters or cast trackers.
-import {impactAreaBox} from './projectile-area.js?v=20261109-hurtboxes';
+import {impactAreaBox,impactAreaView} from './projectile-area.js?v=20261109-area-art';
 export function combatPreviewFrame(arena) {
  const actor = fighter => ({hurtboxes:structuredClone(arena.hurtboxesFor(fighter)),name: fighter.name, x: fighter.x, y: fighter.y,
   hp: fighter.hp, maxHP: fighter.maxHP, energy: fighter.energy,
@@ -24,7 +24,7 @@ export function combatPreviewFrame(arena) {
  return {frame: arena.frame, presentationFrame: arena.presentationFrame,
   hitstopRemaining: arena.hitstopRemaining, fighters: arena.fighters.map(actor),
   projectiles, areas: arena.areas.filter(area => area.owner.hp > 0 && area.target.hp > 0 && arena.frame >= area.start && arena.frame < area.end)
-   .map(area => ({...impactAreaBox(area, arena.frame)})),
+   .map(area => (impactAreaView(area, arena.frame))),
   feedback: arena.contactFeedback.map(c => ({attacker:arena.fighters.indexOf(c.attacker),target:arena.fighters.indexOf(c.target),damage:c.damage??0,outcome:c.outcome})),
   hitResults: structuredClone(arena.lastHitResults),
   contacts: structuredClone(arena.lastProjectileContacts),

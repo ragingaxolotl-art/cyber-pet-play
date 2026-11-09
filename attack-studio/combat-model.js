@@ -4,8 +4,8 @@ import {validateHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {animationAnchorAt,validateAnchorBindings} from './animation-anchors.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery,validateGuardInteraction} from './guard-interaction.js?v=20261109-guard';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-split';
-import {simulateSplitPreview} from './split-preview.js?v=20261109-hit-links';
-import {validateProjectileArea,createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261109-hurtboxes';
+import {simulateSplitPreview} from './split-preview.js?v=20261109-area-art';
+import {validateProjectileArea,createImpactArea,claimAreaHit,impactAreaBox,impactAreaView,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
 import {validateProjectileContact,consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering,validateProjectileSteering} from './projectile-steering.js';
 import {startBoundaryBounce,validateBounces} from './bounce-rules.js';
@@ -22,7 +22,7 @@ import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=2026
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
 import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
-import {requireGroupVersion} from './attack-format.js?v=20261109-hit-links';
+import {requireGroupVersion} from './attack-format.js?v=20261109-area-art';
 import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-rotation';
 import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-durability';
 import {hasLegacyMotion,sampleLegacyMotion} from './legacy-motion.js?v=20261108-durability';
@@ -30,7 +30,7 @@ import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-dura
 import {pathSample} from './attack-motion.js?v=20261108-durability';
 import {HITBOX_SHAPES,shapeHitsRectangle,validateHitboxRotation} from './hitbox-shapes.js?v=20261109-rotation';
 import {validateHitSequence,advancePulseReaction} from './hit-sequence.js?v=20261108-hitstun';
-import {simulateSequence} from './sequence-preview.js?v=20261109-hit-links';
+import {simulateSequence} from './sequence-preview.js?v=20261109-area-art';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -51,7 +51,7 @@ export function validateAttack(a,ids){
  validateContactFeedback(a.contactFeedback);validateComboScaling(a.comboScaling);validateCounterHit(a.counterHit);validateHitstunScaling(a.hitstunScaling);validateBounces(a.bounces);
  if(a.bounces&&(a.hitEvents||!['damage','push'].includes(a.payload)))fail('Bounce settings require ordinary damage/push attacks; use per-hit bounces for sequences.');
  if((a.bounces?.wall&&a.wallSlam)||(a.bounces?.floor&&a.floorSlam))fail('Choose either a slam or a bounce for the same boundary.');
- validateProjectileLifetime(a);validateProjectileContact(a);validateProjectileArea(a);validateProjectileSplit(a);validateGuardInteraction(a);validateProjectileSteering(a.projectileSteering);
+ validateProjectileLifetime(a);validateProjectileContact(a);validateProjectileArea(a,ids);validateProjectileSplit(a);validateGuardInteraction(a);validateProjectileSteering(a.projectileSteering);
  if(a.projectileSteering!==undefined){if(a.projectileLifetime===undefined||a.delivery!=='projectile')fail('Steering requires an independent projectile lifetime.');if(a.motionPath?.length)fail('Choose steering or an authored movement path.');}
  validateCancelWindows(a.cancelWindows);
  validateDefenseWindows(a.defenseWindows);
@@ -87,7 +87,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–27 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–28 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
@@ -221,7 +221,7 @@ export function simulate(a,attacker,target,options={}){
   for(const who of [self,other])who.canAct=who.hp>0&&!who.pulseMotion&&f>=who.stun&&f>=(who.blockstunUntil||0);
   const impactStop=hits>hitsBeforeFeedback&&['damage','push'].includes(a.payload)?(guardContact.guarded&&a.delivery!=='self'?a.contactFeedback?.blockstop:a.contactFeedback?.hitstop)??0:0;
   if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');
-  frames.push({areaHits:impactArea?.targets.get('target')?.hits??0,areas:impactArea&&self.hp>0&&other.hp>0&&f>=impactArea.start&&f<impactArea.end?[impactAreaBox(impactArea,f)]:[],steering:steering?{...steering}:null,combos:combos.snapshot(),frame:f,impactStop,active,ownerActive:cast&&!interrupted&&self.hp>0&&f<(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm)),projectileAlive:!projectileConsumed&&independent&&!steering?.caught&&launched&&self.hp>0&&other.hp>0&&f<tm.startup+a.projectileLifetime&&f<activeEnd(contactMode?impactFrame:tm.startup,tm),box,boxes:a.hitboxGroups?activeGroupBoxes(a.hitboxGroups,f-tm.startup,groupBox):null,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
+  frames.push({areaHits:impactArea?.targets.get('target')?.hits??0,areas:impactArea&&self.hp>0&&other.hp>0&&f>=impactArea.start&&f<impactArea.end?[impactAreaView(impactArea,f)]:[],steering:steering?{...steering}:null,combos:combos.snapshot(),frame:f,impactStop,active,ownerActive:cast&&!interrupted&&self.hp>0&&f<(independent?tm.startup+tm.active+tm.recovery:castEnd(contactMode?impactFrame:tm.startup,tm)),projectileAlive:!projectileConsumed&&independent&&!steering?.caught&&launched&&self.hp>0&&other.hp>0&&f<tm.startup+a.projectileLifetime&&f<activeEnd(contactMode?impactFrame:tm.startup,tm),box,boxes:a.hitboxGroups?activeGroupBoxes(a.hitboxGroups,f-tm.startup,groupBox):null,targetBox,contact,self:{...self},target:{...other},hits,modifiers});
     const recorded=frames.at(-1);recorded.attackerHurtboxes=fighterHurtboxes({x:0,y:0,facing:options.facing??1},recorded.ownerActive?{attack:a,frame:f,timing:tm}:null);
  }
  if(cast&&!hits&&!['block','dodge'].includes(a.payload))event(contactMode?contactDeadline:tm.startup+tm.active,contactMode?'Miss — no opponent contact before travel timeout.':'Miss — no hitbox contact during the active window.');
