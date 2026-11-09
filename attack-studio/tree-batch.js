@@ -1,4 +1,4 @@
-import {copyAttack} from './tree-operations.js?v=20261109-tree-workspace';
+import {copyAttack} from './tree-operations.js?v=20261109-tree-workspace-2';
 // Build one candidate so a batch is validated and undone as one tree edit.
 export function addIndependentAttacks(tree, entries, pathId, makeId=()=>crypto.randomUUID()) {
  if (!entries.length) throw Error('Select at least one attack.');

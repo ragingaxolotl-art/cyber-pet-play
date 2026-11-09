@@ -33,3 +33,12 @@ export function readiness(tree){
  for(const n of tree.nodes){if(n.state!=='ready'||!n.attack)issues.push({id:n.id,text:'Finish attack setup and mark Ready.'});if(n.attack){if(attackIds.has(n.attack.id))issues.push({id:n.id,text:'Duplicate attack identity: make an independent copy.'});attackIds.add(n.attack.id);}if(n.cost!==undefined&&(!Number.isInteger(n.cost)||n.cost<0||n.cost>100))issues.push({id:n.id,text:'Learning cost must be a whole number from 0 to 100.'});}
  return issues;
 }
+
+// A new tree is a new lesson; imported revisions keep IDs, explicit duplicates do not.
+export function copyTree(tree,makeId=()=>crypto.randomUUID()){
+ const next=structuredClone(tree),nodes=new Map(tree.nodes.map(n=>[n.id,makeId()])),attacks=new Map(tree.nodes.filter(n=>n.attack).map(n=>[n.id,'attack_'+makeId().replaceAll('-','_')]));
+ for(const node of next.nodes){const old=node.id;node.id=nodes.get(old);node.requires=node.requires.map(id=>nodes.get(id));if(node.attack){node.attack=copyAttack(node.attack,attacks.get(old));for(const window of node.attack.cancelWindows||[])window.attacks=window.attacks.map(id=>{const source=tree.nodes.find(n=>n.attack?.id===id);return source?attacks.get(source.id):id;});}}
+ if(next.starterSkills)next.starterSkills=next.starterSkills.map(id=>nodes.get(id));
+ if(next.edgeDetails)for(const edge of next.edgeDetails){edge.from=nodes.get(edge.from);edge.to=nodes.get(edge.to);}
+ return next;
+}
