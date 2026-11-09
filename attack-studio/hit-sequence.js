@@ -1,4 +1,4 @@
-import {validateReactionAlternatives} from './conditional-reactions.js?v=20261109-conditional-release';
+import {validateReactionAlternatives} from './conditional-reactions.js?v=20261109-presentation-release';
 import {startBoundaryBounce,validateBounces} from './bounce-rules.js?v=20261108-bounces';
 import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-bounces';
 export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-bounces';

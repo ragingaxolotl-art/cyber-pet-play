@@ -1,13 +1,13 @@
-import {renderThrowEditor} from './throw-editor.js?v=20261109-conditional-release';
-import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-conditional-release';
-import {renderGuardEditor} from './guard-editor.js?v=20261109-conditional-release';
+import {renderThrowEditor} from './throw-editor.js?v=20261109-presentation-release';
+import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-presentation-release';
+import {renderGuardEditor} from './guard-editor.js?v=20261109-presentation-release';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-conditional-release';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-conditional-release';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-conditional-release';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-conditional-release';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-conditional-release';
-import {validateAttack} from './combat-model.js?v=20261109-conditional-release';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-presentation-release';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-presentation-release';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-presentation-release';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-presentation-release';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-presentation-release';
+import {validateAttack} from './combat-model.js?v=20261109-presentation-release';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

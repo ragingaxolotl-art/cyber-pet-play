@@ -1,4 +1,4 @@
-import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261109-conditional-release';
+import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261109-presentation-release';
 export const REACTION_TEMPLATES_KEY='cyber-pet-reaction-templates-v1';
 export const REACTION_TEMPLATES_FORMAT='cyber-pet-reaction-templates';
 export function validateReactionTemplate(value){

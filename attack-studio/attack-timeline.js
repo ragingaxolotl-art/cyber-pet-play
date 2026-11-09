@@ -1,10 +1,10 @@
 import {renderTimelineFrames} from './timeline-frames.js?v=20261109-preview-frames';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261109-conditional-release';
+import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261109-presentation-release';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261109-hurtboxes';
 import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-group-drag-lanes';
 import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-shared-juggle';
-import {validateAttack} from './combat-model.js?v=20261109-conditional-release';
+import {validateAttack} from './combat-model.js?v=20261109-presentation-release';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
  const startup=simulation.timing.startup,contact=simulation.impactFrame??startup,geometryBase=attack.hitEvents?contact:startup,groups=[];
  if(attack.hitboxGroups)for(const [i,g] of attack.hitboxGroups.entries())groups.push({id:g.id,boxes:g.boxes.map((b,j)=>({...b,start:geometryBase+b.start,minStart:geometryBase,maxStart:geometryBase+attack.active-b.duration,label:`G${i+1} · Box ${j+1}`}))});
@@ -12,6 +12,7 @@ export function timelineTracks(attack,simulation,effects,poseCount=0){
  const visuals=attack.visuals.flatMap((v,i)=>{const e=effects.get(v.effectId);return e?[{id:String(i),start:v.start,duration:Math.ceil(cycleFrames(e,v)/v.rate),maxStart:600,lockDuration:!!(v.loopUntilImpact||(v.loop??e.loop)),label:`Effect ${i+1}${v.loopUntilImpact?' · to contact':(v.loop??e.loop)?' · repeating cycle':''}`}]:[];});if(visuals.length)groups.push({id:'effects',boxes:visuals});
  if(['block','dodge'].includes(attack.payload))groups.push({id:'defense',boxes:[{id:'window',start:startup,duration:attack.active,lockStart:true,label:attack.payload==='block'?'Block window':'Dodge window'}]});
  if(attack.defenseWindows)groups.push({id:'armor',boxes:attack.defenseWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:w.kind==='armor'?`Armor ${i+1} · ${w.hits} hits · ${w.against}`:w.kind==='parry'?`Parry ${i+1} · ${w.hits} hits · ${w.stun}f interruption`:`Invulnerability ${i+1} · ${w.against}`}))});
+ for(const kind of ['sound','camera']){const events=(attack.presentationEvents||[]).filter(e=>kind==='sound'?e.kind==='sound':e.kind!=='sound');if(events.length)groups.push({id:kind,boxes:events.map((e,i)=>({id:e.id,start:e.start,duration:e.duration,maxStart:900-e.duration,label:kind==='sound'?`Sound ${i+1} · ${e.preset}`:`Camera ${i+1} · ${e.kind}`}))});}
  if(attack.attackerMotion)groups.push({id:'attackerMotion',boxes:attack.attackerMotion.map((m,i)=>({id:m.id,start:m.start,duration:m.duration,maxStart:900-m.duration,label:`Attacker movement ${i+1}`}))});
  if(attack.movementCancels)groups.push({id:'movementCancels',boxes:attack.movementCancels.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:`Movement ${i+1} · ${w.action} · ${w.condition}`}))});
  if(attack.cancelWindows)groups.push({id:'cancels',boxes:attack.cancelWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:`Follow-up ${i+1} · ${w.automatic?'automatic · ':''}${w.condition}`}))});
@@ -30,6 +31,7 @@ function applyTimelineWindow(attack,tracks,effects,groupId,boxId,window){
   next.poseDurations=durations.map(d=>d*factor);
  }
  else if(groupId==='armor'){const defense=next.defenseWindows.find(w=>w.id===boxId);defense.start=window.start;defense.duration=window.duration;}
+ else if(groupId==='sound'||groupId==='camera'){const event=next.presentationEvents.find(e=>e.id===boxId);event.start=window.start;event.duration=window.duration;}
  else if(groupId==='attackerMotion'){const motion=next.attackerMotion.find(m=>m.id===boxId);motion.start=window.start;motion.duration=window.duration;next.attackerMotion.sort((a,b)=>a.start-b.start);}
  else if(groupId==='movementCancels'){const cancel=next.movementCancels.find(w=>w.id===boxId);cancel.start=window.start;cancel.duration=window.duration;}
  else if(groupId==='cancels'){const cancel=next.cancelWindows.find(w=>w.id===boxId);cancel.start=window.start;cancel.duration=window.duration;}

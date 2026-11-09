@@ -2,6 +2,7 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.presentationEvents)add('presentation-events','info','Sound and camera events require version 34 saving.','Events follow combat frames and stop when the attack ends or is interrupted. They do not extend recovery. Mute and reduced-motion preferences override playback. Test late events against the attack duration.');
  if(attack.hitEvents?.some(e=>e.reactionAlternatives))add('conditional-reactions','info','Grounded/airborne reaction alternatives require version 33 saving.','Target height at contact selects the reaction before combo scaling. Damage and eligibility stay unchanged. Test both standing and airborne scenarios; alternative bounce settings are independent.');
  if(attack.attackerMotion)add('attacker-motion','info','Authored fighter movement requires version 32 saving.','Movement uses absolute combat frames and may extend recovery. Test distance, stage walls and interruptions; the hitbox/effect path is separate. Launched projectiles do not follow later owner movement.');
  if(attack.throw)add('throw','info','Grab holds and releases require version 31 saving.','Use a nearby target. Guard and armor do not stop capture; dodge and throw invulnerability do. Test mutual grabs and interruption in Arena.');

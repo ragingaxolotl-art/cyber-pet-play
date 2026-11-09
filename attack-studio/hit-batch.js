@@ -1,5 +1,5 @@
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
-import {validateAttack} from './combat-model.js?v=20261109-conditional-release';
+import {validateAttack} from './combat-model.js?v=20261109-presentation-release';
 export const BATCH_HIT_FIELDS={damage:'Damage',reaction:'Reaction',target:'Eligible target',height:'Launch height',knockback:'Knockback',frames:'Reaction travel',hold:'Suspend time'};
 export function editHitBatch(attack,ids,key,value){
  if(!Object.hasOwn(BATCH_HIT_FIELDS,key))throw Error('Choose a supported hit property.');
