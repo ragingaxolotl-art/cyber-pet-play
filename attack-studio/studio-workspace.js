@@ -18,7 +18,8 @@ export function installStudioWorkspace(){
  let state;try{state=safeLayout(JSON.parse(localStorage.getItem(KEY)));}catch{state=safeLayout(null);}
  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));}catch{$('status').textContent='Layout works for this session, but browser storage is unavailable.';}};
  function menu(name){const d=make('details'),s=make('summary',name),body=make('div');d.className='workspace-menu';body.className='workspace-menu-body';d.append(s,body);nav.append(d);d.addEventListener('toggle',()=>{if(d.open)for(const other of nav.querySelectorAll('.workspace-menu'))if(other!==d)other.open=false;});return body;}
- const file=menu('File'),tools=menu('Editors'),windows=menu('Workspace');
+ const file=menu('File'),tools=menu('Editors'),windows=menu('Workspace'),panelWindows=menu('Windows');
+ const panelHint=make('p','Choose which panels are visible. Hiding a panel keeps its settings.');panelHint.className='hint';panelWindows.append(panelHint);
  for(const id of ['open','save','download'])file.append($(id));
  for(const link of [...nav.children].filter(e=>e.tagName==='A'))tools.append(link);
  const controls=$('editorMode').closest('label');controls.classList.add('workspace-controls');$('export').after(controls);
@@ -47,7 +48,7 @@ export function installStudioWorkspace(){
   for(const [value,text] of [['left','Dock left'],['center','Dock center'],['right','Dock right'],['float','Float']])dock.add(new Option(text,value));
   resize.className='workspace-resize';resize.setAttribute('aria-label','Resize '+handle.textContent);resize.title='Drag to resize; arrow keys adjust size';
   bar.append(handle,dock,collapse,hide);body.append(panel);shell.append(bar,body,resize);columns[p.dock].append(shell);
-  const label=make('label'),checkbox=make('input');checkbox.type='checkbox';label.append(checkbox,document.createTextNode(handle.textContent));windows.append(label);
+  const label=make('label'),checkbox=make('input');checkbox.type='checkbox';label.append(checkbox,document.createTextNode(handle.textContent));panelWindows.append(label);
   const r={shell,body,state:p,collapse,hide,checkbox,dock,id};records.push(r);
   checkbox.onchange=()=>{p.hidden=!checkbox.checked;show(r);persist();};hide.onclick=()=>{p.hidden=true;show(r);persist();};collapse.onclick=()=>{p.collapsed=!p.collapsed;show(r);persist();};dock.onchange=()=>{if(dock.value==='float')float(r);else{p.floating=false;p.dock=dock.value;}show(r);persist();};
   function drag(target,resizing){target.onpointerdown=e=>{if(state.locked||state.previewStack||e.button!==0)return;e.preventDefault();float(r);shell.style.zIndex=String(++front);const start={x:e.clientX,y:e.clientY,...{px:p.x,py:p.y,w:p.w,h:p.h}};target.setPointerCapture(e.pointerId);target.onpointermove=v=>{if(resizing){p.w=start.w+v.clientX-start.x;p.h=start.h+v.clientY-start.y;}else{p.x=start.px+v.clientX-start.x;p.y=start.py+v.clientY-start.y;}show(r);};const end=()=>{target.onpointermove=null;persist();};target.onpointerup=end;target.onpointercancel=end;};target.onkeydown=e=>{if(state.locked||state.previewStack)return;if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();float(r);const dx=e.key==='ArrowLeft'?-20:e.key==='ArrowRight'?20:0,dy=e.key==='ArrowUp'?-20:e.key==='ArrowDown'?20:0;if(resizing){p.w+=dx;p.h+=dy;}else{p.x+=dx;p.y+=dy;}show(r);persist();};}
