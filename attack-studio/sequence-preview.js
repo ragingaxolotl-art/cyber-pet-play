@@ -3,15 +3,15 @@ import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=2026
 import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaView,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering} from './projectile-steering.js?v=20261108-steering';
-import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
+import {recoverInAir,validateRecoveryFrame} from './air-recovery.js?v=20261109-throw-release';
 import {scaledHitEvent} from './hitstun-scaling.js?v=20261108-hitstun';
 import {scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
 import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
-import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
+import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261109-throw-release';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261109-melee-clashes';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-projectile-flight-release';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-throw-release';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 

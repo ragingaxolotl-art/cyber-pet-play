@@ -3,6 +3,7 @@
 // It grants neither invulnerability nor a renewed juggle budget.
 export const AIR_RECOVERY_RULES=Object.freeze({minimumHitAge:12});
 export function airRecoveryReason(target,frame){
+ if(target.captured||target.holding)return 'Finish the throw first';
  if(target.hp<=0)return 'Defeated fighters cannot recover';
  if(target.y>=0)return 'Air recovery requires an airborne fighter';
  if(target.airRecoveryUsed)return 'Land before another air recovery';

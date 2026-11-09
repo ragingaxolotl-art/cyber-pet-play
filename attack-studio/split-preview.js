@@ -1,5 +1,5 @@
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-projectile-flight-release';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-projectile-flight-release';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-throw-release';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-throw-release';
 import {sequenceDuration} from './hit-sequence.js';
 import {presentationFrames} from './preview-clock.js';
 
@@ -7,7 +7,7 @@ import {presentationFrames} from './preview-clock.js';
 export function simulateSplitPreview(attack,attacker,target,options={}) {
  const origin=480, tm=timing(attack,attacker);
  if(attack.hitEvents)tm.active=sequenceDuration(attack);
- const end=Math.min(1800,Math.max(180,tm.startup+attack.projectileLifetime+(attack.projectileSplit?.lifetime??0)+(attack.projectileArea?.duration??0)+attack.statusDuration+attack.flightFrames, (options.incomingFrame??0)+120,(options.recoveryFrame??0)+120));
+ const end=Math.min(1800,Math.max(180,tm.startup+(attack.projectileLifetime??(attack.impactTrigger==='contact'?601:tm.active))+(attack.throw?.holdFrames??0)+tm.recovery+(attack.projectileSplit?.lifetime??0)+(attack.projectileArea?.duration??0)+attack.statusDuration+attack.flightFrames, (options.incomingFrame??0)+120,(options.recoveryFrame??0)+120));
  const result=simulateRuntimeAttack(attack,attacker,target,{...options,attackerX:origin,targetX:origin+(options.targetSide??1)*(options.distance??100),frames:end,selfHP:options.selfHP??.6,targetHP:options.targetHP??.7});
  const comboNames=chains=>chains.map(c=>({...c,attacker:c.attacker===0?'self':'target',target:c.target===0?'self':'target'}));
  const events=[],frames=[],hitResults=[];let hits=0,areaHits=0,impactFrame=null;
@@ -17,13 +17,14 @@ export function simulateSplitPreview(attack,attacker,target,options={}) {
  for(const shot of samples){
   hitResults.push(...shot.hitResults.filter(r=>r.owner===0).map(r=>({...r,frame:r.frame===null?null:r.frame-1})));
   const frame=frames.length,self=actor(shot.fighters[0]),other=actor(shot.fighters[1]);
+  for(const grab of shot.throws||[])events.push({frame,text:grab.outcome});
   for(const contact of shot.contacts||[])if(contact.outcome==='range limit')events.push({frame,text:'Projectile reached its travel range.'});
   for(const hit of shot.feedback||[])if(hit.attacker===0){hits++;impactFrame??=frame;events.push({frame,text:`${hit.outcome}: ${hit.damage} damage`});}
   areaHits+=shot.areaContacts.filter(c=>c.owner===0&&!c.parried).length;
   const projectiles=shot.projectiles.map(p=>({...p,box:box(p.box),boxes:p.boxes?.map(box),flight:p.flight?{...p.flight,x:p.flight.x-origin}:null,steering:p.steering?{...p.steering,x:p.steering.x-origin}:null,splitRay:p.splitRay?{...p.splitRay,x:p.splitRay.x-origin}:null}));
   const boxes=projectiles.flatMap(p=>p.boxes||[p.box]);
   const primary=boxes[0]||worldBox(attack,frame,attacker,options.facing??1);
-  frames.push({frame,attackerHurtboxes:self.hurtboxes?.map(box),self,target:other,projectiles,box:primary,boxes,targetBox:{x:other.x-14,y:other.y-60,w:28,h:60},areas:shot.areas.map(box),hits,areaHits,active:projectiles.length>0,ownerActive:self.ownerActive,projectileAlive:projectiles.length>0,steering:projectiles[0]?.steering??null,impactStop:shot.hitstopRemaining,contact:shot.feedback.length>0,combos:comboNames(shot.combos),modifiers:shot.fighters.flatMap((f,index)=>f.statuses.map(s=>({recipient:index?'target':'self',kind:s.type,power:s.power,remaining:s.until-shot.frame})))});
+  frames.push({frame,attackerHurtboxes:self.hurtboxes?.map(box),self,target:other,projectiles,box:primary,boxes,targetBox:{x:other.x-14,y:other.y-60,w:28,h:60},areas:shot.areas.map(box),hits,areaHits,active:attack.throw?!!self.holding:projectiles.length>0,ownerActive:self.ownerActive,projectileAlive:projectiles.length>0,steering:projectiles[0]?.steering??null,impactStop:shot.hitstopRemaining,contact:shot.feedback.length>0,combos:comboNames(shot.combos),modifiers:shot.fighters.flatMap((f,index)=>f.statuses.map(s=>({recipient:index?'target':'self',kind:s.type,power:s.power,remaining:s.until-shot.frame})))});
  }
  if(result.reason)events.push({frame:0,text:result.reason});
  if(result.incoming?.attempted)events.push({frame:result.incoming.combatFrame,text:result.incoming.started?'Incoming test hit attempted':result.incoming.reason});

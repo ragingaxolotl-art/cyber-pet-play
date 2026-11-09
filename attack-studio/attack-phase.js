@@ -6,6 +6,7 @@ import {ownerActionEnd} from './projectile-lifetime.js?v=20261109-split';
 // This describes timing only, not whether armor/guard permits a counter-hit.
 export function attackPhase(cast,frame){
  if(!cast)return 'idle';
+ if(cast.throwSpent)return cast.throwRecoveryEnd===undefined?'active':frame<cast.throwRecoveryEnd?'recovery':'idle';
  const age=frame-cast.start;
  if(age<0)return 'idle';
  const independentEnd=ownerActionEnd(cast);

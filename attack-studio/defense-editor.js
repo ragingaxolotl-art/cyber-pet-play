@@ -1,12 +1,13 @@
-import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-projectile-flight-release';
-import {renderGuardEditor} from './guard-editor.js?v=20261109-projectile-flight-release';
+import {renderThrowEditor} from './throw-editor.js?v=20261109-throw-release';
+import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-throw-release';
+import {renderGuardEditor} from './guard-editor.js?v=20261109-throw-release';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-projectile-flight-release';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-projectile-flight-release';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-projectile-flight-release';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-projectile-flight-release';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-projectile-flight-release';
-import {validateAttack} from './combat-model.js?v=20261109-projectile-flight-release';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-throw-release';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-throw-release';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-throw-release';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-throw-release';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-throw-release';
+import {validateAttack} from './combat-model.js?v=20261109-throw-release';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));
@@ -29,9 +30,10 @@ export function renderDefenseEditor({root,attack,commit,status}){
    input.onchange=()=>{const value=Number(input.value);if(input.value!==''&&(!Number.isInteger(value)||value<0||value>100)){status('Use 0–100 whole energy points, or leave blank for none.');input.value=window.energyGain??'';return;}mutate(next=>{if(input.value==='')delete next.defenseWindows[index].energyGain;else next.defenseWindows[index].energyGain=value;});};label.append(input);section.append(label,make('p','Awarded once per absorbed projectile, capped at maximum energy. Exhausted windows, misses, reflection and invulnerability award none. Arena comparison reports the amount actually restored.'));
   }
   const label=make('label','Protect against'),select=make('select');select.setAttribute('aria-label',`${title} ${index+1} attack types`);
-  for(const [value,text] of [['all','All attack types'],['melee','Melee'],['projectile','Projectiles'],['area','Area attacks']])select.add(new Option(text,value));select.value=window.against;select.disabled=['reflect','absorb'].includes(window.kind);select.onchange=()=>mutate(next=>next.defenseWindows[index].against=select.value);label.append(select);section.append(label);
+  for(const [value,text] of [['all','All attack types'],['melee','Melee'],['projectile','Projectiles'],['area','Area attacks']])select.add(new Option(text,value));if(window.kind==='invulnerability')select.add(new Option('Throws','throw'));select.value=window.against;select.disabled=['reflect','absorb'].includes(window.kind);select.onchange=()=>mutate(next=>next.defenseWindows[index].against=select.value);label.append(select);section.append(label);
   const remove=make('button',`Delete ${window.kind} ${index+1}`);remove.type='button';remove.onclick=()=>mutate(next=>{next.defenseWindows.splice(index,1);if(!next.defenseWindows.length)delete next.defenseWindows;});section.append(remove);root.append(section);
  }
+ const grabs=make('section');root.append(grabs);renderThrowEditor({root:grabs,attack,commit,status});
  const clash=make('section');root.append(clash);renderMeleeClashEditor({root:clash,attack,commit,status});
  const guard=make('section');root.append(guard);renderGuardEditor({root:guard,attack,commit,status});
  const feedback=make('section');root.append(feedback);renderContactFeedbackEditor({root:feedback,attack,commit,status});

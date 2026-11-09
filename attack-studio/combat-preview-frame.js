@@ -4,7 +4,7 @@ export function combatPreviewFrame(arena) {
  const actor = fighter => ({hurtboxes:structuredClone(arena.hurtboxesFor(fighter)),name: fighter.name, x: fighter.x, y: fighter.y,
   hp: fighter.hp, maxHP: fighter.maxHP, energy: fighter.energy,
   shield: fighter.shield, facing: fighter.facing, reaction: fighter.reaction,
-  blocking: fighter.guarding, ownerActive: !!fighter.cast, reactionStart: fighter.reactionStart, reactionUntil: fighter.reactionUntil,
+  captured: !!fighter.captured, holding: !!fighter.holding, blocking: fighter.guarding, ownerActive: !!fighter.cast, reactionStart: fighter.reactionStart, reactionUntil: fighter.reactionUntil,
   lastHit: fighter.lastHit, hitstunUntil: fighter.hitstunUntil, reactionInFlight: fighter.reactionInFlight,
   stun: fighter.stun, statuses: structuredClone(fighter.statuses)});
  const projectiles = arena.projectiles.entries
@@ -27,6 +27,7 @@ export function combatPreviewFrame(arena) {
   projectiles, areas: arena.areas.filter(area => area.owner.hp > 0 && area.target.hp > 0 && arena.frame >= area.start && arena.frame < area.end)
    .map(area => (impactAreaView(area, arena.frame))),
   feedback: arena.contactFeedback.map(c => ({attacker:arena.fighters.indexOf(c.attacker),target:arena.fighters.indexOf(c.target),damage:c.damage??0,outcome:c.outcome})),
+  throws: structuredClone(arena.lastThrows),
   hitResults: structuredClone(arena.lastHitResults),
   contacts: structuredClone(arena.lastProjectileContacts),
   areaContacts: structuredClone(arena.lastAreaContacts),

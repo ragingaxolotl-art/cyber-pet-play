@@ -10,8 +10,9 @@ export function validateDefenseWindows(windows) {
   ids.add(w.id);
   if(w.energyGain!==undefined&&(w.kind!=='absorb'||!Number.isInteger(w.energyGain)||w.energyGain<0||w.energyGain>100))throw Error('Absorption energy must be 0–100 whole points and belongs only to absorb windows.');
   if(['reflect','absorb'].includes(w.kind)&&w.against!=='projectile')throw Error('Reflection and absorption protect against projectiles only.');
+  if(w.against==='throw'&&w.kind!=='invulnerability')throw Error('Throw defense requires an invulnerability window.');
   if(w.kind==='parry'&&(!Number.isInteger(w.stun)||w.stun<1||w.stun>60))throw Error('Parry interruption must last 1–60 frames.');
-  if(!['armor','invulnerability','parry','reflect','absorb'].includes(w.kind)||!['all','melee','projectile','area'].includes(w.against))throw Error('Invalid defense window type or attack filter.');
+  if(!['armor','invulnerability','parry','reflect','absorb'].includes(w.kind)||!['all','melee','projectile','area','throw'].includes(w.against))throw Error('Invalid defense window type or attack filter.');
   if(!Number.isInteger(w.start)||w.start<0||!Number.isInteger(w.duration)||w.duration<1||w.start+w.duration>900)throw Error('Defense windows must fit within 900 frames.');
   if(['armor','parry','reflect','absorb'].includes(w.kind)&&(!Number.isInteger(w.hits)||w.hits<1||w.hits>10))throw Error('Armor absorbs reactions from 1–10 hits per window.');
  }
@@ -23,7 +24,7 @@ export function defenseSnapshot(cast,age){
  return {state:cast.defenseState,windows:(cast.a.defenseWindows||[]).filter(w=>age>=w.start&&age<w.start+w.duration)};
 }
 export function claimArmor(snapshot,attack){
- if(!snapshot?.state||!['damage','push'].includes(attack.payload))return false;
+ if(attack.throw||!snapshot?.state||!['damage','push'].includes(attack.payload))return false;
  for(const w of snapshot.windows){
   if(w.kind!=='armor')continue;
   if(w.against!=='all'&&w.against!==attack.delivery)continue;
@@ -36,12 +37,12 @@ export function claimArmor(snapshot,attack){
 
 // Invulnerability has no charge budget. It rejects eligible damage and pushes.
 export function isInvulnerable(snapshot,attack){
- return !!snapshot&&['damage','push'].includes(attack.payload)&&snapshot.windows.some(w=>w.kind==='invulnerability'&&(w.against==='all'||w.against===attack.delivery));
+ return !!snapshot&&['damage','push'].includes(attack.payload)&&snapshot.windows.some(w=>w.kind==='invulnerability'&&(w.against==='all'||w.against===(attack.throw?'throw':attack.delivery)));
 }
 
 // Parry charges are separate from armor, consumed only by eligible contacts.
 export function claimParry(snapshot,attack){
- if(!snapshot?.state||!['damage','push'].includes(attack.payload))return null;
+ if(attack.throw||!snapshot?.state||!['damage','push'].includes(attack.payload))return null;
  for(const w of snapshot.windows){
   if(w.kind!=='parry'||(w.against!=='all'&&w.against!==attack.delivery))continue;
   const used=snapshot.state.get(w.id)||0;if(used>=w.hits)continue;

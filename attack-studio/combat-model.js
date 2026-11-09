@@ -1,3 +1,4 @@
+import {validateThrow} from './throw-rules.js?v=20261109-throw-release';
 import {validateProjectileFlight} from './projectile-flight.js?v=20261109-projectile-flight-release';
 import {validateMeleeClash} from './melee-clashes.js?v=20261109-melee-clashes';
 import {validateHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
@@ -6,12 +7,12 @@ import {validateHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {animationAnchorAt,validateAnchorBindings} from './animation-anchors.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery,validateGuardInteraction} from './guard-interaction.js?v=20261109-guard';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-projectile-flight-release';
-import {simulateSplitPreview} from './split-preview.js?v=20261109-projectile-flight-release';
+import {simulateSplitPreview} from './split-preview.js?v=20261109-throw-release';
 import {validateProjectileArea,createImpactArea,claimAreaHit,impactAreaBox,impactAreaView,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
 import {validateProjectileContact,consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering,validateProjectileSteering} from './projectile-steering.js';
 import {startBoundaryBounce,validateBounces} from './bounce-rules.js';
-import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
+import {recoverInAir,validateRecoveryFrame} from './air-recovery.js?v=20261109-throw-release';
 import {validateHitstunScaling,scaledHitReaction} from './hitstun-scaling.js?v=20261108-hitstun';
 import {validateCounterHit} from './counter-hit.js?v=20261108-counter-hit';
 import {validateComboScaling,scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
@@ -23,8 +24,8 @@ import {validateProjectileLifetime} from './projectile-lifetime.js?v=20261109-sp
 import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=20261108-durability';
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
-import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
-import {requireGroupVersion} from './attack-format.js?v=20261109-projectile-flight-release';
+import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261109-throw-release';
+import {requireGroupVersion} from './attack-format.js?v=20261109-throw-release';
 import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-melee-clashes';
 import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-durability';
 import {hasLegacyMotion,sampleLegacyMotion} from './legacy-motion.js?v=20261108-durability';
@@ -32,7 +33,7 @@ import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-dura
 import {pathSample} from './attack-motion.js?v=20261108-durability';
 import {HITBOX_SHAPES,shapeHitsRectangle,validateHitboxRotation} from './hitbox-shapes.js?v=20261109-rotation';
 import {validateHitSequence,advancePulseReaction} from './hit-sequence.js?v=20261108-hitstun';
-import {simulateSequence} from './sequence-preview.js?v=20261109-projectile-flight-release';
+import {simulateSequence} from './sequence-preview.js?v=20261109-throw-release';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -48,7 +49,7 @@ const fail=s=>{throw Error(s);};
 function num(o,key,min,max,integer=false){const v=o[key];if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max||(integer&&!Number.isInteger(v)))fail(`${key} must be ${integer?'a whole number ':''}between ${min} and ${max}.`);}
 export function validateAttack(a,ids){
  if(!a||typeof a!=='object')fail('Invalid attack.');
- validateProjectileFlight(a);validateMeleeClash(a);validateHitSequence(a);validateAnchorBindings(a);validateHurtboxes(a);validateHitPropertyLinks(a);
+ validateThrow(a);validateProjectileFlight(a);validateMeleeClash(a);validateHitSequence(a);validateAnchorBindings(a);validateHurtboxes(a);validateHitPropertyLinks(a);
  validateMovementCancels(a.movementCancels);
  validateContactFeedback(a.contactFeedback);validateComboScaling(a.comboScaling);validateCounterHit(a.counterHit);validateHitstunScaling(a.hitstunScaling);validateBounces(a.bounces);
  if(a.bounces&&(a.hitEvents||!['damage','push'].includes(a.payload)))fail('Bounce settings require ordinary damage/push attacks; use per-hit bounces for sequences.');
@@ -89,7 +90,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–30 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–31 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
@@ -102,7 +103,7 @@ export function magnitude(a,s){if(['push','block','dodge'].includes(a.payload))r
 export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-Math.round((a.projectileStart??a.startup)*statsFor(s).timing))*a.projectileSpeed:0;const anchorFrame=a.delivery==='projectile'?Math.round((a.projectileStart??a.startup)*statsFor(s).timing):t,anchor=a.box.anchor?animationAnchorAt(a,a.box.anchor,anchorFrame,tm,facing):null;return {x:(facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x)+(anchor?.x||0),y:a.box.y+path.y+(anchor?.y||0),w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing,...(a.box.rotation!==undefined?{rotation:a.box.rotation*facing}:{})};}
 export const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 export function simulate(a,attacker,target,options={}){
- validateRecoveryFrame(options.recoveryFrame);validateAttack(a);if(a.projectileSplit||a.projectileFlight)return simulateSplitPreview(a,attacker,target,options);if(a.hitEvents)return simulateSequence(a,attacker,target,options);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
+ validateRecoveryFrame(options.recoveryFrame);validateAttack(a);if(a.throw||a.projectileSplit||a.projectileFlight)return simulateSplitPreview(a,attacker,target,options);if(a.hitEvents)return simulateSequence(a,attacker,target,options);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;
  const distance=options.distance??100,side=options.targetSide===-1?-1:1;
  let self={hp:Math.round(av.maxHP*(options.selfHP??.6)),maxHP:av.maxHP,energy:Math.round(av.maxEnergy*(options.energy??1)),shield:0,shieldUntil:0,x:0,stun:0,y:0};
  let other={hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,shieldUntil:0,x:side*distance,stun:0,y:-(options.targetHeight??0)};
