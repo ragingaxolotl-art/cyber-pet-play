@@ -9,7 +9,7 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261108-explosion';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-split';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 

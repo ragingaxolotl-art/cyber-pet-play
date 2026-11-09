@@ -1,8 +1,8 @@
-import {renderBounceEditor} from './bounce-editor.js?v=20261108-explosion';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261108-explosion';
-import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261108-explosion';
-import {validateAttack} from './combat-model.js?v=20261108-explosion';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261108-explosion';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-split';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-split';
+import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-split';
+import {validateAttack} from './combat-model.js?v=20261109-split';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-split';
 import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-bounces';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAttacks=()=>null}) {
@@ -70,7 +70,7 @@ export function installSequenceEditor({getAttack,commit,getSimulation,seek,getAt
     const summary=el('strong',`${sim.frames.at(-1).hits} contact(s)${sim.frames.at(-1).areaHits?` · ${sim.frames.at(-1).areaHits} area hit(s)`:""} · ${sim.cost} energy · impact ${sim.impactFrame===null?'not reached':sim.impactFrame+'f'}`);output.append(summary);
     if(sim.combos?.length){const combo=sim.combos.find(c=>c.attacker==='self');if(combo)output.append(el('p',`Outgoing damage chain: up to ${combo.bestHits} hit(s); maximum chain HP damage ${combo.bestDamage}. Guard contacts are excluded. This single-attack preview does not test a follow-up attack; use Arena comparison for cross-attack combos.`));}
     if(sim.hitResults){const table=el('table');const head=el('tr');for(const title of ['Hit','Expected','Actual','Result'])head.append(el('th',title));table.append(head);
-      sim.hitResults.forEach((r,i)=>{const row=el('tr');for(const value of [i+1,(getAttack().sequenceTiming==='cast'?'startup + ':'contact + ')+r.offset,r.frame??'—',r.result+(r.reason?' · '+r.reason:'')])row.append(el('td',String(value)));table.append(row);});output.append(table);
+      sim.hitResults.forEach((r,i)=>{const row=el('tr');for(const value of [r.projectileId!=null?`${i+1} · projectile ${r.projectileId}`:i+1,(getAttack().sequenceTiming==='cast'?'startup + ':'contact + ')+r.offset,r.frame??'—',r.result+(r.reason?' · '+r.reason:'')])row.append(el('td',String(value)));table.append(row);});output.append(table);
     }else{const p=el('p',sim.events.at(-1)?.text||'Run a test to see the result.');output.append(p);}
     const diagnostics=el('section');diagnostics.setAttribute('aria-label','Attack compatibility and test checks');diagnostics.append(el('h3','Compatibility & test checks'));
     const list=el('ul');for(const finding of attackDiagnostics(getAttack(),sim,getAttacks())){const item=el('li');item.dataset.diagnostic=finding.code;item.append(el('strong',finding.level==='warning'?'Check: ':'Note: '),el('span',finding.message+' '+finding.action));list.append(item);}diagnostics.append(list);output.append(diagnostics);

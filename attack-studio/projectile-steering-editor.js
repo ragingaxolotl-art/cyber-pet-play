@@ -1,5 +1,5 @@
 import {addContextHelp} from './context-help.js?v=20261108-static-help';
-import {validateAttack} from './combat-model.js?v=20261108-explosion';
+import {validateAttack} from './combat-model.js?v=20261109-split';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderSteeringEditor({root,attack,commit,status}){
  const section=make('fieldset');section.append(make('legend','Projectile steering'));

@@ -27,6 +27,22 @@ export class ProjectileRegistry{
   const entity={id:this.nextId++,owner,target,cast,durability:cast.a.projectileDurability,spawnFrame:frame,expires:frame+lifetime};
   this.entries.push(entity);cast.projectileLaunched=true;return entity;
  }
+ // Validate in a temporary registry before committing; a rejected split must
+ // leave the parent, siblings, IDs and caller-owned casts unchanged.
+ replaceWithChildren(parent,casts,frame,lifetime){
+  if(!this.entries.includes(parent)||!Number.isInteger(frame)||frame>=parent.expires||frame<parent.spawnFrame||parent.owner.hp<=0||parent.target.hp<=0)throw Error('Splitting requires a live parent projectile.');
+  if(parent.cast.projectileConsumed||parent.cast.sequence?.cancelled||frame-parent.cast.start>=activeEnd(parent.cast.impact,parent.cast.tm))throw Error('The parent projectile has ended.');
+  if(!Array.isArray(casts)||casts.length<2||casts.length>5||new Set(casts).size!==casts.length)throw Error('A split needs 2–5 separate child casts.');
+  if(this.entries.filter(p=>p.owner===parent.owner).length-1+casts.length>PROJECTILE_LIMITS.perOwner)throw Error('Projectile limit reached; split was not created.');
+  const staged=new ProjectileRegistry();
+  for(const cast of casts){
+   if(cast===parent.cast||cast?.a?.projectileSplit!==undefined)throw Error('Children must be independent casts without recursive splitting.');
+   staged.launch(parent.owner,parent.target,{...cast},frame+1,lifetime);
+  }
+  const children=staged.entries.map(child=>({...child,id:this.nextId++}));
+  this.entries=this.entries.filter(p=>p!==parent).concat(children);
+  return children;
+ }
  remove(entity){this.entries=this.entries.filter(p=>p!==entity);}
  prune(frame){this.entries=this.entries.filter(p=>frame<p.expires&&p.owner.hp>0&&p.target.hp>0&&!p.cast.sequence?.cancelled&&frame-p.cast.start<activeEnd(p.cast.impact,p.cast.tm));}
  clear(){this.entries=[];}

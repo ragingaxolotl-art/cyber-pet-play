@@ -1,5 +1,5 @@
 import {activeEnd,castEnd} from './contact-timing.js';
-import {ownerActionEnd} from './projectile-lifetime.js';
+import {ownerActionEnd} from './projectile-lifetime.js?v=20261109-split';
 
 // Capture before resolving any contact. Independent projectiles do not extend
 // their owner's attack phase; contact-triggered moves wait in active phase.

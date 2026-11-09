@@ -1,14 +1,15 @@
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261108-explosion';
+import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-split';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-split';
 import {addContextHelp} from './context-help.js?v=20261108-static-help';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261108-explosion';
-import {validateAttack} from './combat-model.js?v=20261108-explosion';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-split';
+import {validateAttack} from './combat-model.js?v=20261109-split';
 export function renderProjectileEditor({root,attack,commit,status}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);
  const label=document.createElement('label');label.textContent='After attacker interruption';const mode=document.createElement('select');mode.setAttribute('aria-label','Projectile persistence');
  for(const [value,text] of [['cast','End with the move'],['independent','Keep traveling after launch']]){const option=document.createElement('option');option.value=value;option.textContent=text;mode.append(option);}mode.value=attack.projectileLifetime===undefined?'cast':'independent';label.append(mode);section.append(label);
  const mutate=change=>{try{const next=structuredClone(attack);change(next);validateAttack(next);commit(next);}catch(error){status(error.message);}};
- mode.onchange=()=>mutate(next=>{if(mode.value==='independent'){next.projectileLifetime=120;delete next.projectileStart;}else {delete next.projectileLifetime;delete next.projectileDurability;delete next.projectileSteering;delete next.projectileContact;delete next.projectileArea;}});
+ mode.onchange=()=>mutate(next=>{if(mode.value==='independent'){next.projectileLifetime=120;delete next.projectileStart;}else {delete next.projectileLifetime;delete next.projectileDurability;delete next.projectileSteering;delete next.projectileContact;delete next.projectileArea;delete next.projectileSplit;}});
  const note=document.createElement('p');note.textContent='Independent projectiles launch when startup finishes. Interruption before launch cancels them. After launch, expiry, defeat or parry removes them. Enabling this links travel start to startup. Turn persistence off before changing to a different delivery type.';section.append(note);
  if(attack.projectileLifetime!==undefined){
   const contactLabel=document.createElement('label');contactLabel.textContent='On successful contact';const contactMode=document.createElement('select');contactMode.setAttribute('aria-label','Projectile contact behavior');
@@ -27,6 +28,7 @@ export function renderProjectileEditor({root,attack,commit,status}){
    const explanation=document.createElement('p');explanation.textContent='Both projectiles must enable clashes. Each new contact costs one durability; zero destroys the projectile. Continuous overlap costs once. The single-attack preview has no opposing projectile; test clashes in Battle Arena comparison. Saving requires version 8 support.';section.append(explanation);
   }
   renderSteeringEditor({root:section,attack,commit,status});
+  renderProjectileSplitEditor({root:section,attack,commit,status});
   if(attack.payload==='damage')renderProjectileAreaEditor({root:section,attack,commit,status});
   const hint=document.createElement('p');hint.textContent=`60 frames = 1 second. Contact timing and active duration may end the projectile sooner. Saving requires version ${attack.projectileDurability===undefined?7:8} support.`;section.append(hint);
  }

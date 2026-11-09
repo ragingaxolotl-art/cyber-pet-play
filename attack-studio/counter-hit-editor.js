@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261108-explosion';
+import {validateAttack} from './combat-model.js?v=20261109-split';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCounterHitEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h3','Counter-hit bonus'));
