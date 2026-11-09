@@ -1,9 +1,10 @@
+import {validateImpulseReaction} from './impulse-reaction.js?v=20261109-momentum-release';
 import {validateBounces} from './bounce-rules.js';
 // Reaction alternatives are selected from the contact snapshot, before any
 // simultaneous hit changes the target. They never change damage or eligibility.
 export const REACTION_CONDITIONS = Object.freeze(['grounded','airborne']);
 const reactions=['launch','suspend','relaunch','spike','knockback','none'];
-const allowed=new Set(['when','reaction','height','knockback','frames','hold','hitstun','bounces']);
+const allowed=new Set(['when','reaction','height','knockback','frames','hold','hitstun','bounces','impulse']);
 const ranges={height:[0,150],knockback:[0,150],frames:[1,120],hold:[1,30],hitstun:[0,120]};
 
 export function validateReactionAlternatives(alternatives) {
@@ -17,7 +18,8 @@ export function validateReactionAlternatives(alternatives) {
   if(!REACTION_CONDITIONS.includes(rule.when)||seen.has(rule.when))
    throw Error('Each target condition may appear only once.');
   seen.add(rule.when);
-  validateBounces(rule.bounces);
+  validateBounces(rule.bounces);validateImpulseReaction(rule.impulse);
+  if(rule.impulse&&rule.reaction==='none')throw Error('Choose an alternative hit reaction before adding momentum.');
   if(rule.bounces&&['none','suspend'].includes(rule.reaction))throw Error('Bounces require a moving alternative reaction.');
   if(!reactions.includes(rule.reaction))throw Error('Choose a supported alternative reaction.');
   for(const [key,[min,max]] of Object.entries(ranges)){
@@ -41,9 +43,10 @@ export function resolveReactionAlternative(event,contact) {
  if(!rule)return resolved;
  // No implicit inheritance of hitstun/bounces from the default reaction.
  // Omitting hitstun keeps the selected reaction's normal duration rule.
- delete resolved.hitstun;delete resolved.bounces;
+ delete resolved.hitstun;delete resolved.bounces;delete resolved.impulse;
  for(const key of ['reaction','height','knockback','frames','hold','hitstun'])
   if(rule[key]!==undefined)resolved[key]=rule[key];
  if(rule.bounces)resolved.bounces=structuredClone(rule.bounces);
+ if(rule.impulse)resolved.impulse=structuredClone(rule.impulse);
  return resolved;
 }

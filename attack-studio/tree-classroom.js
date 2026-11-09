@@ -1,4 +1,4 @@
-import {treeCloud} from './tree-cloud.js?v=20261109-presentation-release';
+import {treeCloud} from './tree-cloud.js?v=20261109-momentum-release';
 export function installTreeClassroom({getRelease,importRelease}){
  const el=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};const classroom=el('button','Classroom releases');document.querySelector('header nav').append(classroom);
  classroom.onclick=()=>{const dialog=el('dialog'),heading=el('h2','Classroom tree releases'),label=el('label','Teacher password'),password=el('input'),connect=el('button','Connect'),publish=el('button','Publish reviewed local release'),load=el('button','Import selected classroom data set'),picker=el('select'),message=el('p','Publish data set first to create a reviewed local release.'),close=el('button','Close');password.type='password';password.autocomplete='current-password';label.append(password);picker.setAttribute('aria-label','Classroom data set');message.setAttribute('role','status');publish.disabled=load.disabled=true;const client=treeCloud();let items=[];

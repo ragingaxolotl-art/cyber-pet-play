@@ -1,7 +1,7 @@
-import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-presentation-release';
-import {validateAttack, freshAttack} from './combat-model.js?v=20261109-presentation-release';
+import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-momentum-release';
+import {validateAttack, freshAttack} from './combat-model.js?v=20261109-momentum-release';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-projectile-flight-release';
-import {validateRecoveryFrame, recoverInAir} from './air-recovery.js?v=20261109-throw-release';
+import {validateRecoveryFrame, recoverInAir} from './air-recovery.js?v=20261109-momentum-release';
 import {combatPreviewFrame} from './combat-preview-frame.js?v=20261109-conditional-release';
 
 // One simulation for all children: reactions, shields and combos belong to the

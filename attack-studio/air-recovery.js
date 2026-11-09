@@ -17,7 +17,7 @@ export function airRecoveryReason(target,frame){
 }
 export function recoverInAir(target,frame){
  const reason=airRecoveryReason(target,frame);if(reason)return reason;
- target.airRecoveryUsed=true;target.pulseMotion=null;target.legacyMotion=null;
+ target.impulseReleased=false;target.airRecoveryUsed=true;target.pulseMotion=null;target.legacyMotion=null;
  target.pulseOwned=false;target.legacyOwned=false;target.reaction='standing';
  target.reactionUntil=frame;target.stun=frame;target.hitstunUntil=frame;
  target.needsFall=false;target.vx=0;target.vy=0;target.cast=null;

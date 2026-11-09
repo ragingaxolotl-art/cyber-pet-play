@@ -1,4 +1,4 @@
-import {freshAttack,validateAttack} from './combat-model.js?v=20261109-presentation-release';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261109-momentum-release';
 import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261108-scheduled-sequences';
 // Editable starting balance, shared by matching elemental artwork. No elemental bonuses.
 export const RESKIN_PROFILES={

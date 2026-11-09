@@ -1,4 +1,7 @@
-import {validateReactionAlternatives} from './conditional-reactions.js?v=20261109-presentation-release';
+import {validateImpulseReaction,createImpulseMotion,stepImpulseMotion,extendImpulseMotion} from './impulse-reaction.js?v=20261109-momentum-release';
+import {reactionVelocity} from './reaction-velocity.js?v=20261109-momentum-release';
+import {reactionAge,extendReactionArc} from './reaction-clock.js?v=20261109-momentum-release';
+import {validateReactionAlternatives} from './conditional-reactions.js?v=20261109-momentum-release';
 import {startBoundaryBounce,validateBounces} from './bounce-rules.js?v=20261108-bounces';
 import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-bounces';
 export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-bounces';
@@ -26,6 +29,8 @@ export function validateHitSequence(attack) {
   const ids=new Set(); let previous=-1;
   for (const event of attack.hitEvents) {
     validateReactionAlternatives(event.reactionAlternatives);
+    validateImpulseReaction(event.impulse);
+    if(event.impulse&&event.reaction==='none')throw Error('Choose a hit reaction before adding momentum settings.');
     validateBounces(event.bounces);
     if(event.bounces&&['none','suspend'].includes(event.reaction))throw Error('Bounces require a moving hit reaction.');
     if (!event||typeof event.id!=='string'||!/^hit_[a-zA-Z0-9_]{1,80}$/.test(event.id)||ids.has(event.id)) throw Error('Every hit needs a unique ID.');
@@ -84,24 +89,39 @@ export function sequenceOpportunities(attack,state,age,overlap,target) {
 export function applyPulseReaction(target,event,direction,frame) {
   resetGroundedJuggle(target);
   target.lastHit=frame;
-  if(event.reaction==='none'){if(event.hitstun!==undefined){target.hitstunUntil=Math.max(target.hitstunUntil||0,frame+event.hitstun);target.stun=Math.max(target.stun||0,frame+event.hitstun);}return;}
-  const budget=recordJuggleReaction(target,event.height>0&&event.reaction!=='suspend'&&event.reaction!=='spike');
+  if(event.reaction==='none'||event.impulse?.mode==='ignore'){if(event.hitstun!==undefined){target.hitstunUntil=Math.max(target.hitstunUntil||0,frame+event.hitstun);target.stun=Math.max(target.stun||0,frame+event.hitstun);}return;}
+  const budget=recordJuggleReaction(target,event.impulse?event.impulse.vertical<0:event.height>0&&event.reaction!=='suspend'&&event.reaction!=='spike');
   if(budget==='locked')return;
-  target.legacyMotion=null;
-  if(budget==='release')event={...event,reaction:'knockback',height:0,knockback:JUGGLE_RULES.releaseDistance,frames:JUGGLE_RULES.releaseFrames};
+  const previousVelocity=reactionVelocity(target,frame);
+  if(budget==='release'){event={...event,reaction:'knockback',height:0,knockback:JUGGLE_RULES.releaseDistance,frames:JUGGLE_RULES.releaseFrames};delete event.impulse;}
+  if(event.impulse?.mode==='extend'){
+   const old=target.pulseMotion||target.legacyMotion;
+   if(old?.impulse&&!old.impulse.finished){old.impulse=extendImpulseMotion(old.impulse,event.impulse.duration);old.endFrame=old.impulse.end;}
+   else if(old){const duration=old.event?(old.event.reaction==='suspend'?old.event.hold:old.event.frames):(old.attack.flightFrames??36);extendReactionArc(old,duration,frame,event.impulse.duration);}
+   const until=frame+(event.hitstun??event.impulse.duration);target.hitstunUntil=Math.max(target.hitstunUntil||0,until);target.stun=Math.max(target.stun||0,until);return;
+  }
+  target.impulseReleased=false;target.legacyMotion=null;
   target.pulseMotion={start:frame,x:target.x,y:target.y,direction,event:structuredClone(event)};
-  target.reaction=event.reaction==='suspend'||event.height>0||target.y<0?'airborne':'hurt';
+  if(event.impulse){target.pulseMotion.impulse=createImpulseMotion(target,previousVelocity,event.impulse,direction,frame);target.pulseMotion.endFrame=frame+event.impulse.duration;}
+  target.reaction=event.impulse?(target.y<0||target.pulseMotion.impulse.vy<0?'airborne':'hurt'):event.reaction==='suspend'||event.height>0||target.y<0?'airborne':'hurt';
   target.reactionStart=frame;target.lastHit=frame;target.vy=0;target.vx=0;
   target.reactionHitFrame=frame;target.reactionDirection=direction;target.reactionLaunched=target.reaction==='airborne';
-  target.reactionInFlight=true;target.reactionFlightFrames=event.frames;
-  const hitstunEnd=frame+(event.hitstun??(event.reaction==='suspend'?event.hold:event.frames));
+  target.reactionInFlight=true;target.reactionFlightFrames=event.impulse?.duration??event.frames;
+  const hitstunEnd=frame+(event.hitstun??event.impulse?.duration??(event.reaction==='suspend'?event.hold:event.frames));
   target.hitstunUntil=Math.max(target.hitstunUntil||0,hitstunEnd);
   target.stun=Math.max(target.stun||0,hitstunEnd);
 }
 // Returns true while this shared motion owns position, including its landing frame.
 export function advancePulseReaction(target,frame,minX=-Infinity,maxX=Infinity) {
   const motion=target.pulseMotion;if(!motion)return false;
-  const e=motion.event,elapsed=frame-motion.start,duration=e.reaction==='suspend'?e.hold:e.frames;
+  if(motion.impulse){
+   const next=stepImpulseMotion(motion.impulse,frame,{minX,maxX});
+   if(next.contact&&startBoundaryBounce(target,motion.event.bounces,next,motion.direction,frame,minX,maxX))return true;
+   target.x=next.x;target.y=next.y;target.vx=motion.impulse.vx;target.vy=motion.impulse.vy;
+   if(next.done){target.impulseReleased=target.y<0;target.pulseMotion=null;target.reactionInFlight=false;target.reaction=target.y<0?'airborne':'standing';if(target.y===0){target.vx=0;target.vy=0;target.reactionLandFrame=frame;resetGroundedJuggle(target);}}
+   return true;
+  }
+  const e=motion.event,elapsed=reactionAge(motion,frame),duration=e.reaction==='suspend'?e.hold:e.frames;
   const t=Math.max(0,Math.min(1,elapsed/duration));
   const next={x:motion.x+motion.direction*e.knockback*t,y:e.reaction==='suspend'?motion.y:e.reaction==='spike'?motion.y*(1-t):motion.y*(1-t)-4*e.height*t*(1-t)};
   if(startBoundaryBounce(target,e.bounces,next,motion.direction,frame,minX,maxX))return true;
