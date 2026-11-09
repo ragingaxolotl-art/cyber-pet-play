@@ -1,3 +1,4 @@
+import {rememberFrameEditorPosition} from './frame-editor-position.js?v=20261109-frame-position';
 import {drawImpactAreaArt} from './impact-area-art.js?v=20261109-area-art';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHurtboxEditor} from './hurtbox-editor.js?v=20261109-area-art';
@@ -21,7 +22,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261109-preview-fram
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-area-art';
 import {attacksVersion} from './attack-format.js?v=20261109-area-art';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-area-art';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-area-search';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-frame-position';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-area-art';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-area-art';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -209,7 +210,7 @@ function frameEditor(parent,owner,key,count,asset){
  const section=document.createElement('details');const title=document.createElement('summary');title.textContent='Edit frames · drag to reorder';section.append(title);
  const sequence=owner[key]||(key==='poseFrames'?poseSourceFrames(owner,count):Array.from({length:count},(_,i)=>i)),strip=document.createElement('div');strip.className='frame-strip';
  const positions=sequence.map((_,i)=>i);
- const commit=(next,times=null,anchorPositions=positions)=>{if(key==='poseFrames'&&owner.hurtboxes)owner.hurtboxes.frames=remapHurtboxFrames(owner.hurtboxes.frames,anchorPositions);if(key==='poseFrames'&&owner.animationAnchors)owner.animationAnchors.frames=remapAnchorFrames(owner.animationAnchors.frames,anchorPositions);owner[key]=next;if(key==='frames'){owner.loopStart=Math.min(owner.loopStart||1,next.length);owner.loopEnd=Math.max(owner.loopStart,Math.min(owner.loopEnd||next.length,next.length));}if(key==='poseFrames'){owner.poseDurations=times||next.map(()=>.1);owner.poseImpact=Math.min(owner.poseImpact,next.length);};changed();if(key==='poseFrames'){refresh();parent.querySelector('details').open=true;}else{section.remove();frameEditor(parent,owner,key,count,asset);parent.lastChild.open=true;}};
+ const commit=(next,times=null,anchorPositions=positions)=>{const restorePosition=rememberFrameEditorPosition(strip,parent);if(key==='poseFrames'&&owner.hurtboxes)owner.hurtboxes.frames=remapHurtboxFrames(owner.hurtboxes.frames,anchorPositions);if(key==='poseFrames'&&owner.animationAnchors)owner.animationAnchors.frames=remapAnchorFrames(owner.animationAnchors.frames,anchorPositions);owner[key]=next;if(key==='frames'){owner.loopStart=Math.min(owner.loopStart||1,next.length);owner.loopEnd=Math.max(owner.loopStart,Math.min(owner.loopEnd||next.length,next.length));}if(key==='poseFrames'){owner.poseDurations=times||next.map(()=>.1);owner.poseImpact=Math.min(owner.poseImpact,next.length);};changed();if(key==='poseFrames'){refresh();parent.querySelector('details').open=true;}else{section.remove();frameEditor(parent,owner,key,count,asset);parent.lastChild.open=true;}restorePosition(parent.querySelector('.frame-strip'));};
  const times=key==='poseFrames'?poseDurations(owner,count):null;
  const reorder=(from,to)=>commit(moveFrame(sequence,from,to),times?moveFrame(times,from,to):null,moveFrame(positions,from,to));
  sequence.forEach((source,index)=>{const tile=document.createElement('div');tile.className='frame-tile';tile.draggable=true;tile.ondragstart=e=>{frameDrag={owner,key,index};e.dataTransfer.setData('text/plain',String(index));};tile.ondragover=e=>e.preventDefault();tile.ondrop=e=>{e.preventDefault();if(frameDrag?.owner!==owner||frameDrag?.key!==key)return;const from=frameDrag.index;frameDrag=null;if(Number.isInteger(from)&&from>=0&&from<sequence.length)reorder(from,index);};
