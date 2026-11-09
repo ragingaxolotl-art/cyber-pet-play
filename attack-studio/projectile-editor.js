@@ -1,8 +1,8 @@
-import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-guard';
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-guard';
+import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-rotation';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-rotation';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-guard';
-import {validateAttack} from './combat-model.js?v=20261109-guard';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-rotation';
+import {validateAttack} from './combat-model.js?v=20261109-rotation';
 export function renderProjectileEditor({root,attack,commit,status}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);

@@ -1,4 +1,4 @@
-import {shapeHitsRectangle} from './hitbox-shapes.js';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 // Areas begin on the combat frame AFTER contact: impact never double-hits.
 export function validateProjectileArea(attack){
  const rule=attack.projectileArea;if(rule===undefined)return;

@@ -1,4 +1,4 @@
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
+import {HITBOX_SHAPES,shapeHitsRectangle,validateHitboxRotation} from './hitbox-shapes.js?v=20261109-rotation';
 // Runtime foundation; authoring and format negotiation are integrated separately.
 export function validateHitboxGroups(groups) {
  if(!Array.isArray(groups)||!groups.length||groups.length>8)throw Error('Use 1–8 hit groups.');
@@ -11,6 +11,7 @@ export function validateHitboxGroups(groups) {
    if(++count>16)throw Error('Use at most 16 hitboxes.');
    if(typeof box.id!=='string'||!/^box_[a-zA-Z0-9_]{1,64}$/.test(box.id)||boxes.has(box.id))throw Error('Hitboxes need unique IDs.');boxes.add(box.id);
    if(!Number.isInteger(box.start)||!Number.isInteger(box.duration)||box.start<0||box.duration<1||box.start+box.duration>600)throw Error('Hitbox windows must fit within 600 frames.');
+   validateHitboxRotation(box);
    if(!HITBOX_SHAPES.includes(box.shape))throw Error('Unsupported hitbox shape.');
    for(const key of ['x','y','w','h'])if(!Number.isFinite(box[key])||(key==='w'||key==='h'?box[key]<1||box[key]>500:Math.abs(box[key])>500))throw Error('Invalid hitbox geometry.');
   }

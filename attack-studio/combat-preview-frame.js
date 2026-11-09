@@ -1,5 +1,5 @@
 // Detached replay data for Studio: never retain mutable fighters or cast trackers.
-import {impactAreaBox} from './projectile-area.js';
+import {impactAreaBox} from './projectile-area.js?v=20261109-rotation';
 export function combatPreviewFrame(arena) {
  const actor = fighter => ({name: fighter.name, x: fighter.x, y: fighter.y,
   hp: fighter.hp, maxHP: fighter.maxHP, energy: fighter.energy,

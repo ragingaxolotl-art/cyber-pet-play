@@ -11,5 +11,5 @@ export function reflectedProjectileTransform(previous,worldBox){
 export function transformProjectileBox(box,transform){
  if(!transform)return {...box};
  return {...box,x:transform.direction===1?box.x+transform.offset:transform.offset-box.x-box.w,
-  facing:(box.facing??1)*transform.direction};
+  facing:(box.facing??1)*transform.direction,...(box.rotation!==undefined?{rotation:box.rotation*transform.direction}:{})};
 }

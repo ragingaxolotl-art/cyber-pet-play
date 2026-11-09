@@ -1,6 +1,6 @@
 import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
 import {splitDue,splitFan,splitChildDefinition,splitRayPosition} from './projectile-split.js?v=20261109-split';
-import {createImpactArea,claimAreaHit,impactAreaBox,areaAlive,impactAreaAnchor} from './projectile-area.js?v=20261108-explosion';
+import {createImpactArea,claimAreaHit,impactAreaBox,areaAlive,impactAreaAnchor} from './projectile-area.js?v=20261109-rotation';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-contact-final';
 import {createSteeringState,advanceSteering,reflectSteering} from './projectile-steering.js?v=20261108-steering';
 import {recoverInAir} from './air-recovery.js?v=20261108-air-recovery';
@@ -11,17 +11,17 @@ import {scaledComboDamage} from './combo-scaling.js?v=20261108-combo-scaling';
 import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
 import {contactFeedbackResult} from './contact-feedback.js?v=20261108-impact-timing';
 import {movementCancelWindow,MOVEMENT_CANCEL_RULES} from './movement-cancels.js?v=20261108-movement-cancels';
-import {reflectedProjectileTransform,transformProjectileBox} from './projectile-reflection.js?v=20261108-movement-cancels';
-import {ProjectileClashes} from './projectile-clashes.js?v=20261108-movement-cancels';
+import {reflectedProjectileTransform,transformProjectileBox} from './projectile-reflection.js?v=20261109-rotation';
+import {ProjectileClashes} from './projectile-clashes.js?v=20261109-rotation';
 import {ProjectileRegistry,ownerActionEnd} from './projectile-lifetime.js?v=20261109-split';
 import {CONTACT_TIMEOUT,contactDeadline,castEnd} from './contact-timing.js?v=20261108-movement-cancels';
 import {canCancel,automaticFollowup,MAX_AUTOMATIC_FOLLOWUPS} from './cancel-windows.js?v=20261108-movement-cancels';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,claimProjectileDefense} from './defense-windows.js?v=20261108-absorption';
-import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-movement-cancels';
+import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-rotation';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
-import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-guard';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-guard';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-movement-cancels';
+import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-rotation';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-rotation';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261108-bounces';
 export const RULES={width:960,ground:370,gravity:.48,jump:-9.5,move:2.8,sprintMultiplier:1.8,dodgeFrames:18,dodgeInvulnerableStart:2,dodgeInvulnerableEnd:14,dodgeCooldown:45,dodgeSpeed:4,energyPerFrame:.055,contactTimeout:CONTACT_TIMEOUT};
@@ -241,7 +241,7 @@ export class Arena{
   if(!cast||cast.projectileConsumed)return null;const {a,tm}=cast,age=this.frame-cast.start,sourceStats=cast.projectileStats||f.stats;
   let box=worldBox(a,a.impactTrigger==='contact'&&cast.impact!==null?Math.min(age,cast.impact):age,sourceStats,cast.facing);box.x+=cast.x;box.y+=cast.y;
   if(cast.sequence?.attached&&a.projectileMode==='attached')box={...box,x:target.x-box.w/2,y:target.y-box.h};
-  if(!(cast.sequence?.attached&&a.projectileMode==='attached'))box=transformProjectileBox(box,cast.projectileTransform);else box.facing=cast.facing*(cast.projectileTransform?.direction||1);
+  if(!(cast.sequence?.attached&&a.projectileMode==='attached'))box=transformProjectileBox(box,cast.projectileTransform);else {box.facing=cast.facing*(cast.projectileTransform?.direction||1);if(box.rotation!==undefined)box.rotation*=cast.projectileTransform?.direction||1;}
   if(cast.steering&&!(cast.sequence?.attached&&a.projectileMode==='attached'))box={...box,x:cast.steering.x-box.w/2,y:cast.steering.y-box.h/2};
   if(cast.splitRay&&!(cast.sequence?.attached&&a.projectileMode==='attached')){const point=splitRayPosition(cast.splitRay,this.frame);box={...box,x:point.x-box.w/2,y:point.y-box.h/2};}
   const hurt={x:target.x-14,y:target.y-(target.crouch?34:60),w:28,h:target.crouch?34:60};

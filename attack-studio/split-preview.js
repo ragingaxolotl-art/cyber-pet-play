@@ -1,5 +1,5 @@
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-guard';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-guard';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-rotation';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-rotation';
 import {sequenceDuration} from './hit-sequence.js';
 import {presentationFrames} from './preview-clock.js';
 

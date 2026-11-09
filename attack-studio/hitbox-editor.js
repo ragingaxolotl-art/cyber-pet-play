@@ -1,4 +1,5 @@
-import {validateAttack} from './combat-model.js?v=20261109-guard';
+import {renderHitboxRotation} from './hitbox-rotation-editor.js?v=20261109-rotation';
+import {validateAttack} from './combat-model.js?v=20261109-rotation';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const unique=prefix=>prefix+crypto.randomUUID().replaceAll('-','');
 let selectedBox=null;
@@ -10,6 +11,7 @@ export function renderHitboxEditor({root,attack,commit,status}){
  function mutate(change){try{const next=structuredClone(attack);change(next);validateAttack(next);commit(next);}catch(e){status(e.message);}}
  function button(text,run,disabled=false){const b=make('button',text);b.type='button';b.disabled=disabled;b.onclick=run;section.append(b);return b;}
  if(!attack.hitboxGroups){
+  renderHitboxRotation({root:section,attack,commit,status});
   const supported=(attack.hitEvents||attack.impactTrigger!=='contact')&&attack.payload==='damage'&&attack.delivery!=='self';
   section.append(make('p',supported?'Group overlapping boxes to count them as one hit. Separate groups can hit independently.':'Groups work with timed damage attacks or independent contact sequences.'));
   button('Add multiple hitboxes',()=>mutate(next=>{selectedBox=unique('box_');next.hitboxGroups=[{id:unique('group_'),hitLimit:next.hitLimit,hitInterval:next.hitInterval,boxes:[{...next.box,shape:next.box.shape||'rectangle',id:selectedBox,start:0,duration:next.active}]}];if(next.hitEvents)next.hitEvents.forEach(e=>e.hitboxGroup=next.hitboxGroups[0].id);}),!supported);return;
@@ -22,6 +24,7 @@ export function renderHitboxEditor({root,attack,commit,status}){
  control.value=object[key];control.onchange=()=>{const value=values?control.value:Number(control.value);if(!values&&(control.value===''||!Number.isInteger(value)||value<min||value>max)){status(title+' is outside the allowed range.');control.value=object[key];return;}
  mutate(next=>{const g=next.hitboxGroups.find(g=>g.id===group.id),b=g.boxes.find(b=>b.id===box.id);(object===group?g:b)[key]=value;});};label.append(control);section.append(label);}
  if(!attack.hitEvents){input('Group maximum hits','hitLimit',group,1,10);input('Group frames between hits','hitInterval',group,1,300);}
+ renderHitboxRotation({root:section,attack,boxId:box.id,commit,status});
  input('Box shape','shape',box,0,0,['rectangle','ellipse','diamond','triangle']);
  for(const [title,key,min,max] of [['Box forward offset','x',-500,500],['Box vertical offset','y',-500,500],['Box width','w',1,500],['Box height','h',1,500],['Box start frame','start',0,attack.active-1],['Box duration','duration',1,attack.active]])input(title,key,box,min,max);
  button('Duplicate box in group',()=>mutate(next=>{const g=next.hitboxGroups.find(g=>g.id===group.id);selectedBox=unique('box_');g.boxes.push({...box,id:selectedBox});}),all.length>=16);

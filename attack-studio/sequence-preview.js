@@ -1,5 +1,5 @@
 import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
-import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261108-explosion';
+import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261109-rotation';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering} from './projectile-steering.js?v=20261108-steering';
 import {recoverInAir,validateRecoveryFrame} from './air-recovery.js';
@@ -9,9 +9,9 @@ import {ComboTracker} from './combo-tracker.js?v=20261108-combo-scaling';
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
-import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-guard';
-import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
+import {activeGroupBoxes} from './hitbox-groups.js?v=20261109-rotation';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-rotation';
+import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 
 export function simulateSequence(attack,attacker,target,options={}) {

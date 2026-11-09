@@ -7,26 +7,26 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261108-workflow';
 import {installStudioWorkspace} from './studio-workspace.js?v=20261108-workflow';
-import {renderProjectileEditor} from './projectile-editor.js?v=20261109-guard';
-import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261109-guard';
+import {renderProjectileEditor} from './projectile-editor.js?v=20261109-rotation';
+import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261109-rotation';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
-import {renderCancelEditor} from './cancel-editor.js?v=20261109-guard';
-import {renderDefenseEditor} from './defense-editor.js?v=20261109-guard';
-import {renderAttackTimeline} from './attack-timeline.js?v=20261109-guard';
-import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-guard';
-import {attacksVersion} from './attack-format.js?v=20261109-guard';
-import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-guard';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-guard';
-import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-guard';
-import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-guard';
+import {renderCancelEditor} from './cancel-editor.js?v=20261109-rotation';
+import {renderDefenseEditor} from './defense-editor.js?v=20261109-rotation';
+import {renderAttackTimeline} from './attack-timeline.js?v=20261109-rotation';
+import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-rotation';
+import {attacksVersion} from './attack-format.js?v=20261109-rotation';
+import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-rotation';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-rotation';
+import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-rotation';
+import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-rotation';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
-import {shapePoints,containsPoint,resizeHitbox} from './hitbox-shapes.js?v=20261108-scheduled-sequences';
+import {shapePoints,containsPoint,resizeHitbox,hitboxResizeHandles} from './hitbox-shapes.js?v=20261109-rotation';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261108-scheduled-sequences';
-import {installAttackBank} from './attack-bank.js?v=20261109-guard';
-import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261109-guard';
+import {installAttackBank} from './attack-bank.js?v=20261109-rotation';
+import {markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261109-rotation';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
-import {installSequenceEditor} from './sequence-editor.js?v=20261109-guard';
+import {installSequenceEditor} from './sequence-editor.js?v=20261109-rotation';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
@@ -87,11 +87,11 @@ function recompute(){playbackIndex=-1;recordEdit();renderCancelEditor({root:$('c
 function renderLibrary(){const q=$('search').value.toLowerCase().trim(),element=$('elementFilter').value,collection=$('collectionFilter').value,motion=$('motionFilter').value,tier=$('tierFilter').value;const filtered=library.effects.filter(e=>(!element||e.element===element)&&(!collection||e.collection===collection)&&(!motion||e.slot===motion)&&(!tier||e.detail_tier===tier)&&`${e.name} ${e.slot} ${label(e.slot)} ${e.element} ${COLLECTIONS[e.collection]}`.toLowerCase().includes(q));page=Math.min(page,Math.max(0,Math.ceil(filtered.length/12)-1));$('results').textContent=`${filtered.length} effects · page ${page+1} of ${Math.max(1,Math.ceil(filtered.length/12))}`;$('effects').replaceChildren();for(const e of filtered.slice(page*12,page*12+12)){const card=document.createElement('article');card.className='effect';const thumbnail=document.createElement('canvas');thumbnail.width=e.canvas[0];thumbnail.height=e.canvas[1];thumbnail.className='thumbnail';thumbnail.setAttribute('aria-label',e.name);const image=new Image();image.onload=()=>{const c=thumbnail.getContext('2d'),[w,h]=e.canvas,fi=Math.min(e.times.length-1,Math.max(0,e.impact-1));c.imageSmoothingEnabled=false;if(e.sheet)c.drawImage(image,fi%e.columns*w,Math.floor(fi/e.columns)*h,w,h,0,0,w,h);else c.drawImage(image,0,0,w,h);};image.src=e.sheet||e.frames[Math.max(0,e.impact-1)];const body=document.createElement('div'),name=document.createElement('strong'),tags=document.createElement('small'),set=document.createElement('small'),button=document.createElement('button');name.textContent=e.name;tags.textContent=`${e.element} · ${label(e.slot)} · v${e.variant}`;set.textContent=(COLLECTIONS[e.collection]||e.collection)+(e.component_label?' · '+e.component_label:'');button.textContent='＋ Add layer';button.onclick=()=>{if(attack().visuals.length>=12){status('This attack already has twelve layers. Remove one before adding another.');return;}attack().visuals.push({effectId:e.id,x:0,y:0,scale:e.default_scale??(e.collection==='super'?.5:1),start:attack().startup,rate:1});layerIndex=attack().visuals.length-1;mark();renderLayers();renderSettings();recompute();status(`Added ${e.name}. Suggested motion: ${label(e.slot)}. Choose the required motion in Attack settings.`);};body.append(name,tags,set,button);if(reviewedSetups.has(e.id)){const tuned=document.createElement('button');tuned.textContent='Open tuned attack';tuned.onclick=()=>openTunedAttack(e.id);body.append(tuned);}if(['reskin','detailed-reskin'].includes(e.collection)){const starter=document.createElement('button');starter.textContent='Open ready-made attack';starter.onclick=()=>openReskinStarter(e);body.append(starter);}card.append(thumbnail,body);$('effects').append(card);}$('previousPage').disabled=page===0;$('nextPage').disabled=(page+1)*12>=filtered.length;}
 function drawBox(box,color,fill=false){
  ctx.strokeStyle=color;ctx.lineWidth=1;ctx.setLineDash([]);ctx.beginPath();
- if(box.shape==='ellipse')ctx.ellipse(box.x+box.w/2,box.y+box.h/2,box.w/2,box.h/2,0,0,Math.PI*2);
+ if(box.shape==='ellipse')ctx.ellipse(box.x+box.w/2,box.y+box.h/2,box.w/2,box.h/2,(box.rotation||0)*Math.PI/180,0,Math.PI*2);
  else {const points=shapePoints(box);ctx.moveTo(points[0].x,points[0].y);for(const p of points.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();}
  if(fill){ctx.fillStyle=color+'20';ctx.fill();}ctx.stroke();
 }
-function resizeHandles(box){return [{kind:'width',x:box.x+box.w,y:box.y+box.h/2},{kind:'height',x:box.x+box.w/2,y:box.y+box.h},{kind:'size',x:box.x+box.w,y:box.y+box.h}];}
+const resizeHandles=hitboxResizeHandles;
 
 // Crop transparent padding and pin the example to its feet. Empty poses hold a visible pose.
 const poseBounds=new Map();

@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-guard';
+import {validateAttack} from './combat-model.js?v=20261109-rotation';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderBounceEditor({root,attack,eventId=null,commit,status}){
  root.replaceChildren();root.append(make('h3',eventId?'Selected hit bounces':'Boundary bounces'));

@@ -1,7 +1,7 @@
 import {guardContactRule,applyGuardRecovery,validateGuardInteraction} from './guard-interaction.js?v=20261109-guard';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-split';
-import {simulateSplitPreview} from './split-preview.js?v=20261109-guard';
-import {validateProjectileArea,createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261108-explosion';
+import {simulateSplitPreview} from './split-preview.js?v=20261109-rotation';
+import {validateProjectileArea,createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261109-rotation';
 import {validateProjectileContact,consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering,validateProjectileSteering} from './projectile-steering.js';
 import {startBoundaryBounce,validateBounces} from './bounce-rules.js';
@@ -18,15 +18,15 @@ import {juggleLegacyReaction,resetGroundedJuggle} from './juggle-rules.js?v=2026
 import {castEnd,activeEnd} from './contact-timing.js?v=20261108-durability';
 import {validateCancelWindows} from './cancel-windows.js?v=20261108-durability';
 import {validateDefenseWindows,createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
-import {requireGroupVersion} from './attack-format.js?v=20261109-guard';
-import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-durability';
+import {requireGroupVersion} from './attack-format.js?v=20261109-rotation';
+import {validateHitboxGroups,activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-rotation';
 import {legacyRecoveryEnd} from './recovery-timing.js?v=20261108-durability';
 import {hasLegacyMotion,sampleLegacyMotion} from './legacy-motion.js?v=20261108-durability';
 import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-durability';
 import {pathSample} from './attack-motion.js?v=20261108-durability';
-import {HITBOX_SHAPES,shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-durability';
+import {HITBOX_SHAPES,shapeHitsRectangle,validateHitboxRotation} from './hitbox-shapes.js?v=20261109-rotation';
 import {validateHitSequence,advancePulseReaction} from './hit-sequence.js?v=20261108-hitstun';
-import {simulateSequence} from './sequence-preview.js?v=20261109-guard';
+import {simulateSequence} from './sequence-preview.js?v=20261109-rotation';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
 export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
@@ -75,6 +75,7 @@ export function validateAttack(a,ids){
  for(const v of a.visuals||[])validateSequence(v.frames);
  if(a.poseImpact!==undefined)num(a,'poseImpact',0,300,true);
  if(typeof a.blockable!=='boolean'||!a.box)fail('Invalid hitbox.');
+ validateHitboxRotation(a.box);
  if(a.box.shape!==undefined&&!HITBOX_SHAPES.includes(a.box.shape))fail('Invalid hitbox shape.');
  for(const k of ['x','y'])num(a.box,k,-500,500);for(const k of ['w','h'])num(a.box,k,1,500);
  if(!Array.isArray(a.visuals)||a.visuals.length>12)fail('Use up to twelve VFX layers.');
@@ -82,7 +83,7 @@ export function validateAttack(a,ids){
  return a;
 }
 export function validateDesign(p,ids){
- if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–23 Combat Design project (1–256 attacks).');
+ if(p?.format!=='cyber-pet-combat-design'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].includes(p.version)||!Array.isArray(p.attacks)||p.attacks.length<1||p.attacks.length>256)fail('Choose a version 1–24 Combat Design project (1–256 attacks).');
  requireGroupVersion(p.version,p.attacks);
  if(p.testBench){for(const side of ['attacker','target'])statsFor(p.testBench[side]);validateSandbox(p.testBench.options);}
  if(p.version===1&&p.attacks.some(a=>a.hitEvents))fail('Independent hit sequences require a version 2 project.');
@@ -92,7 +93,7 @@ export function validateSandbox(o){validateRecoveryFrame(o?.recoveryFrame);if(o?
 export function statsFor(s){if(!s||typeof s!=='object')fail('Missing test stats.');for(const k of STATS)num(s,k,0,99,true);const b=BALANCE;return {maxHP:b.baseHP+b.hpPerStamina*s.stamina,maxEnergy:b.baseEnergy+b.energyPerStamina*s.stamina,timing:1-b.maxSpeedReduction*s.speed/b.statCap,cost:1-b.maxFocusCostReduction*s.focus/b.statCap,guard:b.baseGuardReduction+b.maxFocusGuardBonus*s.focus/b.statCap,support:1+b.maxCharismaShieldBonus*s.charisma/b.statCap,resistance:1-b.maxFocusStatusReduction*s.focus/b.statCap};}
 export function timing(a,s){const scale=statsFor(s).timing;return {startup:Math.round(a.startup*scale),active:a.active,recovery:Math.round(a.recovery*scale),cooldown:a.cooldown};}
 export function magnitude(a,s){if(['push','block','dodge'].includes(a.payload))return 0;return Math.round((a.base+a.coefficient*s[a.scaling])*(a.payload==='shield'?statsFor(s).support:1));}
-export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-Math.round((a.projectileStart??a.startup)*statsFor(s).timing))*a.projectileSpeed:0;return {x:facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x,y:a.box.y+path.y,w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing};}
+export function worldBox(a,t,s,facing=1){const tm=timing(a,s),path=pathSample(a,t),travel=a.motionPath?.length?0:a.delivery==='projectile'?Math.max(0,t-Math.round((a.projectileStart??a.startup)*statsFor(s).timing))*a.projectileSpeed:0;return {x:facing===1?a.box.x+travel+path.x:-a.box.x-a.box.w-travel-path.x,y:a.box.y+path.y,w:a.box.w,h:a.box.h,shape:a.box.shape||'rectangle',facing,...(a.box.rotation!==undefined?{rotation:a.box.rotation*facing}:{})};}
 export const overlaps=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
 export function simulate(a,attacker,target,options={}){
  validateRecoveryFrame(options.recoveryFrame);validateAttack(a);if(a.projectileSplit)return simulateSplitPreview(a,attacker,target,options);if(a.hitEvents)return simulateSequence(a,attacker,target,options);const av=statsFor(attacker),tv=statsFor(target),tm=timing(a,attacker),facing=options.facing===-1?-1:1;

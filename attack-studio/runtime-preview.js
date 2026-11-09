@@ -1,8 +1,8 @@
-import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-guard';
-import {validateAttack, freshAttack} from './combat-model.js?v=20261109-guard';
+import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-rotation';
+import {validateAttack, freshAttack} from './combat-model.js?v=20261109-rotation';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-split';
 import {validateRecoveryFrame, recoverInAir} from './air-recovery.js';
-import {combatPreviewFrame} from './combat-preview-frame.js?v=20261109-split';
+import {combatPreviewFrame} from './combat-preview-frame.js?v=20261109-rotation';
 
 // One simulation for all children: reactions, shields and combos belong to the
 // actual shared target. The caller supplies Arena coordinates, not canvas pixels.
