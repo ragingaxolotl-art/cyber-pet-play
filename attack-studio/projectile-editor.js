@@ -1,5 +1,5 @@
 import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-area-art';
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-area-art';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-area-search';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
 import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-area-art';
 import {validateAttack} from './combat-model.js?v=20261109-area-art';

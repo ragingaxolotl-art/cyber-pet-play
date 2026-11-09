@@ -1,4 +1,4 @@
-import {renderImpactAreaArtEditor} from './impact-area-art-editor.js?v=20261109-area-art';
+import {renderImpactAreaArtEditor} from './impact-area-art-editor.js?v=20261109-area-search';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
 import {validateAttack} from './combat-model.js?v=20261109-area-art';
 export function renderProjectileAreaEditor({root,attack,commit,status,effects=new Map()}){
