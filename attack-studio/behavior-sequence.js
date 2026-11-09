@@ -1,6 +1,11 @@
 import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
 import {REACTIONS} from './hit-sequence.js?v=20261109-slow-motion-release';
 export const REACTION_BLOCKS=['hit',...REACTIONS.filter(r=>r!=='none')];
+// Shared defaults keep the builder's conditional editor and generated hits aligned.
+export function reactionBlockSettings(block,interval=5){
+ const reaction=block.type==='hit'?'none':block.type;
+ return {reaction,height:['launch','relaunch','spike'].includes(reaction)?45:reaction==='knockback'?12:0,knockback:reaction==='knockback'?65:0,frames:24,hold:interval,...(block.impulse!==undefined?{impulse:structuredClone(block.impulse)}:{}),...(block.reactionAlternatives!==undefined?{reactionAlternatives:structuredClone(block.reactionAlternatives)}:{})};
+}
 // Authoring helper only: exports ordinary hit events understood by both runtimes.
 // It never changes delivery, geometry, artwork, defense or follow-up definitions.
 export function buildReactionSequence(attack,blocks,{interval=5,start=attack.hitEvents?.[0]?.offset??0}={}){
@@ -13,8 +18,7 @@ export function buildReactionSequence(attack,blocks,{interval=5,start=attack.hit
   if(events.length+block.repeat>10)throw Error('A sequence can contain at most ten hits.');
   for(let i=0;i<block.repeat;i++){
    const reaction=block.type==='hit'?'none':block.type;
-   const event={id:'hit_'+crypto.randomUUID().replaceAll('-',''),offset:start+events.length*interval,duration:1,damage:block.damage??(reaction==='knockback'?12:reaction==='launch'?6:3),reaction,height:['launch','relaunch','spike'].includes(reaction)?45:reaction==='knockback'?12:0,knockback:reaction==='knockback'?65:0,frames:24,hold:interval,target:'any'};
-   if(block.impulse!==undefined)event.impulse=structuredClone(block.impulse);
+   const event={id:'hit_'+crypto.randomUUID().replaceAll('-',''),offset:start+events.length*interval,duration:1,damage:block.damage??(reaction==='knockback'?12:reaction==='launch'?6:3),...reactionBlockSettings(block,interval),target:'any'};
    if(next.hitboxGroups)event.hitboxGroup=block.hitboxGroup??attack.hitEvents[0].hitboxGroup;
    events.push(event);
   }

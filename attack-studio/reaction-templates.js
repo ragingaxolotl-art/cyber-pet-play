@@ -1,8 +1,9 @@
+import {validateReactionAlternatives} from './conditional-reactions.js';
 import {validateImpulseReaction} from './impulse-reaction.js';
-import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261109-momentum-template-release';
+import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261109-conditional-template-release';
 export const REACTION_TEMPLATES_KEY='cyber-pet-reaction-templates-v1';
 export const REACTION_TEMPLATES_FORMAT='cyber-pet-reaction-templates';
-const templateVersion=templates=>Array.isArray(templates)&&templates.some(t=>t?.blocks?.some(b=>b?.impulse!==undefined))?2:1;
+const templateVersion=templates=>!Array.isArray(templates)?1:templates.some(t=>t?.blocks?.some(b=>b?.reactionAlternatives!==undefined))?3:templates.some(t=>t?.blocks?.some(b=>b?.impulse!==undefined))?2:1;
 export function validateReactionTemplate(value){
  if(!value||typeof value.name!=='string'||!value.name.trim()||value.name.trim().length>60)throw Error('Give the template a name of 1–60 characters.');
  if(!Number.isInteger(value.interval)||value.interval<1||value.interval>25)throw Error('Template spacing must be 1–25 whole frames.');
@@ -14,12 +15,14 @@ export function validateReactionTemplate(value){
   // Templates are portable recipes, not attack-specific geometry references.
   const result={type:block.type,repeat:block.repeat,damage:block.damage};
   if(block.impulse!==undefined){if(block.type==='hit')throw Error('Choose a reaction before adding momentum.');validateImpulseReaction(block.impulse);result.impulse=structuredClone(block.impulse);}
+  if(block.reactionAlternatives!==undefined){validateReactionAlternatives(block.reactionAlternatives);result.reactionAlternatives=structuredClone(block.reactionAlternatives);}
   return result;
  });return {name:value.name.trim(),interval:value.interval,blocks};
 }
 export function validateReactionTemplateBundle(bundle){
- if(bundle?.format!==REACTION_TEMPLATES_FORMAT||![1,2].includes(bundle.version)||!Array.isArray(bundle.templates)||bundle.templates.length>50)throw Error('Choose a version 1–2 reaction-template backup with at most 50 templates.');
+ if(bundle?.format!==REACTION_TEMPLATES_FORMAT||![1,2,3].includes(bundle.version)||!Array.isArray(bundle.templates)||bundle.templates.length>50)throw Error('Choose a version 1–3 reaction-template backup with at most 50 templates.');
  if(bundle.version<2&&bundle.templates.some(t=>t.blocks?.some(b=>b.impulse!==undefined)))throw Error('Momentum templates require backup version 2.');
+ if(bundle.version<3&&templateVersion(bundle.templates)===3)throw Error('Conditional templates require backup version 3.');
  const names=new Set();const templates=bundle.templates.map(item=>{const value=validateReactionTemplate(item),key=value.name.toLowerCase();if(names.has(key))throw Error('Template names must be unique.');names.add(key);return value;});
  return {format:REACTION_TEMPLATES_FORMAT,version:templateVersion(templates),templates};
 }
@@ -28,7 +31,7 @@ function readStore(storage){
  if(raw===null)return {...reactionTemplateBackup([]),removed:[]};
  let bundle;try{bundle=JSON.parse(raw);}catch{throw Error('Saved reaction templates could not be read. Existing data was preserved.');}
  const checked=validateReactionTemplateBundle(bundle),removed=bundle.removed??[];
- if(bundle.version<2&&templateVersion(removed)===2)throw Error('Momentum template recovery requires version 2.');
+ if(bundle.version<templateVersion(removed))throw Error('Template recovery requires version '+templateVersion(removed)+'.');
  if(!Array.isArray(removed)||removed.length>50)throw Error('Removed-template recovery data is invalid. Existing data was preserved.');
  return {...checked,removed:removed.map(validateReactionTemplate)};
 }
