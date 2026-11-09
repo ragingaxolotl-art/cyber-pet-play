@@ -1,3 +1,4 @@
+import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
 import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaAnchor} from './projectile-area.js?v=20261108-explosion';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering} from './projectile-steering.js?v=20261108-steering';
@@ -9,7 +10,7 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261108-shared-juggle';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-split';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-guard';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-shared-juggle';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
 
@@ -25,7 +26,9 @@ export function simulateSequence(attack,attacker,target,options={}) {
   tm.active=sequenceDuration(attack);
   const state=sequenceState(attack.sequenceTiming==='cast'?tm.startup:null),events=[],frames=[];let recovery=null,impactArea=null;let hits=0,end=castEnd(null,tm),ownerInterrupted=false,launched=false,steering=null;const independent=attack.projectileLifetime!==undefined;
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
+  let guardRecoveryUntil=0;
   for(let frame=0;frame<=end;frame++){
+    const guardContact=guardContactRule(attack,!!options.guard&&frame>=guardRecoveryUntil);
     const hitsBeforeFeedback=hits;
     if(independent&&cast&&!ownerInterrupted&&frame>=tm.startup)launched=true;
     if(independent&&launched&&frame>=tm.startup+attack.projectileLifetime&&!state.cancelled&&state.results.length<attack.hitEvents.length)state.cancelled='Projectile lifetime expired.';
@@ -61,7 +64,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     const active=sourceAlive&&frame>=tm.startup&&!state.cancelled&&((state.startFrame??state.contactFrame)===null?frame<=contactDeadline(tm):frame<(state.startFrame??state.contactFrame)+sequenceDuration(attack));
     if(active){
       for(const event of sequenceOpportunities(attack,state,frame,overlap,other)){
-        const guarded=!!options.guard&&attack.blockable;
+        const guarded=guardContact.guarded;
         const rawDamage=Math.round(event.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1));
         const damage=scaledComboDamage(rawDamage,combos.priorHits('self','target'),attack.comboScaling,guarded?'block':'hit');
         const actual=Math.min(other.hp,damage);other.hp-=actual;hits++;
@@ -70,16 +73,18 @@ export function simulateSequence(attack,attacker,target,options={}) {
         events.push({frame,text:`${guarded?'Blocked hit':'Hit'} ${hits}: ${actual} damage.`});
         if(guarded){if(state.startFrame===null)state.cancelled='First contact was blocked; attachment cancelled.';other.reactionGuardFrame=frame;if(attack.contactFeedback?.blockstun>0)other.blockstunUntil=Math.max(other.blockstunUntil||0,frame+attack.contactFeedback.blockstun+1);}
         else {state.attached=true;applyPulseReaction(other,scaledHitEvent(event,combos.priorHits('self','target'),attack.hitstunScaling),direction,frame);}
+        if(applyGuardRecovery(other,guardContact,guarded?'block':'hit',frame)){guardRecoveryUntil=Math.max(guardRecoveryUntil,other.stun);events.push({frame,text:'Guard '+guardContact.mode+'.'});}
         if(other.hp<=0)state.cancelled='Target defeated.';
         if(consumesProjectile(attack,guarded?'block':'hit')){state.cancelled=CONTACT_END_REASON;if(attack.projectileArea){impactArea=createImpactArea(attack,impactAreaAnchor(boxes,event.hitboxGroup,targetBox,box),frame);events.push({frame,text:'Impact area created.'});}events.push({frame,text:state.cancelled});break;}
       }
     }
     if(impactArea&&self.hp>0&&other.hp>0&&claimAreaHit(impactArea,'target',frame,shapeHitsRectangle(impactAreaBox(impactArea,frame),targetBox))){
-     const guarded=options.guard&&attack.blockable,damage=Math.min(other.hp,Math.round(impactArea.rule.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1)));other.hp-=damage;other.lastHit=frame;
+     const guarded=!!options.guard&&frame>=guardRecoveryUntil&&attack.blockable,damage=Math.min(other.hp,Math.round(impactArea.rule.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1)));other.hp-=damage;other.lastHit=frame;
      events.push({frame,text:`Impact area ${guarded?'blocked':'hit'}: ${damage} damage.`});
     }
     if(incomingInterrupted){ownerInterrupted=true;if(!independent||!launched||self.hp<=0)state.cancelled='Attacker interrupted.';}
     if((state.startFrame??state.contactFrame)!==null)end=(state.startFrame??state.contactFrame)+sequenceDuration(attack)+Math.max(120,tm.recovery);
+    end=Math.max(end,guardRecoveryUntil);
     if(impactArea)end=Math.max(end,impactArea.end);
     if(other.pulseMotion)end=Math.max(end,other.pulseMotion.start+other.pulseMotion.event.frames+1);
     if(options.recoveryFrame!==undefined&&options.recoveryFrame!==null&&frame===options.recoveryFrame){
@@ -88,7 +93,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     }
     if(other.reactionBounceFrame===frame)events.push({frame,text:other.reactionBounceKind==='wall'?'Wall bounce':'Floor bounce'});
     for(const who of [self,other])who.canAct=who.hp>0&&!who.pulseMotion&&frame>=(who.stun||0)&&frame>=(who.blockstunUntil||0);
-    const impactStop=hits>hitsBeforeFeedback?(options.guard&&attack.blockable?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
+    const impactStop=hits>hitsBeforeFeedback?(guardContact.guarded?attack.contactFeedback?.blockstop:attack.contactFeedback?.hitstop)??0:0;
     if(self.hp<=0||other.hp<=0)combos.endAll('Round ended');
     frames.push({areaHits:impactArea?.targets.get('target')?.hits??0,areas:impactArea&&self.hp>0&&other.hp>0&&frame>=impactArea.start&&frame<impactArea.end?[impactAreaBox(impactArea,frame)]:[],steering:steering?{...steering}:null,combos:combos.snapshot(),frame,impactStop,active,ownerActive:cast&&!ownerInterrupted&&self.hp>0&&frame<(independent?tm.startup+tm.active+tm.recovery:castEnd(state.startFrame??state.contactFrame,tm)),projectileAlive:independent&&launched&&!state.cancelled&&self.hp>0&&other.hp>0&&frame<tm.startup+attack.projectileLifetime&&frame<activeEnd(state.startFrame??state.contactFrame,tm),box,boxes,targetBox,contact,self:{...self},target:{...other},hits,modifiers:[]});
     if(!cast)break;

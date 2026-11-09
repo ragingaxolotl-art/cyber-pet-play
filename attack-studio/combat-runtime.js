@@ -1,3 +1,4 @@
+import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
 import {splitDue,splitFan,splitChildDefinition,splitRayPosition} from './projectile-split.js?v=20261109-split';
 import {createImpactArea,claimAreaHit,impactAreaBox,areaAlive,impactAreaAnchor} from './projectile-area.js?v=20261108-explosion';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-contact-final';
@@ -18,8 +19,8 @@ import {canCancel,automaticFollowup,MAX_AUTOMATIC_FOLLOWUPS} from './cancel-wind
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,claimProjectileDefense} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261108-movement-cancels';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
-import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-split';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-split';
+import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-guard';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-guard';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261108-movement-cancels';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261108-bounces';
@@ -208,6 +209,9 @@ export class Arena{
    target.blockstunReduction=Math.max(...this.contactFeedback.filter(c=>c.target===target&&c.outcome==='block').map(c=>c.guardReduction));
    target.guarding=true;target.dashUntil=0;target.dodgeUntil=0;
   }
+  // All accepted contacts were resolved from the same guard snapshot. Apply
+  // forced recovery after ordinary blockstun so it cannot restore broken guard.
+  for(const contact of this.contactFeedback)if(contact.guardInteraction&&applyGuardRecovery(contact.target,contact.guardInteraction,contact.outcome,this.frame))this.emit(contact.guardInteraction.mode==='break'?'GUARD BREAK':'GUARD CRUSH',contact.target.x,contact.target.y-90);
   // Follow-ups start on the next simulation frame, after both sides resolve contact.
   if(this.fighters.every(f=>f.hp>0))for(const f of this.fighters){
    const cast=f.cast,window=automaticFollowup(cast,cast?this.frame-cast.start:0,true);if(!window)continue;
@@ -258,7 +262,8 @@ export class Arena{
   const groupContacts=boxes?a.hitboxGroups.filter(g=>boxes.some(b=>b.groupId===g.id&&shapeHitsRectangle(b,hurt))):null;
   const sequenceContacts=boxes?new Set(groupContacts.map(g=>g.id)):null;
 
-  return {f,target,cast,age,box,targetBox:hurt,defenderPhase:attackPhase(recipient.cast,this.frame),defenderOffensive:['damage','push'].includes(recipient.cast?.a.payload),defense: defenseSnapshot(defense,defAge),invulnerable:isInvulnerable(defenseSnapshot(defense,defAge),a),boxes,groupContacts,sequenceContacts,damageMultiplier:cast.projectileDamageMultiplier??statusMultiplier(f.statuses,'weaken'),contact:a.delivery==='self'||shapeHitsRectangle(box,hurt),guarding:recipient.guarding||(defending&&defense.a.payload==='block'),guardReduction:recipient.blockstunUntil>this.frame?recipient.blockstunReduction:defending&&defense.a.payload==='block'?defense.a.blockPercent/100:recipient.guard,evading:a.delivery!=='self'&&((this.frame>=recipient.dodgeStart+RULES.dodgeInvulnerableStart&&this.frame<recipient.dodgeStart+RULES.dodgeInvulnerableEnd)||(defending&&defense.a.payload==='dodge'))};
+  const guardInteraction=guardContactRule(a,recipient.guarding||(defending&&defense.a.payload==='block'));
+  return {f,target,cast,age,box,targetBox:hurt,defenderPhase:attackPhase(recipient.cast,this.frame),defenderOffensive:['damage','push'].includes(recipient.cast?.a.payload),defense: defenseSnapshot(defense,defAge),invulnerable:isInvulnerable(defenseSnapshot(defense,defAge),a),boxes,groupContacts,sequenceContacts,damageMultiplier:cast.projectileDamageMultiplier??statusMultiplier(f.statuses,'weaken'),contact:a.delivery==='self'||shapeHitsRectangle(box,hurt),guarding:guardInteraction.guarded,guardInteraction,guardReduction:recipient.blockstunUntil>this.frame?recipient.blockstunReduction:defending&&defense.a.payload==='block'?defense.a.blockPercent/100:recipient.guard,evading:a.delivery!=='self'&&((this.frame>=recipient.dodgeStart+RULES.dodgeInvulnerableStart&&this.frame<recipient.dodgeStart+RULES.dodgeInvulnerableEnd)||(defending&&defense.a.payload==='dodge'))};
  }
  resolve(f,target,snapshot=this.prepare(f,target)){if(!snapshot)return;const {cast,age}=snapshot;const {a,tm}=cast;
   if(a.projectileContact==='single'&&(snapshot.evading||snapshot.invulnerable))return;
@@ -280,14 +285,14 @@ export class Arena{
    if(snapshot.evading||snapshot.invulnerable){if(!snapshot.invulnerable&&recipient===this.fighters[0]&&a.payload==='damage')this.honourMetrics.dodges++;this.emit(snapshot.invulnerable?'INVULNERABLE':'DODGE',recipient.x,recipient.y-70);}
    else {let amount=magnitude(a,cast.projectileStats||f.stats);if(a.payload==='damage')amount=Math.round(amount*snapshot.damageMultiplier);
     if(a.payload==='damage'){const guard=snapshot.guarding&&a.blockable,armored=!guard&&claimArmor(snapshot.defense,a);amount=Math.round(amount*(1-clamp(recipient.damageResistance??0,-50,75)/100)*(guard?1-snapshot.guardReduction:1));amount=counterHitDamage(amount,a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit');amount=scaledComboDamage(amount,this.combos.priorHits(f,recipient),a.comboScaling,guard?'block':armored?'armor':'hit');const absorbed=Math.min(recipient.shield,amount);recipient.shield-=absorbed;amount-=absorbed;const hpDamage=Math.min(recipient.hp,amount);recipient.hp-=hpDamage;recipient.flash=this.frame+8;
-     this.contactFeedback.push({attack:a,attacker:f,damage:hpDamage,counterHit:isCounterHit(a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit'),target:recipient,guardReduction:snapshot.guardReduction,outcome:guard?'block':armored?'armor':'hit'});
+     this.contactFeedback.push({attack:a,attacker:f,damage:hpDamage,counterHit:isCounterHit(a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit'),target:recipient,guardInteraction:snapshot.guardInteraction,guardReduction:snapshot.guardReduction,outcome:guard?'block':armored?'armor':'hit'});
      cast.outcomes.add(guard?'block':'hit');if(guard&&recipient===this.fighters[0])this.honourMetrics.guards++;if(amount>0&&f===this.fighters[0]&&recipient===this.fighters[1])this.honourMetrics.attacks.add(a.id);if(!guard&&!armored)beginReaction(recipient,scaledHitReaction(a,this.combos.priorHits(f,recipient)),snapshot.box.facing,this.frame);if(armored)recipient.lastHit=this.frame;if(this.training&&recipient===this.fighters[1]){this.metrics.hits++;this.metrics.damage+=amount;}
      this.emit(guard?'GUARD −'+amount:armored?'ARMOR −'+amount:'−'+amount,recipient.x,recipient.y-70);
      if(!guard&&a.status!=='none')this.status(recipient,a);
     }else if(a.payload==='heal'){recipient.hp=Math.min(recipient.maxHP,recipient.hp+amount);this.emit('+'+amount,recipient.x,recipient.y-70);}
     else if(a.payload==='energy'){recipient.energy=Math.min(recipient.maxEnergy,recipient.energy+amount);this.emit('ENERGY +'+amount,recipient.x,recipient.y-70);}
     else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=this.frame+a.shieldDuration;this.emit('SHIELD',recipient.x,recipient.y-70);}
-    else if(a.payload==='push'){this.contactFeedback.push({attack:a,target:recipient,guardReduction:snapshot.guardReduction,outcome:snapshot.guarding&&a.blockable?'block':'hit'});cast.outcomes.add(snapshot.guarding&&a.blockable?'block':'hit');if(snapshot.guarding&&a.blockable)this.emit('PUSH BLOCKED',recipient.x,recipient.y-70);else if(claimArmor(snapshot.defense,a)){recipient.lastHit=this.frame;this.emit('ARMORED',recipient.x,recipient.y-70);}else beginReaction(recipient,a,snapshot.box.facing,this.frame);}
+    else if(a.payload==='push'){const guard=snapshot.guarding&&a.blockable,armored=!guard&&claimArmor(snapshot.defense,a);this.contactFeedback.push({attack:a,attacker:f,target:recipient,guardInteraction:snapshot.guardInteraction,guardReduction:snapshot.guardReduction,outcome:guard?'block':armored?'armor':'hit'});cast.outcomes.add(guard?'block':'hit');if(guard)this.emit('PUSH BLOCKED',recipient.x,recipient.y-70);else if(armored){recipient.lastHit=this.frame;this.emit('ARMORED',recipient.x,recipient.y-70);}else beginReaction(recipient,a,snapshot.box.facing,this.frame);}
     if(!['damage','push','block','dodge'].includes(a.payload)&&a.status!=='none')this.status(recipient,a);
     if(consumesProjectile(a,snapshot.guarding&&a.blockable?'block':'hit')){this.consumeProjectile(snapshot,recipient,snapshot.guarding&&a.blockable?'block':'hit',groups?.[opportunity]?.id);break;}
    }
@@ -307,7 +312,7 @@ export class Arena{
    const rawDamage=counterHitDamage(Math.round(event.damage*snapshot.damageMultiplier*(1-clamp(target.damageResistance??0,-50,75)/100)*(guard?1-snapshot.guardReduction:1)),a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit');
    const amount=scaledComboDamage(rawDamage,this.combos.priorHits(f,target),a.comboScaling,guard?'block':armored?'armor':'hit'),absorbed=Math.min(target.shield,amount);
    target.shield-=absorbed;const damage=Math.min(target.hp,amount-absorbed);target.hp-=damage;cast.hits++;cast.lastHit=age;
-   this.contactFeedback.push({attack:a,attacker:f,damage,counterHit:isCounterHit(a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit'),target,guardReduction:snapshot.guardReduction,outcome:guard?'block':armored?'armor':'hit'});
+   this.contactFeedback.push({attack:a,attacker:f,damage,counterHit:isCounterHit(a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit'),target,guardInteraction:snapshot.guardInteraction,guardReduction:snapshot.guardReduction,outcome:guard?'block':armored?'armor':'hit'});
    cast.outcomes.add(guard?'block':'hit');hitResult(state,event,age,guard?'Blocked':armored?'Armored':'Connected');this.emit((guard?'GUARD −':armored?'ARMOR −':'−')+damage,target.x,target.y-70);
    if(this.training&&target===this.fighters[1]){this.metrics.hits++;this.metrics.damage+=damage;}
    if(guard){if(state.startFrame===null)state.cancelled='Contact blocked; attachment cancelled.';}

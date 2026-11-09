@@ -1,4 +1,4 @@
-import {addContextHelp} from './context-help.js?v=20261108-static-help';
+import {addContextHelp} from './context-help.js?v=20261109-guard';
 
 // Only explicitly marked instructions move into pop-ups. Status messages,
 // compatibility warnings, and live counts remain visible in the workspace.

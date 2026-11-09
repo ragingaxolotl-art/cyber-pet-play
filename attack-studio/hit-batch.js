@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-split';
+import {validateAttack} from './combat-model.js?v=20261109-guard';
 export const BATCH_HIT_FIELDS={damage:'Damage',reaction:'Reaction',target:'Eligible target',height:'Launch height',knockback:'Knockback',frames:'Reaction travel',hold:'Suspend time'};
 export function editHitBatch(attack,ids,key,value){
  if(!Object.hasOwn(BATCH_HIT_FIELDS,key))throw Error('Choose a supported hit property.');

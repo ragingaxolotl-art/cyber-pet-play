@@ -1,6 +1,6 @@
-import {compactSectionHelp} from './context-help.js?v=20261108-static-help';
-import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261109-split';
-import {validateAttack} from './combat-model.js?v=20261109-split';
+import {compactSectionHelp} from './context-help.js?v=20261109-guard';
+import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261109-guard';
+import {validateAttack} from './combat-model.js?v=20261109-guard';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCancelEditor({root,attack,attacks,commit,status,test}){
  root.replaceChildren();root.append(make('h2','Follow-up windows'));

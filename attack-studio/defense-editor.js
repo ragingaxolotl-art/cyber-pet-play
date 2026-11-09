@@ -1,10 +1,11 @@
-import {compactSectionHelp} from './context-help.js?v=20261108-static-help';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-split';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-split';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-split';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-split';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-split';
-import {validateAttack} from './combat-model.js?v=20261109-split';
+import {renderGuardEditor} from './guard-editor.js?v=20261109-guard';
+import {compactSectionHelp} from './context-help.js?v=20261109-guard';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-guard';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-guard';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-guard';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-guard';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-guard';
+import {validateAttack} from './combat-model.js?v=20261109-guard';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));
@@ -30,6 +31,7 @@ export function renderDefenseEditor({root,attack,commit,status}){
   for(const [value,text] of [['all','All attack types'],['melee','Melee'],['projectile','Projectiles'],['area','Area attacks']])select.add(new Option(text,value));select.value=window.against;select.disabled=['reflect','absorb'].includes(window.kind);select.onchange=()=>mutate(next=>next.defenseWindows[index].against=select.value);label.append(select);section.append(label);
   const remove=make('button',`Delete ${window.kind} ${index+1}`);remove.type='button';remove.onclick=()=>mutate(next=>{next.defenseWindows.splice(index,1);if(!next.defenseWindows.length)delete next.defenseWindows;});section.append(remove);root.append(section);
  }
+ const guard=make('section');root.append(guard);renderGuardEditor({root:guard,attack,commit,status});
  const feedback=make('section');root.append(feedback);renderContactFeedbackEditor({root:feedback,attack,commit,status});
  const bounce=make('section');root.append(bounce);renderBounceEditor({root:bounce,attack,commit,status});
  const hitstun=make('section');root.append(hitstun);renderHitstunEditor({root:hitstun,attack,commit,status});

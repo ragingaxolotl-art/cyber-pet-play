@@ -9,6 +9,7 @@ export function addContextHelp(root,heading,paragraphs){
 }
 export function compactSectionHelp(root){
  for(const heading of [...root.querySelectorAll('h2,h3')]){
+  if(heading.closest('dialog'))continue;
   const parent=heading.parentElement,notes=[...parent.children].filter(n=>n.tagName==='P'&&n.getAttribute('role')===null&&!n.hidden);
   addContextHelp(root,heading,notes);
  }

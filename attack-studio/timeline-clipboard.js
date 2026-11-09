@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-split';
+import {validateAttack} from './combat-model.js?v=20261109-guard';
 const uniqueId=prefix=>prefix+'_'+crypto.randomUUID().replaceAll('-','');
 // Clipboard is an immutable snapshot, never a reference to the editable attack.
 export function copyTimelineEvents(attack,tracks,selection){
