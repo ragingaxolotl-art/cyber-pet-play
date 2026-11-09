@@ -1,3 +1,4 @@
+import {bankOpenConflicts,confirmBankReplacement} from './bank-open-dialog.js?v=20261109-bank-reopen-release';
 import {installAttackRevisions} from './attack-revision-editor.js?v=20261109-attack-revision-release';
 import {presentationTempo,consumePlaybackBudget} from './presentation-tempo.js?v=20261109-slow-motion-release';
 import {createPresentationAudio} from './presentation-audio.js?v=20261109-slow-motion-release';
@@ -30,14 +31,14 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261109-slow-motion-
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-slow-motion-release';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-slow-motion-release';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-trajectory-release';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-bank-reopen-release';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-slow-motion-release';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-slow-motion-release';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
 import {pathSample,visualFrame,visualOpacity,visualEnd as effectEnd} from './attack-motion.js?v=20261108-scheduled-sequences';
 import {shapePoints,containsPoint,resizeHitbox,hitboxResizeHandles} from './hitbox-shapes.js?v=20261109-rotation';
 import {poseDurations,posePlayback,poseSourceFrames} from './pose-timing.js?v=20261109-hurtboxes';
-import {installAttackBank} from './attack-bank.js?v=20261109-slow-motion-release';
+import {installAttackBank} from './attack-bank.js?v=20261109-bank-reopen-release';
 import {timing,markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261109-slow-motion-release';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
 import {installSequenceEditor} from './sequence-editor.js?v=20261109-trajectory-release';
@@ -235,7 +236,7 @@ function frameEditor(parent,owner,key,count,asset){
 }
 
 function renderPoseTimingSelection(){const select=$('poseControls').querySelector('[data-field="poseTiming"]');if(select)select.value=attack().poseTiming;}
-bankController=installAttackBank({onChange:(attacks,label)=>{browserSaved=attacks;browserSavedLabel=label;catalogBrowser?.refresh();},current:attack,currentMany:()=>{ensureAllSkins();return groupMembers(project.attacks,attack());},validate:a=>validateAttack(a,ids),status,open:(a,companions=[])=>{if(dirty&&!confirm('Open this saved attack? Unsaved edits to the matching working attack will be replaced.'))return false;const incoming=[a,...companions.filter(v=>v.id!==a.id)];if(project.attacks.length+incoming.filter(v=>!project.attacks.some(old=>old.id===v.id)).length>256)throw Error('The workspace is full. Open a new project first.');for(const member of incoming){const old=project.attacks.findIndex(v=>v.id===member.id);if(old>=0)project.attacks[old]=member;else project.attacks.push(member);}selected=a.id;frame=0;playing=false;mark();refresh();return true;}});
+bankController=installAttackBank({onChange:(attacks,label)=>{browserSaved=attacks;browserSavedLabel=label;catalogBrowser?.refresh();},current:attack,currentMany:()=>{ensureAllSkins();return groupMembers(project.attacks,attack());},validate:a=>validateAttack(a,ids),status,open:async(a,companions=[])=>{const incoming=[a,...companions.filter(v=>v.id!==a.id)];const conflicts=dirty?bankOpenConflicts(project.attacks,incoming):[];if(conflicts.length&&!await confirmBankReplacement(conflicts))return false;if(project.attacks.length+incoming.filter(v=>!project.attacks.some(old=>old.id===v.id)).length>256)throw Error('The workspace is full. Open a new project first.');for(const member of incoming){const old=project.attacks.findIndex(v=>v.id===member.id);if(old>=0)project.attacks[old]=member;else project.attacks.push(member);}selected=a.id;frame=0;playing=false;mark();refresh();return true;}});
 
 $('drawPath').onclick=()=>{editMode='path';status('Drag a line in the viewer. Its coordinates are relative to the attacker’s feet.');};
 $('moveHitbox').onclick=()=>{editMode='hitbox';$('showBoxes').checked=true;draw();status('Drag inside the orange hitbox to move it, or drag its resize handles.');};

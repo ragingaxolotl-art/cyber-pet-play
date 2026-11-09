@@ -80,7 +80,7 @@ export function installAttackBank({current,currentMany=()=>[current()],validate,
   render();$('bankList').value=attack.id;
  }
  $('bankSource').onchange=()=>task(refresh);$('refreshBank').onclick=()=>task(refresh);
- $('openAttack').onclick=()=>task(async()=>{const saved=bank.attacks.find(a=>a.id===$('bankList').value);if(saved&&open(structuredClone(saved),saved.reskinGroupId?structuredClone(bank.attacks.filter(a=>a.reskinGroupId===saved.reskinGroupId)):[]))message('Opened '+saved.name+' from the attack bank.');});
+ $('openAttack').onclick=async()=>{await task(async()=>{const saved=bank.attacks.find(a=>a.id===$('bankList').value);if(saved&&await open(structuredClone(saved),saved.reskinGroupId?structuredClone(bank.attacks.filter(a=>a.reskinGroupId===saved.reskinGroupId)):[]))message('Opened '+saved.name+' from the attack bank.');});$('openAttack').focus();};
  $('saveAttack').onclick=()=>task(save);
  $('connectBank').onclick=()=>{pendingSave=false;signIn();};
  $('bankConnection').addEventListener('close',()=>{
