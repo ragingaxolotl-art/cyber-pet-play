@@ -1,5 +1,5 @@
-import {renderHitboxRotation} from './hitbox-rotation-editor.js?v=20261109-area-art';
-import {validateAttack} from './combat-model.js?v=20261109-area-art';
+import {renderHitboxRotation} from './hitbox-rotation-editor.js?v=20261109-melee-clashes';
+import {validateAttack} from './combat-model.js?v=20261109-melee-clashes';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const unique=prefix=>prefix+crypto.randomUUID().replaceAll('-','');
 let selectedBox=null;

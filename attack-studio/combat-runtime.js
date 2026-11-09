@@ -1,3 +1,4 @@
+import {resolveMeleeClashes,meleeClashBoxes} from './melee-clashes.js?v=20261109-melee-clashes';
 import {fighterHurtboxes,touchesHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
 import {splitDue,splitFan,splitChildDefinition,splitRayPosition} from './projectile-split.js?v=20261109-split';
@@ -18,10 +19,10 @@ import {ProjectileRegistry,ownerActionEnd} from './projectile-lifetime.js?v=2026
 import {CONTACT_TIMEOUT,contactDeadline,castEnd} from './contact-timing.js?v=20261108-movement-cancels';
 import {canCancel,automaticFollowup,MAX_AUTOMATIC_FOLLOWUPS} from './cancel-windows.js?v=20261108-movement-cancels';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,claimProjectileDefense} from './defense-windows.js?v=20261108-absorption';
-import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-rotation';
+import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-melee-clashes';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
-import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-area-art';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-area-art';
+import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-melee-clashes';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-melee-clashes';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261108-bounces';
@@ -34,7 +35,7 @@ export class Arena{
   return fighterHurtboxes(fighter,active?{attack:cast.a,frame:age,timing:cast.tm}:null);
  }
 
- constructor(player,opponent,attacks,options={}){this.fighters=[player,opponent];opponent.x=700;opponent.facing=-1;this.attacks=attacks;this.frame=0;this.presentationFrame=0;this.hitstopRemaining=0;this.contactFeedback=[];this.combos=new ComboTracker();this.set=0;this.paused=true;this.winner=null;this.winnerIndex=null;this.honourMetrics={guards:0,dodges:0,attacks:new Set()};this.events=[];this.projectiles=new ProjectileRegistry();this.areas=[];this.projectileClashes=new ProjectileClashes();this.lastProjectileClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.automaticAttempts=[];this.training=options.training===true;this.ai=!this.training;this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.decks=options.decks||null;}
+ constructor(player,opponent,attacks,options={}){this.fighters=[player,opponent];opponent.x=700;opponent.facing=-1;this.attacks=attacks;this.frame=0;this.presentationFrame=0;this.hitstopRemaining=0;this.contactFeedback=[];this.combos=new ComboTracker();this.set=0;this.paused=true;this.winner=null;this.winnerIndex=null;this.honourMetrics={guards:0,dodges:0,attacks:new Set()};this.events=[];this.projectiles=new ProjectileRegistry();this.areas=[];this.projectileClashes=new ProjectileClashes();this.lastProjectileClashes=[];this.lastMeleeClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.automaticAttempts=[];this.training=options.training===true;this.ai=!this.training;this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.decks=options.decks||null;}
  // Internal launch boundary. Versioned authoring will call this at startup;
  // existing attack definitions remain cast-owned until that support is enabled.
  launchProjectile(f,lifetime){
@@ -137,7 +138,7 @@ export class Arena{
  }
  emit(text,x,y){this.events.push({text,x,y,until:this.frame+60});this.events=this.events.slice(-12);}
  tick(input=new Set(),sprintDirection=0,opponentInput=new Set()){
-  this.automaticAttempts=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.lastProjectileClashes=[];
+  this.automaticAttempts=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.lastProjectileClashes=[];this.lastMeleeClashes=[];
   if(this.paused||this.winner)return;this.presentationFrame++;
   if(this.hitstopRemaining>0){this.hitstopRemaining--;return;}
   this.contactFeedback=[];this.frame++;
@@ -182,6 +183,24 @@ export class Arena{
   const areaContacts=this.areas.map(area=>this.prepareArea(area));
   const pending=this.fighters.filter(f=>f.hp>0&&f.cast&&!f.cast.projectileLaunched&&!f.cast.projectileFailed).map(f=>this.prepare(f,f===p?o:p));
   for(const projectile of this.projectiles.entries.filter(p=>this.frame>=p.spawnFrame))pending.push({...this.prepareCast(projectile.owner,projectile.target,projectile.cast),projectile});
+  const meleeSnapshots=pending.filter(hit=>hit&&!hit.projectile).map(hit=>({id:this.fighters.indexOf(hit.f),owner:hit.f,attack:hit.cast.a,boxes:meleeClashBoxes(hit),hit}));
+  const melee=resolveMeleeClashes(meleeSnapshots);
+  this.lastMeleeClashes=melee.contacts.map(contact=>({...contact,combatFrame:this.frame,participants:[contact.first,contact.second].map(id=>({owner:id,name:meleeSnapshots.find(s=>s.id===id).attack.name,stopped:melee.stopped.has(id)}))}));
+  for(const snapshot of meleeSnapshots)if(melee.stopped.has(snapshot.id)){
+   const {f,cast}=snapshot.hit;
+   // Cancel the whole action, including future windows and follow-ups. Recovery
+   // is a separate lock so canceled armor/cancel windows cannot remain active.
+   if(f.cast===cast)f.cast=null;
+   f.stun=Math.max(f.stun,this.frame+cast.tm.recovery+1);
+   if(cast.sequence){
+    cast.sequence.cancelled='Attack stopped by a melee clash.';
+    for(const event of cast.a.hitEvents)if(!cast.sequence.consumed.has(event.id)){
+     cast.sequence.consumed.add(event.id);
+     this.lastHitResults.push({id:event.id,offset:event.offset,frame:null,result:'Clashed',reason:cast.sequence.cancelled,projectileId:null,owner:snapshot.id,attack:cast.a.name});
+    }
+   }
+  }
+  for(const contact of melee.contacts){const hit=meleeSnapshots.find(s=>s.id===contact.first).hit;this.emit(contact.outcome==='clash'?'MELEE CLASH':'PRIORITY',hit.box.x+hit.box.w/2,hit.box.y);}
   const clashes=this.projectileClashes.resolve(pending.filter(hit=>hit?.projectile).map(hit=>({id:hit.projectile.id,owner:hit.f,durability:hit.projectile.durability,boxes:hit.boxes||[hit.box]})));
   this.lastProjectileClashes=clashes.contacts.map(contact=>({...contact,participants:[contact.first,contact.second].map(id=>{const projectile=this.projectiles.entries.find(p=>p.id===id);return {id,name:projectile.cast.a.name,owner:this.fighters.indexOf(projectile.owner),remaining:clashes.remaining.get(id),destroyed:clashes.destroyed.has(id)};})}));
   for(const projectile of [...this.projectiles.entries]){
@@ -189,7 +208,7 @@ export class Arena{
    if(clashes.destroyed.has(projectile.id))this.projectiles.remove(projectile);
   }
   for(const contact of clashes.contacts){const hit=pending.find(hit=>hit?.projectile?.id===contact.first);this.emit('CLASH',hit.box.x+hit.box.w/2,hit.box.y);}
-  for(const hit of pending)if(hit&&!clashes.destroyed.has(hit.projectile?.id)){
+  for(const hit of pending)if(hit&&!clashes.destroyed.has(hit.projectile?.id)&&(hit.projectile||!melee.stopped.has(this.fighters.indexOf(hit.f)))){
    const before=hit.cast.sequence?.results.length??0;
    this.resolve(hit.f,hit.target,hit);
    for(const result of hit.cast.sequence?.results.slice(before)||[]){
@@ -239,7 +258,7 @@ export class Arena{
  }
  faceOpponents(){const [p,o]=this.fighters;if(p.x!==o.x){p.facing=o.x>p.x?1:-1;o.facing=-p.facing;}for(const f of this.fighters){if(f.cast&&f.cast.a.delivery==='melee')f.cast.facing=f.facing;}}
  reactionEvent(name,f){this.emit(name,f.x,f.y-80);if(f===this.fighters[1]){if(name==='WALL HIT')this.metrics.wallHits++;if(name==='KNOCKDOWN')this.metrics.knockdowns++;}}
- resetDummy(position=700){if(!this.training)return;this.combos.clear();this.hitstopRemaining=0;this.contactFeedback=[];this.projectiles.clear();this.areas=[];this.projectileClashes.clear();this.lastProjectileClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];const f=this.fighters[1];Object.assign(f,{x:position,y:0,vy:0,vx:0,hp:f.maxHP,energy:f.maxEnergy,pulseMotion:null,pulseOwned:false,legacyMotion:null,legacyOwned:false,juggleHits:0,juggleLocked:false,reaction:'standing',reactionStart:this.frame,reactionUntil:0,needsFall:false,lastHit:-999,cast:null,stun:0,hitstunUntil:0,airRecoveryUsed:false,statuses:[],shield:0});this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.lastSequence=null;for(const actor of this.fighters){actor.cast=null;actor.dashUntil=0;actor.blockstunUntil=0;actor.blockstunReduction=0;}this.faceOpponents();}
+ resetDummy(position=700){if(!this.training)return;this.combos.clear();this.hitstopRemaining=0;this.contactFeedback=[];this.projectiles.clear();this.areas=[];this.projectileClashes.clear();this.lastProjectileClashes=[];this.lastMeleeClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];const f=this.fighters[1];Object.assign(f,{x:position,y:0,vy:0,vx:0,hp:f.maxHP,energy:f.maxEnergy,pulseMotion:null,pulseOwned:false,legacyMotion:null,legacyOwned:false,juggleHits:0,juggleLocked:false,reaction:'standing',reactionStart:this.frame,reactionUntil:0,needsFall:false,lastHit:-999,cast:null,stun:0,hitstunUntil:0,airRecoveryUsed:false,statuses:[],shield:0});this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.lastSequence=null;for(const actor of this.fighters){actor.cast=null;actor.dashUntil=0;actor.blockstunUntil=0;actor.blockstunReduction=0;}this.faceOpponents();}
  testDummyReaction(wall=false){if(!this.training)return;const f=this.fighters[1];this.resetDummy(wall?910:650);beginReaction(f,{motion:'ground_slam_side',knockback:wall?100:24,launchHeight:35,hitstun:15,flightFrames:36,pushAxis:'both',wallSlam:wall,floorSlam:true},1,this.frame);}
  prepare(f,target){return this.prepareCast(f,target,f.cast);}
  // Collision sources may outlive an owner action. Never swap f.cast to inspect one:

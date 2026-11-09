@@ -1,5 +1,5 @@
-import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-area-art';
-import {validateAttack, freshAttack} from './combat-model.js?v=20261109-area-art';
+import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-melee-clashes';
+import {validateAttack, freshAttack} from './combat-model.js?v=20261109-melee-clashes';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-split';
 import {validateRecoveryFrame, recoverInAir} from './air-recovery.js';
 import {combatPreviewFrame} from './combat-preview-frame.js?v=20261109-area-art';

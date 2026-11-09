@@ -1,4 +1,4 @@
-import {freshAttack,validateAttack} from './combat-model.js?v=20261109-area-art';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261109-melee-clashes';
 import {familyKey,createReskinGroup} from './reskin-groups.js?v=20261108-scheduled-sequences';
 // Editable starting balance, shared by matching elemental artwork. No elemental bonuses.
 export const RESKIN_PROFILES={

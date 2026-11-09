@@ -27,7 +27,11 @@ export function activeGroupContacts(groups,frame,target,transform=box=>box) {
 }
 export function createGroupHitTracker(){
  const targets=new Map();
- return {claim(targetId,group,frame){
+ const canClaim=(targetId,group,frame)=>{
+  const record=targets.get(targetId)?.get(group.id);
+  return !record||(record.count<group.hitLimit&&frame-record.last>=group.hitInterval);
+ };
+ return {canClaim,claim(targetId,group,frame){
   let hits=targets.get(targetId);if(!hits){hits=new Map();targets.set(targetId,hits);}
   const record=hits.get(group.id)||{count:0,last:-Infinity};
   if(record.count>=group.hitLimit||frame-record.last<group.hitInterval)return false;

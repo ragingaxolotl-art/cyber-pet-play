@@ -1,4 +1,4 @@
-import {createLocalBankStore,createClassroomBank,validateBank,BANK_KEY,SESSION_KEY,emptyBank} from './attack-bank.js?v=20261109-area-art';
+import {createLocalBankStore,createClassroomBank,validateBank,BANK_KEY,SESSION_KEY,emptyBank} from './attack-bank.js?v=20261109-melee-clashes';
 // Reads definitions through existing bank validation; never writes the bank or exposes credentials.
 export async function readSavedBrowserAttacks(validate){
  const remote=createClassroomBank(validate);try{remote.restore(JSON.parse(localStorage.getItem(SESSION_KEY)||'null'));}catch{}

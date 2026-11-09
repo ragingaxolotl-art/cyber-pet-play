@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-area-art';
+import {validateAttack} from './combat-model.js?v=20261109-melee-clashes';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderMovementCancelEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h3','Movement cancel windows'));

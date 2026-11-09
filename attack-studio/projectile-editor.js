@@ -1,8 +1,8 @@
-import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-area-art';
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-area-search';
+import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-melee-clashes';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-melee-clashes';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-area-art';
-import {validateAttack} from './combat-model.js?v=20261109-area-art';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-melee-clashes';
+import {validateAttack} from './combat-model.js?v=20261109-melee-clashes';
 export function renderProjectileEditor({root,attack,commit,status,effects=new Map()}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);

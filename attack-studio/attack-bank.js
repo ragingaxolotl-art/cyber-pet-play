@@ -1,9 +1,9 @@
-import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261109-area-art';
+import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261109-melee-clashes';
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
 export function emptyBank(){return {format:'cyber-pet-attack-bank',version:1,attacks:[]};}
 export function validateBank(bank,validate){
- if(bank?.format!=='cyber-pet-attack-bank'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
+ if(bank?.format!=='cyber-pet-attack-bank'||![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29].includes(bank.version)||!Array.isArray(bank.attacks)||bank.attacks.length>256)throw Error('Invalid attack bank.');
  requireGroupVersion(bank.version,bank.attacks);
  if(bank.version===1&&bank.attacks.some(a=>a.hitEvents))throw Error('Hit sequences require a version 2 attack bank.');
  const ids=new Set();for(const a of bank.attacks){validate(a);if(ids.has(a.id))throw Error('Duplicate saved attack ID.');ids.add(a.id);}return bank;

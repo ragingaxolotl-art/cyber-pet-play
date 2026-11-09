@@ -1,13 +1,13 @@
 import {createTreeStore,treeStorageMessage} from './tree-storage.js?v=20261108-tree-storage';
-import {treeStorageKey} from './tree-cabinet.js?v=20261109-area-art';
-import {dataSetKey} from './tree-datasets.js?v=20261109-area-art';
-import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261109-area-art';
-import {freshAttack,validateAttack} from './combat-model.js?v=20261109-area-art';
+import {treeStorageKey} from './tree-cabinet.js?v=20261109-melee-clashes';
+import {dataSetKey} from './tree-datasets.js?v=20261109-melee-clashes';
+import {TREE_KEY,validateTree,treeVersion} from './skill-tree-model.js?v=20261109-melee-clashes';
+import {freshAttack,validateAttack} from './combat-model.js?v=20261109-melee-clashes';
 // Tree attacks are independent copies. Explicit save updates only the chosen node.
 export async function connectTreeEditor({effects,open,current,status}){
  const id=new URLSearchParams(location.search).get('treeNode');if(!id)return;
  const treeKey=treeStorageKey(new URLSearchParams(location.search).get('dataSet')||'original',new URLSearchParams(location.search).get('tree')||'main');
- const link=document.querySelector('a[href="skill-tree.html?v=20261109-windows-menu"]');if(link)link.href='skill-tree.html?dataSet='+encodeURIComponent(new URLSearchParams(location.search).get('dataSet')||'original')+'&tree='+encodeURIComponent(new URLSearchParams(location.search).get('tree')||'main');
+ const link=document.querySelector('a[href="skill-tree.html?v=20261109-melee-clashes"]');if(link)link.href='skill-tree.html?dataSet='+encodeURIComponent(new URLSearchParams(location.search).get('dataSet')||'original')+'&tree='+encodeURIComponent(new URLSearchParams(location.search).get('tree')||'main');
  const ids=new Set(effects.map(e=>e.id));
  try{
   const storage=await createTreeStore(),read=(source=storage)=>validateTree(JSON.parse(source.getItem(treeKey)),ids,validateAttack);
