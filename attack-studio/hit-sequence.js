@@ -1,3 +1,4 @@
+import {validateReactionAlternatives} from './conditional-reactions.js?v=20261109-conditional-release';
 import {startBoundaryBounce,validateBounces} from './bounce-rules.js?v=20261108-bounces';
 import {resetGroundedJuggle,recordJuggleReaction,JUGGLE_RULES} from './juggle-rules.js?v=20261108-bounces';
 export {resetGroundedJuggle} from './juggle-rules.js?v=20261108-bounces';
@@ -24,6 +25,7 @@ export function validateHitSequence(attack) {
   if (!Array.isArray(attack.hitEvents)||!integer(attack.hitEvents.length,1,SEQUENCE_LIMITS.hits)) throw Error('Use 1–10 independent hits.');
   const ids=new Set(); let previous=-1;
   for (const event of attack.hitEvents) {
+    validateReactionAlternatives(event.reactionAlternatives);
     validateBounces(event.bounces);
     if(event.bounces&&['none','suspend'].includes(event.reaction))throw Error('Bounces require a moving hit reaction.');
     if (!event||typeof event.id!=='string'||!/^hit_[a-zA-Z0-9_]{1,80}$/.test(event.id)||ids.has(event.id)) throw Error('Every hit needs a unique ID.');

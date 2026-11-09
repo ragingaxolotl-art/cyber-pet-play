@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-throw-release';
+import {validateAttack} from './combat-model.js?v=20261109-conditional-release';
 import {scaledHitstun} from './hitstun-scaling.js?v=20261108-hitstun';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderHitstunEditor({root,attack,commit,status}){

@@ -1,12 +1,13 @@
+import {attackPhase} from './attack-phase.js';
 // Detached replay data for Studio: never retain mutable fighters or cast trackers.
 import {impactAreaBox,impactAreaView} from './projectile-area.js?v=20261109-area-art';
 export function combatPreviewFrame(arena) {
- const actor = fighter => ({hurtboxes:structuredClone(arena.hurtboxesFor(fighter)),name: fighter.name, x: fighter.x, y: fighter.y,
+ const actor = fighter => {const prepared=fighter.cast&&!fighter.cast.projectileLaunched?arena.prepare(fighter,arena.fighters.find(f=>f!==fighter)):null;return {attackBoxes:prepared?structuredClone(prepared.boxes||[prepared.box]):[],attackActive:attackPhase(fighter.cast,arena.frame)==='active',hurtboxes:structuredClone(arena.hurtboxesFor(fighter)),name: fighter.name, x: fighter.x, y: fighter.y,
   hp: fighter.hp, maxHP: fighter.maxHP, energy: fighter.energy,
   shield: fighter.shield, facing: fighter.facing, reaction: fighter.reaction,
   captured: !!fighter.captured, holding: !!fighter.holding, blocking: fighter.guarding, ownerActive: !!fighter.cast, reactionStart: fighter.reactionStart, reactionUntil: fighter.reactionUntil,
   lastHit: fighter.lastHit, hitstunUntil: fighter.hitstunUntil, reactionInFlight: fighter.reactionInFlight,
-  stun: fighter.stun, statuses: structuredClone(fighter.statuses)});
+  stun: fighter.stun, statuses: structuredClone(fighter.statuses)};};
  const projectiles = arena.projectiles.entries
   .filter(entity => entity.owner.hp > 0 && entity.target.hp > 0 && arena.frame >= entity.spawnFrame && arena.frame < entity.expires)
   .flatMap(entity => {

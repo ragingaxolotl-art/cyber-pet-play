@@ -1,6 +1,6 @@
 import {renderImpactAreaArtEditor} from './impact-area-art-editor.js?v=20261109-area-search';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {validateAttack} from './combat-model.js?v=20261109-throw-release';
+import {validateAttack} from './combat-model.js?v=20261109-conditional-release';
 export function renderProjectileAreaEditor({root,attack,commit,status,effects=new Map()}){
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Impact area';section.append(legend);
  const label=document.createElement('label');label.textContent='After first contact';const mode=document.createElement('select');mode.setAttribute('aria-label','Projectile impact area');

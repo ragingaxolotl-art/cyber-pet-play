@@ -1,11 +1,12 @@
+import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261109-conditional-release';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-throw-release';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-throw-release';
-import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-throw-release';
-import {validateAttack} from './combat-model.js?v=20261109-throw-release';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-throw-release';
-import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261108-bounces';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-conditional-release';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-conditional-release';
+import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-conditional-release';
+import {validateAttack} from './combat-model.js?v=20261109-conditional-release';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-conditional-release';
+import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261109-conditional-release';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
@@ -67,6 +68,7 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     fields.append(el('p','Blank preserves reaction-based hitstun; zero adds no hitstun. Movement or suspension can still lock the target. Explicit values require version 15.'));
     root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
     renderHitPropertyLinks(root,a,event.id,next=>{validateAttack(next);saveCommit(next);render();});
+    renderConditionalReactions({root,event,commit:edited=>mutate(n=>{n.hitEvents[n.hitEvents.findIndex(e=>e.id===selected)]=edited;}),status:message=>error.textContent=message});
     const bounce=el('section');root.append(bounce);renderBounceEditor({root:bounce,attack:a,eventId:event.id,commit:next=>{saveCommit(next);render();},status:message=>error.textContent=message});
     const legacy=el('button','Return to ordinary '+a.delivery);legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.sequenceTiming;delete n.behaviorVersion;delete n.projectileMode;if(n.hitboxGroups)n.impactTrigger='timed';});root.append(legacy);
   }

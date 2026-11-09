@@ -1,3 +1,4 @@
+import {reactionContactState,resolveReactionAlternative} from './conditional-reactions.js?v=20261109-conditional-release';
 import {fighterHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
 import {createImpactArea,claimAreaHit,impactAreaBox,impactAreaView,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
@@ -11,9 +12,9 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261109-throw-release';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261109-melee-clashes';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-throw-release';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261109-conditional-release';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261108-hitstun';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261109-conditional-release';
 
 export function simulateSequence(attack,attacker,target,options={}) {
   validateRecoveryFrame(options.recoveryFrame);
@@ -64,6 +65,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
     }
     const active=sourceAlive&&frame>=tm.startup&&!state.cancelled&&((state.startFrame??state.contactFrame)===null?frame<=contactDeadline(tm):frame<(state.startFrame??state.contactFrame)+sequenceDuration(attack));
     if(active){
+      const reactionContact=reactionContactState(other);
       for(const event of sequenceOpportunities(attack,state,frame,overlap,other)){
         const guarded=guardContact.guarded;
         const rawDamage=Math.round(event.damage*(1-Math.max(-50,Math.min(75,options.resistance??0))/100)*(guarded?1-tv.guard:1));
@@ -73,7 +75,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
         hitResult(state,event,frame,guarded?'Blocked':'Connected');
         events.push({frame,text:`${guarded?'Blocked hit':'Hit'} ${hits}: ${actual} damage.`});
         if(guarded){if(state.startFrame===null)state.cancelled='First contact was blocked; attachment cancelled.';other.reactionGuardFrame=frame;if(attack.contactFeedback?.blockstun>0)other.blockstunUntil=Math.max(other.blockstunUntil||0,frame+attack.contactFeedback.blockstun+1);}
-        else {state.attached=true;applyPulseReaction(other,scaledHitEvent(event,combos.priorHits('self','target'),attack.hitstunScaling),direction,frame);}
+        else {state.attached=true;applyPulseReaction(other,scaledHitEvent(resolveReactionAlternative(event,reactionContact),combos.priorHits('self','target'),attack.hitstunScaling),direction,frame);}
         if(applyGuardRecovery(other,guardContact,guarded?'block':'hit',frame)){guardRecoveryUntil=Math.max(guardRecoveryUntil,other.stun);events.push({frame,text:'Guard '+guardContact.mode+'.'});}
         if(other.hp<=0)state.cancelled='Target defeated.';
         if(consumesProjectile(attack,guarded?'block':'hit')){state.cancelled=CONTACT_END_REASON;if(attack.projectileArea){impactArea=createImpactArea(attack,impactAreaAnchor(boxes,event.hitboxGroup,targetBox,box),frame);events.push({frame,text:'Impact area created.'});}events.push({frame,text:state.cancelled});break;}

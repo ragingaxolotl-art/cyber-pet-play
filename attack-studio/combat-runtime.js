@@ -1,3 +1,5 @@
+import {reactionContactState,resolveReactionAlternative} from './conditional-reactions.js?v=20261109-conditional-release';
+import {createAttackerMotion,stepAttackerMotion,attackerMotionTiming} from './attacker-motion.js?v=20261109-conditional-release';
 import {ThrowController} from './throw-controller.js?v=20261109-throw-release';
 import {createFlightState,advanceFlight,reflectFlight} from './projectile-flight.js?v=20261109-projectile-flight-release';
 import {resolveMeleeClashes,meleeClashBoxes} from './melee-clashes.js?v=20261109-melee-clashes';
@@ -23,11 +25,11 @@ import {canCancel,automaticFollowup,MAX_AUTOMATIC_FOLLOWUPS} from './cancel-wind
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,claimProjectileDefense} from './defense-windows.js?v=20261109-throw-release';
 import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-melee-clashes';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
-import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-throw-release';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-throw-release';
+import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-conditional-release';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-conditional-release';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
-import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261108-bounces';
+import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261109-conditional-release';
 export const RULES={width:960,ground:370,gravity:.48,jump:-9.5,move:2.8,sprintMultiplier:1.8,dodgeFrames:18,dodgeInvulnerableStart:2,dodgeInvulnerableEnd:14,dodgeCooldown:45,dodgeSpeed:4,energyPerFrame:.055,contactTimeout:CONTACT_TIMEOUT};
 export function fighter(name,stats,pet=null){const limits=statsFor(stats);return {name,stats,pet,...limits,hp:limits.maxHP,energy:limits.maxEnergy,x:260,y:0,vy:0,facing:1,crouch:false,moving:false,backing:false,sprinting:false,guarding:false,blockstunUntil:0,blockstunReduction:0,dodgeStart:-999,dodgeUntil:0,dodgeReady:0,dashUntil:0,dashReady:0,dashDirection:0,reaction:"standing",reactionStart:0,reactionUntil:0,lastHit:-999,vx:0,needsFall:false,cast:null,cooldowns:new Map(),stun:0,hitstunUntil:0,airRecoveryUsed:false,statuses:[],shield:0,shieldUntil:0,flash:0};}
 export class Arena{
@@ -83,7 +85,7 @@ export class Arena{
  slots(){return this.decks?this.decks[this.set].slots:this.attacks.slice(this.set*KEYS.length,(this.set+1)*KEYS.length);}
  rotate(){if(this.paused||this.winner)return;this.set=(this.set+1)%(this.decks?.length||Math.ceil(this.attacks.length/KEYS.length));}
  reason(f,a,automatic=false){if(!a)return 'Empty slot';if(f.captured||f.holding)return 'Finish the throw first';return (this.hitstopRemaining>0?'Impact pause':'')||(f.blockstunUntil>this.frame?'Recovering from a block':'')||availability(f.pet,a)||(f.reaction!=='standing'?'Recovering from a hit':f.dodgeUntil>this.frame?'Finish your dodge':f.dashUntil>this.frame?'Finish your dash':f.guarding?'Lower your guard before attacking':f.cast&&!canCancel(f.cast,a,this.frame-f.cast.start,automatic)?'Finish the current move':f.stun>this.frame?'Recovering from a hit':(f.cooldowns.get(a.id)||0)>this.frame?'Cooling down':f.energy<Math.ceil(a.cost*f.cost)?'Not enough energy':'');}
- attack(f,a,automatic=false){if(this.paused||this.winner||this.reason(f,a,automatic))return false;const automaticDepth=automatic?(f.cast?.automaticDepth||0)+1:0;this.faceOpponents();a=mappedAttack(f.pet,a);const tm=timing(a,f.stats);if(a.hitEvents)tm.active=sequenceDuration(a);const cost=Math.ceil(a.cost*f.cost);f.energy-=cost;f.cooldowns.set(a.id,this.frame+Math.max(tm.cooldown,tm.startup+tm.active+tm.recovery));f.cast={a,tm,automaticDepth,start:this.frame+1,x:f.x,y:f.y,facing:f.facing,groupTracker:createGroupHitTracker(),defenseState:createDefenseState(),outcomes:new Set(),hits:0,lastHit:-999,impact:a.impactTrigger==='contact'?null:tm.startup,sequence:a.hitEvents?sequenceState(a.sequenceTiming==='cast'?tm.startup:null):null};return true;}
+ attack(f,a,automatic=false){if(this.paused||this.winner||this.reason(f,a,automatic))return false;const automaticDepth=automatic?(f.cast?.automaticDepth||0)+1:0;this.faceOpponents();a=mappedAttack(f.pet,a);let tm=timing(a,f.stats);if(a.hitEvents)tm.active=sequenceDuration(a);tm=attackerMotionTiming(a,tm);const cost=Math.ceil(a.cost*f.cost);f.energy-=cost;f.cooldowns.set(a.id,this.frame+Math.max(tm.cooldown,tm.startup+tm.active+tm.recovery));f.cast={a,tm,attackerMotion:a.attackerMotion?createAttackerMotion(a,f.facing):null,automaticDepth,start:this.frame+1,x:f.x,y:f.y,facing:f.facing,groupTracker:createGroupHitTracker(),defenseState:createDefenseState(),outcomes:new Set(),hits:0,lastHit:-999,impact:a.impactTrigger==='contact'?null:tm.startup,sequence:a.hitEvents?sequenceState(a.sequenceTiming==='cast'?tm.startup:null):null};return true;}
  airRecover(f){
   if(f.captured||f.holding)return 'Finish the throw first';
   if(this.paused||this.winner)return 'Start or resume the round first';
@@ -157,7 +159,7 @@ export class Arena{
    for(const s of f.statuses){if(statusTickDue(s,this.frame)){if(s.type==='regen')f.hp=Math.min(f.maxHP,f.hp+s.power);else if(['burn','poison'].includes(s.type))f.hp=Math.max(0,f.hp-s.power);s.next+=s.interval;}}
    f.statuses=f.statuses.filter(s=>s.until>this.frame);
    if(f.statuses.some(s=>s.type==='stun'))f.stun=Math.max(f.stun,this.frame+1);
-   if(throwLocked){f.guarding=false;f.moving=false;f.sprinting=false;continue;}
+   if(throwLocked){if(f.cast?.attackerMotion)f.cast.attackerMotion.cancelled=true;f.guarding=false;f.moving=false;f.sprinting=false;continue;}
    if(f.reaction!=='standing'||f.stun>this.frame)f.blockstunUntil=0;
    let direction=0,jump=false;f.crouch=false;f.sprinting=false;f.moving=false;f.guarding=f.blockstunUntil>this.frame||(f.reaction==='standing'&&(f===p?input:opponentInput).has('Shift')&&!f.cast&&f.dodgeUntil<=this.frame&&f.dashUntil<=this.frame&&f.stun<=this.frame&&!availability(f.pet,{motion:'block_side'}));
    if(f===p){direction=Number(input.has('ArrowRight'))-Number(input.has('ArrowLeft'));jump=input.has('ArrowUp');f.crouch=input.has('ArrowDown')&&f.y===0;}
@@ -168,7 +170,10 @@ export class Arena{
    if(f.reaction==='standing'&&f.dodgeUntil>this.frame&&f.stun<=this.frame){f.x-=f.facing*RULES.dodgeSpeed;}
    if(f.blockstunUntil<=this.frame&&f.reaction==='standing'&&!f.cast&&f.dodgeUntil<=this.frame&&f.dashUntil<=this.frame&&f.stun<=this.frame){const statusSpeed=movementMultiplier(f.statuses);
     if(direction){f.moving=true;f.sprinting=f===p&&direction===sprintDirection&&!f.guarding&&!f.crouch&&f.y===0;f.x+=direction*(RULES.move+f.stats.speed*.012)*statusSpeed*(f.crouch||f.guarding?.4:1)*(f.sprinting?RULES.sprintMultiplier:1);}if(jump&&f.y===0&&!f.crouch&&!f.guarding)f.vy=RULES.jump;}
-   if(!f.pulseOwned&&!f.legacyOwned&&f.reaction!=='wall'){f.vy+=RULES.gravity;f.y+=f.vy;}if(f.y>=0){f.y=0;f.vy=0;resetGroundedJuggle(f);if(f.reaction==='airborne'&&!f.pulseOwned&&!f.pulseMotion)knockDown(f,this.frame,(name,who)=>this.reactionEvent(name,who));}f.x=clamp(f.x,35,RULES.width-35);
+   let authoredVertical=false;
+   if(f.cast?.attackerMotion){const moved=stepAttackerMotion(f.cast.attackerMotion,this.frame-f.cast.start,f,{interrupted:f.reaction!=='standing'||f.stun>this.frame||f.hp<=0,minX:35,maxX:RULES.width-35});f.x=moved.x;f.y=moved.y;authoredVertical=moved.vertical;if(authoredVertical)f.vy=0;if(moved.active)f.moving=true;}
+   if(!authoredVertical&&!f.pulseOwned&&!f.legacyOwned&&f.reaction!=='wall'){f.vy+=RULES.gravity;f.y+=f.vy;}if(f.y>=0){f.y=0;f.vy=0;resetGroundedJuggle(f);if(f.reaction==='airborne'&&!f.pulseOwned&&!f.pulseMotion)knockDown(f,this.frame,(name,who)=>this.reactionEvent(name,who));}f.x=clamp(f.x,35,RULES.width-35);
+   if(f.cast?.attackerMotion&&!f.cast.projectileLaunched){f.cast.x=f.x;f.cast.y=f.y;}
   }
   this.throws.position();
   this.faceOpponents();p.backing=p.moving&&((input.has('ArrowRight')?1:0)-(input.has('ArrowLeft')?1:0))*p.facing<0;o.backing=false;
@@ -312,7 +317,7 @@ export class Arena{
   const sequenceContacts=boxes?new Set(groupContacts.map(g=>g.id)):null;
 
   const guardInteraction=guardContactRule(a,recipient.guarding||(defending&&defense.a.payload==='block'));
-  return {f,target,cast,age,box,targetBox:hurt,targetRegions,defenderPhase:attackPhase(recipient.cast,this.frame),defenderOffensive:['damage','push'].includes(recipient.cast?.a.payload),defense: defenseSnapshot(defense,defAge),invulnerable:isInvulnerable(defenseSnapshot(defense,defAge),a),boxes,groupContacts,sequenceContacts,damageMultiplier:cast.projectileDamageMultiplier??statusMultiplier(f.statuses,'weaken'),contact:a.delivery==='self'||touchesHurtboxes(box,targetRegions),guarding:guardInteraction.guarded,guardInteraction,guardReduction:recipient.blockstunUntil>this.frame?recipient.blockstunReduction:defending&&defense.a.payload==='block'?defense.a.blockPercent/100:recipient.guard,evading:a.delivery!=='self'&&((this.frame>=recipient.dodgeStart+RULES.dodgeInvulnerableStart&&this.frame<recipient.dodgeStart+RULES.dodgeInvulnerableEnd)||(defending&&defense.a.payload==='dodge'))};
+  return {f,target,cast,age,box,reactionContact:reactionContactState(recipient),targetBox:hurt,targetRegions,defenderPhase:attackPhase(recipient.cast,this.frame),defenderOffensive:['damage','push'].includes(recipient.cast?.a.payload),defense: defenseSnapshot(defense,defAge),invulnerable:isInvulnerable(defenseSnapshot(defense,defAge),a),boxes,groupContacts,sequenceContacts,damageMultiplier:cast.projectileDamageMultiplier??statusMultiplier(f.statuses,'weaken'),contact:a.delivery==='self'||touchesHurtboxes(box,targetRegions),guarding:guardInteraction.guarded,guardInteraction,guardReduction:recipient.blockstunUntil>this.frame?recipient.blockstunReduction:defending&&defense.a.payload==='block'?defense.a.blockPercent/100:recipient.guard,evading:a.delivery!=='self'&&((this.frame>=recipient.dodgeStart+RULES.dodgeInvulnerableStart&&this.frame<recipient.dodgeStart+RULES.dodgeInvulnerableEnd)||(defending&&defense.a.payload==='dodge'))};
  }
  resolve(f,target,snapshot=this.prepare(f,target)){if(!snapshot)return;if(snapshot.cast.a.throw){if(snapshot.age>=castEnd(snapshot.cast.impact,snapshot.cast.tm)&&f.cast===snapshot.cast)f.cast=null;return;}const {cast,age}=snapshot;const {a,tm}=cast;
   if(a.projectileContact==='single'&&(snapshot.evading||snapshot.invulnerable))return;
@@ -373,7 +378,7 @@ export class Arena{
    cast.outcomes.add(guard?'block':'hit');hitResult(state,event,age,guard?'Blocked':armored?'Armored':'Connected');this.emit((guard?'GUARD −':armored?'ARMOR −':'−')+damage,target.x,target.y-70);
    if(this.training&&target===this.fighters[1]){this.metrics.hits++;this.metrics.damage+=damage;}
    if(guard){if(state.startFrame===null)state.cancelled='Contact blocked; attachment cancelled.';}
-   else {state.attached=true;if(armored)target.lastHit=this.frame;else {target.cast=null;target.guarding=false;applyPulseReaction(target,scaledHitEvent(event,this.combos.priorHits(f,target),a.hitstunScaling),snapshot.box.facing,this.frame);}if(f===this.fighters[0]&&damage>0)this.honourMetrics.attacks.add(a.id);}
+   else {state.attached=true;if(armored)target.lastHit=this.frame;else {target.cast=null;target.guarding=false;applyPulseReaction(target,scaledHitEvent(resolveReactionAlternative(event,snapshot.reactionContact),this.combos.priorHits(f,target),a.hitstunScaling),snapshot.box.facing,this.frame);}if(f===this.fighters[0]&&damage>0)this.honourMetrics.attacks.add(a.id);}
    if(consumesProjectile(a,guard?'block':armored?'armor':'hit')){state.cancelled=CONTACT_END_REASON;this.consumeProjectile(snapshot,target,guard?'block':armored?'armor':'hit',event.hitboxGroup);break;}
   }
   cast.impact=state.startFrame??state.contactFrame;

@@ -2,6 +2,8 @@
 export function attackDiagnostics(attack,simulation=null,attacks=null) {
  const findings=[];
  const add=(code,level,message,action)=>findings.push({code,level,message,action});
+ if(attack.hitEvents?.some(e=>e.reactionAlternatives))add('conditional-reactions','info','Grounded/airborne reaction alternatives require version 33 saving.','Target height at contact selects the reaction before combo scaling. Damage and eligibility stay unchanged. Test both standing and airborne scenarios; alternative bounce settings are independent.');
+ if(attack.attackerMotion)add('attacker-motion','info','Authored fighter movement requires version 32 saving.','Movement uses absolute combat frames and may extend recovery. Test distance, stage walls and interruptions; the hitbox/effect path is separate. Launched projectiles do not follow later owner movement.');
  if(attack.throw)add('throw','info','Grab holds and releases require version 31 saving.','Use a nearby target. Guard and armor do not stop capture; dodge and throw invulnerability do. Test mutual grabs and interruption in Arena.');
  if(attack.defenseWindows?.some(w=>w.against==='throw'))add('throw-immunity','info','Throw-only invulnerability requires version 31 saving.','This window does not protect against ordinary strikes or projectiles.');
  if(attack.projectileFlight)add('projectile-flight','info','Ballistic angle, acceleration, gravity and range require version 30 saving.','Range follows the traveled path and survives reflection. Attached hits stop spending range; split children use their own straight rays. Lifetime and active windows can end travel first. Preview the full trajectory and check contact results.');
