@@ -30,7 +30,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261109-slow-motion-
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-slow-motion-release';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-slow-motion-release';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-attack-revision-release';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-compatibility-audit-release';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-slow-motion-release';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-slow-motion-release';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -40,7 +40,7 @@ import {poseDurations,posePlayback,poseSourceFrames} from './pose-timing.js?v=20
 import {installAttackBank} from './attack-bank.js?v=20261109-slow-motion-release';
 import {timing,markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261109-slow-motion-release';
 import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
-import {installSequenceEditor} from './sequence-editor.js?v=20261109-conditional-template-release';
+import {installSequenceEditor} from './sequence-editor.js?v=20261109-compatibility-audit-release';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');

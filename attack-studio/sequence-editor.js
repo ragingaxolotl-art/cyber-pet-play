@@ -3,10 +3,10 @@ import {renderConditionalReactions} from './conditional-reaction-editor.js?v=202
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
 import {renderBounceEditor} from './bounce-editor.js?v=20261109-slow-motion-release';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-conditional-template-release';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-compatibility-audit-release';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-slow-motion-release';
 import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-slow-motion-release';
+import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-compatibility-audit-release';
 import {jugglePreset,resizeHits,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261109-slow-motion-release';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null}) {
