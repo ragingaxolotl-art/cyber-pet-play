@@ -20,7 +20,7 @@ export function installStudioWorkspace(){
  function menu(name){const d=make('details'),s=make('summary',name),body=make('div');d.className='workspace-menu';body.className='workspace-menu-body';d.append(s,body);nav.append(d);d.addEventListener('toggle',()=>{if(d.open)for(const other of nav.querySelectorAll('.workspace-menu'))if(other!==d)other.open=false;});return body;}
  const file=menu('File'),tools=menu('Editors'),windows=menu('Workspace'),panelWindows=menu('Windows');
  const panelHint=make('p','Choose which panels are visible. Hiding a panel keeps its settings.');panelHint.className='hint';panelWindows.append(panelHint);
- for(const id of ['open','save','download'])file.append($(id));
+ for(const id of ['open','save','download','attackRevisions'])if($(id))file.append($(id));
  for(const link of [...nav.children].filter(e=>e.tagName==='A'))tools.append(link);
  const controls=$('editorMode').closest('label');controls.classList.add('workspace-controls');$('export').after(controls);
  const buildPath=make('a','Build paths');buildPath.href='skill-tree.html?workspace=build-path';tools.append(buildPath);

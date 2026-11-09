@@ -1,3 +1,4 @@
+import {installAttackRevisions} from './attack-revision-editor.js?v=20261109-attack-revision-release';
 import {presentationTempo,consumePlaybackBudget} from './presentation-tempo.js?v=20261109-slow-motion-release';
 import {createPresentationAudio} from './presentation-audio.js?v=20261109-slow-motion-release';
 import {createPresentationPlayer} from './presentation-player.js?v=20261109-slow-motion-release';
@@ -19,7 +20,7 @@ import {steeringVisualPosition} from './projectile-steering.js?v=20261108-steeri
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261109-tree-workspace';
-import {installStudioWorkspace} from './studio-workspace.js?v=20261109-windows-menu';
+import {installStudioWorkspace} from './studio-workspace.js?v=20261109-attack-revision-release';
 import {renderProjectileEditor} from './projectile-editor.js?v=20261109-slow-motion-release';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261109-slow-motion-release';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
@@ -29,7 +30,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261109-slow-motion-
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-slow-motion-release';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-slow-motion-release';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-conditional-template-release';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261109-attack-revision-release';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-slow-motion-release';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-slow-motion-release';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -304,6 +305,7 @@ function installEditing(){
  $('scenario').onchange=()=>{const presets={standing:{guard:false,distance:72,targetHeight:0},blocking:{guard:true,distance:72,targetHeight:0},airborne:{guard:false,distance:72,targetHeight:40},distant:{guard:false,distance:190,targetHeight:0}};Object.assign(options,presets[$('scenario').value]);installSandbox();changed();};
  $('saveScenario').onclick=()=>{try{localStorage.setItem(storageKey+'-scenario',JSON.stringify(options));status('Test scenario saved in this browser.');}catch(e){status(e.message);}};
  $('loadScenario').onclick=()=>{try{const saved=JSON.parse(localStorage.getItem(storageKey+'-scenario')||'null');if(!saved)throw Error('Save a scenario first.');const candidate=structuredClone(project);candidate.testBench.options=saved;validateDesign(candidate,ids);Object.assign(options,{recoveryFrame:null},saved);installSandbox();changed();}catch(e){status(e.message);}};
+ installAttackRevisions({host:document.querySelector('header nav'),current:attack,status,restore:(saved,beforeCommit)=>{const candidate=structuredClone(project);candidate.attacks[candidate.attacks.findIndex(a=>a.id===selected)]=structuredClone(saved);candidate.version=attacksVersion(candidate.attacks);validateDesign(candidate,ids);beforeCommit();project=candidate;playing=false;frame=0;dirty=true;recordEdit();refresh();},copy:saved=>{if(project.attacks.length>=256)throw Error('Workspace full. Download a backup and remove an unused draft first.');const previous=saved.id;saved.id=freshAttack().id;remapSelfCancels(saved,previous);delete saved.reskinGroupId;delete saved.reskinFamily;validateAttack(saved,ids);project.attacks.push(saved);selected=saved.id;playing=false;frame=0;changed();refresh();}});
  sequenceEditor.results();recordEdit();installUnifiedBrowser();installStudioWorkspace();
 }
 
