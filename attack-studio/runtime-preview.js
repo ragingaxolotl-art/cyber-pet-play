@@ -1,5 +1,5 @@
-import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-rotation';
-import {validateAttack, freshAttack} from './combat-model.js?v=20261109-rotation';
+import {Arena, fighter, RULES} from './combat-runtime.js?v=20261109-anchors';
+import {validateAttack, freshAttack} from './combat-model.js?v=20261109-anchors';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-split';
 import {validateRecoveryFrame, recoverInAir} from './air-recovery.js';
 import {combatPreviewFrame} from './combat-preview-frame.js?v=20261109-rotation';

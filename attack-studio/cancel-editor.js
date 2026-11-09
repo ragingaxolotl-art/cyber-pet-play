@@ -1,6 +1,6 @@
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261109-rotation';
-import {validateAttack} from './combat-model.js?v=20261109-rotation';
+import {renderMovementCancelEditor} from './movement-cancel-editor.js?v=20261109-anchors';
+import {validateAttack} from './combat-model.js?v=20261109-anchors';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCancelEditor({root,attack,attacks,commit,status,test}){
  root.replaceChildren();root.append(make('h2','Follow-up windows'));

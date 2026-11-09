@@ -1,11 +1,11 @@
-import {renderGuardEditor} from './guard-editor.js?v=20261109-rotation';
+import {renderGuardEditor} from './guard-editor.js?v=20261109-anchors';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-rotation';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-rotation';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-rotation';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-rotation';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-rotation';
-import {validateAttack} from './combat-model.js?v=20261109-rotation';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-anchors';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-anchors';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-anchors';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-anchors';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-anchors';
+import {validateAttack} from './combat-model.js?v=20261109-anchors';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));
