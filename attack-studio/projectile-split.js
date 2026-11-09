@@ -28,7 +28,7 @@ export function splitChildDefinition(attack){
  const child=structuredClone(attack),rule=child.projectileSplit;delete child.projectileSplit;
  // Travel belongs to each ray. Independent damage/reaction/group settings stay
  // authored; the runtime gives each child a fresh cast and collision tracker.
- delete child.projectileSteering;delete child.motionPath;delete child.projectileStart;
+ delete child.projectileFlight;delete child.projectileSteering;delete child.motionPath;delete child.projectileStart;
  child.projectileSpeed=rule.speed;child.projectileLifetime=rule.lifetime;
  child.startup=0;child.active=rule.lifetime;child.recovery=0;
  return child;

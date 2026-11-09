@@ -1,0 +1,14 @@
+import {addContextHelp} from './context-help.js';
+import {validateAttack} from './combat-model.js?v=20261109-projectile-flight-release';
+export function renderFlightEditor({root,attack,commit,status}){
+ const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Ballistic flight';section.append(legend);
+ const mutate=change=>{try{const next=structuredClone(attack);change(next);validateAttack(next);commit(next);return true;}catch(error){status(error.message);return false;}};
+ const label=document.createElement('label');label.textContent='Use angle, acceleration, gravity and range';const enabled=document.createElement('input');enabled.type='checkbox';enabled.checked=!!attack.projectileFlight;enabled.disabled=!!attack.projectileSteering||!!attack.motionPath?.length;enabled.setAttribute('aria-label','Enable ballistic flight');label.append(enabled);section.append(label);
+ enabled.onchange=()=>{if(!mutate(next=>{if(enabled.checked)next.projectileFlight={angle:0,acceleration:0,gravity:0,range:600};else delete next.projectileFlight;}))enabled.checked=!!attack.projectileFlight;};
+ if(enabled.disabled){const p=document.createElement('p');p.setAttribute('role','status');p.textContent='Turn off steering and clear the movement path before enabling ballistic flight.';section.append(p);}
+ if(attack.projectileFlight)for(const [key,title,min,max,step] of [['angle','Launch angle (degrees)',-180,180,1],['acceleration','Acceleration (px/frame²)',-1,1,.05],['gravity','Gravity (px/frame²)',-1,1,.05],['range','Maximum travel range (px)',1,3000,1]]){
+  const label=document.createElement('label');label.textContent=title;const input=document.createElement('input');Object.assign(input,{type:'number',min,max,step,value:attack.projectileFlight[key]});input.setAttribute('aria-label',title);
+  input.onchange=()=>{if(input.value===''||!mutate(next=>next.projectileFlight[key]=Number(input.value))){if(input.value==='')status('Enter a value within the displayed range.');input.value=attack.projectileFlight[key];}};label.append(input);section.append(label);
+ }
+ const note=document.createElement('p');note.textContent='0° launches forward; negative angles launch upward. Initial speed uses Projectile px / frame. Acceleration acts along the launch direction; negative values can slow and reverse travel. Positive gravity pulls down. Combined speed is capped at 12 px/frame. Range counts distance along the path, including after reflection; the endpoint can hit before the projectile ends. Attached hits stop traveling and stop spending range. Split children use their own straight fan settings. Lifetime and active windows can end flight sooner. Saving requires version 30 support.';section.append(note);addContextHelp(section,legend,[note]);root.append(section);
+}

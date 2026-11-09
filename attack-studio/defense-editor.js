@@ -1,12 +1,12 @@
-import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-melee-clashes';
-import {renderGuardEditor} from './guard-editor.js?v=20261109-melee-clashes';
+import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-projectile-flight-release';
+import {renderGuardEditor} from './guard-editor.js?v=20261109-projectile-flight-release';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-melee-clashes';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-melee-clashes';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-melee-clashes';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-melee-clashes';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-melee-clashes';
-import {validateAttack} from './combat-model.js?v=20261109-melee-clashes';
+import {renderBounceEditor} from './bounce-editor.js?v=20261109-projectile-flight-release';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261109-projectile-flight-release';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261109-projectile-flight-release';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-projectile-flight-release';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-projectile-flight-release';
+import {validateAttack} from './combat-model.js?v=20261109-projectile-flight-release';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

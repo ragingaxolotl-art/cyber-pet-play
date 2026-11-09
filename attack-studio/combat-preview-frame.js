@@ -18,6 +18,7 @@ export function combatPreviewFrame(arena) {
     boxes: prepared.boxes ? structuredClone(prepared.boxes) : null,
     attack: structuredClone(entity.cast.a), facing: entity.cast.facing,
     splitRay: entity.cast.splitRay ? {...entity.cast.splitRay} : null,
+    flight: entity.cast.flight ? {...entity.cast.flight} : null,
     steering: entity.cast.steering ? {...entity.cast.steering} : null,
     attached: entity.cast.sequence?.attached === true}];
   });

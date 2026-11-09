@@ -1,7 +1,8 @@
+import {createFlightState,advanceFlight,reflectFlight} from './projectile-flight.js?v=20261109-projectile-flight-release';
 import {resolveMeleeClashes,meleeClashBoxes} from './melee-clashes.js?v=20261109-melee-clashes';
 import {fighterHurtboxes,touchesHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery} from './guard-interaction.js?v=20261109-guard';
-import {splitDue,splitFan,splitChildDefinition,splitRayPosition} from './projectile-split.js?v=20261109-split';
+import {splitDue,splitFan,splitChildDefinition,splitRayPosition} from './projectile-split.js?v=20261109-projectile-flight-release';
 import {createImpactArea,claimAreaHit,impactAreaBox,areaAlive,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
 import {consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-contact-final';
 import {createSteeringState,advanceSteering,reflectSteering} from './projectile-steering.js?v=20261108-steering';
@@ -21,8 +22,8 @@ import {canCancel,automaticFollowup,MAX_AUTOMATIC_FOLLOWUPS} from './cancel-wind
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,claimProjectileDefense} from './defense-windows.js?v=20261108-absorption';
 import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-melee-clashes';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
-import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-melee-clashes';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-melee-clashes';
+import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261109-projectile-flight-release';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261109-projectile-flight-release';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261108-bounces';
@@ -44,11 +45,12 @@ export class Arena{
   const entity=this.projectiles.launch(f,this.fighters.find(other=>other!==f),f.cast,this.frame,lifetime);
   entity.cast.projectileStats=Object.freeze({...f.stats});
   if(entity.cast.a.projectileSteering){const box=this.prepareCast(f,entity.target,entity.cast).box;entity.cast.steering=createSteeringState({x:box.x+box.w/2,y:box.y+box.h/2},entity.cast.facing,this.frame);}
+  if(entity.cast.a.projectileFlight){const box=this.prepareCast(f,entity.target,entity.cast).box;entity.cast.flight=createFlightState({x:box.x+box.w/2,y:box.y+box.h/2},entity.cast.facing,entity.cast.a.projectileSpeed,entity.cast.a.projectileFlight,this.frame);}
   return entity;
  }
  splitProjectile(projectile){
   const parent=projectile.cast,snapshot=this.prepareCast(projectile.owner,projectile.target,parent),box=snapshot.box;
-  let direction=parent.steering?.angle;
+  let direction=parent.flight?Math.atan2(parent.flight.vy,parent.flight.vx):parent.steering?.angle;
   if(direction===undefined){
    const previous=worldBox(parent.a,this.frame-parent.start-1,parent.projectileStats||projectile.owner.stats,parent.facing);
    previous.x+=parent.x;previous.y+=parent.y;const prior=transformProjectileBox(previous,parent.projectileTransform);
@@ -72,6 +74,7 @@ export class Arena{
   projectile.cast={...previous,x:rawX-authored.x,y:snapshot.box.y-authored.y,projectileTransform:transform,projectileDamageMultiplier:snapshot.damageMultiplier,groupTracker:createGroupHitTracker(),outcomes:new Set(),hits:0,lastHit:-999,
    impact:previous.a.impactTrigger==='contact'?null:previous.impact,sequence:previous.a.hitEvents?sequenceState():null};
   if(projectile.cast.steering)reflectSteering(projectile.cast.steering);
+  if(projectile.cast.flight)reflectFlight(projectile.cast.flight);
   if(previous.splitRay){const point=splitRayPosition(previous.splitRay,this.frame);projectile.cast.splitRay={...previous.splitRay,...point,vx:-previous.splitRay.vx,start:this.frame};}
   projectile.owner=defender;projectile.target=formerOwner;projectile.reflections=(projectile.reflections||0)+1;
   this.emit('REFLECT',defender.x,defender.y-70);return true;
@@ -171,6 +174,11 @@ export class Arena{
    try{this.launchProjectile(f,cast.a.projectileLifetime);}catch(error){cast.projectileFailed=true;this.emit(error.message,f.x,f.y-80);}
   }
   for(const projectile of this.projectiles.entries)trackedProjectiles.add(projectile);
+  for(const projectile of this.projectiles.entries){
+   const cast=projectile.cast;if(!cast.flight)continue;
+   if(cast.sequence?.attached&&cast.a.projectileMode==='attached'){cast.flight.lastFrame=this.frame;continue;}
+   advanceFlight(cast.flight,this.frame);
+  }
   for(const projectile of [...this.projectiles.entries]){
    const cast=projectile.cast;if(!cast.steering)continue;
    if(cast.sequence?.attached&&cast.a.projectileMode==='attached'){cast.steering.lastFrame=this.frame;continue;}
@@ -217,10 +225,16 @@ export class Arena{
    }
   }
   for(const contact of areaContacts)this.resolveArea(contact);
+  // The clipped endpoint gets one final collision opportunity before retirement.
+  for(const projectile of [...this.projectiles.entries])if(projectile.cast.flight?.expired){
+   projectile.cast.flightEnded=true;this.projectiles.remove(projectile);
+   this.emit('PROJECTILE RANGE',projectile.cast.flight.x,projectile.cast.flight.y);
+   this.lastProjectileContacts.push({id:projectile.id,name:projectile.cast.a.name,owner:this.fighters.indexOf(projectile.owner),combatFrame:this.frame,outcome:'range limit'});
+  }
   this.projectiles.prune(this.frame);
   for(const projectile of trackedProjectiles)if(!this.projectiles.entries.includes(projectile)){
    const cast=projectile.cast;if(!cast.sequence)continue;
-   const reason=cast.splitReplaced?'Parent replaced by split children.':projectile.expires<=this.frame?'Projectile expired before this hit connected.':cast.sequence.cancelled||'Projectile ended before this hit connected.';
+   const reason=cast.flightEnded?'Projectile reached its travel range before this hit connected.':cast.splitReplaced?'Parent replaced by split children.':projectile.expires<=this.frame?'Projectile expired before this hit connected.':cast.sequence.cancelled||'Projectile ended before this hit connected.';
    const recorded=new Set(cast.sequence.results.map(result=>result.id));
    for(const event of cast.a.hitEvents)if(!recorded.has(event.id))this.lastHitResults.push({id:event.id,offset:event.offset,frame:null,result:cast.splitReplaced?'Replaced':'Missed',reason,projectileId:projectile.id,owner:this.fighters.indexOf(projectile.owner),attack:cast.a.name});
   }
@@ -268,6 +282,7 @@ export class Arena{
   let box=worldBox(a,a.impactTrigger==='contact'&&cast.impact!==null?Math.min(age,cast.impact):age,sourceStats,cast.facing);box.x+=cast.x;box.y+=cast.y;
   if(cast.sequence?.attached&&a.projectileMode==='attached')box={...box,x:target.x-box.w/2,y:target.y-box.h};
   if(!(cast.sequence?.attached&&a.projectileMode==='attached'))box=transformProjectileBox(box,cast.projectileTransform);else {box.facing=cast.facing*(cast.projectileTransform?.direction||1);if(box.rotation!==undefined)box.rotation*=cast.projectileTransform?.direction||1;}
+  if(cast.flight&&!(cast.sequence?.attached&&a.projectileMode==='attached'))box={...box,x:cast.flight.x-box.w/2,y:cast.flight.y-box.h/2};
   if(cast.steering&&!(cast.sequence?.attached&&a.projectileMode==='attached'))box={...box,x:cast.steering.x-box.w/2,y:cast.steering.y-box.h/2};
   if(cast.splitRay&&!(cast.sequence?.attached&&a.projectileMode==='attached')){const point=splitRayPosition(cast.splitRay,this.frame);box={...box,x:point.x-box.w/2,y:point.y-box.h/2};}
   const targetRegions=this.hurtboxesFor(target),hurt=targetRegions[0];
@@ -282,7 +297,7 @@ export class Arena{
    const positioned={...world,x:world.x+(attached?target.x-a.box.w/2-primary.x:cast.x),y:world.y+(attached?target.y-a.box.h-primary.y:cast.y)};
    const transform=attached?(cast.projectileTransform?.direction===-1?{direction:-1,offset:2*target.x}:null):cast.projectileTransform;
    const transformed=transformProjectileBox(positioned,transform);
-   if((cast.steering||cast.splitRay)&&!attached){const anchor=transformProjectileBox({...primary,x:primary.x+cast.x,y:primary.y+cast.y},transform);return {...transformed,x:transformed.x+box.x-anchor.x,y:transformed.y+box.y-anchor.y};}
+   if((cast.flight||cast.steering||cast.splitRay)&&!attached){const anchor=transformProjectileBox({...primary,x:primary.x+cast.x,y:primary.y+cast.y},transform);return {...transformed,x:transformed.x+box.x-anchor.x,y:transformed.y+box.y-anchor.y};}
    return transformed;
   }):null;
   const groupContacts=boxes?a.hitboxGroups.filter(g=>boxes.some(b=>b.groupId===g.id&&touchesHurtboxes(b,targetRegions))):null;

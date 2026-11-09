@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-melee-clashes';
+import {validateAttack} from './combat-model.js?v=20261109-projectile-flight-release';
 import {addContextHelp} from './context-help.js';
 export function renderHitboxRotation({root,attack,boxId,commit,status}){
  const box=boxId?attack.hitboxGroups.flatMap(g=>g.boxes).find(b=>b.id===boxId):attack.box;

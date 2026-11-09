@@ -1,4 +1,4 @@
-import {ancestors} from './skill-tree-model.js?v=20261109-melee-clashes';
+import {ancestors} from './skill-tree-model.js?v=20261109-projectile-flight-release';
 import {setEdgeDetails,trimEdgeDetails} from './tree-paths.js?v=20261108-scheduled-sequences';
 
 // Connection edits return a copy and never delete attacks or their descendants.
