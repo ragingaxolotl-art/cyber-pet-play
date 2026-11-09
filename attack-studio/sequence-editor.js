@@ -1,9 +1,10 @@
+import {renderTrajectoryEditor} from './trajectory-editor.js?v=20261109-trajectory-release';
 import {renderImpulseEditor} from './impulse-editor.js?v=20261109-momentum-release';
 import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261109-slow-motion-release';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
 import {renderBounceEditor} from './bounce-editor.js?v=20261109-slow-motion-release';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-compatibility-audit-release';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-trajectory-release';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-slow-motion-release';
 import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
 import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-compatibility-audit-release';
@@ -69,6 +70,7 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     fields.append(el('p','Blank preserves reaction-based hitstun; zero adds no hitstun. Movement or suspension can still lock the target. Explicit values require version 15.'));
     root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
     renderHitPropertyLinks(root,a,event.id,next=>{validateAttack(next);saveCommit(next);render();});
+    renderTrajectoryEditor({root,event,commit:edited=>mutate(n=>{n.hitEvents[n.hitEvents.findIndex(e=>e.id===selected)]=edited;}),status:message=>error.textContent=message});
     renderImpulseEditor({root,event,commit:edited=>mutate(n=>{n.hitEvents[n.hitEvents.findIndex(e=>e.id===selected)]=edited;}),status:message=>error.textContent=message});
     renderConditionalReactions({root,event,commit:edited=>mutate(n=>{n.hitEvents[n.hitEvents.findIndex(e=>e.id===selected)]=edited;}),status:message=>error.textContent=message});
     const bounce=el('section');root.append(bounce);renderBounceEditor({root:bounce,attack:a,eventId:event.id,commit:next=>{saveCommit(next);render();},status:message=>error.textContent=message});
