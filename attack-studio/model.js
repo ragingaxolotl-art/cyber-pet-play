@@ -23,10 +23,11 @@ export function requirement(a,character){
 export function mappingValid(a,character){const m=character.mappings[a.id];return !requirement(a,character)&&m?.animation===a.required_animation&&!timingProblem(m,character.clips[a.required_animation].frames.length);}
 export function validateProject(p){
  if(p?.format!=='cyber-pet-attack-studio'||p.version!==1)throw Error('Choose an Attack Studio project JSON.');validateCatalog(p.catalog);
- const c=p.character;if(!c||typeof c.name!=='string'||c.name.length>60||!c.clips||typeof c.clips!=='object'||!c.mappings||typeof c.mappings!=='object')throw Error('Invalid character data.');
+ const c=p.character,record=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+ if(!record(c)||typeof c.name!=='string'||c.name.length>60||!record(c.clips)||!record(c.mappings))throw Error('Invalid character data: animations and assignments must be named objects, not lists.');
  let total=0;
  for(const [slot,clip] of Object.entries(c.clips)){
-  if(!Object.hasOwn(slots,slot)||!Array.isArray(clip.frames)||!clip.frames.length||clip.frames.length>300||typeof clip.reviewed!=='boolean')throw Error('Invalid character animation.');
+  if(!Object.hasOwn(slots,slot)||!record(clip)||!Array.isArray(clip.frames)||!clip.frames.length||clip.frames.length>300||typeof clip.reviewed!=='boolean')throw Error('Invalid character animation.');
   if(clip.times!==undefined&&(!Array.isArray(clip.times)||clip.times.length!==clip.frames.length||clip.times.some(t=>!Number.isFinite(t)||t<=0||t>10)))throw Error('Invalid frame timing.');
   if(clip.timing&&timingProblem(clip.timing,clip.frames.length))throw Error('Invalid animation timing.');
   for(const f of clip.frames){if(typeof f!=='string'||!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(f)||f.length>12*1024*1024)throw Error('Projects must contain PNG frames.');total+=f.length;}

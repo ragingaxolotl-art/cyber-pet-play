@@ -1,5 +1,5 @@
 import {confirmMapperDeletion} from './mapper-confirmation.js?v=20261110-mapper-dialog';
-import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261108-scheduled-sequences';
+import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261110-mapper-validation';
 import {readBackup} from './backups.js?v=20261108-scheduled-sequences';
 const $=id=>document.getElementById(id),ctx=$('canvas').getContext('2d');
 let catalog,examples,selected,mode='example',frame=1,playing=false,clock=0,lastTime=0,dirty=false,busy=false,ready=false;
