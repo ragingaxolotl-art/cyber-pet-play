@@ -1,7 +1,7 @@
 import {slots,validateCatalog,timingProblem,requirement,mappingValid,validateProject} from './model.js?v=20261108-scheduled-sequences';
 import {readBackup} from './backups.js?v=20261108-scheduled-sequences';
 const $=id=>document.getElementById(id),ctx=$('canvas').getContext('2d');
-let catalog,examples,selected,mode='example',frame=1,playing=false,clock=0,lastTime=0,dirty=false,busy=false;
+let catalog,examples,selected,mode='example',frame=1,playing=false,clock=0,lastTime=0,dirty=false,busy=false,ready=false;
 let character={name:'',clips:{},mappings:{}},referenceTiming={},art=new Map(),refs=new Map();
 const attack=()=>catalog.attacks.find(a=>a.id===selected);
 const blankTiming=n=>({first:1,last:n,impact:Math.max(1,Math.round(n/2)),speed:1});
@@ -9,8 +9,19 @@ const status=s=>$('status').textContent=s;
 function changed(){dirty=true;}
 const count=()=>mode==='example'?(refs.get(attack().required_animation)?.width/128||0):(character.clips[attack().required_animation]?.frames.length||0);
 function timing(){const a=attack(),n=count();if(mode==='example')return referenceTiming[a.id]??=blankTiming(n||1);return character.mappings[a.id]||character.clips[a.required_animation]?.timing||blankTiming(n||1);}
-function pick(accept,multiple,handler){const p=$('filePicker');p.accept=accept;p.multiple=multiple;p.value='';p.onchange=()=>run(()=>handler([...p.files]));p.click();}
-async function run(fn){if(busy)return;busy=true;playing=false;try{await fn();}catch(e){status(e.message||'Could not open that file.');}finally{busy=false;refresh();}}
+function pick(accept,multiple,handler){const p=$('filePicker');p.accept=accept;p.multiple=multiple;p.value='';p.onchange=()=>{const files=[...p.files];if(files.length)return run(()=>handler(files));};p.click();}
+const disabledBeforeOperation=new Map();
+function lockControls(locked){
+ document.querySelector('main').setAttribute('aria-busy',String(locked));
+ if(locked){for(const control of document.querySelectorAll('button,input,select,textarea')){disabledBeforeOperation.set(control,control.disabled);control.disabled=true;}}
+ else{for(const [control,disabled] of disabledBeforeOperation)control.disabled=disabled;disabledBeforeOperation.clear();}
+}
+async function run(fn){
+ if(busy||!ready)return;
+ const previousStatus=$('status').textContent;busy=true;playing=false;lockControls(true);status('Opening file…');
+ try{await fn();}catch(e){status(e.message||'Could not open that file.');}
+ finally{busy=false;lockControls(false);if($('status').textContent==='Opening file…')status(previousStatus);refresh();}
+}
 function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 async function readJSON(file,max=110*1024*1024){if(!file||file.size>max)throw Error('That file is missing or too large.');return JSON.parse(await file.text());}
 async function decode(src){const img=new Image();img.src=src;await img.decode();return img;}
@@ -44,11 +55,24 @@ $('newAttack').onclick=()=>{let name='New attack',i=2;while(catalog.attacks.some
 $('deleteAttack').onclick=()=>{if(catalog.attacks.length<=1||!confirm('Delete this attack and its assignment from this project?'))return;catalog.attacks=catalog.attacks.filter(a=>a.id!==selected);delete character.mappings[selected];selected=catalog.attacks[0].id;playing=false;changed();refresh();};
 $('assign').onclick=()=>{const a=attack();if(requirement(a,character))return;const clip=character.clips[a.required_animation];character.mappings[a.id]={...(clip.timing||blankTiming(clip.frames.length)),animation:a.required_animation};mode='character';frame=1;playing=false;changed();status('Assigned '+slots[a.required_animation]+' to '+a.name+'.');refresh();};
 $('clearMapping').onclick=()=>{delete character.mappings[selected];changed();refresh();};
-$('importFrames').onclick=()=>pick('.png',true,async files=>{if(!files.length||files.length>300)throw Error('Choose 1–300 PNG frames.');files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));if(files.reduce((s,f)=>s+f.size,0)>32*1024*1024)throw Error('Choose less than 32 MiB of artwork.');const frames=[];for(const f of files){if(!/\.png$/i.test(f.name)||f.size>8*1024*1024)throw Error('Choose PNG files under 8 MiB each.');const b=new Uint8Array(await f.arrayBuffer());if(b[0]!==137||b[1]!==80||b[2]!==78||b[3]!==71)throw Error('Invalid PNG file.');frames.push(await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(new Blob([b],{type:'image/png'}));}));}const slot=attack().required_animation,clip={frames,reviewed:true,timing:blankTiming(frames.length)},clips={...character.clips,[slot]:clip},decoded=await decodeClips(clips);character.clips=clips;art=decoded;for(const a of catalog.attacks)if(a.required_animation===slot)delete character.mappings[a.id];mode='character';frame=1;changed();status(`Loaded ${frames.length} frames for ${slots[slot]}. Choose Use this animation to assign them.`);});
+$('importFrames').onclick=()=>{const slot=attack().required_animation;pick('.png',true,async files=>{if(!files.length||files.length>300)throw Error('Choose 1–300 PNG frames.');files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));if(files.reduce((s,f)=>s+f.size,0)>32*1024*1024)throw Error('Choose less than 32 MiB of artwork.');const frames=[];for(const f of files){if(!/\.png$/i.test(f.name)||f.size>8*1024*1024)throw Error('Choose PNG files under 8 MiB each.');const b=new Uint8Array(await f.arrayBuffer());if(b[0]!==137||b[1]!==80||b[2]!==78||b[3]!==71)throw Error('Invalid PNG file.');frames.push(await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(new Blob([b],{type:'image/png'}));}));}const clip={frames,reviewed:true,timing:blankTiming(frames.length)},clips={...character.clips,[slot]:clip},decoded=await decodeClips(clips);character.clips=clips;art=decoded;for(const a of catalog.attacks)if(a.required_animation===slot)delete character.mappings[a.id];mode='character';frame=1;changed();status(`Loaded ${frames.length} frames for ${slots[slot]}. Choose Use this animation to assign them.`);});};
 $('importPet').onclick=()=>pick('.zip',false,async files=>{const f=files[0];if(!f)return;if(f.size>32*1024*1024)throw Error('Choose a Cyber Pet website backup under 32 MiB.');if(Object.keys(character.clips).length&&!confirm('Replace the current character? Download your project first if you want to keep it.'))return;const pet=await readBackup(await f.arrayBuffer());try{const clips={};for(const slot of Object.keys(slots)){const frames=pet.config.animations[slot];if(!frames?.length)continue;const converted=frames.map(name=>{const img=pet.images.get(name),c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);return c.toDataURL('image/png');});const times=pet.config.animation_frame_times?.[slot];clips[slot]={frames:converted,reviewed:pet.config.animation_reviewed?.[slot]===true,timing:blankTiming(frames.length),times:frames.map((_,i)=>{const n=Array.isArray(times)?times[i]:pet.config.animation_speeds?.[slot];return Number.isFinite(n)&&n>0?Math.min(10,n):.14;})};}const decoded=await decodeClips(clips),candidate={name:pet.name,clips,mappings:{}};for(const p of pet.config.battle_plans?.attacks||[]){const a=catalog.attacks.find(a=>a.id===p.definition_id);if(!a||p.animation!==a.required_animation)continue;const t={first:p.start_frame,last:p.end_frame||clips[p.animation]?.frames.length,impact:p.impact_frame,speed:p.speed,animation:p.animation};candidate.mappings[a.id]=t;if(!mappingValid(a,candidate))delete candidate.mappings[a.id];}character=candidate;art=decoded;mode='character';frame=1;changed();status('Opened '+pet.name+'. '+Object.keys(clips).length+' battle animations found.');}finally{for(const img of pet.images.values())img.close?.();}});
 $('saveProject').onclick=()=>{try{const project={format:'cyber-pet-attack-studio',version:1,catalog,character,referenceTiming};validateProject(project);download('attack-studio-project.json',project);dirty=false;status('Project download started. Keep the file to reopen your artwork and assignments.');}catch(e){status(e.message);}};
 $('openProject').onclick=()=>pick('.json',false,async files=>{if(!files[0])return;const p=validateProject(await readJSON(files[0]));const decoded=await decodeClips(p.character.clips);if(dirty&&!confirm('Replace the current project with this file?'))return;catalog=p.catalog;character=p.character;art=decoded;referenceTiming={};selected=catalog.attacks[0].id;mode='example';frame=1;dirty=false;for(const a of catalog.attacks){const t=p.referenceTiming?.[a.id],n=refs.get(a.required_animation)?.width/128;if(t&&!timingProblem(t,n))referenceTiming[a.id]=t;}status('Project opened.');});
 $('exportCatalog').onclick=()=>download('attack_definitions.json',catalog);
 $('importCatalog').onclick=()=>pick('.json',false,async files=>{if(!files[0])return;const c=validateCatalog(await readJSON(files[0],128*1024));if(!confirm('Replace this project’s attack catalog? Incompatible assignments will be cleared.'))return;catalog=c;for(const id of Object.keys(character.mappings)){const a=c.attacks.find(a=>a.id===id);if(!a||!mappingValid(a,character))delete character.mappings[id];}referenceTiming={};selected=c.attacks[0].id;frame=1;changed();status('Catalog opened.');});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
-try{catalog=validateCatalog(await(await fetch('catalog.json')).json());examples=(await(await fetch('slots.json')).json()).examples;for(const [slot,file] of Object.entries(examples))refs.set(slot,await decode('assets/'+file));selected=catalog.attacks[0].id;refresh();requestAnimationFrame(tick);}catch(e){status('Could not load Attack Studio. Refresh to retry. '+e.message);}
+lockControls(true);status('Loading animation workshop…');
+try{
+ const response=await fetch('catalog.json');if(!response.ok)throw Error('The attack catalog is unavailable.');
+ catalog=validateCatalog(await response.json());selected=catalog.attacks[0].id;
+ let referenceFailures=0;
+ try{
+  const response=await fetch('slots.json');if(!response.ok)throw Error('Reference list unavailable.');
+  examples=(await response.json()).examples;
+  const loaded=await Promise.allSettled(Object.entries(examples).map(async([slot,file])=>{refs.set(slot,await decode('assets/'+file));}));
+  referenceFailures=loaded.filter(result=>result.status==='rejected').length;
+ }catch{referenceFailures=1;}
+ ready=true;lockControls(false);refresh();requestAnimationFrame(tick);
+ status(referenceFailures?'Some reference artwork is unavailable. You can still import and assign your own character artwork.':'Ready. Explore an example, then attach your own artwork.');
+}catch(e){status('Could not load Attack Studio. Refresh to retry. '+e.message);}
