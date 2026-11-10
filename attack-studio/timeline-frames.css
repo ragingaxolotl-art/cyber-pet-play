@@ -7,3 +7,5 @@
 .timeline-frame span { font-size: .75rem; white-space: nowrap; }
 .timeline-frame[aria-pressed="true"] { outline: 2px solid #d5ff76; outline-offset: -2px; background: #263c30; }
 .timeline-frame:focus-visible { outline: 3px solid #9fe7ff; }
+
+.timeline-frame-tile{flex:0 0 auto;display:flex;flex-direction:column;gap:4px}.timeline-frame-tile label{font-size:12px}.timeline-frame-tile input{width:auto}

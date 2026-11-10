@@ -1,4 +1,4 @@
-import {renderTimelineFrames} from './timeline-frames.js?v=20261109-preview-frames';
+import {renderTimelineFrames} from './timeline-frames.js?v=20261109-frame-multiselect';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
 import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261109-slow-motion-release';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261109-hurtboxes';
@@ -64,7 +64,7 @@ export function moveTimelineSelection(attack,tracks,effects,selection,delta){
 }
 export function renderAttackTimeline({root,attack,simulation,effects,commit,poseCount=0,poseAsset,image,seek}){
  root.replaceChildren();const title=document.createElement('h2');title.textContent='Attack timeline';root.append(title);
- const updateFrames=renderTimelineFrames({root,attack,simulation,effects,poseAsset,image,seek});
+ const updateFrames=renderTimelineFrames({root,attack,simulation,effects,poseAsset,image,seek,commit});
  const tracks=timelineTracks(attack,simulation,effects,poseCount),note=document.createElement('p');note.textContent=`All tracks use frames since attack start. Startup ends at ${tracks.startup}. ${attack.hitEvents?(attack.sequenceTiming==='cast'?`Hit windows start from startup at ${tracks.startup}; misses do not shift them.`:simulation.impactFrame===null?'Contact was not reached; hit tracks use startup as a provisional anchor.':`Contact occurs at ${tracks.contact}; hit tracks remain relative to it.`):''} Repeating effects show one cycle. Synced animation follows combat; choose Custom frame durations to resize it independently. Visual edits do not move damage windows.`;root.append(note);
  const error=document.createElement('p');error.setAttribute('role','status');
  if(tracks.groups.length)renderHitboxTimeline({root,groups:tracks.groups,frames:tracks.frames,title:'Combined attack timing tracks',clockLabel:'Attack frames',selectionKey:attack.id,copySelection:selection=>copyTimelineEvents(attack,tracks,selection),pasteSelection:(clipboard,start)=>commit(pasteTimelineEvents(attack,tracks,clipboard,start)),moveSelection:(selection,delta)=>commit(moveTimelineSelection(attack,tracks,effects,selection,delta)),onError:m=>error.textContent=m,commit:(g,b,w)=>commit(editTimeline(attack,tracks,effects,g,b,w))});else{const p=document.createElement('p');p.textContent='Add hitbox groups, a hit sequence, effects or a movement path to edit their timing here.';root.append(p);}root.append(error);
