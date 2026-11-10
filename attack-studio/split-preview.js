@@ -1,6 +1,6 @@
 import {attackerMotionTiming} from './attacker-motion.js?v=20261109-conditional-release';
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261110-energy-preview';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261110-energy-preview';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261110-defense-boundary-audit';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261110-defense-boundary-audit';
 import {sequenceDuration} from './hit-sequence.js?v=20261110-library-management';
 import {presentationFrames} from './preview-clock.js';
 
@@ -18,6 +18,7 @@ export function simulateSplitPreview(attack,attacker,target,options={}) {
  for(const shot of samples){
   hitResults.push(...shot.hitResults.filter(r=>r.owner===0).map(r=>({...r,observedFrame:frames.length,frame:r.frame===null?null:r.frame-1})));
   const frame=frames.length,self=actor(shot.fighters[0]),other=actor(shot.fighters[1]);
+  for(const avoided of shot.avoidedContacts||[])events.push({frame,text:`${avoided.target===0?'Incoming attack':'Target'} ${avoided.outcome}: ${avoided.name} · ${avoided.kind==='overlap'?'overlap':'contact'} ignored.`});
   for(const grab of shot.throws||[])events.push({frame,text:grab.outcome});
   for(const contact of shot.contacts||[])if(contact.outcome==='range limit')events.push({frame,text:'Projectile reached its travel range.'});
   for(const hit of shot.feedback||[])if(hit.attacker===0){hits++;impactFrame??=frame;events.push({frame,text:`${hit.outcome}: ${hit.damage} damage`});}

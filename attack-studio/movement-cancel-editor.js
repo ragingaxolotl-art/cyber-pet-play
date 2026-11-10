@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261110-energy-preview';
+import {validateAttack} from './combat-model.js?v=20261110-defense-boundary-audit';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderMovementCancelEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h3','Movement cancel windows'));

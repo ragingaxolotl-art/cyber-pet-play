@@ -1,13 +1,13 @@
-import {renderThrowEditor} from './throw-editor.js?v=20261110-energy-preview';
-import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261110-energy-preview';
-import {renderGuardEditor} from './guard-editor.js?v=20261110-energy-preview';
+import {renderThrowEditor} from './throw-editor.js?v=20261110-defense-boundary-audit';
+import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261110-defense-boundary-audit';
+import {renderGuardEditor} from './guard-editor.js?v=20261110-defense-boundary-audit';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261110-energy-preview';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261110-energy-preview';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261110-energy-preview';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261110-energy-preview';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261110-energy-preview';
-import {validateAttack} from './combat-model.js?v=20261110-energy-preview';
+import {renderBounceEditor} from './bounce-editor.js?v=20261110-defense-boundary-audit';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261110-defense-boundary-audit';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261110-defense-boundary-audit';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261110-defense-boundary-audit';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261110-defense-boundary-audit';
+import {validateAttack} from './combat-model.js?v=20261110-defense-boundary-audit';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

@@ -27,7 +27,7 @@ import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry,
 import {activeGroupBoxes,activeGroupContacts,createGroupHitTracker} from './hitbox-groups.js?v=20261109-melee-clashes';
 import {refreshStatus,statusTickDue,statusMultiplier,movementMultiplier} from './status-rules.js?v=20261108-movement-cancels';
 import {beginReaction,advanceReaction,knockDown} from './combat-reactions.js?v=20261110-library-management';
-import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261110-energy-preview';
+import {statsFor,timing,magnitude,worldBox,clamp} from './combat-model.js?v=20261110-defense-boundary-audit';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {KEYS,availability,mappedAttack} from './combat-artwork.js?v=20261109-split';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult} from './hit-sequence.js?v=20261110-library-management';
@@ -40,7 +40,7 @@ export class Arena{
   return fighterHurtboxes(fighter,active?{attack:cast.a,frame:age,timing:cast.tm}:null);
  }
 
- constructor(player,opponent,attacks,options={}){this.fighters=[player,opponent];opponent.x=700;opponent.facing=-1;this.attacks=attacks;this.frame=0;this.presentationFrame=0;this.hitstopRemaining=0;this.contactFeedback=[];this.combos=new ComboTracker();this.set=0;this.paused=true;this.winner=null;this.winnerIndex=null;this.honourMetrics={guards:0,dodges:0,attacks:new Set()};this.events=[];this.throws=new ThrowController(this);this.lastThrows=[];this.projectiles=new ProjectileRegistry();this.areas=[];this.projectileClashes=new ProjectileClashes();this.lastProjectileClashes=[];this.lastMeleeClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.automaticAttempts=[];this.training=options.training===true;this.ai=!this.training;this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.decks=options.decks||null;}
+ constructor(player,opponent,attacks,options={}){this.fighters=[player,opponent];opponent.x=700;opponent.facing=-1;this.attacks=attacks;this.frame=0;this.presentationFrame=0;this.hitstopRemaining=0;this.contactFeedback=[];this.combos=new ComboTracker();this.set=0;this.paused=true;this.winner=null;this.winnerIndex=null;this.honourMetrics={guards:0,dodges:0,attacks:new Set()};this.events=[];this.throws=new ThrowController(this);this.lastThrows=[];this.projectiles=new ProjectileRegistry();this.areas=[];this.projectileClashes=new ProjectileClashes();this.lastProjectileClashes=[];this.lastMeleeClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.lastAvoidedContacts=[];this.avoidedOverlaps=new WeakMap();this.automaticAttempts=[];this.training=options.training===true;this.ai=!this.training;this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.decks=options.decks||null;}
  // Internal launch boundary. Versioned authoring will call this at startup;
  // existing attack definitions remain cast-owned until that support is enabled.
  launchProjectile(f,lifetime){
@@ -147,9 +147,18 @@ export class Arena{
   f.dashUntil=this.frame+1+MOVEMENT_CANCEL_RULES.dashFrames;
   f.dashReady=this.frame+MOVEMENT_CANCEL_RULES.dashCooldown;return '';
  }
+ // Reporting only: do not spend hit/defense budgets or enter damage feedback.
+ recordAvoided(owner,target,source,name,outcome,kind='contact',eventId=null){
+  if(kind==='overlap'){
+   const previous=this.avoidedOverlaps.get(source);
+   this.avoidedOverlaps.set(source,{target,outcome,frame:this.frame});
+   if(previous?.target===target&&previous.outcome===outcome&&previous.frame===this.frame-1)return;
+  }
+  this.lastAvoidedContacts.push({owner:this.fighters.indexOf(owner),target:this.fighters.indexOf(target),name,outcome,kind,eventId,combatFrame:this.frame});
+ }
  emit(text,x,y){this.events.push({text,x,y,until:this.frame+60});this.events=this.events.slice(-12);}
  tick(input=new Set(),sprintDirection=0,opponentInput=new Set()){
-  this.lastThrows=[];this.automaticAttempts=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.lastProjectileClashes=[];this.lastMeleeClashes=[];
+  this.lastThrows=[];this.automaticAttempts=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.lastAvoidedContacts=[];this.lastProjectileClashes=[];this.lastMeleeClashes=[];
   if(this.paused||this.winner)return;this.presentationFrame++;
   if(this.hitstopRemaining>0){this.hitstopRemaining--;return;}
   this.contactFeedback=[];this.frame++;
@@ -286,7 +295,7 @@ export class Arena{
  }
  faceOpponents(){const [p,o]=this.fighters;if(p.x!==o.x){p.facing=o.x>p.x?1:-1;o.facing=-p.facing;}for(const f of this.fighters){if(f.cast&&f.cast.a.delivery==='melee')f.cast.facing=f.facing;}}
  reactionEvent(name,f){this.emit(name,f.x,f.y-80);if(f===this.fighters[1]){if(name==='WALL HIT')this.metrics.wallHits++;if(name==='KNOCKDOWN')this.metrics.knockdowns++;}}
- resetDummy(position=700){if(!this.training)return;this.throws.clear();this.lastThrows=[];this.combos.clear();this.hitstopRemaining=0;this.contactFeedback=[];this.projectiles.clear();this.areas=[];this.projectileClashes.clear();this.lastProjectileClashes=[];this.lastMeleeClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];const f=this.fighters[1];Object.assign(f,{x:position,y:0,vy:0,vx:0,hp:f.maxHP,energy:f.maxEnergy,pulseMotion:null,pulseOwned:false,legacyMotion:null,legacyOwned:false,juggleHits:0,juggleLocked:false,reaction:'standing',reactionStart:this.frame,reactionUntil:0,needsFall:false,lastHit:-999,cast:null,stun:0,hitstunUntil:0,airRecoveryUsed:false,statuses:[],shield:0});this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.lastSequence=null;for(const actor of this.fighters){actor.cast=null;actor.dashUntil=0;actor.blockstunUntil=0;actor.blockstunReduction=0;}this.faceOpponents();}
+ resetDummy(position=700){if(!this.training)return;this.throws.clear();this.lastThrows=[];this.combos.clear();this.hitstopRemaining=0;this.contactFeedback=[];this.projectiles.clear();this.areas=[];this.projectileClashes.clear();this.lastProjectileClashes=[];this.lastMeleeClashes=[];this.lastProjectileDefenses=[];this.lastProjectileReturns=[];this.lastProjectileContacts=[];this.lastHitResults=[];this.lastAreaContacts=[];this.lastAvoidedContacts=[];const f=this.fighters[1];Object.assign(f,{x:position,y:0,vy:0,vx:0,hp:f.maxHP,energy:f.maxEnergy,pulseMotion:null,pulseOwned:false,legacyMotion:null,legacyOwned:false,juggleHits:0,juggleLocked:false,reaction:'standing',reactionStart:this.frame,reactionUntil:0,needsFall:false,lastHit:-999,cast:null,stun:0,hitstunUntil:0,airRecoveryUsed:false,statuses:[],shield:0});this.metrics={hits:0,damage:0,wallHits:0,knockdowns:0};this.lastSequence=null;for(const actor of this.fighters){actor.cast=null;actor.dashUntil=0;actor.blockstunUntil=0;actor.blockstunReduction=0;}this.faceOpponents();}
  testDummyReaction(wall=false){if(!this.training)return;const f=this.fighters[1];this.resetDummy(wall?910:650);beginReaction(f,{motion:'ground_slam_side',knockback:wall?100:24,launchHeight:35,hitstun:15,flightFrames:36,pushAxis:'both',wallSlam:wall,floorSlam:true},1,this.frame);}
  prepare(f,target){return this.prepareCast(f,target,f.cast);}
  // Collision sources may outlive an owner action. Never swap f.cast to inspect one:
@@ -321,7 +330,10 @@ export class Arena{
   return {f,target,cast,age,box,reactionContact:reactionContactState(recipient),targetBox:hurt,targetRegions,defenderPhase:attackPhase(recipient.cast,this.frame),defenderOffensive:['damage','push'].includes(recipient.cast?.a.payload),defense: defenseSnapshot(defense,defAge),invulnerable:isInvulnerable(defenseSnapshot(defense,defAge),a),boxes,groupContacts,sequenceContacts,damageMultiplier:cast.projectileDamageMultiplier??statusMultiplier(f.statuses,'weaken'),contact:a.delivery==='self'||touchesHurtboxes(box,targetRegions),guarding:guardInteraction.guarded,guardInteraction,guardReduction:recipient.blockstunUntil>this.frame?recipient.blockstunReduction:defending&&defense.a.payload==='block'?defense.a.blockPercent/100:recipient.guard,evading:a.delivery!=='self'&&((this.frame>=recipient.dodgeStart+RULES.dodgeInvulnerableStart&&this.frame<recipient.dodgeStart+RULES.dodgeInvulnerableEnd)||(defending&&defense.a.payload==='dodge'))};
  }
  resolve(f,target,snapshot=this.prepare(f,target)){if(!snapshot)return;if(snapshot.cast.a.throw){if(snapshot.age>=castEnd(snapshot.cast.impact,snapshot.cast.tm)&&f.cast===snapshot.cast)f.cast=null;return;}const {cast,age}=snapshot;const {a,tm}=cast;
-  if(a.projectileContact==='single'&&(snapshot.evading||snapshot.invulnerable))return;
+  if(a.projectileContact==='single'&&(snapshot.evading||snapshot.invulnerable)){
+   if(age>=tm.startup&&(snapshot.groupContacts?snapshot.groupContacts.length:snapshot.contact))this.recordAvoided(f,target,cast,a.name,snapshot.invulnerable?'invulnerable':'dodged','overlap');
+   return;
+  }
   if(a.hitEvents){this.resolveSequence(f,target,snapshot);return;}
   const box=worldBox(a,a.impactTrigger==='contact'&&cast.impact!==null?Math.min(age,cast.impact):age,f.stats,cast.facing);box.x+=cast.x;box.y+=cast.y;
   const targetRegions=this.hurtboxesFor(target),hurt=targetRegions[0];
@@ -337,7 +349,7 @@ export class Arena{
    if(!snapshot.evading&&!snapshot.invulnerable&&this.projectileDefense(snapshot,recipient))break;
    const parry=!snapshot.evading&&!snapshot.invulnerable&&claimParry(snapshot.defense,a);
    if(parry){this.parry(f,recipient,parry,snapshot.projectile);if(snapshot.projectile)break;continue;}
-   if(snapshot.evading||snapshot.invulnerable){if(!snapshot.invulnerable&&recipient===this.fighters[0]&&a.payload==='damage')this.honourMetrics.dodges++;this.emit(snapshot.invulnerable?'INVULNERABLE':'DODGE',recipient.x,recipient.y-70);}
+   if(snapshot.evading||snapshot.invulnerable){this.recordAvoided(f,recipient,cast,a.name,snapshot.invulnerable?'invulnerable':'dodged');if(!snapshot.invulnerable&&recipient===this.fighters[0]&&a.payload==='damage')this.honourMetrics.dodges++;this.emit(snapshot.invulnerable?'INVULNERABLE':'DODGE',recipient.x,recipient.y-70);}
    else {let amount=magnitude(a,cast.projectileStats||f.stats);if(a.payload==='damage')amount=Math.round(amount*snapshot.damageMultiplier);
     if(a.payload==='damage'){const guard=snapshot.guarding&&a.blockable,armored=!guard&&claimArmor(snapshot.defense,a);amount=Math.round(amount*(1-clamp(recipient.damageResistance??0,-50,75)/100)*(guard?1-snapshot.guardReduction:1));amount=counterHitDamage(amount,a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit');amount=scaledComboDamage(amount,this.combos.priorHits(f,recipient),a.comboScaling,guard?'block':armored?'armor':'hit');const absorbed=Math.min(recipient.shield,amount);recipient.shield-=absorbed;amount-=absorbed;const hpDamage=Math.min(recipient.hp,amount);recipient.hp-=hpDamage;recipient.flash=this.frame+8;
      this.contactFeedback.push({attack:a,attacker:f,damage:hpDamage,counterHit:isCounterHit(a.counterHit,snapshot.defenderPhase,snapshot.defenderOffensive,guard?'block':armored?'armor':'hit'),target:recipient,guardInteraction:snapshot.guardInteraction,guardReduction:snapshot.guardReduction,outcome:guard?'block':armored?'armor':'hit'});
@@ -368,7 +380,7 @@ export class Arena{
   if(target.hp<=0)state.cancelled='Target defeated.';
   for(const event of (state.contactFrame===null&&age>contactDeadline(tm)?[]:sequenceOpportunities(a,state,age,snapshot.sequenceContacts?(event=>snapshot.sequenceContacts.has(event.hitboxGroup)):snapshot.contact,target))){
    const guard=snapshot.guarding&&a.blockable;
-   if(snapshot.evading||snapshot.invulnerable){hitResult(state,event,age,snapshot.invulnerable?'Invulnerable':'Dodged');if(state.startFrame===null)state.cancelled=snapshot.invulnerable?'Contact invulnerable; attachment cancelled.':'Contact dodged; attachment cancelled.';this.emit(snapshot.invulnerable?'INVULNERABLE':'DODGE',target.x,target.y-70);continue;}
+   if(snapshot.evading||snapshot.invulnerable){this.recordAvoided(f,target,cast,a.name,snapshot.invulnerable?'invulnerable':'dodged','contact',event.id);hitResult(state,event,age,snapshot.invulnerable?'Invulnerable':'Dodged');if(state.startFrame===null)state.cancelled=snapshot.invulnerable?'Contact invulnerable; attachment cancelled.':'Contact dodged; attachment cancelled.';this.emit(snapshot.invulnerable?'INVULNERABLE':'DODGE',target.x,target.y-70);continue;}
    const projectileResult=this.projectileDefense(snapshot,target);if(projectileResult){hitResult(state,event,age,projectileResult);break;}
    const parry=claimParry(snapshot.defense,a);if(parry){hitResult(state,event,age,'Parried');state.cancelled='Contact parried; attachment cancelled.';this.parry(f,target,parry,snapshot.projectile);if(snapshot.projectile)break;continue;}
    const armored=!guard&&claimArmor(snapshot.defense,a);
@@ -396,7 +408,9 @@ export class Arena{
    invulnerable:isInvulnerable(defense,incoming),overlap:touchesHurtboxes(impactAreaBox(area,this.frame),this.hurtboxesFor(target))};
  }
  resolveArea({area,defense,guarding,guardReduction,evading,invulnerable,overlap}){
-  const target=area.target;if(target.hp<=0||evading||invulnerable||!claimAreaHit(area,target,this.frame,overlap))return;
+  const target=area.target;
+  if(target.hp>0&&(evading||invulnerable)&&overlap&&this.frame>=area.start&&this.frame<area.end)this.recordAvoided(area.owner,target,area,area.name,invulnerable?'invulnerable':'dodged','overlap');
+  if(target.hp<=0||evading||invulnerable||!claimAreaHit(area,target,this.frame,overlap))return;
   if(claimParry(defense,{delivery:'area',payload:'damage'})){area.end=this.frame;target.cast?.outcomes.add('parry');this.lastAreaContacts.push({name:area.name,owner:this.fighters.indexOf(area.owner),target:this.fighters.indexOf(target),damage:0,parried:true,combatFrame:this.frame});this.emit('AREA PARRIED',target.x,target.y-70);return;}
   const guarded=guarding&&area.blockable,amount=Math.round(area.rule.damage*(1-clamp(target.damageResistance??0,-50,75)/100)*(guarded?1-guardReduction:1)),absorbed=Math.min(target.shield,amount),damage=Math.min(target.hp,amount-absorbed);target.shield-=absorbed;target.hp-=damage;target.flash=this.frame+8;target.lastHit=this.frame;
   this.lastAreaContacts.push({name:area.name,owner:this.fighters.indexOf(area.owner),target:this.fighters.indexOf(target),damage,blocked:!!guarded,combatFrame:this.frame});

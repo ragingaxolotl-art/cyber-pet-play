@@ -1,5 +1,5 @@
 import {validateObjectWorkspace,workspaceObjects} from './workspace-objects.js?v=20261110-library-management';
-import {validateDesign} from './combat-model.js?v=20261110-energy-preview';
+import {validateDesign} from './combat-model.js?v=20261110-defense-boundary-audit';
 import {attackVersion} from './attack-format.js';
 export const REVISION_KEY='cyber-pet-attack-revisions-v1';
 export const LEGACY_REVISION_BACKUP_KEY=REVISION_KEY+'-before-object-versions';

@@ -1,5 +1,5 @@
 import {addContextHelp} from './context-help.js';
-import {validateAttack} from './combat-model.js?v=20261110-energy-preview';
+import {validateAttack} from './combat-model.js?v=20261110-defense-boundary-audit';
 export function renderMeleeClashEditor({root,attack,commit,status}){
  if(attack.delivery!=='melee'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Melee clashes';section.append(legend);

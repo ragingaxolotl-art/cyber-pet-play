@@ -1,9 +1,9 @@
-import {renderFlightEditor} from './projectile-flight-editor.js?v=20261110-energy-preview';
-import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261110-energy-preview';
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261110-energy-preview';
+import {renderFlightEditor} from './projectile-flight-editor.js?v=20261110-defense-boundary-audit';
+import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261110-defense-boundary-audit';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261110-defense-boundary-audit';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261110-energy-preview';
-import {validateAttack} from './combat-model.js?v=20261110-energy-preview';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261110-defense-boundary-audit';
+import {validateAttack} from './combat-model.js?v=20261110-defense-boundary-audit';
 export function renderProjectileEditor({root,attack,commit,status,effects=new Map()}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);

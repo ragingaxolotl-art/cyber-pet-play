@@ -28,6 +28,7 @@ export function combatPreviewFrame(arena) {
   projectiles, areas: arena.areas.filter(area => area.owner.hp > 0 && area.target.hp > 0 && arena.frame >= area.start && arena.frame < area.end)
    .map(area => (impactAreaView(area, arena.frame))),
   feedback: arena.contactFeedback.map(c => ({attacker:arena.fighters.indexOf(c.attacker),target:arena.fighters.indexOf(c.target),damage:c.damage??0,outcome:c.outcome})),
+  avoidedContacts: structuredClone(arena.lastAvoidedContacts),
   throws: structuredClone(arena.lastThrows),
   hitResults: structuredClone(arena.lastHitResults),
   contacts: structuredClone(arena.lastProjectileContacts),
