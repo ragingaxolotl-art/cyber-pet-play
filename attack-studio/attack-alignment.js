@@ -1,5 +1,5 @@
 import {poseDurations} from './pose-timing.js';
-import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
+import {validateAttack} from './combat-model.js?v=20261110-status-support-audit';
 
 // All alignment targets use the preview's combat clock. Change existing authored
 // fields only, so saving, Arena playback and attack Undo keep their usual meaning.

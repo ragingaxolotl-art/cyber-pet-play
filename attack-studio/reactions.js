@@ -1,4 +1,4 @@
-import {freshAttack,defaultStats,simulate} from './combat-model.js?v=20261110-suspension-recovery';
+import {freshAttack,defaultStats,simulate} from './combat-model.js?v=20261110-status-support-audit';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261110-suspension-recovery';
 const examples=(await(await fetch('vfx-library.json',{cache:'no-store'})).json()).examples,poses=new Map();
 for(const key of ['ready_side','hurt_side','guard_side','knocked_down_side','get_up_side','jump_side','defeated_side']){

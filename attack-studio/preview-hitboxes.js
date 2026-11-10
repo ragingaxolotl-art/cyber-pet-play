@@ -1,4 +1,4 @@
-import {worldBox} from './combat-model.js';
+import {worldBox} from './combat-model.js?v=20261110-status-support-audit';
 
 // Collision samples contain only active boxes. Keep the selected authored box
 // editable outside its window without adding it to the combat simulation.

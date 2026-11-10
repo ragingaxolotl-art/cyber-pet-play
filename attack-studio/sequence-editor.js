@@ -5,10 +5,10 @@ import {renderImpulseEditor} from './impulse-editor.js?v=20261109-momentum-relea
 import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261110-library-management';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
-import {renderBounceEditor} from './bounce-editor.js?v=20261110-suspension-recovery';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261110-suspension-recovery';
-import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261110-suspension-recovery';
-import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
+import {renderBounceEditor} from './bounce-editor.js?v=20261110-status-support-audit';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261110-status-support-audit';
+import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261110-status-support-audit';
+import {validateAttack} from './combat-model.js?v=20261110-status-support-audit';
 import {renderTestResults} from './test-results-panel.js?v=20261110-test-report-state';
 import {jugglePreset,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261110-library-management';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};

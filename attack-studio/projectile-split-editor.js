@@ -1,5 +1,5 @@
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
+import {validateAttack} from './combat-model.js?v=20261110-status-support-audit';
 export function renderProjectileSplitEditor({root,attack,commit,status}) {
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Split projectile';section.append(legend);
  const label=document.createElement('label');label.textContent='During flight';const mode=document.createElement('select');mode.setAttribute('aria-label','Projectile splitting');

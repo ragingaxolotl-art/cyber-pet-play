@@ -1,13 +1,13 @@
-import {renderThrowEditor} from './throw-editor.js?v=20261110-suspension-recovery';
-import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261110-suspension-recovery';
-import {renderGuardEditor} from './guard-editor.js?v=20261110-suspension-recovery';
+import {renderThrowEditor} from './throw-editor.js?v=20261110-status-support-audit';
+import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261110-status-support-audit';
+import {renderGuardEditor} from './guard-editor.js?v=20261110-status-support-audit';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261110-suspension-recovery';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261110-suspension-recovery';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261110-suspension-recovery';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261110-suspension-recovery';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261110-suspension-recovery';
-import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
+import {renderBounceEditor} from './bounce-editor.js?v=20261110-status-support-audit';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261110-status-support-audit';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261110-status-support-audit';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261110-status-support-audit';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261110-status-support-audit';
+import {validateAttack} from './combat-model.js?v=20261110-status-support-audit';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

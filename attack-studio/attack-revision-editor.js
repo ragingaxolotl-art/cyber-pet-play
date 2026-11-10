@@ -1,4 +1,4 @@
-import {readRevisions,saveRevision,removeRevision,restoreRemovedRevision,emptyRemovedRevisions,importRevisions,revisionChanges} from './attack-revisions.js?v=20261110-suspension-recovery';
+import {readRevisions,saveRevision,removeRevision,restoreRemovedRevision,emptyRemovedRevisions,importRevisions,revisionChanges} from './attack-revisions.js?v=20261110-status-support-audit';
 const propertyName=key=>({base:'Base amount',box:'Hitbox',hitEvents:'Hit sequence',visuals:'Visual effects',presentationEvents:'Sound and camera',cancelWindows:'Follow-up windows',defenseWindows:'Defense windows',attackerMotion:'Attacker movement',objectWorkspace:'Object names, groups and preview settings'}[key]||key.replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase()));
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installAttackRevisions({host,current,restore,copy,status,currentObjects=()=>undefined}){
