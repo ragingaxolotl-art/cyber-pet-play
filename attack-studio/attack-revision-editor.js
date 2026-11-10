@@ -21,7 +21,12 @@ export function installAttackRevisions({host,current,restore,copy,status,current
  purge.onclick=attempt(()=>{if(!confirm('Permanently empty removed revisions? Export revision history first if you need a backup. Active revisions and working attacks are kept.'))return;emptyRemovedRevisions(storage);refresh();report('Removed revisions permanently cleared.');});
  download.onclick=attempt(()=>{const bundle=readRevisions(storage),url=URL.createObjectURL(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'})),link=el('a');link.href=url;link.download='cyber-pet-attack-revisions.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1500);report('Revision history download started, including removed revisions.');});
  upload.onchange=attempt(async()=>{try{const file=upload.files?.[0];if(!file)return;if(file.size>3*1024*1024)throw Error('Choose a revision backup under 3 MiB.');importRevisions(storage,JSON.parse(await file.text()));refresh();report('Imported history. Existing revisions were preserved; imported removed revisions are available in the list.');}finally{upload.value='';}});
- close.onclick=()=>dialog.close();dialog.addEventListener('close',()=>previous?.focus());
+ close.onclick=()=>dialog.close();dialog.addEventListener('close',()=>{
+  // Opening a dialog can close the File menu. Its hidden button cannot receive
+  // keyboard focus, so return to the visible menu title in that case.
+  const menu=previous?.closest('details');
+  (menu&&!menu.open?menu.querySelector('summary'):previous)?.focus();
+ });
  const header=el('div'),saveRow=el('div'),choose=el('div'),actions=el('div'),management=el('details');header.className=saveRow.className=choose.className=actions.className='row';heading.style.flex='1';header.append(heading,close);const nameLabel=el('label','Revision name'),scopeLabel=el('label','Show revisions'),listLabel=el('label','Saved revision');nameLabel.append(name);scopeLabel.append(scope);listLabel.append(list);choose.style.display='grid';choose.style.gridTemplateColumns='repeat(auto-fit,minmax(min(100%,220px),1fr))';for(const label of [scopeLabel,listLabel])label.style.minWidth='0';for(const control of [scope,list]){control.style.width='100%';control.style.minWidth='0';}saveRow.append(nameLabel,save);choose.append(scopeLabel,listLabel);actions.append(restoreButton,copyButton);management.append(el('summary','Backups and removed revisions'),download,upload,remove,recover,purge);dialog.append(header,note,saveRow,choose,actions,diff,management,message);document.body.append(dialog);
  open.onclick=attempt(()=>{previous=document.activeElement;name.value='';message.textContent='';refresh();dialog.showModal();name.focus();});return {open,dialog};
 }
