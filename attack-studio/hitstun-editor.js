@@ -2,7 +2,7 @@ import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
 import {scaledHitstun} from './hitstun-scaling.js?v=20261108-hitstun';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderHitstunEditor({root,attack,commit,status}){
- root.replaceChildren();root.append(make('h3','Hitstun deterioration'),make('p','Optionally shorten this attack’s hitstun after earlier uninterrupted hits. Counts span attacks and reset when the defender regains control. Requires version 15 saving.'));
+ root.classList.add('compact-combat-setting');root.replaceChildren();root.append(make('h3','Hitstun deterioration'),make('p','Optionally shorten this attack’s hitstun after earlier uninterrupted hits. Counts span attacks and reset when the defender regains control. Requires version 15 saving.'));
  const mutate=fn=>{try{const next=structuredClone(attack);fn(next);validateAttack(next);commit(next);return true;}catch(e){status(e.message);return false;}};
  if(attack.hitstunScaling===undefined){const b=make('button','Customize hitstun deterioration');b.type='button';b.onclick=()=>mutate(n=>n.hitstunScaling={step:0,minimum:0});root.append(b);return;}
  for(const [key,title] of [['step','Hitstun reduction per prior hit'],['minimum','Minimum hitstun']]){

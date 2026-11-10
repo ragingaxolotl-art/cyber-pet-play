@@ -10,7 +10,7 @@ import {readTreeSession,writeTreeSession,restoreTreeHistory} from './tree-sessio
 import {BUNDLE_FORMAT,exportDataSet,importDataSet,validateBundle,bundleSummary} from './tree-bundle.js?v=20261109-slow-motion-release';
 import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
-import {installAccessibility} from './editor-accessibility.js?v=20261108-scheduled-sequences';
+import {installAccessibility} from './editor-accessibility.js?v=20261110-workspace-docks';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261109-tree-workspace-2';
 import {readSavedBrowserAttacks} from './browser-saved-attacks.js?v=20261109-bank-reopen-release';
