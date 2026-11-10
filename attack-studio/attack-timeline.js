@@ -2,8 +2,8 @@ import {renderTimelineFrames} from './timeline-frames.js?v=20261110-frame-marker
 import {addContextHelp} from './context-help.js?v=20261109-guard';
 import {copyTimelineEvents,pasteTimelineEvents} from './timeline-clipboard.js?v=20261110-library-management';
 import {poseDurations,posePlayback} from './pose-timing.js?v=20261109-hurtboxes';
-import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261108-group-drag-lanes';
-import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261108-shared-juggle';
+import {renderHitboxTimeline} from './hitbox-timeline.js?v=20261110-timeline-interactions';
+import {cycleFrames,retimeVisual} from './vfx-timeline.js?v=20261110-timeline-interactions';
 import {validateAttack} from './combat-model.js?v=20261110-library-management';
 export function timelineTracks(attack,simulation,effects,poseCount=0){
  const startup=simulation.timing.startup,contact=simulation.impactFrame??startup,geometryBase=attack.hitEvents?contact:startup,groups=[];
@@ -11,7 +11,7 @@ export function timelineTracks(attack,simulation,effects,poseCount=0){
  if(attack.hitEvents)groups.push({id:'sequence',boxes:attack.hitEvents.map((h,i)=>({id:h.id,start:contact+h.offset,duration:h.duration,minStart:contact,maxStart:contact+299,lockStart:attack.sequenceTiming!=='cast'&&i===0,label:'Hit '+(i+1)}))});
  const visuals=attack.visuals.flatMap((v,i)=>{const e=effects.get(v.effectId);return e?[{id:String(i),start:v.start,duration:Math.ceil(cycleFrames(e,v)/v.rate),maxStart:600,lockDuration:!!(v.loopUntilImpact||(v.loop??e.loop)),label:`Effect ${i+1}${v.loopUntilImpact?' · to contact':(v.loop??e.loop)?' · repeating cycle':''}`}]:[];});if(visuals.length)groups.push({id:'effects',boxes:visuals});
  if(['block','dodge'].includes(attack.payload))groups.push({id:'defense',boxes:[{id:'window',start:startup,duration:attack.active,lockStart:true,label:attack.payload==='block'?'Block window':'Dodge window'}]});
- if(attack.defenseWindows)groups.push({id:'armor',boxes:attack.defenseWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:w.kind==='armor'?`Armor ${i+1} · ${w.hits} hits · ${w.against}`:w.kind==='parry'?`Parry ${i+1} · ${w.hits} hits · ${w.stun}f interruption`:`Invulnerability ${i+1} · ${w.against}`}))});
+ if(attack.defenseWindows)groups.push({id:'armor',boxes:attack.defenseWindows.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:w.kind==='armor'?`Armor ${i+1} · ${w.hits} hits · ${w.against}`:w.kind==='parry'?`Parry ${i+1} · ${w.hits} hits · ${w.stun}f interruption`:`${({reflect:'Reflect',absorb:'Absorb',invulnerability:'Invulnerability'})[w.kind]||w.kind} ${i+1} · ${w.against}`}))});
  for(const kind of ['sound','camera']){const events=(attack.presentationEvents||[]).filter(e=>kind==='sound'?e.kind==='sound':e.kind!=='sound');if(events.length)groups.push({id:kind,boxes:events.map((e,i)=>({id:e.id,start:e.start,duration:e.duration,maxStart:900-e.duration,label:kind==='sound'?`Sound ${i+1} · ${e.preset}`:`Camera ${i+1} · ${e.kind}`}))});}
  if(attack.attackerMotion)groups.push({id:'attackerMotion',boxes:attack.attackerMotion.map((m,i)=>({id:m.id,start:m.start,duration:m.duration,maxStart:900-m.duration,label:`Attacker movement ${i+1}`}))});
  if(attack.movementCancels)groups.push({id:'movementCancels',boxes:attack.movementCancels.map((w,i)=>({id:w.id,start:w.start,duration:w.duration,maxStart:900-w.duration,label:`Movement ${i+1} · ${w.action} · ${w.condition}`}))});

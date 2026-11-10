@@ -51,8 +51,9 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
 
  const trackOptions=el('details'),summary=el('summary','Track visibility and locks');trackOptions.append(summary);timeline.append(trackOptions);
  const rowsByGroup=new Map(),controlsByGroup=new Map();
- for(const [index,group] of groups.entries()){
-  const name=({sequence:'Hit sequence',animation:'Animation',effects:'Visual effects',movement:'Movement',defense:'Block / dodge',armor:'Defense windows',cancels:'Follow-ups'})[group.id]||'Hitbox group '+(index+1);
+ let hitboxNumber=0;
+ for(const group of groups){
+  const name=({sequence:'Hit sequence',animation:'Animation',effects:'Visual effects',movement:'Movement',defense:'Block / dodge',armor:'Defense windows',cancels:'Follow-ups',sound:'Sound',camera:'Camera',attackerMotion:'Attacker movement',movementCancels:'Movement cancels'})[group.id]||'Hitbox group '+(++hitboxNumber);
   const options=el('div'),show=el('input'),lock=el('input');show.type=lock.type='checkbox';show.checked=!view.hidden.has(group.id);lock.checked=view.locked.has(group.id);
   show.setAttribute('aria-label','Show '+name+' track');lock.setAttribute('aria-label','Lock '+name+' track');
   const showLabel=el('label',name+' · show '),lockLabel=el('label',' lock ');showLabel.append(show);lockLabel.append(lock);options.append(showLabel,lockLabel);trackOptions.append(options);
@@ -63,7 +64,7 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
 
  groups.forEach((group,gi)=>group.boxes.forEach((box,bi)=>{
   const row=el('div');row.className='group-timeline-row';const label=el('span',box.label||`G${gi+1} · Box ${bi+1}`),track=el('div');track.className='group-timeline-track';
-  if(moveSelection){const selected=el('input');selected.type='checkbox';const key=JSON.stringify([group.id,box.id]);selected.checked=view.selected.has(key);selected.disabled=!!box.lockStart;selected.setAttribute('aria-label','Select '+(box.label||`group ${gi+1} box ${bi+1}`));selected.onchange=()=>{selected.checked?view.selected.set(key,{groupId:group.id,boxId:box.id}):view.selected.delete(key);};label.append(selected);selectionInputs.push(selected);}
+  if(moveSelection){const selected=el('input');selected.type='checkbox';const key=JSON.stringify([group.id,box.id]);selected.checked=view.selected.has(key);selected.setAttribute('aria-label','Select '+(box.label||`group ${gi+1} box ${bi+1}`));selected.onchange=()=>{selected.checked?view.selected.set(key,{groupId:group.id,boxId:box.id}):view.selected.delete(key);};label.append(selected);selectionInputs.push(selected);}
   const bar=el('button'),end=el('button','↔');bar.type=end.type='button';bar.className='group-timeline-bar';end.className='group-timeline-end';end.disabled=!!box.lockDuration;
   // A separate resize lane prevents its hit target from covering a short event.
   track.style.height='68px';end.style.top='36px';end.style.width='28px';end.style.height='28px';
@@ -85,11 +86,13 @@ export function renderHitboxTimeline({root,groups,frames,commit,moveSelection=nu
   function paint(){bar.style.left=100*proposal.start/frames+'%';bar.style.width=100*proposal.duration/frames+'%';bar.textContent=`${proposal.start}–${proposal.start+proposal.duration-1}`;end.style.left=100*(proposal.start+proposal.duration)/frames+'%';bar.title=`Start ${proposal.start}; duration ${proposal.duration} frames`;}
   function apply(){if(view.locked.has(group.id))return;try{if(proposal.start!==box.start&&groupMove()){selectionAllowed();moveSelection(selectedEvents(),proposal.start-box.start);}else if(proposal.start!==box.start||proposal.duration!==box.duration)commit(group.id,box.id,{start:proposal.start,duration:proposal.duration});}catch(error){resetGroup();proposal={...box};paint();onError(error.message);}}
   for(const [control,mode] of [[bar,'move'],[end,'resize']]){
-   control.onpointerdown=e=>{if(view.locked.has(group.id))return;if(e.button!==undefined&&e.button!==0)return;e.preventDefault();drag={x:e.clientX,width:track.getBoundingClientRect().width,mode};control.setPointerCapture(e.pointerId);};
-   control.onpointermove=e=>{if(!drag||drag.width<=0)return;if(drag.mode==='move'&&groupMove())previewGroup((e.clientX-drag.x)*frames/drag.width);else{proposal=adjustWindow(box,(e.clientX-drag.x)*frames/drag.width,drag.mode,frames);paint();}};
-   control.onpointerup=()=>{if(!drag)return;drag=null;apply();};
-   control.onpointercancel=()=>{drag=null;resetGroup();proposal={...box};paint();};
-   control.onkeydown=e=>{if(view.locked.has(group.id))return;if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const delta=e.key==='ArrowLeft'?-1:1;if(!e.shiftKey&&mode==='move'&&groupMove())previewGroup(delta);else{proposal=adjustWindow(box,delta,e.shiftKey?'resize':mode,frames);}const label=control.getAttribute('aria-label');apply();[...document.querySelectorAll('button')].find(n=>n.getAttribute('aria-label')===label)?.focus();};
+   const ownsPointer=e=>!!drag&&(e?.pointerId===undefined||e.pointerId===drag.pointerId);
+   const cancelDrag=e=>{if(!ownsPointer(e))return;drag=null;resetGroup();proposal={...box};paint();};
+   control.onpointerdown=e=>{if(view.locked.has(group.id)||drag)return;if(e.button!==undefined&&e.button!==0)return;e.preventDefault();control.focus({preventScroll:true});drag={pointerId:e.pointerId,x:e.clientX,width:track.getBoundingClientRect().width,mode};control.setPointerCapture(e.pointerId);};
+   control.onpointermove=e=>{if(!ownsPointer(e)||drag.width<=0)return;if(drag.mode==='move'&&groupMove())previewGroup((e.clientX-drag.x)*frames/drag.width);else{proposal=adjustWindow(box,(e.clientX-drag.x)*frames/drag.width,drag.mode,frames);paint();}};
+   control.onpointerup=e=>{if(!ownsPointer(e))return;drag=null;apply();};
+   control.onpointercancel=cancelDrag;control.onlostpointercapture=cancelDrag;
+   control.onkeydown=e=>{if(e.key==='Escape'&&drag){e.preventDefault();cancelDrag();return;}if(view.locked.has(group.id))return;if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const delta=e.key==='ArrowLeft'?-1:1;if(!e.shiftKey&&mode==='move'&&groupMove())previewGroup(delta);else{proposal=adjustWindow(box,delta,e.shiftKey?'resize':mode,frames);}const label=control.getAttribute('aria-label');apply();[...document.querySelectorAll('button')].find(n=>n.getAttribute('aria-label')===label)?.focus();};
   }
   eventViews.set(eventKey,{box,preview:delta=>{proposal={...box,start:box.start+delta};paint();}});
   paint();track.append(bar,end);row.append(label,track);content.append(row);
