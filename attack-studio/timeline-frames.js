@@ -1,3 +1,4 @@
+import {remapPoseImpact,remapEffectLoop} from './frame-markers.js?v=20261110-frame-markers';
 import {frameSelection} from './frame-selection.js?v=20261109-frame-multiselect';
 import {remapAnchorFrames,remapHurtboxFrames} from './anchor-frame-edit.js';
 import {posePlayback,poseSourceFrames,poseDurations} from './pose-timing.js';
@@ -52,10 +53,10 @@ export function renderTimelineFrames({root,attack,simulation,effects,poseAsset,i
   const selection=commit&&row.kind?frameSelection({root:section,strip,count:row.order.length,name:row.name,remove:indices=>{
    const next=structuredClone(attack),keep=row.order.map((_,i)=>i).filter(i=>!indices.includes(i));if(!keep.length)return;
    if(row.kind==='character'){
-    next.poseFrames=keep.map(i=>row.order[i]);const times=poseDurations(attack,poseAsset.count);next.poseDurations=keep.map(i=>times[i]);next.poseImpact=Math.min(next.poseImpact||0,keep.length);
+    next.poseFrames=keep.map(i=>row.order[i]);const times=poseDurations(attack,poseAsset.count);next.poseDurations=keep.map(i=>times[i]);next.poseImpact=remapPoseImpact(next.poseImpact,keep);
     if(next.hurtboxes)next.hurtboxes.frames=remapHurtboxFrames(next.hurtboxes.frames,keep);
     if(next.animationAnchors)next.animationAnchors.frames=remapAnchorFrames(next.animationAnchors.frames,keep);
-   }else{const v=next.visuals[row.visualIndex];v.frames=keep.map(i=>row.order[i]);v.loopStart=Math.min(v.loopStart||1,keep.length);v.loopEnd=Math.max(v.loopStart,Math.min(v.loopEnd||keep.length,keep.length));}
+   }else{const v=next.visuals[row.visualIndex];v.frames=keep.map(i=>row.order[i]);Object.assign(v,remapEffectLoop(v,keep,row.order.length));}
    const left=strip.scrollLeft,ancestors=[];for(let node=root;node;node=node.parentElement)ancestors.push([node,node.scrollTop,node.scrollLeft]);commit(next);
    const replacement=root.querySelectorAll('.timeline-frame-strip')[rowIndex];if(replacement){replacement.children[Math.min(indices[0],keep.length-1)]?.querySelector('input')?.focus({preventScroll:true});replacement.scrollLeft=left;}
    for(const [node,top,x] of ancestors){node.scrollTop=top;node.scrollLeft=x;}

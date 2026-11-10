@@ -1,3 +1,4 @@
+import {remapPoseImpact,remapEffectLoop} from './frame-markers.js?v=20261110-frame-markers';
 import {renderObjectProperties} from './object-properties.js?v=20261110-library-management';
 import {validateObjectWorkspace,objectEntry,objectState,workspaceObjects,remapObjectKeys,removeEffectObject,pruneObjectWorkspace,combatProject} from './workspace-objects.js?v=20261110-library-management';
 import {renderWorkspaceObjects} from './workspace-objects-panel.js?v=20261110-library-management';
@@ -33,11 +34,11 @@ import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261110-lib
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
 import {renderCancelEditor} from './cancel-editor.js?v=20261110-library-management';
 import {renderDefenseEditor} from './defense-editor.js?v=20261110-library-management';
-import {renderAttackTimeline} from './attack-timeline.js?v=20261110-library-management';
+import {renderAttackTimeline} from './attack-timeline.js?v=20261110-frame-markers';
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261110-library-management';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261110-library-management';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-library-concurrency';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-frame-markers';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261110-library-management';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261110-library-management';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -255,7 +256,25 @@ function frameEditor(parent,owner,key,count,asset){
  const section=document.createElement('details');const title=document.createElement('summary');title.textContent='Edit frames · drag to reorder';section.append(title);
  const sequence=owner[key]||(key==='poseFrames'?poseSourceFrames(owner,count):Array.from({length:count},(_,i)=>i)),strip=document.createElement('div');strip.className='frame-strip';
  const positions=sequence.map((_,i)=>i);
- const commit=(next,times=null,anchorPositions=positions)=>{const restorePosition=rememberFrameEditorPosition(strip,parent);if(key==='poseFrames'&&owner.hurtboxes)owner.hurtboxes.frames=remapHurtboxFrames(owner.hurtboxes.frames,anchorPositions);if(key==='poseFrames'&&owner.animationAnchors)owner.animationAnchors.frames=remapAnchorFrames(owner.animationAnchors.frames,anchorPositions);owner[key]=next;if(key==='frames'){owner.loopStart=Math.min(owner.loopStart||1,next.length);owner.loopEnd=Math.max(owner.loopStart,Math.min(owner.loopEnd||next.length,next.length));}if(key==='poseFrames'){owner.poseDurations=times||next.map(()=>.1);owner.poseImpact=Math.min(owner.poseImpact,next.length);};changed();if(key==='poseFrames'){refresh();parent.querySelector('details').open=true;}else{section.remove();frameEditor(parent,owner,key,count,asset);parent.lastChild.open=true;}restorePosition(parent.querySelector('.frame-strip'));};
+ const commit=(next,times=null,anchorPositions=positions,markerPositions=anchorPositions)=>{
+  const restorePosition=rememberFrameEditorPosition(strip,parent);
+  if(key==='poseFrames'&&owner.hurtboxes)owner.hurtboxes.frames=remapHurtboxFrames(owner.hurtboxes.frames,anchorPositions);
+  if(key==='poseFrames'&&owner.animationAnchors)owner.animationAnchors.frames=remapAnchorFrames(owner.animationAnchors.frames,anchorPositions);
+  owner[key]=next;
+  if(key==='frames')Object.assign(owner,remapEffectLoop(owner,markerPositions,sequence.length));
+  if(key==='poseFrames'){
+   owner.poseDurations=times||next.map(()=>.1);
+   owner.poseImpact=remapPoseImpact(owner.poseImpact,markerPositions);
+  }
+  changed();
+  if(key==='poseFrames'){refresh();parent.querySelector('details').open=true;}
+  else{
+   // Loop controls and their bounds must reflect the new strip immediately.
+   for(const input of parent.querySelectorAll('input'))if(['loopStart','loopEnd'].includes(input.dataset.field)){input.value=owner[input.dataset.field];input.max=next.length;}
+   section.remove();frameEditor(parent,owner,key,count,asset);parent.lastChild.open=true;
+  }
+  restorePosition(parent.querySelector('.frame-strip'));
+ };
  const times=key==='poseFrames'?poseDurations(owner,count):null;
  const reorder=(from,to)=>commit(moveFrame(sequence,from,to),times?moveFrame(times,from,to):null,moveFrame(positions,from,to));
  const selection=frameSelection({root:section,strip,count:sequence.length,name:key==='poseFrames'?'character':'effect',remove:indices=>{const keep=positions.filter(i=>!indices.includes(i));commit(keep.map(i=>sequence[i]),times?keep.map(i=>times[i]):null,keep);}});
@@ -264,7 +283,7 @@ function frameEditor(parent,owner,key,count,asset){
  const select=document.createElement('select');select.setAttribute('aria-label','Source frame for position '+(index+1));for(let i=0;i<count;i++)select.add(new Option('Frame '+(i+1),i));select.value=source;select.onchange=()=>{const next=[...sequence];next[index]=Number(select.value);commit(next,times);};tile.append(select);
  if(times){const l=document.createElement('label');l.textContent='Seconds';const duration=document.createElement('input');duration.type='number';duration.min=.02;duration.max=5;duration.step=.01;duration.value=times[index];duration.setAttribute('aria-label','Seconds for attacker frame '+(index+1));duration.onchange=()=>{const value=Number(duration.value);if(!duration.checkValidity()||!Number.isFinite(value)||!duration.value){duration.value=times[index];return;}times[index]=value;owner.poseTiming='custom';owner.poseDurations=[...times];changed();renderPoseTimingSelection();};duration.oninput=()=>{if(duration.value!==''&&duration.checkValidity())duration.onchange();};l.append(duration);tile.append(l);}
  for(const [name,action,disabled] of [['←',()=>reorder(index,index-1),index===0],['→',()=>reorder(index,index+1),index===sequence.length-1],['−',()=>commit(sequence.filter((_,i)=>i!==index),times?.filter((_,i)=>i!==index),positions.filter(i=>i!==index)),sequence.length===1]]){const b=document.createElement('button');b.textContent=name;const actionLabel=name==='←'?'Move earlier':name==='→'?'Move later':'Delete';const frameLabel=actionLabel+' · '+(key==='poseFrames'?'character':'effect')+' frame at position '+(index+1);b.setAttribute('aria-label',frameLabel);b.title=frameLabel;b.disabled=disabled;b.onclick=action;tile.append(b);}strip.append(tile);
- });section.append(strip);const add=document.createElement('button');add.textContent='Duplicate last frame';add.disabled=sequence.length>=300;add.onclick=()=>commit([...sequence,sequence.at(-1)],times?[...times,times.at(-1)]:null,[...positions,positions.at(-1)]);const reset=document.createElement('button');reset.textContent='Reset frame order';reset.onclick=()=>{const next=Array.from({length:count},(_,i)=>i),mapping=next.map(source=>{const found=sequence.indexOf(source);return found>=0?found:Math.min(source,sequence.length-1);});commit(next,null,mapping);};section.append(add,reset);parent.append(section);
+ });section.append(strip);const add=document.createElement('button');add.textContent='Duplicate last frame';add.disabled=sequence.length>=300;add.onclick=()=>commit([...sequence,sequence.at(-1)],times?[...times,times.at(-1)]:null,[...positions,positions.at(-1)]);const reset=document.createElement('button');reset.textContent='Reset frame order';reset.onclick=()=>{const next=Array.from({length:count},(_,i)=>i),mapping=next.map(source=>{const found=sequence.indexOf(source);return found>=0?found:Math.min(source,sequence.length-1);});commit(next,null,mapping,next.map(source=>sequence.indexOf(source)));};section.append(add,reset);parent.append(section);
 }
 
 function renderPoseTimingSelection(){const select=$('poseControls').querySelector('[data-field="poseTiming"]');if(select)select.value=attack().poseTiming;}
