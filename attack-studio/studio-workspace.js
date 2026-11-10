@@ -36,6 +36,13 @@ export function installStudioWorkspace(){
  const records=[],pinnedAreas={},unpinnedAreas={},heightInputs={},heightDividers={};let front=20,below=null;
  const tabView=createWorkspaceTabs(state,records,id=>{const group=tabGroup(state,id);if(group){group.active=id;persist();}});
  const indicator=make('div');indicator.className='workspace-drop-indicator';indicator.hidden=true;document.body.append(indicator);
+ function minimumUnitHeight(unit){
+  const record=records.find(r=>r.id===(unit.group?.active||unit.id));
+  const header=record?.shell.querySelector('.workspace-panel-bar')?.offsetHeight||0;
+  const edge=record?.shell.querySelector('.workspace-pin-edge')?.offsetHeight||0;
+  const tabs=unit.group?(unit.element.querySelector('.workspace-tabs')?.offsetHeight||0):0;
+  return header+edge+tabs+4+(record?.state.collapsed?0:100);
+ }
  function arrangePanels(){
   if(!records.length)return;
   const active=document.activeElement;
@@ -43,6 +50,7 @@ export function installStudioWorkspace(){
   for(const [dock,column] of Object.entries(columns)){
    if(state.previewStack){pinnedAreas[dock]?.remove();unpinnedAreas[dock]?.remove();delete pinnedAreas[dock];delete unpinnedAreas[dock];column.classList.remove('has-pins');continue;}
    const units=dockUnits(state,dock).map(unit=>({...unit,element:tabView.element(unit)})).filter(unit=>unit.element);
+   for(const unit of units)unit.element.style.minHeight='';
    const pins=units.filter(unit=>unit.pinned&&!unit.hidden),horizontal=['top','bottom'].includes(dock);
    const scrolling=units.filter(unit=>!pins.includes(unit));
    let area=pinnedAreas[dock],flow=unpinnedAreas[dock];
@@ -54,14 +62,20 @@ export function installStudioWorkspace(){
     const desired=[area,flow];if(desired.some((node,i)=>column.children[i]!==node))for(const node of desired)column.append(node);
     if(scrolling.some((unit,i)=>flow.children[i]!==unit.element))for(const unit of scrolling)flow.append(unit.element);
     for(const [index,unit] of pins.entries()){
-     unit.element.style.top='';unit.element.style.maxHeight=size.panel+'px';
      if(area.children[index+1]!==unit.element)area.append(unit.element);
+     // Wrapped titles and tab controls must not squeeze the editor to zero.
+     // The shelf scrolls when this minimum cannot fit above the other panels.
+     unit.element.style.top='';unit.element.style.maxHeight=Math.max(size.panel,minimumUnitHeight(unit))+'px';
     }
    }else{
     const desired=units.map(unit=>unit.element);
     if(desired.some((node,i)=>column.children[i]!==node))for(const node of desired)column.append(node);
     if(area){area.remove();delete pinnedAreas[dock];}if(flow){flow.remove();delete unpinnedAreas[dock];}column.classList.remove('has-pins');
-    for(const unit of units){unit.element.style.top='';unit.element.style.maxHeight='';}
+    for(const unit of units){
+     unit.element.style.top='';unit.element.style.maxHeight='';
+     // Short horizontal docks scroll around a usable panel, not an empty body.
+     if(horizontal){unit.element.style.minHeight=minimumUnitHeight(unit)+'px';unit.element.style.maxHeight='none';}
+    }
    }
    if(['top','bottom'].includes(dock)){column.hidden=!units.some(unit=>!unit.hidden)&&!document.body.classList.contains('workspace-dragging');}
   }
@@ -103,7 +117,15 @@ export function installStudioWorkspace(){
   r.shell.classList.toggle('floating',floating);r.shell.classList.toggle('collapsed',p.collapsed);r.shell.classList.toggle('pinned',p.pinned&&!floating&&!stacked);r.pin.textContent=p.pinned?'Unpin':'Pin';r.pin.setAttribute('aria-pressed',String(p.pinned));r.pin.disabled=state.locked===true||!!stacked||floating;
   r.earlier.disabled=r.later.disabled=state.locked===true||!!stacked||floating;
   r.summary.hidden=!p.collapsed;r.summary.textContent=[...r.body.querySelectorAll('input,select')].filter(el=>el.getAttribute('aria-label')&&el.type!=='checkbox'&&el.type!=='file').slice(0,3).map(el=>el.getAttribute('aria-label')+': '+el.value).join(' · ')||'Expand to edit';
-  if(floating){if(r.shell.parentElement!==document.body)document.body.append(r.shell);Object.assign(p,fitWindow(p,innerWidth,innerHeight));Object.assign(r.shell.style,{left:p.x+'px',top:p.y+'px',width:p.w+'px',height:p.collapsed?'auto':p.h+'px'});}
+  if(floating){
+   if(r.shell.parentElement!==document.body)document.body.append(r.shell);
+   Object.assign(p,fitWindow(p,innerWidth,innerHeight));Object.assign(r.shell.style,{left:p.x+'px',top:p.y+'px',width:p.w+'px',height:p.collapsed?'auto':p.h+'px'});
+   const header=r.shell.querySelector('.workspace-panel-bar').offsetHeight||0;
+   if(header&&!p.collapsed){
+    const minimum=header+(r.shell.querySelector('.workspace-pin-edge').offsetHeight||0)+124;
+    p.h=Math.min(Math.max(p.h,minimum),Math.max(120,innerHeight-16));r.shell.style.height=p.h+'px';
+   }
+  }
   else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):tabView.destination(r.id)||(p.pinned?pinnedAreas[p.dock]:unpinnedAreas[p.dock])||columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
  }
  function float(r){if(r.state.floating)return;const rect=r.shell.getBoundingClientRect();detachTab(state,r.id);Object.assign(r.state,{floating:true,x:rect.left,y:rect.top,w:Math.max(320,rect.width),h:Math.max(220,rect.height)});r.shell.style.zIndex=String(++front);show(r);}
