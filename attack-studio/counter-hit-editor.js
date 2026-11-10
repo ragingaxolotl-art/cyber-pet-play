@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {validateAttack} from './combat-model.js?v=20261110-results-navigation';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderCounterHitEditor({root,attack,commit,status}){
  root.classList.add('compact-combat-setting');root.replaceChildren();root.append(make('h3','Counter-hit bonus'));

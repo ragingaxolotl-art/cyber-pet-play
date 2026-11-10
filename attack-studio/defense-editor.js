@@ -1,13 +1,13 @@
-import {renderThrowEditor} from './throw-editor.js?v=20261109-slow-motion-release';
-import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261109-slow-motion-release';
-import {renderGuardEditor} from './guard-editor.js?v=20261109-slow-motion-release';
+import {renderThrowEditor} from './throw-editor.js?v=20261110-results-navigation';
+import {renderMeleeClashEditor} from './melee-clash-editor.js?v=20261110-results-navigation';
+import {renderGuardEditor} from './guard-editor.js?v=20261110-results-navigation';
 import {compactSectionHelp} from './context-help.js?v=20261109-guard';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-slow-motion-release';
-import {renderHitstunEditor} from './hitstun-editor.js?v=20261110-workspace-docks';
-import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261110-workspace-docks';
-import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261109-slow-motion-release';
-import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261109-slow-motion-release';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {renderBounceEditor} from './bounce-editor.js?v=20261110-results-navigation';
+import {renderHitstunEditor} from './hitstun-editor.js?v=20261110-results-navigation';
+import {renderCounterHitEditor} from './counter-hit-editor.js?v=20261110-results-navigation';
+import {renderComboScalingEditor} from './combo-scaling-editor.js?v=20261110-results-navigation';
+import {renderContactFeedbackEditor} from './contact-feedback-editor.js?v=20261110-results-navigation';
+import {validateAttack} from './combat-model.js?v=20261110-results-navigation';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderDefenseEditor({root,attack,commit,status}){
  root.replaceChildren();root.append(make('h2','Defense windows'));

@@ -1,5 +1,5 @@
 import {poseSourceFrames,poseDurations} from './pose-timing.js?v=20261109-hurtboxes';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {validateAttack} from './combat-model.js?v=20261110-results-navigation';
 import {addContextHelp} from './context-help.js';
 let selectedFrame=0,selectedName='hand';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};

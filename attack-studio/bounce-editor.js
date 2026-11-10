@@ -1,5 +1,5 @@
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {validateAttack} from './combat-model.js?v=20261110-results-navigation';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderBounceEditor({root,attack,eventId=null,commit,status}){
  root.replaceChildren();root.append(make('h3',eventId?'Selected hit bounces':'Boundary bounces'));

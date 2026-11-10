@@ -1,9 +1,9 @@
-import {renderFlightEditor} from './projectile-flight-editor.js?v=20261109-slow-motion-release';
-import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261109-slow-motion-release';
-import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261109-slow-motion-release';
+import {renderFlightEditor} from './projectile-flight-editor.js?v=20261110-results-navigation';
+import {renderProjectileSplitEditor} from './projectile-split-editor.js?v=20261110-results-navigation';
+import {renderProjectileAreaEditor} from './projectile-area-editor.js?v=20261110-results-navigation';
 import {addContextHelp} from './context-help.js?v=20261109-guard';
-import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261109-slow-motion-release';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {renderSteeringEditor} from './projectile-steering-editor.js?v=20261110-results-navigation';
+import {validateAttack} from './combat-model.js?v=20261110-results-navigation';
 export function renderProjectileEditor({root,attack,commit,status,effects=new Map()}){
  if(attack.delivery!=='projectile'||!['damage','push'].includes(attack.payload))return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');section.className='projectile-lifetime-editor';legend.textContent='Projectile lifetime';section.append(legend);
