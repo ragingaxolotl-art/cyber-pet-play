@@ -117,7 +117,7 @@ body:has(.layout) #arena { width:min(100%, calc(var(--viewer-height,28dvh) * 2))
 .group-timeline{grid-column:1/-1;min-width:0;margin:12px 0}.group-timeline p{font-size:12px;line-height:1.5}.group-timeline-row{display:grid;grid-template-columns:80px minmax(140px,1fr);align-items:center;gap:8px;margin:8px 0;font-size:12px}.group-timeline-track{position:relative;height:34px;background:#15251f;border:1px solid var(--edge);margin-right:12px}.group-timeline-bar{position:absolute;top:2px;height:28px;padding:2px;min-width:0;overflow:hidden;background:#32594c;white-space:nowrap;touch-action:none;cursor:grab}.group-timeline-end{position:absolute;top:1px;width:18px;height:30px;padding:0;transform:translateX(-50%);background:#456e59;touch-action:none;cursor:ew-resize}.group-timeline button:focus-visible{outline:2px solid var(--mint);outline-offset:2px;z-index:2}
 
 /* Playback precedes the canvas so testing stays discoverable in a short preview. */
-.preview .playback{position:sticky;top:0;z-index:4;background:var(--panel,#151b22);padding:6px 0;gap:6px;flex-wrap:wrap}
+.preview .playback{position:static;background:var(--panel,#151b22);padding:6px 0;gap:6px;flex-wrap:wrap}
 .preview .playback button{font-size:12px;padding:7px 9px}
 
 .projectile-lifetime-editor{grid-column:1/-1;min-width:0;margin:8px 0;padding:12px;border:1px solid var(--edge);border-radius:8px}.projectile-lifetime-editor label{display:grid;gap:6px}.projectile-lifetime-editor select,.projectile-lifetime-editor input{width:100%;min-width:0}.projectile-lifetime-editor p{line-height:1.5;margin:10px 0}
