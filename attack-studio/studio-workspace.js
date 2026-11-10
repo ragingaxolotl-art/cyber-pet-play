@@ -1,4 +1,4 @@
-import {installPanelResize} from './panel-resize.js?v=20261110-panel-hitbox-resize-r2';
+import {installPanelResize} from './panel-resize.js?v=20261110-resize-keyboard-recovery';
 import {fitDockHeights,pinnedAreaSize} from './workspace-sizing.js?v=20261110-workspace-sizing';
 import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-panel-hitbox-resize-r2';
 import {reviewImport} from './import-preview.js?v=20261110-layout-safety';
