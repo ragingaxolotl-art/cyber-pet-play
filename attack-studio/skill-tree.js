@@ -1,5 +1,5 @@
 import {installTreeNodeDrag} from './tree-node-drag.js?v=20261110-tree-gestures';
-import {installTreeClassroom} from './tree-classroom.js?v=20261109-slow-motion-release';
+import {installTreeClassroom} from './tree-classroom.js?v=20261110-tree-classroom-recovery';
 import {installTreeWorkspace} from './tree-workspace.js?v=20261110-layout-safety';
 import {installTreeTools} from './tree-tools.js?v=20261110-layout-safety';
 import {readiness} from './tree-operations.js?v=20261109-tree-workspace-2';
