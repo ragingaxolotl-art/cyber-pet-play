@@ -30,6 +30,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       pages: write
       id-token: write
@@ -40,3 +41,6 @@ jobs:
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # The prior deployment built successfully but exceeded the default sync wait.
+          timeout: 1200000
