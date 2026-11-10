@@ -83,3 +83,35 @@ header nav{align-items:center}.workspace-controls{display:flex;flex-direction:ro
  .workspace-tab-group.pinned{position:static;max-height:none!important}
  .preview-stack>.workspace-dock-center{grid-column:1;grid-row:2}
 }
+
+/* A shared pinned shelf prevents multiple sticky panels from overlapping.
+   Its contents scroll separately when the screen cannot show all pins. */
+.workspace-pinned-area{position:sticky;top:0;z-index:7;overflow:auto;min-height:0;overscroll-behavior:contain;background:var(--panel);border:1px solid var(--edge);border-radius:8px;margin-bottom:10px;padding:4px}
+.workspace-pinned-label{display:block;padding:3px 5px 7px;color:var(--muted);font-size:11px}
+.workspace-pinned-area>.pinned{position:static;min-height:0;margin-bottom:8px}
+.workspace-pinned-area>.workspace-panel{display:flex;flex-direction:column}
+.workspace-dock-top>.pinned,.workspace-dock-bottom>.pinned{position:static;top:auto}
+.custom-workspace{grid-template-rows:auto auto minmax(0,1fr) auto auto}
+.workspace-dock-left,.workspace-dock-center,.workspace-dock-right,.workspace-splitter{grid-row:3}
+.workspace-dock-bottom{grid-row:5}
+.workspace-height-divider{height:8px;background:#283c4b;border-radius:4px;grid-column:1/-1;cursor:row-resize;touch-action:none}
+.workspace-height-top{grid-row:2}.workspace-height-bottom{grid-row:4}
+.workspace-height-divider:hover,.workspace-height-divider:focus-visible{background:var(--mint)}
+.workspace-height-divider[hidden],.preview-stack>.workspace-height-divider{display:none!important}
+.workspace-height-divider[aria-disabled="true"]{cursor:default;opacity:.5}
+.workspace-menu-body fieldset input[type="number"]{width:8ch;min-width:8ch;margin-left:auto}
+@media(max-width:760px){
+ .workspace-height-divider{display:none}
+ .workspace-dock-top,.workspace-dock-bottom{height:auto!important}
+ .workspace-pinned-area{position:static;max-height:none!important;overflow:visible}
+ .workspace-pinned-area>.pinned{max-height:none!important}
+ .preview-stack>.workspace-dock-center{grid-row:3}
+}
+
+/* Pinned and remaining panels have separate scroll areas, so a sticky preview
+   cannot cover a control that keyboard focus or a pointer tries to reach. */
+.workspace-column.has-pins{display:flex;flex-direction:column;overflow:hidden}
+.workspace-column>.workspace-pinned-area{position:relative;top:auto;flex:0 0 auto;min-height:0}
+.workspace-unpinned-area{flex:1 1 auto;overflow:auto;min-height:0;overscroll-behavior:contain}
+.workspace-unpinned-area[hidden]{display:none!important}
+@media(max-width:760px){.workspace-column.has-pins{display:block;overflow:visible}.workspace-unpinned-area{overflow:visible}}

@@ -9,6 +9,10 @@ export function validateWorkspaceBundle(value){
   for(const [id,p] of Object.entries(panels))if(!/^[a-zA-Z0-9-]+$/.test(id)||!p||!(item.layout.version===1?['left','center','right']:['left','center','right','top','bottom']).includes(p.dock)||['x','y','w','h'].some(key=>!Number.isFinite(p[key])))throw Error('Invalid panel position or size.');
   if(item.layout.version>=2)for(const p of Object.values(panels))if(!Number.isSafeInteger(p.order)||p.order<0||typeof p.pinned!=='boolean')throw Error('Invalid panel order or pin setting.');
   if(item.layout.version===3){
+   if(item.layout.dockHeights!==undefined){
+    const heights=item.layout.dockHeights;
+    if(!heights||typeof heights!=='object'||Array.isArray(heights)||Object.keys(heights).some(key=>!['top','bottom'].includes(key))||Object.values(heights).some(n=>n!==null&&(!Number.isFinite(n)||n<100||n>1200)))throw Error('Invalid dock height.');
+   }
    if(!Array.isArray(item.layout.tabs)||item.layout.tabs.length>50)throw Error('Invalid tab groups.');
    const used=new Set(),ids=new Set();
    for(const group of item.layout.tabs){

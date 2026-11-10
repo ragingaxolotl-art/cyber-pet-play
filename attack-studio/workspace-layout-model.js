@@ -19,7 +19,9 @@ export function safeLayout(value){
   }
  }
  const widths=valid&&Array.isArray(value.widths)&&value.widths.length===3&&value.widths.every(n=>Number.isFinite(n)&&n>=15&&n<=70)?[...value.widths]:[24,48,28];
- const result={version:3,panels,widths,tabs:valid&&value.version===3&&Array.isArray(value.tabs)?structuredClone(value.tabs):[],locked:valid&&value.locked===true,previewStack:valid&&value.previewStack===true,previewFocus:valid&&value.previewFocus===true};
+ const dockHeights={top:null,bottom:null};
+ for(const dock of ['top','bottom'])if(valid&&Number.isFinite(value.dockHeights?.[dock])&&value.dockHeights[dock]>=100&&value.dockHeights[dock]<=1200)dockHeights[dock]=value.dockHeights[dock];
+ const result={version:3,panels,widths,dockHeights,tabs:valid&&value.version===3&&Array.isArray(value.tabs)?structuredClone(value.tabs):[],locked:valid&&value.locked===true,previewStack:valid&&value.previewStack===true,previewFocus:valid&&value.previewFocus===true};
  normalizeTabs(result);return result;
 }
 // A tab group occupies one dock position. Hidden tabs stay in the group so the

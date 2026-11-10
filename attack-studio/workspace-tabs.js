@@ -1,4 +1,4 @@
-import {tabGroup,normalizeTabs} from './workspace-layout-model.js?v=20261110-workspace-tabs';
+import {tabGroup,normalizeTabs} from './workspace-layout-model.js?v=20261110-workspace-sizing';
 
 // Persistent tab buttons retain keyboard focus. Panels keep their existing DOM
 // and event listeners: switching a tab must never rebuild an editor or draft.

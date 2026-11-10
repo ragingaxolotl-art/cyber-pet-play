@@ -1,10 +1,11 @@
-import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-workspace-tabs';
+import {fitDockHeights,pinnedAreaSize} from './workspace-sizing.js?v=20261110-workspace-sizing';
+import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-workspace-sizing';
 import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
 import {installAccessibility} from './editor-accessibility.js?v=20261110-workspace-docks';
-import {safeLayout,panelDefaults,orderedPanels,movePanel,createLayoutHistory,findDockDrop,LAYOUT_KEY,PREVIOUS_LAYOUT_KEY,LEGACY_LAYOUT_KEY,DOCKS,tabGroup,groupTabs,detachTab,dockUnits} from './workspace-layout-model.js?v=20261110-workspace-tabs';
-export {safeLayout} from './workspace-layout-model.js?v=20261110-workspace-tabs';
-import {createWorkspaceTabs} from './workspace-tabs.js?v=20261110-workspace-tabs';
+import {safeLayout,panelDefaults,orderedPanels,movePanel,createLayoutHistory,findDockDrop,LAYOUT_KEY,PREVIOUS_LAYOUT_KEY,LEGACY_LAYOUT_KEY,DOCKS,tabGroup,groupTabs,detachTab,dockUnits} from './workspace-layout-model.js?v=20261110-workspace-sizing';
+export {safeLayout} from './workspace-layout-model.js?v=20261110-workspace-sizing';
+import {createWorkspaceTabs} from './workspace-tabs.js?v=20261110-workspace-sizing';
 export const PRESETS_KEY='cyber-pet-studio-presets-v3';
 const PREVIOUS_PRESETS_KEY='cyber-pet-studio-presets-v2';
 const LEGACY_PRESETS_KEY='cyber-pet-studio-presets-v1';
@@ -32,7 +33,7 @@ export function installStudioWorkspace(){
  const originalPanels=[document.querySelector('.library'),document.querySelector('.preview'),...[...document.querySelector('.editor-scroll').children].filter(e=>e.classList.contains('panel')),document.querySelector('.inspector')];
  const columns={};layout.classList.add('custom-workspace');
  for(const name of DOCKS){const c=make('section');c.className='workspace-column workspace-dock-'+name;c.setAttribute('aria-label',name+' workspace column');columns[name]=c;}
- const records=[];let front=20,below=null;
+ const records=[],pinnedAreas={},unpinnedAreas={},heightInputs={},heightDividers={};let front=20,below=null;
  const tabView=createWorkspaceTabs(state,records,id=>{const group=tabGroup(state,id);if(group){group.active=id;persist();}});
  const indicator=make('div');indicator.className='workspace-drop-indicator';indicator.hidden=true;document.body.append(indicator);
  function arrangePanels(){
@@ -40,13 +41,27 @@ export function installStudioWorkspace(){
   const active=document.activeElement;
   tabView.sync(state.previewStack);updateTabControls();columnWidths();
   for(const [dock,column] of Object.entries(columns)){
-   if(state.previewStack)continue;
+   if(state.previewStack){pinnedAreas[dock]?.remove();unpinnedAreas[dock]?.remove();delete pinnedAreas[dock];delete unpinnedAreas[dock];column.classList.remove('has-pins');continue;}
    const units=dockUnits(state,dock).map(unit=>({...unit,element:tabView.element(unit)})).filter(unit=>unit.element);
-   const present=[...column.children].filter(n=>!n.classList.contains('floating'));
-   if(units.some((unit,i)=>present[i]!==unit.element))for(const unit of units)column.append(unit.element);
-   const pins=units.filter(unit=>unit.pinned&&!unit.hidden),available=Math.max(120,(column.clientHeight||innerHeight)*.6/Math.max(1,pins.length));let offset=0;
-   for(const unit of units){
-    if(unit.pinned&&!unit.hidden){unit.element.style.top=offset+'px';unit.element.style.maxHeight=available+'px';offset+=Math.min(unit.element.getBoundingClientRect().height,available)+8;}
+   const pins=units.filter(unit=>unit.pinned&&!unit.hidden),horizontal=['top','bottom'].includes(dock);
+   const scrolling=units.filter(unit=>!pins.includes(unit));
+   let area=pinnedAreas[dock],flow=unpinnedAreas[dock];
+   if(pins.length&&!horizontal){
+    if(!area){area=make('section');area.className='workspace-pinned-area';area.setAttribute('aria-label','Pinned panels in '+dock+' dock');const title=make('small','Pinned panels · scroll here for more');title.className='workspace-pinned-label';area.append(title);pinnedAreas[dock]=area;}
+    if(!flow){flow=make('section');flow.className='workspace-unpinned-area';flow.setAttribute('aria-label','Other panels in '+dock+' dock');unpinnedAreas[dock]=flow;}
+    column.classList.add('has-pins');const hasUnpinned=scrolling.some(unit=>!unit.hidden);flow.hidden=!hasUnpinned;
+    const size=pinnedAreaSize(column.clientHeight||innerHeight,pins.length,hasUnpinned);area.style.maxHeight=size.area+'px';
+    const desired=[area,flow];if(desired.some((node,i)=>column.children[i]!==node))for(const node of desired)column.append(node);
+    if(scrolling.some((unit,i)=>flow.children[i]!==unit.element))for(const unit of scrolling)flow.append(unit.element);
+    for(const [index,unit] of pins.entries()){
+     unit.element.style.top='';unit.element.style.maxHeight=size.panel+'px';
+     if(area.children[index+1]!==unit.element)area.append(unit.element);
+    }
+   }else{
+    const desired=units.map(unit=>unit.element);
+    if(desired.some((node,i)=>column.children[i]!==node))for(const node of desired)column.append(node);
+    if(area){area.remove();delete pinnedAreas[dock];}if(flow){flow.remove();delete unpinnedAreas[dock];}column.classList.remove('has-pins');
+    for(const unit of units){unit.element.style.top='';unit.element.style.maxHeight='';}
    }
    if(['top','bottom'].includes(dock)){column.hidden=!units.some(unit=>!unit.hidden)&&!document.body.classList.contains('workspace-dragging');}
   }
@@ -66,7 +81,18 @@ export function installStudioWorkspace(){
  function rect(element){const r=element.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right??r.left+r.width,bottom:r.bottom??r.top+r.height};}
  function showDrop(drop){indicator.hidden=!drop;if(drop)Object.assign(indicator.style,{left:drop.x+'px',top:drop.y+'px',width:drop.width+'px',height:drop.height+'px'});}
 
- function columnWidths(){const height=layout.clientHeight||innerHeight*.75;for(const dock of ['top','bottom']){const tabbed=dockUnits(state,dock).some(unit=>unit.group&&!unit.hidden);columns[dock].style.maxHeight=Math.max(80,height*(tabbed?.3:.22))+'px';}layout.style.gridTemplateColumns=`minmax(190px,${state.widths[0]}fr) 8px minmax(260px,${state.widths[1]}fr) 8px minmax(190px,${state.widths[2]}fr)`;}
+ function columnWidths(){
+  const height=layout.clientHeight||innerHeight*.75,visible={},tabbed={};
+  for(const dock of ['top','bottom']){const units=dockUnits(state,dock);visible[dock]=!state.previewStack&&units.some(unit=>!unit.hidden);tabbed[dock]=units.some(unit=>unit.group&&!unit.hidden);}
+  const fitted=fitDockHeights(height,state.dockHeights,visible,tabbed);autoSizes.disabled=state.locked||state.previewStack;
+  for(const dock of ['top','bottom']){
+   columns[dock].style.maxHeight=fitted[dock]+'px';columns[dock].style.height=state.dockHeights[dock]===null?'':fitted[dock]+'px';
+   if(heightInputs[dock]){heightInputs[dock].value=state.dockHeights[dock]??'';heightInputs[dock].disabled=state.locked||state.previewStack;}
+   const divider=heightDividers[dock];if(divider){divider.hidden=!visible[dock];divider.setAttribute('aria-valuenow',String(Math.round(fitted[dock])));divider.setAttribute('aria-disabled',String(state.locked||state.previewStack));}
+  }
+  layout.style.gridTemplateColumns=`minmax(190px,${state.widths[0]}fr) 8px minmax(260px,${state.widths[1]}fr) 8px minmax(190px,${state.widths[2]}fr)`;
+ }
+
  function show(r){
   const p=r.state,stacked=state.previewStack&&below,isPreview=r.id==='preview',floating=p.floating&&!stacked;r.shell.hidden=stacked&&isPreview?false:p.hidden;r.body.hidden=stacked&&isPreview?false:p.collapsed;r.collapse.textContent=p.collapsed?'Expand':'Collapse';r.collapse.setAttribute('aria-expanded',String(!p.collapsed));r.checkbox.checked=!p.hidden;r.dock.value=p.floating?'float':p.dock;r.dock.disabled=state.locked===true||!!stacked;
   r.collapse.disabled=!!stacked&&isPreview;r.hide.disabled=!!stacked&&isPreview;r.checkbox.disabled=!!stacked&&isPreview;
@@ -74,7 +100,7 @@ export function installStudioWorkspace(){
   r.earlier.disabled=r.later.disabled=state.locked===true||!!stacked||floating;
   r.summary.hidden=!p.collapsed;r.summary.textContent=[...r.body.querySelectorAll('input,select')].filter(el=>el.getAttribute('aria-label')&&el.type!=='checkbox'&&el.type!=='file').slice(0,3).map(el=>el.getAttribute('aria-label')+': '+el.value).join(' · ')||'Expand to edit';
   if(floating){if(r.shell.parentElement!==document.body)document.body.append(r.shell);Object.assign(p,fitWindow(p,innerWidth,innerHeight));Object.assign(r.shell.style,{left:p.x+'px',top:p.y+'px',width:p.w+'px',height:p.collapsed?'auto':p.h+'px'});}
-  else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):tabView.destination(r.id)||columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
+  else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):tabView.destination(r.id)||(p.pinned?pinnedAreas[p.dock]:unpinnedAreas[p.dock])||columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
  }
  function float(r){if(r.state.floating)return;const rect=r.shell.getBoundingClientRect();detachTab(state,r.id);Object.assign(r.state,{floating:true,x:rect.left,y:rect.top,w:Math.max(320,rect.width),h:Math.max(220,rect.height)});r.shell.style.zIndex=String(++front);show(r);}
  for(const [i,panel] of originalPanels.entries()){
@@ -131,11 +157,29 @@ export function installStudioWorkspace(){
  tabSource.onchange=tabTarget.onchange=updateTabControls;
  groupButton.onclick=()=>{if(groupButton.disabled)return;if(groupTabs(state,tabSource.value,tabTarget.value)){records.forEach(show);persist();$('status').textContent='Panels grouped as tabs. Arrow keys switch tabs; Undo layout restores the previous arrangement.';}};
  detachButton.onclick=()=>{if(detachButton.disabled)return;detachTab(state,tabSource.value);records.forEach(show);persist();$('status').textContent='Panel separated from its tab group.';};
+ const sizes=make('fieldset'),sizeLegend=make('legend','Dock sizes');sizes.append(sizeLegend);
+ for(const dock of ['top','bottom']){
+  const label=make('label',dock==='top'?'Top dock height (px)':'Bottom dock height (px)'),input=make('input');input.type='number';input.min='100';input.max='1200';input.step='1';input.placeholder='Auto';input.setAttribute('aria-label',label.textContent);heightInputs[dock]=input;label.append(input);sizes.append(label);
+  input.onchange=()=>{if(state.locked||state.previewStack)return;const value=input.value===''?null:Number(input.value);if(value!==null&&(!Number.isFinite(value)||value<100||value>1200)){input.value=state.dockHeights[dock]??'';$('status').textContent='Use a dock height from 100 to 1200 pixels, or leave it blank for automatic sizing.';return;}state.dockHeights[dock]=value;persist();};
+ }
+ const autoSizes=make('button','Automatic dock heights');autoSizes.onclick=()=>{if(state.locked||state.previewStack)return;state.dockHeights={top:null,bottom:null};persist();};
+ const sizeHint=make('small','Drag the divider beneath the top dock or above the bottom dock. Arrow keys resize; Home or double-click returns to automatic sizing. Heights fit the screen so the center stays available.');sizes.append(autoSizes,sizeHint);windows.append(sizes);
+ function heightDivider(dock){
+  const divider=make('div');divider.className='workspace-height-divider workspace-height-'+dock;divider.tabIndex=0;divider.setAttribute('role','separator');divider.setAttribute('aria-orientation','horizontal');divider.setAttribute('aria-label','Resize '+dock+' dock');divider.setAttribute('aria-valuemin','0');divider.setAttribute('aria-valuemax','1200');divider.title='Drag or use Up/Down to resize. Double-click or Home for automatic sizing.';heightDividers[dock]=divider;
+  const allowed=()=>!state.locked&&!state.previewStack;
+  const setSize=value=>{state.dockHeights[dock]=Math.max(100,Math.min(1200,Math.round(value)));arrangePanels();};
+  divider.onpointerdown=e=>{if(!allowed()||e.button!==0)return;e.preventDefault();divider.setPointerCapture(e.pointerId);const start=e.clientY,height=columns[dock].getBoundingClientRect().height,original=state.dockHeights[dock];
+   divider.onpointermove=v=>setSize(height+(v.clientY-start)*(dock==='top'?1:-1));
+   const finish=cancel=>{divider.onpointermove=null;divider.onpointerup=null;divider.onpointercancel=null;if(cancel)state.dockHeights[dock]=original;persist();};divider.onpointerup=()=>finish(false);divider.onpointercancel=()=>finish(true);
+  };
+  divider.onkeydown=e=>{if(!allowed()||!['ArrowUp','ArrowDown','Home'].includes(e.key))return;e.preventDefault();if(e.key==='Home')state.dockHeights[dock]=null;else setSize(columns[dock].getBoundingClientRect().height+(e.key==='ArrowDown'?20:-20)*(dock==='top'?1:-1));persist();};
+  divider.ondblclick=()=>{if(!allowed())return;state.dockHeights[dock]=null;persist();};return divider;
+ }
  function splitter(index){const s=make('div');s.className='workspace-splitter';s.tabIndex=0;s.setAttribute('role','separator');s.setAttribute('aria-orientation','vertical');s.setAttribute('aria-label','Resize workspace columns');
  const change=delta=>{const amount=Math.max(15-state.widths[index],Math.min(state.widths[index+1]-15,delta));state.widths[index]+=amount;state.widths[index+1]-=amount;columnWidths();};
- s.onpointerdown=e=>{if(state.locked)return;e.preventDefault();s.setPointerCapture(e.pointerId);let x=e.clientX;s.onpointermove=v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;};s.onpointerup=s.onpointercancel=()=>{s.onpointermove=null;persist();};};s.onkeydown=e=>{if(state.locked)return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}};return s;}
- layout.replaceChildren(columns.top,columns.left,splitter(0),columns.center,splitter(1),columns.right,columns.bottom);columnWidths();
- reset.onclick=()=>{state.previewStack=false;state.previewFocus=false;state.tabs=[];state.locked=false;lockBox.checked=false;document.body.classList.remove('workspace-locked');state.widths=[24,48,28];for(const r of records){Object.assign(r.state,panelDefaults(r.home,records.indexOf(r)));columns[r.home].append(r.shell);show(r);}columnWidths();arrangePreview();persist();};
+ s.onpointerdown=e=>{if(state.locked)return;e.preventDefault();s.setPointerCapture(e.pointerId);let x=e.clientX;const original=[...state.widths];s.onpointermove=v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;};const finish=cancel=>{s.onpointermove=null;s.onpointerup=null;s.onpointercancel=null;if(cancel)state.widths=original;persist();};s.onpointerup=()=>finish(false);s.onpointercancel=()=>finish(true);};s.onkeydown=e=>{if(state.locked)return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}};return s;}
+ layout.replaceChildren(columns.top,heightDivider('top'),columns.left,splitter(0),columns.center,splitter(1),columns.right,heightDivider('bottom'),columns.bottom);columnWidths();
+ reset.onclick=()=>{state.previewStack=false;state.previewFocus=false;state.tabs=[];state.locked=false;lockBox.checked=false;document.body.classList.remove('workspace-locked');state.widths=[24,48,28];state.dockHeights={top:null,bottom:null};for(const r of records){Object.assign(r.state,panelDefaults(r.home,records.indexOf(r)));columns[r.home].append(r.shell);show(r);}columnWidths();arrangePreview();persist();};
 
  const stackLabel=make('label'),stackToggle=make('input');stackToggle.type='checkbox';stackLabel.append(stackToggle,document.createTextNode('Keep preview above scrolling controls'));windows.prepend(stackLabel);
  const previewRecord=records.find(r=>r.id==='preview'),controlsDrawer=make('div'),drawerTitle=make('button','Editing controls');controlsDrawer.className='preview-controls-drawer';controlsDrawer.classList.add('is-open');drawerTitle.type='button';drawerTitle.setAttribute('aria-expanded','true');below=make('div');below.className='preview-controls-scroll';below.setAttribute('aria-label','Controls below preview');drawerTitle.onclick=()=>{const open=drawerTitle.getAttribute('aria-expanded')!=='true';drawerTitle.setAttribute('aria-expanded',String(open));controlsDrawer.classList.toggle('is-open',open);below.hidden=!open;};controlsDrawer.append(drawerTitle,below);previewRecord.body.append(controlsDrawer);
@@ -148,7 +192,7 @@ export function installStudioWorkspace(){
  let presets=[];try{const stored=JSON.parse(localStorage.getItem(PRESETS_KEY)||localStorage.getItem(PREVIOUS_PRESETS_KEY)||localStorage.getItem(LEGACY_PRESETS_KEY)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.name.length<=80&&[1,2,3].includes(p.layout?.version)).map(p=>({...p,layout:safeLayout(p.layout)}));}catch{}
  function fillPresets(selected='default'){presetPicker.replaceChildren();for(const [id,name] of [['default','Default workspace'],['browse','Find attacks'],['animate','Animate'],['balance','Balance and test']])presetPicker.add(new Option(name,id));for(const preset of presets)presetPicker.add(new Option(preset.name,preset.id));presetPicker.value=selected;}
  function persistPresets(){try{localStorage.setItem(PRESETS_KEY,JSON.stringify(presets));}catch{$('status').textContent='Could not save this layout. Browser storage is full.';return false;}return true;}
- function applyState(next){const clean=safeLayout(next);state.version=3;state.tabs=clean.tabs;state.widths=clean.widths;state.locked=clean.locked;state.previewStack=clean.previewStack;state.previewFocus=clean.previewFocus;lockBox.checked=!!state.locked;document.body.classList.toggle('workspace-locked',!!state.locked);for(const r of records){Object.assign(r.state,clean.panels[r.id]||panelDefaults(r.home,records.indexOf(r)));state.panels[r.id]=r.state;show(r);}columnWidths();arrangePreview();persist();}
+ function applyState(next){const clean=safeLayout(next);state.version=3;state.tabs=clean.tabs;state.widths=clean.widths;state.dockHeights=clean.dockHeights;state.locked=clean.locked;state.previewStack=clean.previewStack;state.previewFocus=clean.previewFocus;lockBox.checked=!!state.locked;document.body.classList.toggle('workspace-locked',!!state.locked);for(const r of records){Object.assign(r.state,clean.panels[r.id]||panelDefaults(r.home,records.indexOf(r)));state.panels[r.id]=r.state;show(r);}columnWidths();arrangePreview();persist();}
  function builtIn(kind){const layout={version:3,tabs:[],widths:kind==='browse'?[40,40,20]:kind==='balance'?[18,52,30]:[20,55,25],panels:{},locked:false};for(const r of records){const showIds=kind==='animate'?['library','preview','attackTimeline','panel-9','panel-10']:kind==='balance'?['preview','attackTimeline','sequenceEditor','defenseEditor','cancelEditor','panel-6','panel-11','panel-12']:kind==='browse'?['library','preview']:records.map(r=>r.id);layout.panels[r.id]={...panelDefaults(r.home,records.indexOf(r)),hidden:!showIds.includes(r.id)};}return layout;}
  applyLayout.onclick=()=>{const named=presets.find(p=>p.id===presetPicker.value);applyState(named?.layout||builtIn(presetPicker.value));$('status').textContent='Workspace layout opened. Hidden panels remain available in the Windows menu.';if(presetPicker.value==='browse')$('findAttacks')?.click();};
  saveLayout.onclick=async()=>{const name=await requestEditorName('Name this workspace layout');if(!name?.trim())return;if(name.trim().length>80){$('status').textContent='Use a layout name under 80 characters.';return;}const id=crypto.randomUUID();presets.push({id,name:name.trim(),layout:structuredClone(state)});if(persistPresets()){fillPresets(id);$('status').textContent='Saved '+name.trim()+' in this browser.';}};
