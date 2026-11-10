@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261110-library-management';
+import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
 import {addContextHelp} from './context-help.js';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderPresentationEditor({root,attack,commit,status}){

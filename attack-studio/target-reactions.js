@@ -17,6 +17,14 @@ export function targetReaction(target,frame,{guard=false}={}){
   const age=Number.isFinite(land)?frame-land:hitAge;
   return result('Knocked out','defeated_side',Number.isFinite(age)?age/18:.999);
  }
+ // Sequence and released-momentum recovery use the runtime state directly.
+ // Legacy previews below retain their authored landing metadata.
+ if(target.reaction==='down'){
+  const age=Math.max(0,frame-(target.reactionStart??frame));
+  return age<REACTION_TIMING.fall?result('Knockdown','knocked_down_side',age/REACTION_TIMING.fall,0,[1,2,3,4]):result('Down','knocked_down_side',.999,0,[4]);
+ }
+ if(target.reaction==='getting_up')return result('Getting up','get_up_side',(frame-(target.reactionStart??frame))/REACTION_TIMING.getUp);
+ if(target.reaction==='airborne'&&target.y<0)return result('Falling','hurt_side',.9,direction*32,[2]);
  if(Number.isFinite(land)){
   const age=frame-land-(Number.isFinite(wall)?Math.max(0,wall+REACTION_TIMING.wall-land):0);
   if(target.reactionKnockedDown){

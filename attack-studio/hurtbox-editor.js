@@ -1,5 +1,5 @@
 import {poseSourceFrames,poseDurations} from './pose-timing.js?v=20261109-hurtboxes';
-import {validateAttack} from './combat-model.js?v=20261110-library-management';
+import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
 import {addContextHelp} from './context-help.js';
 let frameIndex=0,boxIndex=0;
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};

@@ -1,5 +1,5 @@
 import {addContextHelp} from './context-help.js';
-import {validateAttack} from './combat-model.js?v=20261110-library-management';
+import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
 export function renderFlightEditor({root,attack,commit,status}){
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Ballistic flight';section.append(legend);
  const mutate=change=>{try{const next=structuredClone(attack);change(next);validateAttack(next);commit(next);return true;}catch(error){status(error.message);return false;}};

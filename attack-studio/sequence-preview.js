@@ -13,7 +13,7 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261109-throw-release';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261109-melee-clashes';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261110-library-management';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261110-suspension-recovery';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261110-library-management';
 
@@ -21,7 +21,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   validateRecoveryFrame(options.recoveryFrame);
   const av=statsFor(attacker),tv=statsFor(target),tm=timing(attack,attacker),direction=options.facing===-1?-1:1;
   const self={x:0,y:0,hp:Math.round(av.maxHP*(options.selfHP??.6)),maxHP:av.maxHP,energy:Math.round(av.maxEnergy*(options.energy??1)),shield:0,stun:0};
-  const other={x:(options.targetSide===-1?-1:1)*(options.distance??100),y:-(options.targetHeight??0),vy:0,hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,stun:0};
+  const other={x:(options.targetSide===-1?-1:1)*(options.distance??100),y:-(options.targetHeight??0),vy:0,vx:0,reaction:'standing',hp:Math.round(tv.maxHP*(options.targetHP??.7)),maxHP:tv.maxHP,energy:tv.maxEnergy,shield:0,stun:0};
   const cost=Math.ceil(attack.cost*av.cost),cast=self.energy>=cost;
   if(cast)self.energy-=cost;
   const combos=new ComboTracker();
@@ -37,12 +37,14 @@ export function simulateSequence(attack,attacker,target,options={}) {
     if(independent&&launched&&frame>=tm.startup+attack.projectileLifetime&&!state.cancelled&&state.results.length<attack.hitEvents.length)state.cancelled='Projectile lifetime expired.';
     if(independent&&self.hp<=0)state.cancelled='Attacker defeated.';
     const pulseOwned=advancePulseReaction(other,frame,-220,220);
-    if(!pulseOwned&&other.impulseReleased){
+    // Authored suspension can release above the floor just like a velocity reaction.
+    // Continue through landing, knockdown and get-up using the Arena's recovery rules.
+    if(!pulseOwned&&(other.impulseReleased||(state.contactFrame!==null&&(other.y<0||['down','getting_up'].includes(other.reaction))))){
      const emit=name=>events.push({frame,text:name});advanceReaction(other,frame,emit,-220,220);
      if(other.reaction!=='wall'){other.vy+=SEQUENCE_LIMITS.gravity;other.y+=other.vy;}
      if(other.y>=0){other.y=0;other.vy=0;resetGroundedJuggle(other);if(other.reaction==='airborne')knockDown(other,frame,emit);}
      other.x=Math.max(-220,Math.min(220,other.x));if(other.reaction==='standing')other.impulseReleased=false;
-    }else if(!pulseOwned&&state.contactFrame!==null&&other.y<0){other.vy+=SEQUENCE_LIMITS.gravity;other.y=Math.min(0,other.y+other.vy);if(other.y===0){resetGroundedJuggle(other);other.reaction='standing';other.reactionLandFrame=frame;}}
+    }
     combos.beginFrame(frame,new Map([['target',{defeated:other.hp<=0,locked:other.stun>frame||!!other.pulseMotion}]]));
     let box=worldBox(attack,(state.startFrame!==null?frame:state.contactFrame??frame),attacker,direction);
     if(attack.projectileSteering&&independent&&launched){
