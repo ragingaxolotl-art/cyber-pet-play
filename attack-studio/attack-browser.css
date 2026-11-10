@@ -34,3 +34,26 @@
 .attack-browser-library p{margin:8px 4px;line-height:1.5}
 .attack-browser-library>details{margin:8px 4px}
 .attack-browser-library button{white-space:normal;max-width:100%}
+
+/* Artwork-first finder: tools have their own resizable windows. */
+.attack-browser[open]{width:min(1320px,96vw);height:min(900px,94dvh);min-width:min(440px,96vw);min-height:min(480px,94dvh);max-width:98vw;max-height:98dvh;padding:12px;resize:both;gap:8px}
+.attack-browser .attack-browser-heading{flex-wrap:wrap;gap:8px;margin:0}.attack-browser-heading h2{margin:0;flex:1 1 160px;font-size:20px}
+.attack-browser .attack-browser-filters{gap:8px;max-height:none;overflow:visible;align-items:center;flex:none}
+.attack-browser .attack-browser-filters label{margin:0;min-width:0;flex:0 1 150px}.attack-browser .attack-browser-filters label:has(input[type=search]){flex:1 1 240px}
+.attack-browser .attack-browser-filters button{min-height:38px;padding:6px 10px}
+.attack-browser .attack-browser-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,var(--attack-preview-width,30%));flex:1 1 auto;min-height:min(280px,40dvh);max-height:none;overflow:hidden;gap:12px}
+.attack-browser .attack-browser-cards{min-height:0;overflow:auto;grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--attack-card-size,160px)),1fr));padding:3px 8px 8px 3px;scrollbar-gutter:stable;align-content:start}
+.attack-browser .attack-browser-cards canvas{display:block;width:100%;height:auto;aspect-ratio:3/2;image-rendering:pixelated;object-fit:contain;background:#101923;border-radius:6px}
+.attack-browser .attack-browser-preview{min-height:0;max-height:100%;height:100%;overflow:auto;position:static;align-self:stretch;margin:0}
+.attack-browser.attack-browser-gallery-only .attack-browser-body{grid-template-columns:minmax(0,1fr)}
+.attack-browser .attack-browser-pagination{display:flex;flex:none;gap:8px;align-items:center;margin:0}.attack-browser-pagination p{flex:1;margin:0;font-size:12px}
+.attack-browser .attack-browser-footer{flex:none;max-height:22dvh;overflow:auto;margin:0;padding-top:6px}.attack-browser-footer p,.attack-browser-footer .attack-browser-actions{margin:4px 0}.attack-browser-batch details{margin-top:4px}.attack-browser-footer strong:empty{display:none}
+.attack-browser.attack-browser-expanded[open]{width:98vw;height:98dvh;max-width:98vw;max-height:98dvh}
+.attack-browser-tool-window{width:min(850px,92vw);height:auto;max-width:96vw;max-height:88dvh;min-width:min(360px,92vw);min-height:200px;resize:both;overflow:auto;background:#14232f;color:#edf6fb;border:1px solid #7fb7be;border-radius:12px;padding:16px}
+.attack-browser-tool-window::backdrop{background:#0009}.attack-browser-tool-window>.attack-browser-heading{position:sticky;top:-16px;background:#14232f;padding:10px 0;z-index:2}
+.attack-browser-tool-window .attack-browser-library{border:0;padding:0;max-height:none;overflow:visible}.attack-browser-tool-window .attack-browser-library>summary{display:none}
+.attack-browser-tool-window .browser-library-row{display:flex;flex-wrap:wrap;align-items:end;gap:6px;padding:10px 0}.attack-browser-tool-window .browser-library-row label{flex:1 1 180px;max-width:260px;min-width:0;margin:4px}.attack-browser-tool-window button{white-space:normal;margin:3px;min-height:38px}
+.attack-browser-tool-window .browser-library-actions{width:100%;display:flex;flex-wrap:wrap;gap:4px}.attack-browser-tool-window label{margin:10px 0}.attack-browser-tool-window input[type=range]{width:100%}
+.attack-browser-tool-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.attack-browser-tool-filters label{min-width:0;margin:0}
+.attack-browser.attack-browser-docked[open]{width:100%;height:84dvh;min-width:0;min-height:400px;resize:vertical}.attack-browser-docked .attack-browser-body{display:flex;flex-direction:column;overflow:auto}.attack-browser-docked .attack-browser-preview{order:1;height:auto;max-height:280px;flex:none}.attack-browser-docked .attack-browser-cards{overflow:visible;flex:none;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.attack-browser[open]{padding:8px;gap:6px}.attack-browser .attack-browser-heading h2{font-size:18px}.attack-browser .attack-browser-body{display:flex;flex-direction:column;overflow:auto;min-height:35dvh}.attack-browser .attack-browser-cards{overflow:visible;flex:none;grid-template-columns:repeat(2,minmax(0,1fr))}.attack-browser .attack-browser-preview{order:1;height:auto;max-height:none;overflow:visible;flex:none}.attack-browser .attack-browser-filters{max-height:20dvh;overflow:auto}.attack-browser-tool-window{padding:12px}}

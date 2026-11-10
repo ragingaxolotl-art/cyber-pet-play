@@ -1,3 +1,4 @@
+import {installFinderLayout} from './attack-browser-layout.js?v=20261110-artwork-first';
 import {installBrowserLibrary,browserStorage} from './browser-library.js?v=20261110-layout-safety';
 import {BROWSER_PREFS,filterCatalog,readBrowserPreferences,recordRecent} from './attack-browser-model.js?v=20261108-workflow';
 // Shared, read-only browsing UI. Only the explicit action callbacks change drafts/trees.
@@ -32,6 +33,7 @@ export function installAttackBrowser({getEntries,actions,status=()=>{},loadSaved
  const clear=make('button','Clear filters');clear.onclick=()=>{for(const [key,field] of Object.entries(filters))if(key!=='size')field.value='';page=0;render();};toolbar.append(clear);
  if(loadSaved){const refresh=make('button','Refresh saved attacks');refresh.onclick=async()=>{refresh.disabled=true;try{await loadSaved();entries=getEntries();page=0;render();}catch(e){results.textContent=e.message;}finally{refresh.disabled=false;}};toolbar.append(refresh);}
  const previous=make('button','Previous'),next=make('button','Next');previous.onclick=()=>{page--;render();};next.onclick=()=>{page++;render();};pager.append(previous,next);
+ installFinderLayout({dialog,toolbar,preview,body,pager,filters,results,headingRow});
  function persist(report=true){try{if(!storage)throw Error('Browser storage unavailable');storage.setItem(BROWSER_PREFS,JSON.stringify(prefs));preferenceNotice.hidden=true;}catch{preferenceNotice.hidden=false;preferenceNotice.textContent='Favorites and browser settings work for this session but are not saved on this device. Keep this page open to retain them.';if(report)status(preferenceNotice.textContent);}}
  function stop(){animationGeneration++;if(frameHandle!==null&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(frameHandle);frameHandle=null;}
  function paint(canvas,effect,index){if(!effect)return;const image=new Image(),url=effect.sheet||effect.frames?.[index]||effect.preview;if(!url)return;image.onload=()=>{if(!canvas.isConnected&&canvas.isConnected!==undefined)return;const ctx=canvas.getContext('2d'),[w,h]=effect.canvas||[image.naturalWidth,image.naturalHeight],cols=effect.columns||1,z=Math.min(canvas.width/w,canvas.height/h)*.9;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=false;ctx.drawImage(image,effect.sheet?index%cols*w:0,effect.sheet?Math.floor(index/cols)*h:0,w,h,(canvas.width-w*z)/2,(canvas.height-h*z)/2,w*z,h*z);};image.onerror=()=>{canvas.setAttribute('aria-label',effect.name+' — preview unavailable');};image.src=url;}
