@@ -35,3 +35,15 @@ export function installTreeWorkspace(){
  const previewLabel=make('label'),preview=make('input');preview.type='checkbox';preview.checked=previewPanel.open;previewLabel.append(preview,document.createTextNode('Show bottom animation preview'));controls.append(previewLabel);preview.onchange=()=>{previewPanel.open=preview.checked;saved.previewOpen=preview.checked;persist();};
  return {refresh:()=>records.forEach(r=>r.apply())};
 }
+
+// Menu placement follows the actual wrapped toolbar, including larger text.
+export function installTreeMenus(){
+ const nav=document.querySelector('header nav');
+ const menus=[...nav.querySelectorAll('.tree-workspace-menu')];
+ function position(){for(const menu of menus){if(!menu.open)continue;const rect=menu.querySelector('summary').getBoundingClientRect(),bar=nav.getBoundingClientRect();menu.querySelector('div').style.setProperty('--tree-menu-top',Math.max(8,rect.top+rect.height+4,bar.top+bar.height+4)+'px');}}
+ for(const menu of menus)menu.addEventListener('toggle',()=>{if(menu.open){for(const other of menus)if(other!==menu)other.open=false;position();}});
+ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;for(const menu of menus)if(menu.open){menu.open=false;menu.querySelector('summary').focus();}});
+ document.addEventListener('click',event=>{for(const menu of menus)if(menu.open&&!menu.contains(event.target))menu.open=false;});
+ window.addEventListener('resize',position);window.addEventListener('scroll',position);
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(position).observe(nav);
+}

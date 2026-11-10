@@ -1,6 +1,6 @@
 import {installTreeNodeDrag} from './tree-node-drag.js?v=20261110-tree-gestures';
 import {installTreeClassroom} from './tree-classroom.js?v=20261110-tree-classroom-recovery';
-import {installTreeWorkspace} from './tree-workspace.js?v=20261110-layout-safety';
+import {installTreeWorkspace,installTreeMenus} from './tree-workspace.js?v=20261110-tree-menu-repair';
 import {installTreeTools} from './tree-tools.js?v=20261110-layout-safety';
 import {readiness} from './tree-operations.js?v=20261109-tree-workspace-2';
 import {makePublication,publicationKey} from './tree-library.js?v=20261109-tree-workspace-2';
@@ -103,7 +103,7 @@ window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();
 try{treeStore=await createTreeStore();const responses=await Promise.all([fetch('vfx-library.json'),fetch('reviewed-attacks.json')]);if(responses.some(r=>!r.ok))throw Error('Could not load the attack library.');const [library,reviewed]=await Promise.all(responses.map(r=>r.json()));effects=new Map(library.effects.map(e=>[e.id,e]));ids=new Set(effects.keys());setups=new Map(reviewed.attacks.map(s=>[s.effectId,s]));dataSets=readCabinet(treeStore);dataSetId=new URLSearchParams(location.search).get('dataSet')||savedTreeSession.active?.dataSetId||'original';if(!dataSets.some(d=>d.id===dataSetId))dataSetId=dataSets[0].id;treeId=new URLSearchParams(location.search).get('tree')||(!new URLSearchParams(location.search).has('dataSet')?savedTreeSession.active?.treeId:null)||MAIN_TREE;if(!dataSets.find(d=>d.id===dataSetId).trees.some(t=>t.id===treeId)){if(new URLSearchParams(location.search).has('tree'))throw Error('The requested tree is not in this browser. Import its backup to open it.');treeId=MAIN_TREE;}for(const tab of savedTreeSession.tabs)if(dataSets.find(d=>d.id===tab.dataSetId)?.trees.some(t=>t.id===tab.treeId))openTreeTabs.set(treeStorageKey(tab.dataSetId,tab.treeId),tab);treeKey=treeStorageKey(dataSetId,treeId);rememberTab();refreshDataSets();baseSaved=treeStore.getItem(treeKey);tree=baseSaved?check(JSON.parse(baseSaved)):check(starterTree(library.effects,setups));dirty=!baseSaved;branches();$('branch').value='air';selected=tree.nodes.find(n=>n.branch==='air')?.id||tree.nodes[0]?.id;paths=installPaths({getTree:()=>tree,commit,applyPending,status:say});
 connections=installConnections({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,undo,canUndo:()=>history.length>0,paths});
 starters=installStarters({getTree:()=>tree,getSelected:()=>selected,commit,applyPending,select:selectNode,inspect,status:say,effects});
-treeTools=installTreeTools({getTree:()=>tree,commit,applyPending,select:selectNode,status:say,validate:check});installTreeCatalog();treeLayout=installTreeWorkspace();installTreeDelivery();
+treeTools=installTreeTools({getTree:()=>tree,commit,applyPending,select:selectNode,status:say,validate:check});installTreeCatalog();treeLayout=installTreeWorkspace();installTreeDelivery();installTreeMenus();
 installAccessibility($('treeAccessibility'));render();restoreView(treeViews.get(treeKey));inspect();libraryOptions();say(`${tree.nodes.length} attacks in the learning tree. ${baseSaved?'Restored saved edits.':'Proposed order — edit and save to keep it.'}`);requestAnimationFrame(tick);}catch(e){say('Could not open tree: '+treeStorageMessage(e));}
 
 function refreshDataSets(){
