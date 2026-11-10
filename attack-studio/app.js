@@ -42,7 +42,22 @@ function refresh(){if(!catalog)return;const a=attack(),n=count(),t=timing();fram
 function draw(){ctx.clearRect(0,0,960,540);ctx.strokeStyle='#456077';ctx.beginPath();ctx.moveTo(80,440);ctx.lineTo(880,440);ctx.stroke();const a=attack(),t=timing(),n=count();ctx.imageSmoothingEnabled=false;
  if(n){if(mode==='example'){const img=refs.get(a.required_animation);ctx.drawImage(img,(frame-1)*128,0,128,128,224,0,512,512);}else{const clip=character.clips[a.required_animation],img=art.get(clip.frames[frame-1]);if(img){const scale=Math.min(600/img.width,380/img.height);ctx.drawImage(img,(960-img.width*scale)/2,440-img.height*scale,img.width*scale,img.height*scale);}}}else{ctx.fillStyle='#b2c4da';ctx.font='22px system-ui';ctx.textAlign='center';ctx.fillText(mode==='example'?'No reference for '+slots[a.required_animation]+'.':'Attach '+slots[a.required_animation]+' artwork to preview it.',480,260);}
  $('scrub').value=frame;$('frameLabel').textContent=n?`Frame ${frame} / ${n}`:'No frames';$('phase').textContent=frame<t.impact?'PREPARATION':frame===t.impact?'● IMPACT':'RECOVERY';$('phase').style.color=frame===t.impact?'#adf2ce':'';$('play').textContent=playing?'Pause Ⅱ':'Play once ▶';}
-function tick(now){const delta=Math.min((now-lastTime)/1000,.1);lastTime=now;if(playing){clock+=delta;const t=timing(),clip=character.clips[attack().required_animation],duration=mode==='character'?(clip?.times?.[frame-1]||.14):.14;if(clock>=duration/t.speed){clock=0;if(frame>=t.last)playing=false;else frame++;}draw();}requestAnimationFrame(tick);}
+function tick(now){
+ const delta=Math.min((now-lastTime)/1000,.1);lastTime=now;
+ if(playing){
+  clock+=delta;
+  const t=timing(),clip=character.clips[attack().required_animation];
+  // Keep unused time: short frames may need several advances in one screen update.
+  while(playing){
+   const duration=(mode==='character'?(clip?.times?.[frame-1]||.14):.14)/t.speed;
+   if(clock+1e-9<duration)break;
+   clock=Math.max(0,clock-duration);
+   if(frame>=t.last){playing=false;clock=0;}else frame++;
+  }
+  draw();
+ }
+ requestAnimationFrame(tick);
+}
 for(const [key,label] of Object.entries(slots)){const o=document.createElement('option');o.value=key;o.textContent=label;$('required').append(o);}
 $('referenceTab').onclick=()=>{mode='example';frame=1;playing=false;refresh();};$('characterTab').onclick=()=>{mode='character';frame=1;playing=false;refresh();};
 $('play').onclick=()=>{if(!playing){if(timingProblem(timing(),count()))return;frame=timing().first;clock=0;}playing=!playing;draw();};
