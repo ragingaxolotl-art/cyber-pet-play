@@ -55,12 +55,12 @@ export function createLocalBankStore(storage=localStorage,database=indexedDB){
 }
 
 export function installAttackBank({current,currentMany=()=>[current()],validate,status,open,onChange=()=>{}}){
- const $=id=>document.getElementById(id),remote=createClassroomBank(validate),localStore=createLocalBankStore();let bank=emptyBank(),busy=false,pendingSave=false;
+ const $=id=>document.getElementById(id),remote=createClassroomBank(validate),localStore=createLocalBankStore();let bank=emptyBank(),busy=false,pendingSave=false,announceStatus=true;
  try{remote.restore(JSON.parse(localStorage.getItem(SESSION_KEY)||'null'));}catch{}
- const message=text=>{$('bankStatus').textContent=text;status(text);};
+ const message=text=>{$('bankStatus').textContent=text;if(announceStatus)status(text);};
  async function local(){return validateBank(await localStore.read(),validate);}
  function render(){onChange(structuredClone(bank.attacks),$('bankSource').value==='classroom'&&remote.connected()?'Classroom bank':'Saved on this device');const selected=$('bankList').value;$('bankList').replaceChildren();for(const a of bank.attacks){const option=document.createElement('option');option.value=a.id;option.textContent=a.name;$('bankList').append(option);}if(bank.attacks.some(a=>a.id===selected))$('bankList').value=selected;$('openAttack').disabled=busy||!bank.attacks.length;$('connectBank').textContent=remote.connected()?'Teacher connection':'Teacher sign in';}
- async function task(action){if(busy)return;busy=true;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){if(e.status===401)localStorage.removeItem(SESSION_KEY);message(e.message);}finally{busy=false;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
+ async function task(action,announce=true){if(busy)return;busy=true;announceStatus=announce;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){if(e.status===401)localStorage.removeItem(SESSION_KEY);message(e.message);}finally{busy=false;announceStatus=true;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
  function signIn(){ $('bankPassword').value='';$('bankConnection').showModal(); }
  async function refresh(){
   if($('bankSource').value==='classroom'&&!remote.connected()){bank=await local();render();message('Sign in with your teacher password for classroom saves. Showing local recovery copies.');return;}
@@ -89,7 +89,8 @@ export function installAttackBank({current,currentMany=()=>[current()],validate,
   else if(action==='connect'&&password)task(async()=>{const session=await remote.connect(password);if($('rememberBank').checked){try{localStorage.setItem(SESSION_KEY,JSON.stringify(session));}catch{message('Signed in for this page. Browser storage is full, so the connection cannot be remembered.');}}else localStorage.removeItem(SESSION_KEY);$('bankSource').value='classroom';if(pendingSave){pendingSave=false;await save();}else await refresh();});
   else pendingSave=false;
  });
- task(refresh);
+ // Startup notices belong in the bank panel, not over project/import feedback.
+ task(refresh,false);
  return {refresh:()=>task(refresh)};
 }
 
