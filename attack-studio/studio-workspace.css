@@ -58,6 +58,10 @@ header nav{align-items:center}.workspace-controls{display:flex;flex-direction:ro
 .workspace-panel.pinned>.workspace-panel-bar{flex:none}
 .workspace-pin-edge{display:block;width:100%;height:9px;min-height:9px!important;padding:0;border:0;border-top:1px solid var(--edge);border-radius:0;cursor:ns-resize;background:#263d48;flex:none}
 .workspace-pin-edge:hover,.workspace-pin-edge:focus-visible{background:var(--mint)}
+.workspace-panel.custom-panel-height{display:flex;flex-direction:column;flex-shrink:0}
+.workspace-panel.custom-panel-height>.workspace-panel-bar{flex:none}
+.workspace-pin-edge{touch-action:none}
+.workspace-pin-edge[aria-disabled="true"],.collapsed>.workspace-pin-edge{cursor:default}
 .workspace-drop-indicator{position:fixed;pointer-events:none;z-index:500;background:var(--mint);box-shadow:0 0 7px var(--mint)}
 .workspace-drop-indicator[hidden]{display:none}
 .workspace-collapsed-summary{flex-basis:100%;font-size:11px;white-space:normal;overflow-wrap:anywhere;color:var(--muted)}

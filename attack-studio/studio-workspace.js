@@ -1,13 +1,14 @@
+import {installPanelResize} from './panel-resize.js?v=20261110-panel-hitbox-resize-r2';
 import {fitDockHeights,pinnedAreaSize} from './workspace-sizing.js?v=20261110-workspace-sizing';
-import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-workspace-sizing';
+import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-panel-hitbox-resize-r2';
 import {reviewImport} from './import-preview.js?v=20261110-layout-safety';
 import {requestEditorName} from './editor-name-dialog.js?v=20261110-layout-safety';
 import {installAccessibility} from './editor-accessibility.js?v=20261110-workspace-docks';
-import {safeLayout,panelDefaults,orderedPanels,movePanel,createLayoutHistory,findDockDrop,LAYOUT_KEY,PREVIOUS_LAYOUT_KEY,LEGACY_LAYOUT_KEY,DOCKS,tabGroup,groupTabs,detachTab,dockUnits} from './workspace-layout-model.js?v=20261110-workspace-sizing';
-export {safeLayout} from './workspace-layout-model.js?v=20261110-workspace-sizing';
-import {createWorkspaceTabs} from './workspace-tabs.js?v=20261110-library-management';
-import {createWorkspacePresets} from './workspace-presets.js?v=20261110-layout-safety';
-export {PRESETS_KEY} from './workspace-presets.js?v=20261110-layout-safety';
+import {safeLayout,panelDefaults,orderedPanels,movePanel,createLayoutHistory,findDockDrop,LAYOUT_KEY,PREVIOUS_LAYOUT_KEY,LEGACY_LAYOUT_KEY,DOCKS,tabGroup,groupTabs,detachTab,dockUnits} from './workspace-layout-model.js?v=20261110-panel-hitbox-resize-r2';
+export {safeLayout} from './workspace-layout-model.js?v=20261110-panel-hitbox-resize-r2';
+import {createWorkspaceTabs} from './workspace-tabs.js?v=20261110-panel-hitbox-resize-r2';
+import {createWorkspacePresets} from './workspace-presets.js?v=20261110-panel-hitbox-resize-r2';
+export {PRESETS_KEY} from './workspace-presets.js?v=20261110-panel-hitbox-resize-r2';
 export function fitWindow(p,width,height){return {...p,w:Math.max(240,Math.min(p.w,width-16)),h:Math.max(120,Math.min(p.h,height-16)),x:Math.max(0,Math.min(p.x,width-Math.min(p.w,width-16))),y:Math.max(0,Math.min(p.y,height-48))};}
 export function installStudioWorkspace(){
  const $=id=>document.getElementById(id),make=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
@@ -64,7 +65,8 @@ export function installStudioWorkspace(){
      if(area.children[index+1]!==unit.element)area.append(unit.element);
      // Wrapped titles and tab controls must not squeeze the editor to zero.
      // The shelf scrolls when this minimum cannot fit above the other panels.
-     unit.element.style.top='';unit.element.style.maxHeight=Math.max(size.panel,minimumUnitHeight(unit))+'px';
+     const requested=state.panels[unit.group?.active||unit.id]?.dockHeight;
+     unit.element.style.top='';unit.element.style.maxHeight=Math.max(size.panel,minimumUnitHeight(unit),requested??0)+'px';
     }
    }else{
     const desired=units.map(unit=>unit.element);
@@ -126,6 +128,10 @@ export function installStudioWorkspace(){
    }
   }
   else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):tabView.destination(r.id)||(p.pinned?pinnedAreas[p.dock]:unpinnedAreas[p.dock])||columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
+  const sized=!floating&&!stacked&&!p.collapsed&&p.dockHeight!==null;
+  r.shell.classList.toggle('custom-panel-height',sized);
+  if(sized)r.shell.style.height=Math.max(p.dockHeight,(r.shell.querySelector('.workspace-panel-bar').offsetHeight||60)+124)+'px';
+  r.shell.querySelector('.workspace-pin-edge').setAttribute('aria-disabled',String(state.locked||!!stacked));
  }
  function float(r){if(r.state.floating)return;const rect=r.shell.getBoundingClientRect();detachTab(state,r.id);Object.assign(r.state,{floating:true,x:rect.left,y:rect.top,w:Math.max(320,rect.width),h:Math.max(220,rect.height)});r.shell.style.zIndex=String(++front);show(r);}
  for(const [i,panel] of originalPanels.entries()){
@@ -138,12 +144,13 @@ export function installStudioWorkspace(){
   for(const [value,text] of [['left','Dock left'],['center','Dock center'],['right','Dock right'],['top','Dock top'],['bottom','Dock bottom'],['float','Float']])dock.add(new Option(text,value));
   resize.className='workspace-resize';resize.setAttribute('aria-label','Resize '+handle.textContent);resize.title='Drag to resize; arrow keys adjust size';
   for(const [button,action] of [[pin,'Pin'],[earlier,'Move earlier'],[later,'Move later']]){button.type='button';button.setAttribute('aria-label',action+' '+handle.textContent);}
-  edge.type='button';edge.className='workspace-pin-edge';edge.setAttribute('aria-label','Toggle pin '+handle.textContent);edge.title='Double-click to pin or unpin; Enter also toggles pin';summary.className='workspace-collapsed-summary';
+  edge.type='button';edge.className='workspace-pin-edge';edge.setAttribute('aria-label','Resize or pin '+handle.textContent);edge.title='Drag to resize height; Up/Down resize; Home restores automatic height. Double-click or Enter to pin.';summary.className='workspace-collapsed-summary';
   bar.append(handle,dock,earlier,later,pin,collapse,hide,summary);body.append(panel);shell.append(bar,body,resize,edge);columns[p.dock].append(shell);
   const label=make('label'),checkbox=make('input');checkbox.type='checkbox';label.append(checkbox,document.createTextNode(handle.textContent));panelWindows.append(label);
   const r={shell,body,state:p,collapse,hide,checkbox,dock,id,pin,earlier,later,summary,title:handle.textContent};records.push(r);
   const togglePin=()=>{if(state.locked||state.previewStack||p.floating)return;const pinned=!p.pinned;for(const id of tabGroup(state,r.id)?.panels||[r.id]){state.panels[id].pinned=pinned;show(records.find(item=>item.id===id));}persist();};pin.onclick=togglePin;edge.ondblclick=togglePin;edge.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePin();}};
   earlier.onclick=()=>reorder(r,-1);later.onclick=()=>reorder(r,1);
+  installPanelResize({edge,shell,state:p,allowed:()=>!state.locked&&!state.previewStack,show:()=>show(r),commit:persist});
   checkbox.onchange=()=>{p.hidden=!checkbox.checked;const group=tabGroup(state,id);if(group&&!p.hidden)group.active=id;show(r);persist();};hide.onclick=()=>{p.hidden=true;show(r);persist();tabView.focusActive(id);};collapse.onclick=()=>{p.collapsed=!p.collapsed;show(r);persist();};dock.onchange=()=>{if(dock.value==='float')float(r);else{movePanel(state,id,dock.value);p.pinned=false;}show(r);persist();};
   function drag(target,resizing){
    target.onpointerdown=e=>{

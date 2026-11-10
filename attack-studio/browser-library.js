@@ -1,6 +1,6 @@
 import {requestEditorName} from './editor-name-dialog.js?v=20261110-layout-safety';
 import {BrowserLibrarySession,BROWSER_LIBRARY_KEY} from './browser-library-session.js?v=20261110-library-concurrency';
-import {downloadJson} from './workspace-transfer.js';
+import {downloadJson} from './workspace-transfer.js?v=20261110-panel-hitbox-resize-r2';
 import {emptyBrowserLibrary, normalizeBrowserLibrary, editBrowserLibrary, savedSearchFilters, searchFilters} from './browser-library-model.js?v=20261110-library-concurrency';
 export {searchFilters} from './browser-library-model.js?v=20261110-library-concurrency';
 export {BROWSER_LIBRARY_KEY} from './browser-library-session.js?v=20261110-library-concurrency';

@@ -8,6 +8,7 @@ export function validateWorkspaceBundle(value){
   if(!Array.isArray(widths)||widths.length!==3||widths.some(n=>!Number.isFinite(n)||n<15||n>70))throw Error('Invalid workspace column widths.');
   for(const [id,p] of Object.entries(panels))if(!/^[a-zA-Z0-9-]+$/.test(id)||!p||!(item.layout.version===1?['left','center','right']:['left','center','right','top','bottom']).includes(p.dock)||['x','y','w','h'].some(key=>!Number.isFinite(p[key])))throw Error('Invalid panel position or size.');
   if(item.layout.version>=2)for(const p of Object.values(panels))if(!Number.isSafeInteger(p.order)||p.order<0||typeof p.pinned!=='boolean')throw Error('Invalid panel order or pin setting.');
+  for(const p of Object.values(panels))if(p.dockHeight!==undefined&&p.dockHeight!==null&&(!Number.isFinite(p.dockHeight)||p.dockHeight<124||p.dockHeight>1200))throw Error('Invalid panel height.');
   if(item.layout.version===3){
    if(item.layout.dockHeights!==undefined){
     const heights=item.layout.dockHeights;

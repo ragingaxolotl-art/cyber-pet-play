@@ -1,5 +1,5 @@
 import {installFinderLayout} from './attack-browser-layout.js?v=20261110-artwork-first';
-import {installBrowserLibrary,browserStorage} from './browser-library.js?v=20261110-layout-safety';
+import {installBrowserLibrary,browserStorage} from './browser-library.js?v=20261110-panel-hitbox-resize-r2';
 import {BROWSER_PREFS,filterCatalog,readBrowserPreferences,recordRecent} from './attack-browser-model.js?v=20261108-workflow';
 // Shared, read-only browsing UI. Only the explicit action callbacks change drafts/trees.
 export function installAttackBrowser({getEntries,actions,status=()=>{},loadSaved,allowKeepAdding=false,batchAction=null,getExisting=()=>[],getDestination=()=>''}){

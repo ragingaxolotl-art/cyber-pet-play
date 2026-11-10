@@ -4,7 +4,7 @@ export const LAYOUT_KEY = 'cyber-pet-studio-layout-v3';
 export const PREVIOUS_LAYOUT_KEY = 'cyber-pet-studio-layout-v2';
 export const LEGACY_LAYOUT_KEY = 'cyber-pet-studio-layout-v1';
 export function panelDefaults(dock='center',order=0){
- return {dock,order,floating:false,hidden:false,collapsed:false,pinned:false,x:30,y:100,w:480,h:400};
+ return {dock,order,floating:false,hidden:false,collapsed:false,pinned:false,x:30,y:100,w:480,h:400,dockHeight:null};
 }
 export function safeLayout(value){
  const valid=!!value&&[1,2,3].includes(value.version),panels={};
@@ -14,6 +14,7 @@ export function safeLayout(value){
    const clean=panelDefaults(p.dock,Object.keys(panels).length);
    for(const key of ['floating','hidden','collapsed','pinned'])clean[key]=p[key]===true;
    for(const key of ['x','y','w','h'])if(Number.isFinite(p[key]))clean[key]=p[key];
+   if(Number.isFinite(p.dockHeight)&&p.dockHeight>=124&&p.dockHeight<=1200)clean.dockHeight=p.dockHeight;
    if(Number.isSafeInteger(p.order)&&p.order>=0)clean.order=p.order;
    panels[id]=clean;
   }

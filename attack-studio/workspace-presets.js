@@ -1,5 +1,5 @@
-import {safeLayout} from './workspace-layout-model.js';
-import {validateWorkspaceBundle,workspaceBundle} from './workspace-transfer.js';
+import {safeLayout} from './workspace-layout-model.js?v=20261110-panel-hitbox-resize-r2';
+import {validateWorkspaceBundle,workspaceBundle} from './workspace-transfer.js?v=20261110-panel-hitbox-resize-r2';
 
 export const PRESETS_KEY='cyber-pet-studio-presets-v3';
 const KEYS=[PRESETS_KEY,'cyber-pet-studio-presets-v2','cyber-pet-studio-presets-v1'];
