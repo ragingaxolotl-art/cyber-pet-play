@@ -9,7 +9,7 @@ import {renderBounceEditor} from './bounce-editor.js?v=20261110-suspension-recov
 import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261110-suspension-recovery';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261110-suspension-recovery';
 import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
-import {renderTestResults} from './test-results-panel.js?v=20261110-library-management';
+import {renderTestResults} from './test-results-panel.js?v=20261110-test-report-state';
 import {jugglePreset,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261110-library-management';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null,reveal=()=>{},inspectBox=()=>{}}) {
