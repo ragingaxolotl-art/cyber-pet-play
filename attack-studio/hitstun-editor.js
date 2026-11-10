@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261110-library-management';
+import {validateAttack} from './combat-model.js?v=20261110-suspension-recovery';
 import {scaledHitstun} from './hitstun-scaling.js?v=20261108-hitstun';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderHitstunEditor({root,attack,commit,status}){

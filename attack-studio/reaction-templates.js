@@ -1,6 +1,6 @@
 import {validateReactionAlternatives} from './conditional-reactions.js?v=20261110-library-management';
 import {validateImpulseReaction} from './impulse-reaction.js';
-import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261110-library-management';
+import {REACTION_BLOCKS} from './behavior-sequence.js?v=20261110-suspension-recovery';
 export const REACTION_TEMPLATES_KEY='cyber-pet-reaction-templates-v1';
 export const REACTION_TEMPLATES_FORMAT='cyber-pet-reaction-templates';
 const templateVersion=templates=>!Array.isArray(templates)?1:templates.some(t=>t?.blocks?.some(b=>b?.reactionAlternatives!==undefined))?3:templates.some(t=>t?.blocks?.some(b=>b?.impulse!==undefined))?2:1;
