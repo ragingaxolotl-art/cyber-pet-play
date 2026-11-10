@@ -145,3 +145,11 @@ body:has(.layout) #arena { width:min(100%, calc(var(--viewer-height,28dvh) * 2))
 .editor-compact .workspace-panel-body label:has(>input[type=checkbox]){flex-direction:row;align-items:center;white-space:normal}
 .editor-compact .workspace-panel-body .row{flex-wrap:wrap}
 .editor-compact .workspace-panel-body .row>button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+/* Keep alignment controls compact without clipping labels in side docks. */
+#attackAlignment { margin-top:.5rem; }
+.alignment-row { display:flex;flex-wrap:wrap;align-items:end;gap:.4rem;margin:.5rem 0; }
+.alignment-row label { display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;min-width:0; }
+.alignment-row input[type="number"] { width:6rem; }
+.alignment-row select { max-width:100%;width:auto; }
+.alignment-row small,.alignment-readout { display:block;overflow-wrap:anywhere; }

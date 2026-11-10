@@ -1,0 +1,26 @@
+import {alignAttackPart} from './attack-alignment.js?v=20261110-attack-alignment';
+import {posePlayback,poseDurations} from './pose-timing.js';
+import {addContextHelp} from './context-help.js';
+const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
+export function renderAttackAlignment({root,attack,effects,poseCount,simulation,seek,commit,status,selectEffect}) {
+ const saved={open:root.querySelector('details')?.open??false,effect:root.querySelector('[data-align="effect"]')?.value,movement:root.querySelector('[data-align="movement"]')?.value,pose:root.querySelector('[data-align="pose"]')?.value};
+ root.replaceChildren();const details=make('details'),summary=make('summary','Line up movement, character & effects');details.open=saved.open;details.append(summary);root.append(details);
+ const clock=make('div');clock.className='alignment-row';const label=make('label','Preview frame'),input=make('input');Object.assign(input,{type:'number',min:0,max:simulation.frames.length-1,step:1});input.setAttribute('aria-label','Alignment preview frame');label.append(input);clock.append(label);
+ let current=0;
+ const button=(parent,title,action)=>{const b=make('button',title);b.type='button';b.onclick=action;parent.append(b);return b;};
+ const go=value=>seek(Math.max(0,Math.min(simulation.frames.length-1,value)));
+ input.onfocus=()=>go(current);
+ input.onchange=()=>{const value=Number(input.value);if(input.value===''||!Number.isInteger(value)){status('Enter a whole preview frame.');input.value=current;return;}go(value);};
+ button(clock,'Previous frame',()=>go(current-1));button(clock,'Next frame',()=>go(current+1));const contact=button(clock,'Go to contact',()=>go(simulation.impactFrame));contact.disabled=simulation.impactFrame===null;
+ details.append(clock);const readout=make('output');readout.className='alignment-readout';details.append(readout);
+ const help=make('p','Pause or scrub to the frame you want. Each row aligns only its selected item. Movement shifts its existing time window; distances stay the same. Character alignment switches to Custom timing and retimes preceding poses, leaving later durations unchanged. Effect alignment shifts its start without changing speed; Impact here uses the first occurrence of its impact artwork. Damage timing stays separate. Contact-dependent effects must use their contact settings. Move attacker in the preview only changes the test starting position; add authored movement in Attack path & hitbox movement.');details.append(help);addContextHelp(details,summary,[help]);
+ const row=(title,key,options)=>{const line=make('div');line.className='alignment-row';const label=make('label',title),select=make('select');select.setAttribute('data-align',key);select.setAttribute('aria-label','Alignment '+key);for(const [value,text] of options)select.add(new Option(text,value));if(options.some(([value])=>String(value)===saved[key]))select.value=saved[key];label.append(select);line.append(label);details.append(line);return {line,select};};
+ const apply=part=>{try{const next=alignAttackPart(attack,effects,part,current,poseCount);commit(next);status('Aligned at preview frame '+current+'. Scrub to check; Undo restores the previous timing.');}catch(error){status(error.message);}};
+ const movement=row('Attacker movement','movement',(attack.attackerMotion||[]).map((m,i)=>[m.id,`Movement ${i+1} · ${m.start}–${m.start+m.duration}f`]));
+ for(const edge of ['start','end'])button(movement.line,edge==='start'?'Start movement here':'End movement here',()=>apply({kind:'movement',id:movement.select.value,edge})).disabled=!attack.attackerMotion?.length;
+ if(!attack.attackerMotion?.length)movement.line.append(make('small','Add attacker movement in Attack path & hitbox movement.'));
+ const poses=poseCount?poseDurations(attack,poseCount):[];const pose=row('Character pose','pose',poses.map((_,i)=>[String(i),`Pose ${i+1}`]));button(pose.line,'Place pose here',()=>apply({kind:'pose',index:Number(pose.select.value)})).disabled=!poses.length;
+ const effect=row('Effect layer','effect',attack.visuals.map((v,i)=>[String(i),`${i+1}. ${effects.get(v.effectId)?.name||'Missing effect'}`]));effect.select.onchange=()=>selectEffect(Number(effect.select.value));
+ for(const edge of ['start','impact'])button(effect.line,edge==='start'?'Start effect here':'Effect impact here',()=>apply({kind:'effect',index:Number(effect.select.value),edge})).disabled=!attack.visuals.length;
+ return (frame,selectedEffect)=>{if(Number.isInteger(selectedEffect)&&attack.visuals[selectedEffect])effect.select.value=String(selectedEffect);current=frame;input.value=frame;const pose=poseCount?posePlayback(attack,poseCount,frame,simulation.timing,simulation.contactMode?(simulation.impactFrame??Infinity):undefined):null;const motion=(attack.attackerMotion||[]).findIndex(m=>frame>=m.start&&frame<m.start+m.duration);readout.textContent=`${frame}f · ${pose?`Character pose ${pose.index+1}${pose.finished?' · finished':''}`:'No mapped character animation'} · ${motion<0?'No movement segment active':`Movement ${motion+1} active`} · ${simulation.impactFrame===null?'No contact in this test':`Contact ${simulation.impactFrame}f`}`;};
+}
