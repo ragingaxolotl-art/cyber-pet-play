@@ -40,7 +40,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261110-frame-marker
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261110-library-management';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261110-library-management';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-combined-workspace';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-project-import-order';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261110-library-management';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261110-library-management';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -214,7 +214,24 @@ $('delete').onclick=()=>{if(project.attacks.length<2||!confirm('Delete this atta
 $('tags').onchange=()=>{const old=attack().tags;attack().tags=$('tags').value.split(',').map(t=>t.trim()).filter(Boolean);try{validateAttack(attack(),ids);mark();}catch(e){attack().tags=old;status(e.message);renderSettings();}};$('notes').onchange=()=>{attack().notes=$('notes').value;mark();};
 $('save').onclick=()=>{try{validateDesign(project,ids);localStorage.setItem(storageKey,JSON.stringify(project));localStorage.setItem(storageKey+'-recovery',JSON.stringify(project));dirty=false;$('saveState').textContent='Workspace saved in this browser';status('Saved on this device. Download a project file for a portable backup.');}catch(e){status('Could not save: '+e.message+' Download a project file instead.');}};
 $('download').onclick=()=>{try{validateDesign(project,ids);download('cyber-pet-attack-designs.json',project);dirty=false;status('Project download started. It contains definitions and VFX references; reopen it here.');}catch(e){status(e.message);}};
-$('open').onclick=()=>{$('file').value='';$('file').click();};$('file').onchange=async()=>{const f=$('file').files[0];if(!f)return;try{if(f.size>4*1024*1024)throw Error('Choose a project under 4 MiB.');const candidate=validateDesign(JSON.parse(await f.text()),ids);if(dirty&&!confirm('Replace unsaved edits with this project?'))return;project=candidate;history?.reset(project);connectTestBench();installSandbox();selected=project.attacks[0].id;frame=0;playing=false;dirty=false;refresh();status('Opened attack designs. Save on device to keep this project here.');}catch(e){status(e.message);}};
+let projectImportSequence=0;
+$('open').onclick=()=>{$('file').value='';$('file').click();};
+$('file').onchange=async()=>{
+ const file=$('file').files[0];if(!file)return;
+ const request=++projectImportSequence;
+ try{
+  if(file.size>4*1024*1024)throw Error('Choose a project under 4 MiB.');
+  const text=await file.text();
+  // Selecting another file supersedes this read, even if the older file is
+  // slower or the newer choice is invalid. Never resurrect a stale import.
+  if(request!==projectImportSequence)return;
+  const candidate=validateDesign(JSON.parse(text),ids);
+  if(dirty&&!confirm('Replace unsaved edits with this project?'))return;
+  project=candidate;history?.reset(project);connectTestBench();installSandbox();
+  selected=project.attacks[0].id;frame=0;playing=false;dirty=false;refresh();
+  status('Opened attack designs. Save on device to keep this project here.');
+ }catch(error){if(request===projectImportSequence)status(error.message);}
+};
 $('practiceExport').onclick=()=>{try{validateDesign(project,ids);const exported=combatProject(project),text=JSON.stringify(exported);if(new TextEncoder().encode(text).length>2*1024*1024)throw Error('Arena practice imports must fit within 2 MiB. Export a smaller project.');download('cyber-pet-arena-practice.json',exported);status('Practice project downloaded. In Arena, choose Open attack design. This does not publish to the classroom bank or approve artwork.');}catch(e){status(e.message);}};
 $('export').onclick=()=>{try{validateDesign(project,ids);const used=[...new Set(project.attacks.flatMap(a=>[...a.visuals.map(v=>v.effectId),...(a.projectileArea?.visual?[a.projectileArea.visual.effectId]:[])]))];const eligibility=project.attacks.map(a=>({id:a.id,required_animation:a.motion,requires_exact_saved_reviewed_art:true,legacy_catalog_compatible:!a.cancelWindows&&!a.defenseWindows&&!a.hitboxGroups&&!a.hitEvents&&MOTIONS.slice(0,13).includes(a.motion)}));download('cyber-pet-attacks-for-review.json',{format:'cyber-pet-combat-review',version:1,state:'draft-not-runtime',project,assets:used.map(id=>effectMap.get(id)),requirements:eligibility,balance:BALANCE,notes:['Version 2 contact sequences are supported by the upgraded Arena. Legacy reaction choreography still needs compatibility review.','Existing teacher catalog accepts at most 32 attacks and exact attack-animation slots.','VFX motion tags never grant student artwork eligibility.','Example character artwork is view-only and is not included.']});status('Review package downloaded. Nothing was uploaded or added to student options.');}catch(e){status(e.message);}};
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
