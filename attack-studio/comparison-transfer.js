@@ -10,25 +10,33 @@ export function validateComparisonTransfer(data,now=Date.now()){
 }
 // Remove only disposable handoff entries; never inspect profiles or saved attacks.
 export function cleanupComparisonTransfers(storage,now=Date.now()){
- if(typeof storage.key!=='function'||!Number.isInteger(storage.length))return;
- const keys=[];for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key?.startsWith(PREFIX))keys.push(key);}
+ // Cleanup is optional. A failed storage read is not evidence of corrupt data.
+ const keys=[];
+ try{
+  if(typeof storage.key!=='function'||!Number.isInteger(storage.length))return;
+  for(let i=0;i<storage.length;i++){const key=storage.key(i);if(key?.startsWith(PREFIX))keys.push(key);}
+ }catch{return;}
  for(const key of keys){
+  let raw;try{raw=storage.getItem(key);}catch{continue;}
+  if(!raw)continue;
   let expired=false;
-  try{const raw=storage.getItem(key);if(!raw)continue;const data=JSON.parse(raw);expired=!Number.isFinite(data?.created)||now-data.created>MAX_AGE||data.created>now+60000;}
+  try{const data=JSON.parse(raw);expired=!Number.isFinite(data?.created)||now-data.created>MAX_AGE||data.created>now+60000;}
   catch{expired=true;}
-  if(expired)storage.removeItem(key);
+  if(expired)try{storage.removeItem(key);}catch{/* A later transfer can retry cleanup. */}
  }
 }
+const storageGuidance='Cannot transfer this test because browser storage is unavailable. Use Download for Arena practice in Studio, then Open attack design in Arena.';
 export function prepareComparisonTransfer(attacks,first,window,arenaUrl,storage=localStorage,now=Date.now()){
  const url=new URL(arenaUrl,location.href);if(url.origin!==location.origin)throw Error('Open Studio and Arena on the same website to transfer a test.');
  const data=validateComparisonTransfer({version:1,created:now,attacks:structuredClone(attacks),first,followup:window.attacks[0],frame:window.start,automatic:!!window.automatic},now),raw=JSON.stringify(data);
  if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Error('This project is too large to transfer. Download it and open the design in Arena.');
  cleanupComparisonTransfers(storage,now);
- const token=crypto.randomUUID();storage.setItem(PREFIX+token,raw);url.hash='studio-test='+token;return url.href;
+ const token=crypto.randomUUID();try{storage.setItem(PREFIX+token,raw);}catch{throw Error(storageGuidance);}url.hash='studio-test='+token;return url.href;
 }
 export function consumeComparisonTransfer(hash,storage=localStorage,now=Date.now()){
  const match=/^#studio-test=([a-f0-9-]{36})$/.exec(hash||'');if(!match)return null;
- const key=PREFIX+match[1],raw=storage.getItem(key);if(!raw)throw Error('This Studio test was already opened or is unavailable. Open it again from Studio.');
- storage.removeItem(key);if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Error('Studio test is too large.');
- return validateComparisonTransfer(JSON.parse(raw),now);
+ const key=PREFIX+match[1];let raw;try{raw=storage.getItem(key);}catch{throw Error(storageGuidance);}if(!raw)throw Error('This Studio test was already opened or is unavailable. Open it again from Studio.');
+ try{storage.removeItem(key);}catch{throw Error(storageGuidance);}if(new TextEncoder().encode(raw).length>MAX_BYTES)throw Error('Studio test is too large.');
+ let data;try{data=JSON.parse(raw);}catch{throw Error('This Studio test is unreadable. Open it again from Studio.');}
+ return validateComparisonTransfer(data,now);
 }
