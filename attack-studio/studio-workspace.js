@@ -1,3 +1,4 @@
+import {installWorkspacePointerGesture} from './workspace-pointer-gesture.js?v=20261110-workspace-gesture-recovery';
 import {installPanelResize} from './panel-resize.js?v=20261110-resize-keyboard-recovery';
 import {fitDockHeights,pinnedAreaSize} from './workspace-sizing.js?v=20261110-workspace-sizing';
 import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-panel-hitbox-resize-r2';
@@ -9,7 +10,10 @@ export {safeLayout} from './workspace-layout-model.js?v=20261110-panel-hitbox-re
 import {createWorkspaceTabs} from './workspace-tabs.js?v=20261110-panel-hitbox-resize-r2';
 import {createWorkspacePresets} from './workspace-presets.js?v=20261110-panel-hitbox-resize-r2';
 export {PRESETS_KEY} from './workspace-presets.js?v=20261110-panel-hitbox-resize-r2';
-export function fitWindow(p,width,height){return {...p,w:Math.max(240,Math.min(p.w,width-16)),h:Math.max(120,Math.min(p.h,height-16)),x:Math.max(0,Math.min(p.x,width-Math.min(p.w,width-16))),y:Math.max(0,Math.min(p.y,height-48))};}
+export function fitWindow(p,width,height){
+ const w=Math.min(Math.max(240,p.w),Math.max(1,width-16)),h=Math.min(Math.max(120,p.h),Math.max(1,height-16));
+ return {...p,w,h,x:Math.max(0,Math.min(p.x,width-w)),y:Math.max(0,Math.min(p.y,height-h))};
+}
 export function installStudioWorkspace(){
  const $=id=>document.getElementById(id),make=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
  const nav=document.querySelector('header nav'),layout=document.querySelector('.layout');if(!layout)return;
@@ -124,7 +128,8 @@ export function installStudioWorkspace(){
    const header=r.shell.querySelector('.workspace-panel-bar').offsetHeight||0;
    if(header&&!p.collapsed){
     const minimum=header+(r.shell.querySelector('.workspace-pin-edge').offsetHeight||0)+124;
-    p.h=Math.min(Math.max(p.h,minimum),Math.max(120,innerHeight-16));r.shell.style.height=p.h+'px';
+    Object.assign(p,fitWindow({...p,h:Math.max(p.h,minimum)},innerWidth,innerHeight));
+    Object.assign(r.shell.style,{top:p.y+'px',height:p.h+'px'});
    }
   }
   else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):tabView.destination(r.id)||(p.pinned?pinnedAreas[p.dock]:unpinnedAreas[p.dock])||columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
@@ -153,28 +158,24 @@ export function installStudioWorkspace(){
   installPanelResize({edge,shell,state:p,allowed:()=>!state.locked&&!state.previewStack,show:()=>show(r),commit:persist});
   checkbox.onchange=()=>{p.hidden=!checkbox.checked;const group=tabGroup(state,id);if(group&&!p.hidden)group.active=id;show(r);persist();};hide.onclick=()=>{p.hidden=true;show(r);persist();tabView.focusActive(id);};collapse.onclick=()=>{p.collapsed=!p.collapsed;show(r);persist();};dock.onchange=()=>{if(dock.value==='float')float(r);else{movePanel(state,id,dock.value);p.pinned=false;}show(r);persist();};
   function drag(target,resizing){
-   target.onpointerdown=e=>{
-    if(state.locked||state.previewStack||e.button!==0)return;e.preventDefault();
+   installWorkspacePointerGesture({target,allowed:()=>!state.locked&&!state.previewStack,start:(e,retainCapture)=>{
     const original=structuredClone(p),originalTabs=structuredClone(state.tabs),start={x:e.clientX,y:e.clientY};let moving=false,drop=null;
-    target.setPointerCapture(e.pointerId);
-    target.onpointermove=v=>{
+    return {move:v=>{
      if(!moving&&Math.hypot(v.clientX-start.x,v.clientY-start.y)<5)return;
-     if(!moving){float(r);target.setPointerCapture(e.pointerId);moving=true;Object.assign(start,{px:p.x,py:p.y,w:p.w,h:p.h});document.body.classList.add('workspace-dragging');columnWidths();columns.top.hidden=columns.bottom.hidden=false;}
+     if(!moving){retainCapture(()=>float(r));moving=true;Object.assign(start,{px:p.x,py:p.y,w:p.w,h:p.h});document.body.classList.add('workspace-dragging');columnWidths();columns.top.hidden=columns.bottom.hidden=false;}
      if(resizing){p.w=start.w+v.clientX-start.x;p.h=start.h+v.clientY-start.y;}
      else{p.x=start.px+v.clientX-start.x;p.y=start.py+v.clientY-start.y;drop=dropAt(v.clientX,v.clientY,r);showDrop(drop);}
      show(r);
-    };
-    const end=cancel=>{target.onpointermove=null;target.onpointerup=null;target.onpointercancel=null;document.body.classList.remove('workspace-dragging');showDrop(null);
+    },finish:cancel=>{document.body.classList.remove('workspace-dragging');showDrop(null);
      if(cancel){Object.assign(p,original);state.tabs=originalTabs;}else if(moving&&drop&&!resizing){movePanel(state,id,drop.dock,drop.beforeId);p.pinned=false;}
      show(r);persist();
-    };target.onpointerup=()=>end(false);target.onpointercancel=()=>end(true);
-   };
-   target.onkeydown=e=>{
+    }};
+   },keyboard:e=>{
     if(state.locked||state.previewStack||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();
     if(!resizing&&!p.floating){reorder(r,['ArrowLeft','ArrowUp'].includes(e.key)?-1:1);return;}
     float(r);const dx=e.key==='ArrowLeft'?-20:e.key==='ArrowRight'?20:0,dy=e.key==='ArrowUp'?-20:e.key==='ArrowDown'?20:0;
     if(resizing){p.w+=dx;p.h+=dy;}else{p.x+=dx;p.y+=dy;}show(r);persist();
-   };
+   }});
   }
   drag(handle,false);drag(resize,true);show(r);r.home=home;r.id=id;
  }
@@ -200,16 +201,15 @@ export function installStudioWorkspace(){
   const divider=make('div');divider.className='workspace-height-divider workspace-height-'+dock;divider.tabIndex=0;divider.setAttribute('role','separator');divider.setAttribute('aria-orientation','horizontal');divider.setAttribute('aria-label','Resize '+dock+' dock');divider.setAttribute('aria-valuemin','0');divider.setAttribute('aria-valuemax','1200');divider.title='Drag or use Up/Down to resize. Double-click or Home for automatic sizing.';heightDividers[dock]=divider;
   const allowed=()=>!state.locked&&!state.previewStack;
   const setSize=value=>{state.dockHeights[dock]=Math.max(100,Math.min(1200,Math.round(value)));arrangePanels();};
-  divider.onpointerdown=e=>{if(!allowed()||e.button!==0)return;e.preventDefault();divider.setPointerCapture(e.pointerId);const start=e.clientY,height=columns[dock].getBoundingClientRect().height,original=state.dockHeights[dock];
-   divider.onpointermove=v=>setSize(height+(v.clientY-start)*(dock==='top'?1:-1));
-   const finish=cancel=>{divider.onpointermove=null;divider.onpointerup=null;divider.onpointercancel=null;if(cancel)state.dockHeights[dock]=original;persist();};divider.onpointerup=()=>finish(false);divider.onpointercancel=()=>finish(true);
-  };
-  divider.onkeydown=e=>{if(!allowed()||!['ArrowUp','ArrowDown','Home'].includes(e.key))return;e.preventDefault();if(e.key==='Home')state.dockHeights[dock]=null;else setSize(columns[dock].getBoundingClientRect().height+(e.key==='ArrowDown'?20:-20)*(dock==='top'?1:-1));persist();};
-  divider.ondblclick=()=>{if(!allowed())return;state.dockHeights[dock]=null;persist();};return divider;
+  const gesture=installWorkspacePointerGesture({target:divider,allowed,start:e=>{
+   const start=e.clientY,height=columns[dock].getBoundingClientRect().height,original=state.dockHeights[dock];
+   return {move:v=>setSize(height+(v.clientY-start)*(dock==='top'?1:-1)),finish:cancel=>{if(cancel)state.dockHeights[dock]=original;persist();}};
+  },keyboard:e=>{if(!allowed()||!['ArrowUp','ArrowDown','Home'].includes(e.key))return;e.preventDefault();if(e.key==='Home')state.dockHeights[dock]=null;else setSize(columns[dock].getBoundingClientRect().height+(e.key==='ArrowDown'?20:-20)*(dock==='top'?1:-1));persist();}});
+  divider.ondblclick=()=>{if(gesture.active||!allowed())return;state.dockHeights[dock]=null;persist();};return divider;
  }
  function splitter(index){const s=make('div');s.className='workspace-splitter';s.tabIndex=0;s.setAttribute('role','separator');s.setAttribute('aria-orientation','vertical');s.setAttribute('aria-label','Resize workspace columns');
  const change=delta=>{const amount=Math.max(15-state.widths[index],Math.min(state.widths[index+1]-15,delta));state.widths[index]+=amount;state.widths[index+1]-=amount;columnWidths();};
- s.onpointerdown=e=>{if(state.locked)return;e.preventDefault();s.setPointerCapture(e.pointerId);let x=e.clientX;const original=[...state.widths];s.onpointermove=v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;};const finish=cancel=>{s.onpointermove=null;s.onpointerup=null;s.onpointercancel=null;if(cancel)state.widths=original;persist();};s.onpointerup=()=>finish(false);s.onpointercancel=()=>finish(true);};s.onkeydown=e=>{if(state.locked)return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}};return s;}
+ installWorkspacePointerGesture({target:s,allowed:()=>!state.locked&&!state.previewStack,start:e=>{let x=e.clientX;const original=[...state.widths];return {move:v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;},finish:cancel=>{if(cancel)state.widths=original;persist();}};},keyboard:e=>{if(state.locked||state.previewStack)return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}}});return s;}
  layout.replaceChildren(columns.top,heightDivider('top'),columns.left,splitter(0),columns.center,splitter(1),columns.right,heightDivider('bottom'),columns.bottom);columnWidths();
  reset.onclick=()=>{state.previewStack=false;state.previewFocus=false;state.tabs=[];state.locked=false;lockBox.checked=false;document.body.classList.remove('workspace-locked');state.widths=[24,48,28];state.dockHeights={top:null,bottom:null};for(const r of records){Object.assign(r.state,panelDefaults(r.home,records.indexOf(r)));columns[r.home].append(r.shell);show(r);}columnWidths();arrangePreview();persist();};
 
