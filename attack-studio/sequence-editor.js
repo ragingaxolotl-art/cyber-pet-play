@@ -16,7 +16,20 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
   const commit=next=>{const resolved=reconcileHitPropertyLinks(getAttack(),next);validateAttack(resolved);saveCommit(resolved);};
   function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));commit(next);render();}
+  // Inspector disclosure choices belong to the workspace, not attack history.
+  // Keep them when Undo, another hit selection or a field edit rebuilds the form.
+  const disclosureState=new Map();
+  const disclosureKey=section=>[...section.children].find(node=>node.tagName==='SUMMARY')?.textContent;
   function render(){
+    for(const section of root.querySelectorAll('details')){
+      const key=disclosureKey(section);if(key)disclosureState.set(key,!!section.open);
+    }
+    renderContents();
+    for(const section of root.querySelectorAll('details')){
+      const key=disclosureKey(section);if(disclosureState.has(key))section.open=disclosureState.get(key);
+    }
+  }
+  function renderContents(){
     const a=getAttack(),scheduled=a.sequenceTiming==='cast',origin=scheduled?'startup':'contact';root.replaceChildren();
     const heading=el('h2','Hit sequence'),intro=el('p',(scheduled?'Startup ends, then the hit windows run even if a hit misses.':'Contact starts the projectile clock.')+' Each hit has its own damage, timing and reaction. Up to ten hits.');root.append(heading,intro);addContextHelp(root,heading,[intro]);
     if(!a.hitEvents){

@@ -41,7 +41,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261110-suspension-r
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261110-suspension-recovery';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261110-suspension-recovery';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-suspension-recovery';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-reaction-panel-state';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261110-suspension-recovery';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261110-suspension-recovery';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -51,7 +51,7 @@ import {poseDurations,posePlayback,poseSourceFrames} from './pose-timing.js?v=20
 import {installAttackBank} from './attack-bank.js?v=20261110-gallery-layout';
 import {timing,markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign as validateCombatDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261110-suspension-recovery';
 import {EditHistory} from './edit-history.js?v=20261110-library-management';
-import {installSequenceEditor} from './sequence-editor.js?v=20261110-suspension-recovery';
+import {installSequenceEditor} from './sequence-editor.js?v=20261110-reaction-panel-state';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
 let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer,previewEdit=null;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
