@@ -22,7 +22,14 @@ export function installStudioWorkspace(){
  const persist=()=>{arrangePanels();if(history&&!replaying)history.record(state);updateHistory();try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(state));}catch{$('status').textContent='Layout works for this session, but browser storage is unavailable.';}};
  function updateHistory(){if(undoLayout){undoLayout.disabled=!history?.canUndo;redoLayout.disabled=!history?.canRedo;}}
 
- function menu(name){const d=make('details'),s=make('summary',name),body=make('div');d.className='workspace-menu';body.className='workspace-menu-body';d.append(s,body);nav.append(d);d.addEventListener('toggle',()=>{if(d.open)for(const other of nav.querySelectorAll('.workspace-menu'))if(other!==d)other.open=false;});return body;}
+ // Narrow toolbars wrap: a fixed 100px menu origin can cover its own button.
+ function positionOpenMenus(){
+  for(const item of nav.querySelectorAll('.workspace-menu'))if(item.open){
+   const rect=item.querySelector('summary').getBoundingClientRect();
+   item.querySelector('.workspace-menu-body').style.setProperty('--workspace-menu-top',Math.max(8,rect.top+rect.height+4)+'px');
+  }
+ }
+ function menu(name){const d=make('details'),s=make('summary',name),body=make('div');d.className='workspace-menu';body.className='workspace-menu-body';d.append(s,body);nav.append(d);d.addEventListener('toggle',()=>{if(d.open)for(const other of nav.querySelectorAll('.workspace-menu'))if(other!==d)other.open=false;positionOpenMenus();});return body;}
  const file=menu('File'),tools=menu('Editors'),windows=menu('Workspace'),panelWindows=menu('Windows');
  const panelHint=make('p','Choose which panels are visible. Hiding a panel keeps its settings.');panelHint.className='hint';panelWindows.append(panelHint);
  for(const id of ['open','save','download','attackRevisions'])if($(id))file.append($(id));
@@ -244,7 +251,9 @@ export function installStudioWorkspace(){
  exportLayouts.onclick=manage(()=>{if(!presets.length)throw Error('Save a named layout first.');downloadJson(workspaceBundle(presets),'cyber-pet-workspace-layouts.json');$('status').textContent='Downloaded '+presets.length+' saved layouts.';});
  importLayouts.onclick=()=>layoutFile.click();layoutFile.onchange=manage(async()=>{try{const file=layoutFile.files[0];if(!file)return;if(file.size>1024*1024)throw Error('Choose a layout backup under 1 MiB.');const bundle=validateWorkspaceBundle(JSON.parse(await file.text()));if(!await reviewImport({title:'Import workspace layouts',description:'Imported layouts get separate copies. Your saved layouts stay in place.',items:bundle.layouts.map(item=>item.name),action:'Import layouts'}))return;const added=bundle.layouts.map(item=>({id:crypto.randomUUID(),name:item.name,layout:safeLayout(item.layout)}));await writePresets([...presets,...added],added[0].id);$('status').textContent='Imported '+added.length+' layouts. Choose Open layout to use one.';}finally{layoutFile.value='';}});
  lockBox.onchange=()=>{state.locked=lockBox.checked;document.body.classList.toggle('workspace-locked',state.locked);records.forEach(show);persist();};document.body.classList.toggle('workspace-locked',!!state.locked);fillPresets();arrangePanels();history=createLayoutHistory(state);updateHistory();
- window.addEventListener('resize' ,()=>{columnWidths();records.forEach(show);arrangePanels();});
+ window.addEventListener('resize' ,()=>{columnWidths();records.forEach(show);arrangePanels();positionOpenMenus();});
+ // Text and control-size preferences can wrap the toolbar without resizing the window.
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(positionOpenMenus).observe(nav);
  document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const d of nav.querySelectorAll('.workspace-menu'))d.open=false;});
  document.addEventListener('pointerdown',e=>{for(const d of nav.querySelectorAll('.workspace-menu'))if(!d.contains(e.target))d.open=false;});
  return {reveal(id){

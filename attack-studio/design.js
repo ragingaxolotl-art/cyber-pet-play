@@ -1,3 +1,4 @@
+import {frameSourceSelect} from './frame-source-select.js';
 import {editablePreviewBoxes} from './preview-hitboxes.js?v=20261110-defense-boundary-audit';
 import {applyEditorDefaults} from './editor-defaults.js?v=20261110-layer-history';
 import {renderEffectPlayback} from './effect-playback-editor.js?v=20261110-compact-support';
@@ -32,7 +33,7 @@ import {steeringVisualPosition} from './projectile-steering.js?v=20261108-steeri
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261110-panel-hitbox-resize-r2';
-import {installStudioWorkspace} from './studio-workspace.js?v=20261110-workspace-gesture-recovery';
+import {installStudioWorkspace} from './studio-workspace.js?v=20261110-frame-controls-r2';
 import {renderProjectileEditor} from './projectile-editor.js?v=20261110-projectile-lifecycle-audit';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261110-automatic-transfer-recovery';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
@@ -42,7 +43,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261110-defense-boun
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261110-defense-boundary-audit';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261110-suspension-recovery';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-automatic-transfer-recovery';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-frame-controls-r2';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261110-defense-boundary-audit';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261110-defense-boundary-audit';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -303,7 +304,7 @@ function frameEditor(parent,owner,key,count,asset){
  const selection=frameSelection({root:section,strip,count:sequence.length,name:key==='poseFrames'?'character':'effect',remove:indices=>{const keep=positions.filter(i=>!indices.includes(i));commit(keep.map(i=>sequence[i]),times?keep.map(i=>times[i]):null,keep);}});
  sequence.forEach((source,index)=>{const tile=document.createElement('div');tile.className='frame-tile';tile.draggable=true;tile.ondragstart=e=>{frameDrag={owner,key,index};e.dataTransfer.setData('text/plain',String(index));};tile.ondragover=e=>e.preventDefault();tile.ondrop=e=>{e.preventDefault();if(frameDrag?.owner!==owner||frameDrag?.key!==key)return;const from=frameDrag.index;frameDrag=null;if(Number.isInteger(from)&&from>=0&&from<sequence.length)reorder(from,index);};
  const preview=document.createElement('canvas');preview.width=64;preview.height=64;const image=img(asset.url||asset.sheet||asset.frames[source]);const paint=()=>{if(!image.naturalWidth)return;const c=preview.getContext('2d');c.imageSmoothingEnabled=false;const [w,h]=asset.canvas||[128,128],cols=asset.columns||asset.count;const sx=asset.url||asset.sheet?source%cols*w:0,sy=asset.sheet?Math.floor(source/cols)*h:0;c.drawImage(image,sx,sy,w,h,0,0,64,64);};if(image.complete)paint();else image.addEventListener('load',paint,{once:true});tile.append(preview);selection.add(tile,index,preview);
- const select=document.createElement('select');select.setAttribute('aria-label','Source frame for position '+(index+1));for(let i=0;i<count;i++)select.add(new Option('Frame '+(i+1),i));select.value=source;select.onchange=()=>{const next=[...sequence];next[index]=Number(select.value);commit(next,times);};tile.append(select);
+ const select=frameSourceSelect(count,source,index+1);select.onchange=()=>{const next=[...sequence];next[index]=Number(select.value);commit(next,times);};tile.append(select);
  if(times){const l=document.createElement('label');l.textContent='Seconds';const duration=document.createElement('input');duration.type='number';duration.min=.02;duration.max=5;duration.step=.01;duration.value=times[index];duration.setAttribute('aria-label','Seconds for attacker frame '+(index+1));duration.onchange=()=>{const value=Number(duration.value);if(!duration.checkValidity()||!Number.isFinite(value)||!duration.value){duration.value=times[index];return;}times[index]=value;owner.poseTiming='custom';owner.poseDurations=[...times];changed();renderPoseTimingSelection();};duration.oninput=()=>{if(duration.value!==''&&duration.checkValidity())duration.onchange();};l.append(duration);tile.append(l);}
  for(const [name,action,disabled] of [['←',()=>reorder(index,index-1),index===0],['→',()=>reorder(index,index+1),index===sequence.length-1],['−',()=>commit(sequence.filter((_,i)=>i!==index),times?.filter((_,i)=>i!==index),positions.filter(i=>i!==index)),sequence.length===1]]){const b=document.createElement('button');b.textContent=name;const actionLabel=name==='←'?'Move earlier':name==='→'?'Move later':'Delete';const frameLabel=actionLabel+' · '+(key==='poseFrames'?'character':'effect')+' frame at position '+(index+1);b.setAttribute('aria-label',frameLabel);b.title=frameLabel;b.disabled=disabled;b.onclick=action;tile.append(b);}strip.append(tile);
  });section.append(strip);const add=document.createElement('button');add.textContent='Duplicate last frame';add.disabled=sequence.length>=300;add.onclick=()=>commit([...sequence,sequence.at(-1)],times?[...times,times.at(-1)]:null,[...positions,positions.at(-1)]);const reset=document.createElement('button');reset.textContent='Reset frame order';reset.onclick=()=>{const next=Array.from({length:count},(_,i)=>i),mapping=next.map(source=>{const found=sequence.indexOf(source);return found>=0?found:Math.min(source,sequence.length-1);});commit(next,null,mapping,next.map(source=>sequence.indexOf(source)));};section.append(add,reset);parent.append(section);
