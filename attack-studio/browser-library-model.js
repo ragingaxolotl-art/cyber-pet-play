@@ -75,3 +75,25 @@ export function savedSearchFilters(library, search) {
  }
  return searchFilters(search.filters);
 }
+
+// Recovery adds copies. It never replaces another window's items, and references
+// inside recovered searches follow their recovered collection copies.
+export function importBrowserLibrary(library, value, newId = () => crypto.randomUUID()) {
+ const recovered=normalizeBrowserLibrary(value),next=structuredClone(library),ids=new Map();
+ for(const kind of ['collections','searches']) {
+  if(next[kind].length+recovered[kind].length>LIBRARY_LIMIT)throw Error(`Recovery would exceed ${LIBRARY_LIMIT} ${kind}. Remove unused items first.`);
+  for(const entry of [...recovered[kind],...recovered.removed.filter(item=>item.kind===kind).map(item=>item.entry)])ids.set(kind+':'+entry.id,newId());
+ }
+ function copy(entry,kind){
+  const result=structuredClone(entry);result.id=ids.get(kind+':'+entry.id);
+  result.name=(entry.name+' (recovered)').slice(0,80);
+  if(kind==='searches'&&result.filters.collection.startsWith('collection:')){
+   const id=ids.get('collections:'+result.filters.collection.slice(11));
+   if(id)result.filters.collection='collection:'+id;
+  }
+  return result;
+ }
+ for(const kind of ['collections','searches'])next[kind].push(...recovered[kind].map(entry=>copy(entry,kind)));
+ next.removed.push(...recovered.removed.map(item=>({kind:item.kind,entry:copy(item.entry,item.kind)})));
+ return normalizeBrowserLibrary(next);
+}
