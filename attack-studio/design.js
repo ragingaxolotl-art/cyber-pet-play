@@ -1,4 +1,5 @@
-import {renderAttackAlignment} from './attack-alignment-editor.js?v=20261110-attack-alignment';
+import {describeEdit,renderEditHistory} from './edit-history-panel.js?v=20261110-edit-history';
+import {renderAttackAlignment} from './attack-alignment-editor.js?v=20261110-edit-history';
 import {frameSelection} from './frame-selection.js?v=20261109-frame-multiselect';
 import {bankOpenConflicts,confirmBankReplacement} from './bank-open-dialog.js?v=20261109-bank-reopen-release';
 import {installAttackRevisions} from './attack-revision-editor.js?v=20261109-final-ui-release';
@@ -23,17 +24,17 @@ import {steeringVisualPosition} from './projectile-steering.js?v=20261108-steeri
 import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
 import {installAttackBrowser} from './attack-browser.js?v=20261109-tree-workspace';
-import {installStudioWorkspace} from './studio-workspace.js?v=20261110-attack-alignment';
+import {installStudioWorkspace} from './studio-workspace.js?v=20261110-edit-history';
 import {renderProjectileEditor} from './projectile-editor.js?v=20261109-slow-motion-release';
 import {prepareComparisonTransfer} from './comparison-transfer.js?v=20261109-slow-motion-release';
 import {remapSelfCancels} from './cancel-windows.js?v=20261108-scheduled-sequences';
 import {renderCancelEditor} from './cancel-editor.js?v=20261109-slow-motion-release';
-import {renderDefenseEditor} from './defense-editor.js?v=20261110-attack-alignment';
+import {renderDefenseEditor} from './defense-editor.js?v=20261110-edit-history';
 import {renderAttackTimeline} from './attack-timeline.js?v=20261109-frame-multiselect';
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261109-slow-motion-release';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261109-slow-motion-release';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-attack-alignment';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-edit-history';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261109-slow-motion-release';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261109-slow-motion-release';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
@@ -42,10 +43,10 @@ import {shapePoints,containsPoint,resizeHitbox,hitboxResizeHandles} from './hitb
 import {poseDurations,posePlayback,poseSourceFrames} from './pose-timing.js?v=20261109-hurtboxes';
 import {installAttackBank} from './attack-bank.js?v=20261109-bank-reopen-release';
 import {timing,markOpponentImpact,BALANCE,STATS,MOTIONS,label,freshAttack,defaultStats,validateAttack,validateDesign,simulate,statsFor,effectFrame,orderedEffect,moveFrame} from './combat-model.js?v=20261109-slow-motion-release';
-import {EditHistory} from './edit-history.js?v=20261108-scheduled-sequences';
+import {EditHistory} from './edit-history.js?v=20261110-edit-history';
 import {installSequenceEditor} from './sequence-editor.js?v=20261109-final-ui-release';
 let catalogBrowser,bankController,browserSaved=[],browserSavedLabel='Saved attacks';
-let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer;
+let history=null,sequenceEditor=null,restoringHistory=false,recoveryTimer,previewEdit=null;
 const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
 const storageKey='cyber-pet-combat-design-v1',COLLECTIONS={components:'Separate summons',detailed:'Detailed distinct attacks','detailed-reskin':'Detailed shared reskins',super:'Super attacks · 256 px',distinct:'Simple distinct · weaker moments',reskin:'Simple reskins · weaker moments','earth':'Original Earth','earth-grand':'Grand Earth · earlier style','earth-pixel-prototype':'Earth pixel prototypes','pixellab-2026-10-18':'Original power effects'};
 let library,effectMap,ids,reviewedSetups=new Map(),project={format:'cyber-pet-combat-design',version:1,attacks:[freshAttack()]},selected=project.attacks[0].id;
@@ -281,17 +282,50 @@ $('openReskinStarter').onclick=()=>openReskinStarter(effectMap.get($('reskinStar
 function openTunedAttack(effectId){try{const setup=reviewedSetups.get(effectId);if(!setup)throw Error('This attack has not completed individual tuning yet.');const members=openReviewedAttack(setup,library.effects);if(project.attacks.length+members.length>256)throw Error('The workspace is full. Download your project before opening more attacks.');project.attacks.push(...members);selected=members[0].id;frame=0;playing=false;dirty=true;refresh();status('Opened tuned '+setup.attack.name+' as a new editable copy. Existing drafts were preserved.');}catch(e){status(e.message);}}
 $('openTunedAttack').onclick=()=>openTunedAttack($('tunedAttack').value);
 
+function scheduleRecovery(){
+ clearTimeout(recoveryTimer);$('saveState').textContent='Unsaved changes · recovery pending';
+ recoveryTimer=setTimeout(()=>{try{validateDesign(project,ids);localStorage.setItem(storageKey+'-recovery',JSON.stringify(project));$('saveState').textContent='Draft recovered locally · classroom bank unchanged';}catch(e){$('saveState').textContent='Recovery unavailable · download a backup';}},300);
+}
+function cancelPreviewEdit(){
+ if(!previewEdit)return;
+ const before=previewEdit;previewEdit=null;history.cancelTransaction();drag=null;pathDraft=null;
+ project=before.project;frame=before.frame;dirty=before.dirty;playing=false;
+ restoringHistory=true;connectTestBench();installSandbox();refresh();restoringHistory=false;
+ // A pre-existing unsaved edit still needs recovery; canceled partial edits do not.
+ if(dirty)scheduleRecovery();else clearTimeout(recoveryTimer);
+ recordEdit();status('Drag canceled. Original position restored.');
+}
+function installPreviewTransactions(){
+ const down=canvas.onpointerdown,move=canvas.onpointermove,up=canvas.onpointerup;
+ canvas.onpointerdown=e=>{
+  if(previewEdit||e.button!==undefined&&e.button!==0)return;
+  const before={project:structuredClone(project),dirty,frame,pointerId:e.pointerId};
+  history.beginTransaction();clearTimeout(recoveryTimer);down(e);
+  if(drag||pathDraft){before.label=({layer:'Move effect',box:'Move hitbox',attacker:'Position test attacker',target:'Position test target',anchor:'Move animation anchor',hurtbox:'Edit hurtbox'})[drag?.kind]||(pathDraft?'Draw effect and hitbox path':'Resize hitbox');previewEdit=before;}else{history.cancelTransaction();if(dirty)scheduleRecovery();}
+ };
+ canvas.onpointermove=e=>{if(previewEdit&&e.pointerId!==undefined&&e.pointerId!==previewEdit.pointerId)return;move(e);};
+ canvas.onpointerup=e=>{
+  if(previewEdit&&e?.pointerId!==undefined&&e.pointerId!==previewEdit.pointerId)return;
+  up(e);if(!previewEdit)return;const label=previewEdit.label;previewEdit=null;
+  if(history.commitTransaction(label))dirty=true;
+  if(dirty)scheduleRecovery();recordEdit();
+ };
+ canvas.onpointercancel=e=>{if(e?.pointerId!==undefined&&previewEdit&&e.pointerId!==previewEdit.pointerId)return;cancelPreviewEdit();};
+ canvas.onlostpointercapture=canvas.onpointercancel;
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&previewEdit){e.preventDefault();cancelPreviewEdit();}});
+}
 function recordEdit(){
  project.version=attacksVersion(project.attacks);
  if(!history||restoringHistory)return;
  const key=drag?'drag:'+drag.kind:document.activeElement?.dataset.field||'';
- if(history.record(project,key?selected+':'+key:'')){
-  dirty=true;clearTimeout(recoveryTimer);$('saveState').textContent='Unsaved changes · recovery pending';
-  recoveryTimer=setTimeout(()=>{try{validateDesign(project,ids);localStorage.setItem(storageKey+'-recovery',JSON.stringify(project));$('saveState').textContent='Draft recovered locally · classroom bank unchanged';}catch(e){$('saveState').textContent='Recovery unavailable · download a backup';}},300);
+ if(history.record(project,key?selected+':'+key:'',Date.now(),describeEdit({field:document.activeElement?.dataset.field,button:document.activeElement?.closest('button')?.textContent,before:history.current,after:project,selected}))){
+  dirty=true;if(!history.transaction)scheduleRecovery();
  }
  $('undo').disabled=!history.past.length;$('redo').disabled=!history.future.length;
+ if($('editHistory'))renderEditHistory({root:$('editHistory'),history,restore:index=>{const count=index-history.past.length;for(let n=0;n<Math.abs(count);n++)restoreEdit(count<0?'undo':'redo');}});
 }
 function restoreEdit(direction){
+ if(previewEdit){cancelPreviewEdit();return;}
  const next=history?.[direction]();if(!next)return;
  const restoreFrameLayouts=[$('layers'),$('poseFrames')].map(rememberFrameEditorLayout);
  restoringHistory=true;project=next;if(!project.attacks.some(a=>a.id===selected))selected=project.attacks[0].id;
@@ -302,7 +336,7 @@ function restoreEdit(direction){
 function installEditing(){
  if(['127.0.0.1','localhost'].includes(new URL(location.href).hostname))$('arenaLink').href='/arena/';
  const moveTools=document.createElement('div');moveTools.className='row playback';moveTools.setAttribute('aria-label','Move preview objects');for(const [label,id,mode] of [['Move hitbox','moveHitbox','hitbox'],['Move animation','moveEffect','effect'],['Move target','moveTarget','target'],['Move attacker',null,'attacker']]){const button=document.createElement('button');button.type='button';button.textContent=label;button.onclick=()=>{if(id)$(id).click();else{editMode=mode;playing=false;frame=0;recompute();status('Drag sideways to place the attacker on the floor. Target stays in place; test distance updates.');}for(const b of moveTools.children)b.setAttribute('aria-pressed',String(b===button));};moveTools.append(button);}document.querySelector('.preview').append(moveTools);
- history=new EditHistory(project);installStaticHelp();installLibraryTabs();
+ history=new EditHistory(project);const historyPanel=document.createElement('section');historyPanel.id='editHistory';historyPanel.className='panel';document.querySelector('.editor-scroll').append(historyPanel);installPreviewTransactions();installStaticHelp();installLibraryTabs();
  sequenceEditor=installSequenceEditor({getAttack:attack,getAttacks:()=>project.attacks,getSimulation:()=>simulation,seek:n=>{frame=Math.max(0,Math.min(n,simulation.frames.length-1));playing=false;draw();},commit:next=>{Object.assign(attack(),next);for(const k of ['hitEvents','behaviorVersion','projectileMode','sequenceTiming','bounces','hitPropertyLinks'])if(next[k]===undefined)delete attack()[k];changed();refresh();}});
  $('undo').onclick=()=>restoreEdit('undo');$('redo').onclick=()=>restoreEdit('redo');
  document.addEventListener('keydown',e=>{if(!(e.metaKey||e.ctrlKey)||e.key.toLowerCase()!=='z'||e.target.closest('input,textarea'))return;e.preventDefault();restoreEdit(e.shiftKey?'redo':'undo');});
