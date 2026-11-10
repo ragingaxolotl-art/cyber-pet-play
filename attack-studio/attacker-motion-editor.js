@@ -1,6 +1,6 @@
 import {movementPreset,ATTACKER_MOTION_PRESETS} from './attacker-motion-presets.js?v=20261109-conditional-release';
 import {addContextHelp} from './context-help.js';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {validateAttack} from './combat-model.js?v=20261110-library-management';
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderAttackerMotionEditor({root,attack,commit,status,timing}){
  const section=make('fieldset'),legend=make('legend','Attacker movement');section.style.gridColumn='1 / -1';section.append(legend);

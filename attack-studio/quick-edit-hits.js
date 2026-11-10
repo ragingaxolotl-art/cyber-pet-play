@@ -1,4 +1,4 @@
-import {resizeHits} from './hit-sequence.js';
+import {resizeHits} from './hit-sequence.js?v=20261110-library-management';
 // Preserve every retained event exactly. Insert additional middle hits into the
 // largest available integer-frame gap; never move the original finisher.
 export function resizeAuthoredHits(events,count,interval,mode){

@@ -1,17 +1,17 @@
-import {resizeAuthoredHits} from './quick-edit-hits.js?v=20261109-quick-keep-release';
-import {renderTrajectoryEditor} from './trajectory-editor.js?v=20261109-final-ui-release';
+import {resizeAuthoredHits} from './quick-edit-hits.js?v=20261110-library-management';
+import {renderTrajectoryEditor} from './trajectory-editor.js?v=20261110-library-management';
 import {renderImpulseEditor} from './impulse-editor.js?v=20261109-momentum-release';
-import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261109-slow-motion-release';
+import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261110-library-management';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
-import {renderBounceEditor} from './bounce-editor.js?v=20261109-slow-motion-release';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261109-final-ui-release';
-import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261109-slow-motion-release';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
-import {attackDiagnostics} from './attack-diagnostics.js?v=20261109-final-ui-release';
-import {jugglePreset,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261109-slow-motion-release';
+import {renderBounceEditor} from './bounce-editor.js?v=20261110-library-management';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261110-library-management';
+import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261110-library-management';
+import {validateAttack} from './combat-model.js?v=20261110-library-management';
+import {renderTestResults} from './test-results-panel.js?v=20261110-library-management';
+import {jugglePreset,validateHitSequence,REACTIONS} from './hit-sequence.js?v=20261110-library-management';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null}) {
+export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation,seek,getAttacks=()=>null,reveal=()=>{},inspectBox=()=>{}}) {
   const root=document.getElementById('sequenceEditor');let selected=null,proposal=null;
   const commit=next=>{const resolved=reconcileHitPropertyLinks(getAttack(),next);validateAttack(resolved);saveCommit(resolved);};
   function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));commit(next);render();}
@@ -46,7 +46,7 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     if(!a.hitEvents.some(e=>e.id===selected))selected=a.hitEvents[0].id;
     const strip=el('div');strip.className='hit-timeline';strip.setAttribute('aria-label','Select a hit to inspect');
     for(const [i,event] of a.hitEvents.entries()){
-      const b=el('button',`${i+1} · +${event.offset}f`);b.setAttribute('aria-pressed',String(selected===event.id));b.onclick=()=>{selected=event.id;const sim=getSimulation();seek((sim?.impactFrame??sim?.timing.startup??0)+event.offset);render();};strip.append(b);
+      const b=el('button',`${i+1} · +${event.offset}f`);b.setAttribute('aria-pressed',String(selected===event.id));b.onclick=()=>{selected=event.id;const sim=getSimulation();seek((a.sequenceTiming==='cast'?sim?.timing.startup??0:sim?.impactFrame??sim?.timing.startup??0)+event.offset);render();};strip.append(b);
     }root.append(strip);
     const batch=el('details'),batchSummary=el('summary','Edit several hits'),chosen=new Set();batch.append(batchSummary,el('p','Choose hits and one property. Timing and all other properties stay unchanged. One Undo restores the whole edit.'));
     for(const [i,hit] of a.hitEvents.entries()){const label=el('label','Hit '+(i+1)+' '),check=el('input');check.type='checkbox';check.setAttribute('aria-label','Batch edit Hit '+(i+1));check.onchange=()=>check.checked?chosen.add(hit.id):chosen.delete(hit.id);label.append(check);batch.append(label);}
@@ -77,14 +77,6 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     const bounce=el('section');root.append(bounce);renderBounceEditor({root:bounce,attack:a,eventId:event.id,commit:next=>{saveCommit(next);render();},status:message=>error.textContent=message});
     const legacy=el('button','Return to ordinary '+a.delivery);legacy.onclick=()=>mutate(n=>{delete n.hitEvents;delete n.sequenceTiming;delete n.behaviorVersion;delete n.projectileMode;if(n.hitboxGroups)n.impactTrigger='timed';});root.append(legacy);
   }
-  function results(){const output=document.getElementById('hitResults');output.replaceChildren();const sim=getSimulation();if(!sim)return;
-    const summary=el('strong',`${sim.frames.at(-1).hits} contact(s)${sim.frames.at(-1).areaHits?` · ${sim.frames.at(-1).areaHits} area hit(s)`:""} · ${sim.cost} energy · impact ${sim.impactFrame===null?'not reached':sim.impactFrame+'f'}`);output.append(summary);
-    if(sim.combos?.length){const combo=sim.combos.find(c=>c.attacker==='self');if(combo)output.append(el('p',`Outgoing damage chain: up to ${combo.bestHits} hit(s); maximum chain HP damage ${combo.bestDamage}. Guard contacts are excluded. This single-attack preview does not test a follow-up attack; use Arena comparison for cross-attack combos.`));}
-    if(sim.hitResults){const table=el('table');const head=el('tr');for(const title of ['Hit','Expected','Actual','Result'])head.append(el('th',title));table.append(head);
-      sim.hitResults.forEach((r,i)=>{const row=el('tr');for(const value of [r.projectileId!=null?`${i+1} · projectile ${r.projectileId}`:i+1,(getAttack().sequenceTiming==='cast'?'startup + ':'contact + ')+r.offset,r.frame??'—',r.result+(r.reason?' · '+r.reason:'')])row.append(el('td',String(value)));table.append(row);});output.append(table);
-    }else{const p=el('p',sim.events.at(-1)?.text||'Run a test to see the result.');output.append(p);}
-    const diagnostics=el('section');diagnostics.setAttribute('aria-label','Attack compatibility and test checks');diagnostics.append(el('h3','Compatibility & test checks'));
-    const list=el('ul');for(const finding of attackDiagnostics(getAttack(),sim,getAttacks())){const item=el('li');item.dataset.diagnostic=finding.code;item.append(el('strong',finding.level==='warning'?'Check: ':'Note: '),el('span',finding.message+' '+finding.action));list.append(item);}diagnostics.append(list);output.append(diagnostics);
-  }
+  function results(){renderTestResults({root:document.getElementById('hitResults'),attack:getAttack(),simulation:getSimulation(),attacks:getAttacks(),seek,reveal,inspectBox,editHit:id=>{selected=id;render();reveal('sequenceEditor');}});}
   render();return {render,results};
 }

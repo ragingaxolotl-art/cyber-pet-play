@@ -1,4 +1,4 @@
-import {advancePulseReaction} from './hit-sequence.js';
+import {advancePulseReaction} from './hit-sequence.js?v=20261110-library-management';
 // Use the combat sampler instead of maintaining a second flight formula.
 export function authoredTrajectory(event){
  if(event.impulse||!['launch','relaunch','knockback'].includes(event.reaction))return null;

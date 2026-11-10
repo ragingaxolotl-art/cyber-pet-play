@@ -1,7 +1,7 @@
 import {attackerMotionTiming} from './attacker-motion.js?v=20261109-conditional-release';
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261109-slow-motion-release';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261109-slow-motion-release';
-import {sequenceDuration} from './hit-sequence.js?v=20261109-slow-motion-release';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261110-library-management';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261110-library-management';
+import {sequenceDuration} from './hit-sequence.js?v=20261110-library-management';
 import {presentationFrames} from './preview-clock.js';
 
 // Adapt shared Arena coordinates and ticks to the existing Studio canvas contract.
@@ -16,7 +16,7 @@ export function simulateSplitPreview(attack,attacker,target,options={}) {
  const actor=f=>{const next={...f,x:f.x-origin};for(const key of ['stun','reactionStart','reactionUntil','lastHit','hitstunUntil'])if(Number.isFinite(next[key]))next[key]--;return next;};
  const samples=result.frames.length?result.frames:[result.final];
  for(const shot of samples){
-  hitResults.push(...shot.hitResults.filter(r=>r.owner===0).map(r=>({...r,frame:r.frame===null?null:r.frame-1})));
+  hitResults.push(...shot.hitResults.filter(r=>r.owner===0).map(r=>({...r,observedFrame:frames.length,frame:r.frame===null?null:r.frame-1})));
   const frame=frames.length,self=actor(shot.fighters[0]),other=actor(shot.fighters[1]);
   for(const grab of shot.throws||[])events.push({frame,text:grab.outcome});
   for(const contact of shot.contacts||[])if(contact.outcome==='range limit')events.push({frame,text:'Projectile reached its travel range.'});
