@@ -1,3 +1,4 @@
+import {createLegacyTreeStore,recoverLegacyTreeStorage} from './tree-storage-legacy.js?v=20261110-storage-transaction-recovery';
 // Tree records use a separate IndexedDB database; old localStorage saves stay intact.
 // Each mutation reads the latest records and commits tree + registry together.
 export function treeStorageMessage(error){
@@ -6,7 +7,10 @@ export function treeStorageMessage(error){
  return error?.message||'The tree could not be saved. Download a backup to keep your edits.';
 }
 export async function createTreeStore({legacy=localStorage,database=globalThis.indexedDB}={}){
- if(!database)return {getItem:key=>legacy.getItem(key),refresh:async()=>{},transaction:async fn=>fn(legacy)};
+ if(!database)return createLegacyTreeStore(legacy);
+ // Recover interrupted fallback saves before IndexedDB reads legacy values.
+ // An unavailable legacy store must not disable an otherwise usable database.
+ try{await recoverLegacyTreeStorage(legacy);}catch(error){if(error?.name!=='SecurityError')throw error;}
  const db=await new Promise((resolve,reject)=>{
   const request=database.open('cyber-pet-tree-storage',1);
   request.onupgradeneeded=()=>request.result.createObjectStore('records');
