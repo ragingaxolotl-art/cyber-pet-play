@@ -8,7 +8,7 @@ import {freshAttack,validateAttack} from './combat-model.js?v=20261110-defense-b
 export async function connectTreeEditor({effects,open,current,status}){
  const id=new URLSearchParams(location.search).get('treeNode');if(!id)return;
  const treeKey=treeStorageKey(new URLSearchParams(location.search).get('dataSet')||'original',new URLSearchParams(location.search).get('tree')||'main');
- const link=document.querySelector('a[href="skill-tree.html?v=20261110-frame-geometry-boundaries"]');if(link)link.href='skill-tree.html?dataSet='+encodeURIComponent(new URLSearchParams(location.search).get('dataSet')||'original')+'&tree='+encodeURIComponent(new URLSearchParams(location.search).get('tree')||'main');
+ const link=document.querySelector('a[href="skill-tree.html?v=20261110-frame-attachment-audit"]');if(link)link.href='skill-tree.html?dataSet='+encodeURIComponent(new URLSearchParams(location.search).get('dataSet')||'original')+'&tree='+encodeURIComponent(new URLSearchParams(location.search).get('tree')||'main');
  const ids=new Set(effects.map(e=>e.id));
  try{
   const storage=await createTreeStore(),read=(source=storage)=>validateTree(JSON.parse(source.getItem(treeKey)),ids,validateAttack);

@@ -6,7 +6,7 @@ const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefin
 export function renderAnchorEditor({root,attack,count,commit,status,preview}){
  const section=make('section'),heading=make('h3','Animation anchors');section.append(heading);root.append(section);
  const note=make('p','Place named points relative to the attacker’s feet. Positive X is forward and negative Y is above the floor. Each frame has independent positions. Anchors follow the attack clock; projectiles use the launch-frame position.');section.append(note);addContextHelp(section,heading,[note]);
- const mutate=change=>{try{const next=structuredClone(attack);change(next);validateAttack(next);commit(next);return true;}catch(e){status(e.message);return false;}};
+ const mutate=change=>{const previousName=selectedName;try{const next=structuredClone(attack);change(next);validateAttack(next);commit(next);return true;}catch(e){selectedName=previousName;status(e.message);return false;}};
  const button=(text,action)=>{const b=make('button',text);b.type='button';b.onclick=action;section.append(b);return b;};
  if(!attack.animationAnchors){button('Add animation anchors',()=>mutate(next=>{
   const order=poseSourceFrames(next,count||1);next.poseFrames=order;next.poseDurations=poseDurations(next,count||1);

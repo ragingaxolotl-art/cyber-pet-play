@@ -22,7 +22,7 @@ import {rememberFrameEditorPosition,rememberFrameEditorLayout} from './frame-edi
 import {drawImpactAreaArt} from './impact-area-art.js?v=20261109-area-art';
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHurtboxEditor} from './hurtbox-editor.js?v=20261110-frame-geometry-boundaries';
-import {renderAnchorEditor} from './anchor-editor.js?v=20261110-frame-geometry-boundaries';
+import {renderAnchorEditor} from './anchor-editor.js?v=20261110-frame-attachment-audit';
 import {remapAnchorFrames,remapHurtboxFrames} from './anchor-frame-edit.js?v=20261109-hurtboxes';
 import {projectileVisualInstances,drawProjectileVisuals} from './projectile-preview-view.js?v=20261110-library-management';
 import {drawImpactArea} from './impact-area-view.js?v=20261108-explosion';
@@ -42,7 +42,7 @@ import {renderAttackTimeline} from './attack-timeline.js?v=20261110-defense-boun
 import {renderHitboxEditor,selectedHitbox,selectHitbox} from './hitbox-editor.js?v=20261110-defense-boundary-audit';
 import {attacksVersion} from './attack-format.js?v=20261109-slow-motion-release';
 import {targetReaction,fitReactionX} from './target-reactions.js?v=20261110-suspension-recovery';
-import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-frame-geometry-boundaries';
+import {connectTreeEditor} from './skill-tree-editor.js?v=20261110-frame-attachment-audit';
 import {openReviewedAttack} from './reviewed-attacks.js?v=20261110-defense-boundary-audit';
 import {reskinStarters,createReskinStarter} from './reskin-presets.js?v=20261110-defense-boundary-audit';
 import {ensureReskinGroup,synchronizeReskins,groupMembers} from './reskin-groups.js?v=20261108-scheduled-sequences';
