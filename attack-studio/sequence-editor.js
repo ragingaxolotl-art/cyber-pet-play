@@ -1,3 +1,4 @@
+import {addContextHelp} from './context-help.js';
 import {resizeAuthoredHits} from './quick-edit-hits.js?v=20261110-library-management';
 import {renderTrajectoryEditor} from './trajectory-editor.js?v=20261110-library-management';
 import {renderImpulseEditor} from './impulse-editor.js?v=20261109-momentum-release';
@@ -5,7 +6,7 @@ import {renderConditionalReactions} from './conditional-reaction-editor.js?v=202
 import {reconcileHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
 import {renderHitPropertyLinks} from './hit-property-links-editor.js?v=20261109-hit-links';
 import {renderBounceEditor} from './bounce-editor.js?v=20261110-library-management';
-import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261110-library-management';
+import {renderReactionBuilder} from './behavior-sequence-editor.js?v=20261110-compact-support';
 import {editHitBatch,BATCH_HIT_FIELDS} from './hit-batch.js?v=20261110-library-management';
 import {validateAttack} from './combat-model.js?v=20261110-library-management';
 import {renderTestResults} from './test-results-panel.js?v=20261110-library-management';
@@ -17,7 +18,7 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
   function mutate(update){const next=structuredClone(getAttack());update(next);if(next.hitEvents)next.active=Math.max(...next.hitEvents.map(e=>e.offset+e.duration));commit(next);render();}
   function render(){
     const a=getAttack(),scheduled=a.sequenceTiming==='cast',origin=scheduled?'startup':'contact';root.replaceChildren();
-    root.append(el('h2','Hit sequence'),el('p',(scheduled?'Startup ends, then the hit windows run even if a hit misses.':'Contact starts the projectile clock.')+' Each hit has its own damage, timing and reaction. Up to ten hits.'));
+    const heading=el('h2','Hit sequence'),intro=el('p',(scheduled?'Startup ends, then the hit windows run even if a hit misses.':'Contact starts the projectile clock.')+' Each hit has its own damage, timing and reaction. Up to ten hits.');root.append(heading,intro);addContextHelp(root,heading,[intro]);
     if(!a.hitEvents){
       const timed=['melee','area'].includes(a.delivery);
       const create=el('button',timed?'Create three-hit '+a.delivery+' sequence':'Create five-hit juggling projectile');create.type='button';create.disabled=!!a.hitboxGroups;if(a.hitboxGroups)create.title='Return to one hitbox before creating a contact sequence.';
@@ -39,7 +40,7 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     const interval=el('input');interval.type='number';interval.min=1;interval.max=25;interval.value=a.hitEvents.length>1?a.hitEvents[1].offset-a.hitEvents[0].offset:5;
     const timing=el('select');timing.add(new Option('Even spacing · extend duration','extend'));timing.add(new Option('Keep existing hit frames','keep'));timing.add(new Option('Fit original duration','fit'));
     for(const [title,input] of [['Hit count',count],['Spacing (frames)',interval],['Quick Edit timing',timing]]){const l=el('label',title);l.append(input);quick.append(l);}
-    const preview=el('button','Preview Quick Edit'),apply=el('button','Apply changes'),note=el('p');apply.disabled=true;
+    const preview=el('button','Preview Quick Edit'),apply=el('button','Apply changes'),note=el('p');note.setAttribute('role','status');apply.disabled=true;
     const invalidate=()=>{proposal=null;apply.disabled=true;note.textContent='Preview again to apply these settings.';};count.oninput=interval.oninput=invalidate;timing.onchange=()=>{interval.disabled=timing.value==='keep';invalidate();};
     preview.onclick=()=>{try{proposal=resizeAuthoredHits(a.hitEvents,Number(count.value),Number(interval.value),timing.value);validateHitSequence({...a,hitEvents:proposal});note.textContent=`${a.hitEvents.length} → ${proposal.length} hits; final hit at ${origin} + ${proposal.at(-1).offset}. Existing retained hits keep their damage and reactions; ${Math.max(0,a.hitEvents.length-proposal.length)} hit(s) removed. Undo restores everything.`;apply.disabled=false;}catch(e){note.textContent=e.message;apply.disabled=true;}};
     apply.onclick=()=>mutate(n=>{n.hitEvents=proposal;n.active=Math.max(...proposal.map(e=>e.offset+e.duration));proposal=null;});quick.append(preview,apply,note);root.append(quick);
@@ -68,8 +69,7 @@ export function installSequenceEditor({getAttack,commit:saveCommit,getSimulation
     if(a.hitboxGroups){const label=el('label','Hitbox group for this hit'),select=el('select');select.setAttribute('aria-label','Hitbox group for this hit');a.hitboxGroups.forEach((g,i)=>select.add(new Option('Group '+(i+1),g.id)));select.value=event.hitboxGroup;select.onchange=()=>{try{mutate(n=>n.hitEvents.find(e=>e.id===selected).hitboxGroup=select.value);}catch(e){error.textContent=e.message;select.value=event.hitboxGroup;}};label.append(select);fields.append(label);}
     const stunLabel=el('label','Hitstun override (frames; blank uses reaction timing)'),stunInput=el('input');Object.assign(stunInput,{type:'number',min:0,max:120,step:1,value:event.hitstun??''});stunInput.setAttribute('aria-label','Selected hit hitstun frames');
     stunInput.onchange=()=>{try{mutate(n=>{const hit=n.hitEvents.find(e=>e.id===selected);if(stunInput.value==='')delete hit.hitstun;else hit.hitstun=Number(stunInput.value);});}catch(e){error.textContent=e.message;stunInput.value=event.hitstun??'';}};stunLabel.append(stunInput);fields.append(stunLabel);
-    fields.append(el('p','Blank preserves reaction-based hitstun; zero adds no hitstun. Movement or suspension can still lock the target. Explicit values require version 15.'));
-    root.append(el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),fields,error);
+    const hitHeading=el('h3','Selected hit '+(a.hitEvents.indexOf(event)+1)),stunHelp=el('p','A blank hitstun override uses the reaction timing; zero adds no hitstun. Movement or suspension can still lock the target.');root.append(hitHeading,fields,stunHelp,error);addContextHelp(root,hitHeading,[stunHelp]);
     renderHitPropertyLinks(root,a,event.id,next=>{validateAttack(next);saveCommit(next);render();});
     renderTrajectoryEditor({root,event,commit:edited=>mutate(n=>{n.hitEvents[n.hitEvents.findIndex(e=>e.id===selected)]=edited;}),status:message=>error.textContent=message});
     renderImpulseEditor({root,event,commit:edited=>mutate(n=>{n.hitEvents[n.hitEvents.findIndex(e=>e.id===selected)]=edited;}),status:message=>error.textContent=message});

@@ -159,6 +159,22 @@ body:has(.layout) #arena { width:min(100%, calc(var(--viewer-height,28dvh) * 2))
 .edit-history-list button { text-align:left;white-space:normal;overflow-wrap:anywhere;width:100%; }
 .edit-history-list [aria-current="step"] { opacity:1;border-color:var(--mint); }
 
+/* Supporting editors fit the dock rather than forcing full-width form rows. */
+.supporting-control-group,.motion-segment{min-width:0;border:1px solid var(--edge);border-radius:6px;padding:10px;margin:8px 0}
+.supporting-control-group>legend,.motion-segment>legend{font-size:12px;font-weight:650;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.supporting-control-group>select{max-width:100%}
+#sandbox.supporting-controls{grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))}
+.supporting-control-group>button,.motion-segment>button{white-space:normal;max-width:100%;margin:4px 2px}
+.supporting-control-group .fields{grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))}
+.editor-compact .workspace-panel-body .supporting-control-group .fields{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));margin:6px 0}
+.editor-compact .motion-segment{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:6px 12px;padding:8px}
+.editor-compact .motion-segment>button{justify-self:start;align-self:center}
+.editor-compact .sequence-quick{align-items:end;gap:8px 12px;margin:8px 0}
+.editor-compact .sequence-quick>label{width:auto;flex:1 1 12rem;max-width:100%}
+.editor-compact .sequence-quick>button{white-space:normal;max-width:100%}
+.editor-compact .sequence-quick>p:empty{display:none}
+.editor-compact .supporting-controls>.supporting-control-group{margin:0;padding:8px}
+
 /* Object rows wrap at side-dock widths and keep full names readable. */
 .workspace-object-row { display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .65rem;padding:.5rem 0;border-bottom:1px solid var(--line,#34475a); }
 .workspace-object-row .object-select { flex:1 1 9rem;text-align:left;white-space:normal;overflow-wrap:anywhere; }
