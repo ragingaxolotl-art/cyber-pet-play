@@ -1,5 +1,5 @@
 import {resolveHitPropertyLinks} from './hit-property-links.js?v=20261109-hit-links';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {validateAttack} from './combat-model.js?v=20261110-browser-audit';
 const uniqueId=prefix=>prefix+'_'+crypto.randomUUID().replaceAll('-','');
 // Clipboard is an immutable snapshot, never a reference to the editable attack.
 export function copyTimelineEvents(attack,tracks,selection){

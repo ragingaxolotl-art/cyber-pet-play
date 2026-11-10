@@ -12,7 +12,7 @@ import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
 import {installAccessibility} from './editor-accessibility.js?v=20261110-workspace-docks';
 import {catalogEntries} from './attack-browser-model.js?v=20261108-workflow';
-import {installAttackBrowser} from './attack-browser.js?v=20261109-tree-workspace-2';
+import {installAttackBrowser} from './attack-browser.js?v=20261110-browser-audit';
 import {readSavedBrowserAttacks} from './browser-saved-attacks.js?v=20261109-bank-reopen-release';
 import {MAIN_TREE,treeStorageKey,readCabinet,createTree,renameTree,relatedNodeIds,treeBounds} from './tree-cabinet.js?v=20261109-slow-motion-release';
 import {DATASETS_KEY,dataSetKey,readDataSets,pathNodeIds} from './tree-datasets.js?v=20261109-slow-motion-release';
@@ -22,7 +22,7 @@ import {installPaths,validateExtras,trimEdgeDetails,setEdgeDetails} from './tree
 import {installTreeGallery} from './tree-gallery.js?v=20261108-scheduled-sequences';
 import {installStarters,setStarter} from './tree-starters.js?v=20261108-scheduled-sequences';
 import {TREE_KEY,validateTree,starterTree,ancestors,arrange,treeVersion} from './skill-tree-model.js?v=20261109-slow-motion-release';
-import {validateAttack} from './combat-model.js?v=20261109-slow-motion-release';
+import {validateAttack} from './combat-model.js?v=20261110-browser-audit';
 const $=id=>document.getElementById(id),say=t=>$('status').textContent=t;
 let treeStore,editRevision=0,tree,effects,ids,setups,selected,dirty=false,baseSaved=null,playing=false,clipFrame=0,clipElapsed=0,last=0;
 let dataSets=[],dataSetId='original',treeId=MAIN_TREE,treeKey=TREE_KEY;

@@ -1,5 +1,5 @@
 import {renderImpulseEditor} from './impulse-editor.js?v=20261109-momentum-release';
-import {validateReactionAlternatives} from './conditional-reactions.js?v=20261109-slow-motion-release';
+import {validateReactionAlternatives} from './conditional-reactions.js?v=20261110-browser-audit';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function renderConditionalReactions({root,event,commit,status}){
  const section=el('details');section.open=!!event.reactionAlternatives;

@@ -106,7 +106,7 @@ export function attackDiagnostics(attack,simulation=null,attacks=null) {
   else if(simulation.frames.at(-1)?.hits===0&&!['block','dodge'].includes(attack.payload))
    add('no-contact','warning','No hit connected in this test scenario.','Check target position, hitbox path and active timing.');
   const missed=simulation.hitResults?.filter(hit=>hit.result==='Missed')||[];
-  if(missed.length)add('missed-followups','warning',`${missed.length} hit window(s) missed in this scenario.`,'Review the hit-by-hit results; check target restrictions and repeated-contact geometry.');
+  if(simulation.cast&&missed.length)add('missed-followups','warning',`${missed.length} hit window(s) missed in this scenario.`,'Review the hit-by-hit results; check target restrictions and repeated-contact geometry.');
  }
  if(!findings.length)add('no-known-difference','info','No known setting-specific compatibility warning for this attack.','Test in Arena; this check does not validate every combat interaction.');
  return findings;

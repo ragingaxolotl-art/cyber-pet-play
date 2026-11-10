@@ -1,4 +1,6 @@
 import {requestEditorName} from './editor-name-dialog.js';
+// Accessing the property itself can throw when browser storage is blocked.
+export function browserStorage(){try{return localStorage;}catch{return null;}}
 export const BROWSER_LIBRARY_KEY='cyber-pet-browser-library-v1';
 export function readBrowserLibrary(storage){
  try{const value=JSON.parse(storage.getItem(BROWSER_LIBRARY_KEY)||'{}'),valid=p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.name.trim()&&p.name.length<=80;
@@ -6,13 +8,15 @@ export function readBrowserLibrary(storage){
  }catch{return {collections:[],searches:[]};}
 }
 export function searchFilters(value){return Object.fromEntries(['query','element','delivery','behavior','source','collection'].map(key=>[key,typeof value[key]==='string'?value[key].slice(0,300):'']));}
-export function installBrowserLibrary({host,showFilter,getFilters,setFilters,getSelected,refresh,status}){
+export function installBrowserLibrary({host,showFilter,getFilters,setFilters,getSelected,refresh,status,storage=browserStorage()}){
  const make=(tag,text)=>{const node=document.createElement(tag);if(text)node.textContent=text;return node;};
- let library=readBrowserLibrary(localStorage);
+ let library=readBrowserLibrary(storage);
  const group=make('details'),summary=make('summary','Collections & saved searches'),collectionLabel=make('label','Collection'),collections=make('select'),searchLabel=make('label','Saved search'),searches=make('select');collections.setAttribute('aria-label','Collection to organize');searches.setAttribute('aria-label','Saved search');collectionLabel.append(collections);searchLabel.append(searches);group.className='attack-browser-library';group.append(summary,collectionLabel,searchLabel);host.append(group);
+ group.append(make('p','Collections organize links to attacks. Save working drafts separately to keep them after reload.'));
+ const storageNotice=make('p');storageNotice.setAttribute('role','status');storageNotice.hidden=!!storage;storageNotice.textContent='Collections and saved searches work for this session but are not saved on this device. Keep this page open to retain them.';group.append(storageNotice);
  const action=(text,fn)=>{const button=make('button',text);button.onclick=async()=>{try{await fn();}catch(error){status(error.message);}};group.append(button);return button;};
  function fill(){const selected=collections.value,search=searches.value,filter=showFilter.value;collections.replaceChildren(new Option('Choose collection',''),...library.collections.map(c=>new Option(c.name,c.id)));searches.replaceChildren(new Option('Choose saved search',''),...library.searches.map(s=>new Option(s.name,s.id)));collections.value=library.collections.some(c=>c.id===selected)?selected:'';searches.value=library.searches.some(s=>s.id===search)?search:'';showFilter.replaceChildren(new Option('All matches',''),new Option('Favorites','favorites'),new Option('Recently used','recent'),...library.collections.map(c=>new Option(c.name,'collection:'+c.id)));showFilter.value=filter==='favorites'||filter==='recent'||library.collections.some(c=>'collection:'+c.id===filter)?filter:'';}
- function save(next){localStorage.setItem(BROWSER_LIBRARY_KEY,JSON.stringify(next));library=next;fill();refresh();}
+ function save(next){let saved=false;try{if(storage){storage.setItem(BROWSER_LIBRARY_KEY,JSON.stringify(next));saved=true;}}catch{}storageNotice.hidden=saved;library=next;fill();refresh();}
  function selectedCollection(){const collection=library.collections.find(c=>c.id===collections.value);if(!collection)throw Error('Choose a collection first.');return collection;}
  action('New collection',async()=>{if(library.collections.length>=100)throw Error('You can save up to 100 collections.');const name=await requestEditorName('Name this attack collection');if(!name)return;const collection={id:crypto.randomUUID(),name,items:[]};save({...library,collections:[...library.collections,collection]});collections.value=collection.id;status('Created '+name+'. Select an attack preview, then Add selected to collection.');});
  action('Add selected to collection',()=>{const collection=selectedCollection(),entry=getSelected();if(!entry)throw Error('Select an attack preview first.');if(collection.items.length>=3000)throw Error('This collection is full.');save({...library,collections:library.collections.map(c=>c.id===collection.id?{...c,items:[...new Set([...c.items,entry.id])]}:c)});status('Added '+entry.name+' to '+collection.name+'.');});
