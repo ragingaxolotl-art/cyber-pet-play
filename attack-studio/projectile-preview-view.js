@@ -10,7 +10,7 @@ export function projectileVisualInstances(projectiles,effects,target) {
   const position=projectile.attached?{x:target.x+visual.x*facing,y:target.y+visual.y}:steeringVisualPosition({x:projectile.box.x+projectile.box.w/2,y:projectile.box.y+projectile.box.h/2},projectile.attack.box,visual,facing);
   const path=pathSample(projectile.attack,projectile.age);
   const directionAngle=visual.followPath?(projectile.splitRay?Math.atan2(projectile.splitRay.vy,Math.abs(projectile.splitRay.vx)):projectile.attack.motionPath?.length?Math.atan2(path.dy,path.dx):0):0;
-  return [{index,projectileId:projectile.id,effect,visual,source:visual.frames?.[frame]??frame,...position,facing,
+  return [{index,attackId:projectile.attack.id,projectileId:projectile.id,effect,visual,source:visual.frames?.[frame]??frame,...position,facing,
    angle:directionAngle-(visual.forwardAngle||0)*Math.PI/180,scaleX:visual.scale*(visual.stretchX??1),scaleY:visual.scale*(visual.stretchY??1),
    anchor:effect.anchor,size:effect.canvas,visible:true,opacity:visualOpacity(effect,visual,projectile.age,impact)}];
  }));

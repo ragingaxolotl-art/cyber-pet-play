@@ -115,3 +115,5 @@ header nav{align-items:center}.workspace-controls{display:flex;flex-direction:ro
 .workspace-unpinned-area{flex:1 1 auto;overflow:auto;min-height:0;overscroll-behavior:contain}
 .workspace-unpinned-area[hidden]{display:none!important}
 @media(max-width:760px){.workspace-column.has-pins{display:block;overflow:visible}.workspace-unpinned-area{overflow:visible}}
+
+.custom-workspace>.workspace-column[hidden],.custom-workspace>.workspace-splitter[hidden]{display:none!important}
