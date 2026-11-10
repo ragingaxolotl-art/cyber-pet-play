@@ -1,4 +1,4 @@
-import {validateAttack} from './combat-model.js?v=20261110-status-support-audit';
+import {validateAttack} from './combat-model.js?v=20261110-energy-preview';
 import {REACTIONS} from './hit-sequence.js?v=20261110-library-management';
 export const REACTION_BLOCKS=['hit',...REACTIONS.filter(r=>r!=='none')];
 // Shared defaults keep the builder's conditional editor and generated hits aligned.

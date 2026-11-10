@@ -1,5 +1,5 @@
 import {addContextHelp} from './context-help.js';
-import {validateAttack} from './combat-model.js?v=20261110-status-support-audit';
+import {validateAttack} from './combat-model.js?v=20261110-energy-preview';
 export function renderThrowEditor({root,attack,commit,status}){
  if(attack.delivery!=='melee'||attack.payload!=='damage')return;
  const section=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent='Grab and throw';section.append(legend);

@@ -1,3 +1,4 @@
+import {ENERGY_PER_FRAME} from './energy-rules.js?v=20261110-energy-preview';
 import {validatePresentationEvents} from './presentation-events.js?v=20261109-slow-motion-release';
 import {validateAttackerMotion} from './attacker-motion.js?v=20261109-conditional-release';
 import {validateThrow} from './throw-rules.js?v=20261109-throw-release';
@@ -9,7 +10,7 @@ import {validateHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
 import {animationAnchorAt,validateAnchorBindings} from './animation-anchors.js?v=20261109-hurtboxes';
 import {guardContactRule,applyGuardRecovery,validateGuardInteraction} from './guard-interaction.js?v=20261109-guard';
 import {validateProjectileSplit} from './projectile-split.js?v=20261109-projectile-flight-release';
-import {simulateSplitPreview} from './split-preview.js?v=20261110-status-support-audit';
+import {simulateSplitPreview} from './split-preview.js?v=20261110-energy-preview';
 import {validateProjectileArea,createImpactArea,claimAreaHit,impactAreaBox,impactAreaView,impactAreaAnchor} from './projectile-area.js?v=20261109-area-art';
 import {validateProjectileContact,consumesProjectile,CONTACT_END_REASON} from './projectile-contact.js?v=20261108-area-final';
 import {createSteeringState,advanceSteering,validateProjectileSteering} from './projectile-steering.js';
@@ -35,9 +36,9 @@ import {statusDuration,statusMultiplier} from './status-rules.js?v=20261108-dura
 import {pathSample} from './attack-motion.js?v=20261108-durability';
 import {HITBOX_SHAPES,shapeHitsRectangle,validateHitboxRotation} from './hitbox-shapes.js?v=20261109-rotation';
 import {validateHitSequence,advancePulseReaction} from './hit-sequence.js?v=20261110-library-management';
-import {simulateSequence} from './sequence-preview.js?v=20261110-status-support-audit';
+import {simulateSequence} from './sequence-preview.js?v=20261110-energy-preview';
 // Proposed classroom playtest rules. All timing is in 60 Hz simulation frames.
-export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
+export const BALANCE={id:'classroom-playtest-v1',baseHP:100,hpPerStamina:2,baseEnergy:50,energyPerStamina:1,energyPerFrame:ENERGY_PER_FRAME,maxSpeedReduction:.15,maxFocusCostReduction:.2,baseGuardReduction:.35,maxFocusGuardBonus:.2,maxCharismaShieldBonus:.2,maxFocusStatusReduction:.25,statCap:99};
 export const STATS=['strength','speed','stamina','intelligence','charisma','focus'];
 export const MOTIONS=['upper_hit_side','lower_hit_side','thrust_hit_side','sweep_hit_side','body_bash_side','spin_hit_side','ground_slam_side','side_push_side','up_summon_side','down_summon_side','gather_power_side','release_power_side','channel_power_side','block_side','dodge_side','stunned_side','knocked_down_side','get_up_side','victory_front'];
 export const label=s=>s.replace(/_side$|_front$/,'').replaceAll('_',' ');
@@ -135,6 +136,7 @@ export function simulate(a,attacker,target,options={}){
  function hurt(who,n){const absorb=Math.min(who.shield,n);who.shield-=absorb;const damage=Math.min(who.hp,n-absorb);who.hp-=damage;return damage;}
  let guardRecoveryUntil=0;
  for(let f=0;f<=end;f++){
+  if(cast&&self.hp>0&&other.hp>0){self.energy=Math.min(av.maxEnergy,self.energy+ENERGY_PER_FRAME);other.energy=Math.min(tv.maxEnergy,other.energy+ENERGY_PER_FRAME);}
  const guardContact=guardContactRule(a,!!options.guard&&f>=guardRecoveryUntil);
   if(independent&&cast&&!interrupted&&f>=tm.startup)launched=true;
   let sourceAlive=!projectileConsumed&&cast&&(!interrupted||launched)&&(!independent||(launched&&self.hp>0&&f<tm.startup+a.projectileLifetime));
@@ -197,7 +199,7 @@ export function simulate(a,attacker,target,options={}){
    }else if(a.payload==='push'){event(f,guarding?'Push blocked — no damage.':'Push only — no damage.');if(guarding){recipient.reactionGuardFrame=f;if(a.contactFeedback?.blockstun>0)recipient.blockstunUntil=Math.max(recipient.blockstunUntil||0,f+a.contactFeedback.blockstun+1);}if(!guarding){startReaction(recipient,f);}}
    else if(a.payload==='heal')event(f,`Healed ${heal(recipient,amount)} HP.`);
    else if(a.payload==='shield'){recipient.shield=Math.max(recipient.shield,amount);recipient.shieldUntil=f+a.shieldDuration;event(f,`Shield: ${amount} HP (refresh; does not stack).`);}
-   else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${recipient.energy-old} energy.`);}
+   else {const max=recipient===self?av.maxEnergy:tv.maxEnergy,old=recipient.energy;recipient.energy=Math.min(max,recipient.energy+amount);event(f,`Restored ${Number((recipient.energy-old).toFixed(2))} energy.`);}
    if(!['push','block','dodge'].includes(a.payload)&&a.status!=='none'&&!guarding){
     const duration=statusDuration(a,(recipient===self?av:tv).resistance);
     // One status per cast/recipient; repeated hits refresh duration instead of multiplying ticks.

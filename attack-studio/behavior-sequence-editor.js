@@ -1,7 +1,7 @@
 import {renderConditionalReactions} from './conditional-reaction-editor.js?v=20261110-library-management';
 import {renderImpulseEditor} from './impulse-editor.js';
-import {renderReactionTemplates} from './reaction-template-editor.js?v=20261110-status-support-audit';
-import {buildReactionSequence,reactionBlockSettings,REACTION_BLOCKS} from './behavior-sequence.js?v=20261110-status-support-audit';
+import {renderReactionTemplates} from './reaction-template-editor.js?v=20261110-energy-preview';
+import {buildReactionSequence,reactionBlockSettings,REACTION_BLOCKS} from './behavior-sequence.js?v=20261110-energy-preview';
 const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
 export function renderReactionBuilder(root,attack,commit){
  const panel=el('details'),summary=el('summary','Build a reaction sequence');panel.append(summary,el('p','Arrange reaction blocks, preview, then replace the current hits. Each repeat makes one editable hit. Artwork and other attack settings stay unchanged. With grouped hitboxes, new hits use the first hit’s group; review contact in the test results.'));

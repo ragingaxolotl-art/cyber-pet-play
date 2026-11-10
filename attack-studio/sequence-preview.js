@@ -1,3 +1,4 @@
+import {ENERGY_PER_FRAME} from './energy-rules.js?v=20261110-energy-preview';
 import {advanceReaction,knockDown} from './combat-reactions.js?v=20261110-library-management';
 import {reactionContactState,resolveReactionAlternative} from './conditional-reactions.js?v=20261110-library-management';
 import {fighterHurtboxes} from './hurtboxes.js?v=20261109-hurtboxes';
@@ -13,7 +14,7 @@ import {presentationFrames} from './preview-clock.js?v=20261108-impact-timing';
 import {contactDeadline,castEnd,activeEnd} from './contact-timing.js?v=20261108-shared-juggle';
 import {createDefenseState,defenseSnapshot,claimArmor,isInvulnerable,claimParry} from './defense-windows.js?v=20261109-throw-release';
 import {activeGroupBoxes} from './hitbox-groups.js?v=20261109-melee-clashes';
-import {worldBox,timing,statsFor} from './combat-model.js?v=20261110-status-support-audit';
+import {worldBox,timing,statsFor} from './combat-model.js?v=20261110-energy-preview';
 import {shapeHitsRectangle} from './hitbox-shapes.js?v=20261109-rotation';
 import {resetGroundedJuggle,sequenceState,sequenceDuration,sequenceOpportunities,applyPulseReaction,advancePulseReaction,hitResult,SEQUENCE_LIMITS} from './hit-sequence.js?v=20261110-library-management';
 
@@ -31,6 +32,7 @@ export function simulateSequence(attack,attacker,target,options={}) {
   if(!cast)events.push({frame:0,text:'Not enough energy — attack did not start.'});
   let guardRecoveryUntil=0;
   for(let frame=0;frame<=end;frame++){
+    if(cast&&self.hp>0&&other.hp>0){self.energy=Math.min(av.maxEnergy,self.energy+ENERGY_PER_FRAME);other.energy=Math.min(tv.maxEnergy,other.energy+ENERGY_PER_FRAME);}
     const guardContact=guardContactRule(attack,!!options.guard&&frame>=guardRecoveryUntil);
     const hitsBeforeFeedback=hits;
     if(independent&&cast&&!ownerInterrupted&&frame>=tm.startup)launched=true;

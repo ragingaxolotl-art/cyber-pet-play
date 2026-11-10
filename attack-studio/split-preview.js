@@ -1,6 +1,6 @@
 import {attackerMotionTiming} from './attacker-motion.js?v=20261109-conditional-release';
-import {simulateRuntimeAttack} from './runtime-preview.js?v=20261110-status-support-audit';
-import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261110-status-support-audit';
+import {simulateRuntimeAttack} from './runtime-preview.js?v=20261110-energy-preview';
+import {timing,statsFor,magnitude,worldBox} from './combat-model.js?v=20261110-energy-preview';
 import {sequenceDuration} from './hit-sequence.js?v=20261110-library-management';
 import {presentationFrames} from './preview-clock.js';
 

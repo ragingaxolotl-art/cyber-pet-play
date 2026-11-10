@@ -1,4 +1,4 @@
-import {alignAttackPart} from './attack-alignment.js?v=20261110-status-support-audit';
+import {alignAttackPart} from './attack-alignment.js?v=20261110-energy-preview';
 import {posePlayback,poseDurations} from './pose-timing.js';
 import {addContextHelp} from './context-help.js';
 const make=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node;};
