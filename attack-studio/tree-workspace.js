@@ -1,4 +1,4 @@
-import {requestEditorName} from './editor-name-dialog.js';
+import {requestEditorName} from './editor-name-dialog.js?v=20261110-layout-safety';
 // Layout changes only move existing DOM panels; they never modify tree records.
 const KEY='cyber-pet-tree-workspaces-v1';
 export function installTreeWorkspace(){

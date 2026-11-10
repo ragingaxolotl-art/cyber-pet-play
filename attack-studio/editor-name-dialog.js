@@ -13,7 +13,7 @@ export function requestEditorName(title, initial = '') {
   label.setAttribute('for', input.id); label.append(input);
   const save = document.createElement('button'); save.type = 'submit'; save.textContent = 'Save name';
   const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Cancel';
-  const finish = value => { dialog.close(); dialog.remove(); previous?.focus(); resolve(value); };
+  const finish = value => { dialog.close(); dialog.remove(); const menu=previous?.closest('details');(menu&&!menu.open?menu.querySelector('summary'):previous)?.focus(); resolve(value); };
   form.onsubmit = event => { event.preventDefault(); const name = input.value.trim(); if(name && name.length <= 80) finish(name); };
   cancel.onclick = () => finish(null);
   dialog.addEventListener('cancel', event => { event.preventDefault(); finish(null); });

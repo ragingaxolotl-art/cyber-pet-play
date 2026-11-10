@@ -1,4 +1,4 @@
-import {requestEditorName} from './editor-name-dialog.js';
+import {requestEditorName} from './editor-name-dialog.js?v=20261110-layout-safety';
 import {BrowserLibrarySession,BROWSER_LIBRARY_KEY} from './browser-library-session.js?v=20261110-library-concurrency';
 import {downloadJson} from './workspace-transfer.js';
 import {emptyBrowserLibrary, normalizeBrowserLibrary, editBrowserLibrary, savedSearchFilters, searchFilters} from './browser-library-model.js?v=20261110-library-concurrency';

@@ -1,5 +1,5 @@
 import {copyAttack,copyBranch,moveGroup,connectGroup,readiness} from './tree-operations.js?v=20261109-tree-workspace-2';
-import {requestEditorName} from './editor-name-dialog.js';
+import {requestEditorName} from './editor-name-dialog.js?v=20261110-layout-safety';
 export function installTreeTools({getTree,commit,applyPending,select,status,validate}){
  const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;},selected=new Set(),bar=make('details'),title=make('summary','Group tools'),body=make('div'),count=make('p'),tray=make('ol'),minimap=make('nav');bar.append(title,body);body.append(count,tray);document.querySelector('.tree-stage').prepend(bar);bar.className='tree-group-tools';minimap.className='tree-minimap';minimap.setAttribute('aria-label','Tree overview');document.querySelector('.tree-stage').append(minimap);
  const run=fn=>()=>{try{applyPending();fn();}catch(e){status(e.message);}};
