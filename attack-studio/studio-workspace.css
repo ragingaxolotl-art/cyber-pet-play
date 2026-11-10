@@ -63,10 +63,23 @@ header nav{align-items:center}.workspace-controls{display:flex;flex-direction:ro
 .workspace-collapsed-summary{flex-basis:100%;font-size:11px;white-space:normal;overflow-wrap:anywhere;color:var(--muted)}
 .workspace-panel-bar .workspace-drag{flex:1 1 9rem}
 .workspace-panel-bar button{white-space:normal}
+.workspace-tab-group{min-width:0;border:1px solid var(--edge);border-radius:10px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+.workspace-tab-group[hidden]{display:none!important}
+.workspace-tabs{display:flex;gap:4px;padding:5px;overflow:auto;background:#162a37;flex:none}
+.workspace-tabs button{flex:0 0 auto;max-width:18rem;white-space:normal;text-align:left;font-size:12px;padding:7px 9px}
+.workspace-tabs button[aria-selected="true"]{background:var(--mint);color:#10232b;border-color:var(--mint)}
+.workspace-tabs button[hidden]{display:none!important}
+.workspace-tab-group>.workspace-panel{border:0;border-radius:0;margin:0;min-height:0}
+.workspace-tab-group.pinned{position:sticky;z-index:6;display:flex;flex-direction:column;box-shadow:0 6px 14px #0008}
+.workspace-tab-group.pinned>.workspace-panel,.workspace-dock-top>.workspace-tab-group>.workspace-panel,.workspace-dock-bottom>.workspace-tab-group>.workspace-panel{display:flex;flex-direction:column;flex:1 1 auto;overflow:hidden;min-height:0}
+.workspace-dock-top>.workspace-tab-group,.workspace-dock-bottom>.workspace-tab-group{flex:1 0 min(300px,100%);display:flex;flex-direction:column;max-height:inherit;margin-bottom:4px}
+.workspace-menu-body fieldset{min-width:0;margin:4px 0;padding:8px;display:flex;flex-direction:column;gap:8px}
+.workspace-menu-body fieldset label{flex-wrap:wrap}.workspace-menu-body fieldset select{max-width:100%}
 .preview-stack>.workspace-dock-center{grid-column:2}
 .preview-focus>.workspace-dock-center{grid-column:1}
 @media(max-width:760px){
  .workspace-dock-top,.workspace-dock-bottom{max-height:none!important;flex-wrap:wrap}
  .workspace-panel.pinned{position:static;max-height:none!important}
+ .workspace-tab-group.pinned{position:static;max-height:none!important}
  .preview-stack>.workspace-dock-center{grid-column:1;grid-row:2}
 }

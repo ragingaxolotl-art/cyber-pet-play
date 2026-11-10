@@ -1,16 +1,18 @@
-import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-workspace-docks';
+import {workspaceBundle,validateWorkspaceBundle,downloadJson} from './workspace-transfer.js?v=20261110-workspace-tabs';
 import {reviewImport} from './import-preview.js?v=20261108-workflow';
 import {requestEditorName} from './editor-name-dialog.js?v=20261108-scheduled-sequences';
 import {installAccessibility} from './editor-accessibility.js?v=20261110-workspace-docks';
-import {safeLayout,panelDefaults,orderedPanels,movePanel,createLayoutHistory,findDockDrop,LAYOUT_KEY,LEGACY_LAYOUT_KEY,DOCKS} from './workspace-layout-model.js?v=20261110-workspace-docks';
-export {safeLayout} from './workspace-layout-model.js?v=20261110-workspace-docks';
-export const PRESETS_KEY='cyber-pet-studio-presets-v2';
+import {safeLayout,panelDefaults,orderedPanels,movePanel,createLayoutHistory,findDockDrop,LAYOUT_KEY,PREVIOUS_LAYOUT_KEY,LEGACY_LAYOUT_KEY,DOCKS,tabGroup,groupTabs,detachTab,dockUnits} from './workspace-layout-model.js?v=20261110-workspace-tabs';
+export {safeLayout} from './workspace-layout-model.js?v=20261110-workspace-tabs';
+import {createWorkspaceTabs} from './workspace-tabs.js?v=20261110-workspace-tabs';
+export const PRESETS_KEY='cyber-pet-studio-presets-v3';
+const PREVIOUS_PRESETS_KEY='cyber-pet-studio-presets-v2';
 const LEGACY_PRESETS_KEY='cyber-pet-studio-presets-v1';
 export function fitWindow(p,width,height){return {...p,w:Math.max(240,Math.min(p.w,width-16)),h:Math.max(120,Math.min(p.h,height-16)),x:Math.max(0,Math.min(p.x,width-Math.min(p.w,width-16))),y:Math.max(0,Math.min(p.y,height-48))};}
 export function installStudioWorkspace(){
  const $=id=>document.getElementById(id),make=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
  const nav=document.querySelector('header nav'),layout=document.querySelector('.layout');if(!layout)return;
- let state;try{state=safeLayout(JSON.parse((localStorage.getItem(LAYOUT_KEY)||localStorage.getItem(LEGACY_LAYOUT_KEY))));}catch{state=safeLayout(null);}
+ let state;try{state=safeLayout(JSON.parse((localStorage.getItem(LAYOUT_KEY)||localStorage.getItem(PREVIOUS_LAYOUT_KEY)||localStorage.getItem(LEGACY_LAYOUT_KEY))));}catch{state=safeLayout(null);}
  let history=null,replaying=false,undoLayout,redoLayout;
  const persist=()=>{arrangePanels();if(history&&!replaying)history.record(state);updateHistory();try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(state));}catch{$('status').textContent='Layout works for this session, but browser storage is unavailable.';}};
  function updateHistory(){if(undoLayout){undoLayout.disabled=!history?.canUndo;redoLayout.disabled=!history?.canRedo;}}
@@ -31,38 +33,40 @@ export function installStudioWorkspace(){
  const columns={};layout.classList.add('custom-workspace');
  for(const name of DOCKS){const c=make('section');c.className='workspace-column workspace-dock-'+name;c.setAttribute('aria-label',name+' workspace column');columns[name]=c;}
  const records=[];let front=20,below=null;
+ const tabView=createWorkspaceTabs(state,records,id=>{const group=tabGroup(state,id);if(group){group.active=id;persist();}});
  const indicator=make('div');indicator.className='workspace-drop-indicator';indicator.hidden=true;document.body.append(indicator);
  function arrangePanels(){
   if(!records.length)return;
   const active=document.activeElement;
+  tabView.sync(state.previewStack);updateTabControls();columnWidths();
   for(const [dock,column] of Object.entries(columns)){
    if(state.previewStack)continue;
-   const ordered=orderedPanels(state,dock).map(([id])=>records.find(r=>r.id===id)).filter(Boolean);
-   ordered.sort((a,b)=>Number(b.state.pinned)-Number(a.state.pinned));
+   const units=dockUnits(state,dock).map(unit=>({...unit,element:tabView.element(unit)})).filter(unit=>unit.element);
    const present=[...column.children].filter(n=>!n.classList.contains('floating'));
-   if(ordered.some((r,i)=>present[i]!==r.shell))for(const r of ordered)column.append(r.shell);
-   const pins=ordered.filter(r=>r.state.pinned&&!r.state.hidden),available=Math.max(120,(column.clientHeight||innerHeight)*.6/Math.max(1,pins.length));let offset=0;
-   for(const r of ordered){
-    if(r.state.pinned&&!r.state.hidden){r.shell.style.top=offset+'px';r.shell.style.maxHeight=available+'px';offset+=Math.min(r.shell.getBoundingClientRect().height,available)+8;}
+   if(units.some((unit,i)=>present[i]!==unit.element))for(const unit of units)column.append(unit.element);
+   const pins=units.filter(unit=>unit.pinned&&!unit.hidden),available=Math.max(120,(column.clientHeight||innerHeight)*.6/Math.max(1,pins.length));let offset=0;
+   for(const unit of units){
+    if(unit.pinned&&!unit.hidden){unit.element.style.top=offset+'px';unit.element.style.maxHeight=available+'px';offset+=Math.min(unit.element.getBoundingClientRect().height,available)+8;}
    }
-   if(['top','bottom'].includes(dock)){column.hidden=!ordered.some(r=>!r.state.hidden)&&!document.body.classList.contains('workspace-dragging');}
+   if(['top','bottom'].includes(dock)){column.hidden=!units.some(unit=>!unit.hidden)&&!document.body.classList.contains('workspace-dragging');}
   }
   if(active&&document.activeElement!==active)active.focus?.({preventScroll:true});
  }
  function reorder(r,direction){
   if(state.locked||state.previewStack||r.state.floating)return;
-  const peers=orderedPanels(state,r.state.dock).filter(([,p])=>!p.hidden&&p.pinned===r.state.pinned).map(([id])=>id),index=peers.indexOf(r.id),other=peers[index+direction];if(!other)return;
-  const value=state.panels[other].order;state.panels[other].order=r.state.order;r.state.order=value;persist();r.shell.scrollIntoView({block:'nearest'});
+  const units=dockUnits(state,r.state.dock),peers=units.filter(unit=>!unit.hidden&&unit.pinned===r.state.pinned),unit=peers.find(unit=>unit.members.includes(r.id)),index=peers.indexOf(unit),other=peers[index+direction];if(!other)return;
+  const first=units.indexOf(unit),second=units.indexOf(other);[units[first],units[second]]=[units[second],units[first]];
+  units.flatMap(unit=>unit.members).forEach((id,order)=>state.panels[id].order=order);persist();r.shell.scrollIntoView({block:'nearest'});
  }
  function dropAt(x,y,r){
   const zones=Object.entries(columns).filter(([,el])=>!el.hidden).map(([dock,el])=>({dock,...rect(el)}));
-  const panels=records.filter(item=>!item.state.hidden&&!item.state.floating&&!item.state.pinned&&item!==r).sort((a,b)=>a.state.order-b.state.order).map(item=>({id:item.id,dock:item.state.dock,...rect(item.shell)}));
+  const panels=DOCKS.flatMap(dock=>dockUnits(state,dock).filter(unit=>!unit.hidden&&!unit.pinned&&!unit.members.includes(r.id)).map(unit=>({id:unit.id,dock,...rect(tabView.element(unit))})));
   return findDockDrop(zones,panels,x,y,r.id);
  }
  function rect(element){const r=element.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right??r.left+r.width,bottom:r.bottom??r.top+r.height};}
  function showDrop(drop){indicator.hidden=!drop;if(drop)Object.assign(indicator.style,{left:drop.x+'px',top:drop.y+'px',width:drop.width+'px',height:drop.height+'px'});}
 
- function columnWidths(){const bandLimit=Math.max(80,(layout.clientHeight||innerHeight*.75)*.22);columns.top.style.maxHeight=columns.bottom.style.maxHeight=bandLimit+'px';layout.style.gridTemplateColumns=`minmax(190px,${state.widths[0]}fr) 8px minmax(260px,${state.widths[1]}fr) 8px minmax(190px,${state.widths[2]}fr)`;}
+ function columnWidths(){const height=layout.clientHeight||innerHeight*.75;for(const dock of ['top','bottom']){const tabbed=dockUnits(state,dock).some(unit=>unit.group&&!unit.hidden);columns[dock].style.maxHeight=Math.max(80,height*(tabbed?.3:.22))+'px';}layout.style.gridTemplateColumns=`minmax(190px,${state.widths[0]}fr) 8px minmax(260px,${state.widths[1]}fr) 8px minmax(190px,${state.widths[2]}fr)`;}
  function show(r){
   const p=r.state,stacked=state.previewStack&&below,isPreview=r.id==='preview',floating=p.floating&&!stacked;r.shell.hidden=stacked&&isPreview?false:p.hidden;r.body.hidden=stacked&&isPreview?false:p.collapsed;r.collapse.textContent=p.collapsed?'Expand':'Collapse';r.collapse.setAttribute('aria-expanded',String(!p.collapsed));r.checkbox.checked=!p.hidden;r.dock.value=p.floating?'float':p.dock;r.dock.disabled=state.locked===true||!!stacked;
   r.collapse.disabled=!!stacked&&isPreview;r.hide.disabled=!!stacked&&isPreview;r.checkbox.disabled=!!stacked&&isPreview;
@@ -70,9 +74,9 @@ export function installStudioWorkspace(){
   r.earlier.disabled=r.later.disabled=state.locked===true||!!stacked||floating;
   r.summary.hidden=!p.collapsed;r.summary.textContent=[...r.body.querySelectorAll('input,select')].filter(el=>el.getAttribute('aria-label')&&el.type!=='checkbox'&&el.type!=='file').slice(0,3).map(el=>el.getAttribute('aria-label')+': '+el.value).join(' · ')||'Expand to edit';
   if(floating){if(r.shell.parentElement!==document.body)document.body.append(r.shell);Object.assign(p,fitWindow(p,innerWidth,innerHeight));Object.assign(r.shell.style,{left:p.x+'px',top:p.y+'px',width:p.w+'px',height:p.collapsed?'auto':p.h+'px'});}
-  else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
+  else{r.shell.removeAttribute('style');const destination=stacked?(isPreview?columns.center:r.id==='library'?columns.left:below):tabView.destination(r.id)||columns[p.dock];if(r.shell.parentElement!==destination)destination.append(r.shell);}
  }
- function float(r){if(r.state.floating)return;const rect=r.shell.getBoundingClientRect();Object.assign(r.state,{floating:true,x:rect.left,y:rect.top,w:Math.max(320,rect.width),h:Math.max(220,rect.height)});r.shell.style.zIndex=String(++front);show(r);}
+ function float(r){if(r.state.floating)return;const rect=r.shell.getBoundingClientRect();detachTab(state,r.id);Object.assign(r.state,{floating:true,x:rect.left,y:rect.top,w:Math.max(320,rect.width),h:Math.max(220,rect.height)});r.shell.style.zIndex=String(++front);show(r);}
  for(const [i,panel] of originalPanels.entries()){
   const id=panel.id||['library','preview'][i]||('panel-'+i),title=panel.querySelector('h2,summary')?.textContent.trim()||({attackTimeline:'Attack timeline',sequenceEditor:'Hit sequence',defenseEditor:'Defense',cancelEditor:'Cancels'}[id])||'Attack settings';
   const home=i===0?'left':i===originalPanels.length-1?'right':'center';
@@ -86,14 +90,14 @@ export function installStudioWorkspace(){
   edge.type='button';edge.className='workspace-pin-edge';edge.setAttribute('aria-label','Toggle pin '+handle.textContent);edge.title='Double-click to pin or unpin; Enter also toggles pin';summary.className='workspace-collapsed-summary';
   bar.append(handle,dock,earlier,later,pin,collapse,hide,summary);body.append(panel);shell.append(bar,body,resize,edge);columns[p.dock].append(shell);
   const label=make('label'),checkbox=make('input');checkbox.type='checkbox';label.append(checkbox,document.createTextNode(handle.textContent));panelWindows.append(label);
-  const r={shell,body,state:p,collapse,hide,checkbox,dock,id,pin,earlier,later,summary};records.push(r);
-  const togglePin=()=>{if(state.locked||state.previewStack||p.floating)return;p.pinned=!p.pinned;show(r);persist();};pin.onclick=togglePin;edge.ondblclick=togglePin;edge.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePin();}};
+  const r={shell,body,state:p,collapse,hide,checkbox,dock,id,pin,earlier,later,summary,title:handle.textContent};records.push(r);
+  const togglePin=()=>{if(state.locked||state.previewStack||p.floating)return;const pinned=!p.pinned;for(const id of tabGroup(state,r.id)?.panels||[r.id]){state.panels[id].pinned=pinned;show(records.find(item=>item.id===id));}persist();};pin.onclick=togglePin;edge.ondblclick=togglePin;edge.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();togglePin();}};
   earlier.onclick=()=>reorder(r,-1);later.onclick=()=>reorder(r,1);
-  checkbox.onchange=()=>{p.hidden=!checkbox.checked;show(r);persist();};hide.onclick=()=>{p.hidden=true;show(r);persist();};collapse.onclick=()=>{p.collapsed=!p.collapsed;show(r);persist();};dock.onchange=()=>{if(dock.value==='float')float(r);else{movePanel(state,id,dock.value);p.pinned=false;}show(r);persist();};
+  checkbox.onchange=()=>{p.hidden=!checkbox.checked;const group=tabGroup(state,id);if(group&&!p.hidden)group.active=id;show(r);persist();};hide.onclick=()=>{p.hidden=true;show(r);persist();tabView.focusActive(id);};collapse.onclick=()=>{p.collapsed=!p.collapsed;show(r);persist();};dock.onchange=()=>{if(dock.value==='float')float(r);else{movePanel(state,id,dock.value);p.pinned=false;}show(r);persist();};
   function drag(target,resizing){
    target.onpointerdown=e=>{
     if(state.locked||state.previewStack||e.button!==0)return;e.preventDefault();
-    const original=structuredClone(p),start={x:e.clientX,y:e.clientY};let moving=false,drop=null;
+    const original=structuredClone(p),originalTabs=structuredClone(state.tabs),start={x:e.clientX,y:e.clientY};let moving=false,drop=null;
     target.setPointerCapture(e.pointerId);
     target.onpointermove=v=>{
      if(!moving&&Math.hypot(v.clientX-start.x,v.clientY-start.y)<5)return;
@@ -103,7 +107,7 @@ export function installStudioWorkspace(){
      show(r);
     };
     const end=cancel=>{target.onpointermove=null;target.onpointerup=null;target.onpointercancel=null;document.body.classList.remove('workspace-dragging');showDrop(null);
-     if(cancel)Object.assign(p,original);else if(moving&&drop&&!resizing){movePanel(state,id,drop.dock,drop.beforeId);p.pinned=false;}
+     if(cancel){Object.assign(p,original);state.tabs=originalTabs;}else if(moving&&drop&&!resizing){movePanel(state,id,drop.dock,drop.beforeId);p.pinned=false;}
      show(r);persist();
     };target.onpointerup=()=>end(false);target.onpointercancel=()=>end(true);
    };
@@ -116,11 +120,22 @@ export function installStudioWorkspace(){
   }
   drag(handle,false);drag(resize,true);show(r);r.home=home;r.id=id;
  }
+ const tabSettings=make('fieldset'),tabLegend=make('legend','Group panels as tabs'),tabSource=make('select'),tabTarget=make('select'),groupButton=make('button','Group as tabs'),detachButton=make('button','Separate selected tab');
+ tabSource.setAttribute('aria-label','Panel to group');tabTarget.setAttribute('aria-label','Group with panel');
+ for(const r of records){tabSource.add(new Option(r.title,r.id));tabTarget.add(new Option(r.title,r.id));}
+ tabSource.value='attackTimeline';tabTarget.value='preview';
+ const sourceLabel=make('label','Panel'),targetLabel=make('label','With');sourceLabel.append(tabSource);targetLabel.append(tabTarget);
+ const tabHint=make('p','Tabs share one dock position. Use a panel’s Dock control or drag its title to separate it. Earlier/Later and Pin apply to the whole group.');tabHint.className='hint';
+ tabSettings.append(tabLegend,sourceLabel,targetLabel,groupButton,detachButton,tabHint);panelWindows.append(tabSettings);
+ function updateTabControls(){groupButton.disabled=state.locked||state.previewStack||tabSource.value===tabTarget.value;detachButton.disabled=state.locked||state.previewStack||!tabGroup(state,tabSource.value);}
+ tabSource.onchange=tabTarget.onchange=updateTabControls;
+ groupButton.onclick=()=>{if(groupButton.disabled)return;if(groupTabs(state,tabSource.value,tabTarget.value)){records.forEach(show);persist();$('status').textContent='Panels grouped as tabs. Arrow keys switch tabs; Undo layout restores the previous arrangement.';}};
+ detachButton.onclick=()=>{if(detachButton.disabled)return;detachTab(state,tabSource.value);records.forEach(show);persist();$('status').textContent='Panel separated from its tab group.';};
  function splitter(index){const s=make('div');s.className='workspace-splitter';s.tabIndex=0;s.setAttribute('role','separator');s.setAttribute('aria-orientation','vertical');s.setAttribute('aria-label','Resize workspace columns');
  const change=delta=>{const amount=Math.max(15-state.widths[index],Math.min(state.widths[index+1]-15,delta));state.widths[index]+=amount;state.widths[index+1]-=amount;columnWidths();};
  s.onpointerdown=e=>{if(state.locked)return;e.preventDefault();s.setPointerCapture(e.pointerId);let x=e.clientX;s.onpointermove=v=>{change((v.clientX-x)/layout.clientWidth*100);x=v.clientX;};s.onpointerup=s.onpointercancel=()=>{s.onpointermove=null;persist();};};s.onkeydown=e=>{if(state.locked)return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();change(e.key==='ArrowLeft'?-2:2);persist();}};return s;}
  layout.replaceChildren(columns.top,columns.left,splitter(0),columns.center,splitter(1),columns.right,columns.bottom);columnWidths();
- reset.onclick=()=>{state.previewStack=false;state.previewFocus=false;state.locked=false;lockBox.checked=false;document.body.classList.remove('workspace-locked');state.widths=[24,48,28];for(const r of records){Object.assign(r.state,panelDefaults(r.home,records.indexOf(r)));columns[r.home].append(r.shell);show(r);}columnWidths();arrangePreview();persist();};
+ reset.onclick=()=>{state.previewStack=false;state.previewFocus=false;state.tabs=[];state.locked=false;lockBox.checked=false;document.body.classList.remove('workspace-locked');state.widths=[24,48,28];for(const r of records){Object.assign(r.state,panelDefaults(r.home,records.indexOf(r)));columns[r.home].append(r.shell);show(r);}columnWidths();arrangePreview();persist();};
 
  const stackLabel=make('label'),stackToggle=make('input');stackToggle.type='checkbox';stackLabel.append(stackToggle,document.createTextNode('Keep preview above scrolling controls'));windows.prepend(stackLabel);
  const previewRecord=records.find(r=>r.id==='preview'),controlsDrawer=make('div'),drawerTitle=make('button','Editing controls');controlsDrawer.className='preview-controls-drawer';controlsDrawer.classList.add('is-open');drawerTitle.type='button';drawerTitle.setAttribute('aria-expanded','true');below=make('div');below.className='preview-controls-scroll';below.setAttribute('aria-label','Controls below preview');drawerTitle.onclick=()=>{const open=drawerTitle.getAttribute('aria-expanded')!=='true';drawerTitle.setAttribute('aria-expanded',String(open));controlsDrawer.classList.toggle('is-open',open);below.hidden=!open;};controlsDrawer.append(drawerTitle,below);previewRecord.body.append(controlsDrawer);
@@ -130,11 +145,11 @@ export function installStudioWorkspace(){
  focusPreview.onclick=()=>{const restore=state.previewFocus===true;state.previewStack=!restore;state.previewFocus=!restore;arrangePreview();persist();};
  arrangePreview();
  const presetBox=make('div');presetBox.className='workspace-presets';const presetLabel=make('label','Workspace layout'),presetPicker=make('select'),applyLayout=make('button','Open layout'),saveLayout=make('button','Save layout as…'),renameLayout=make('button','Rename saved layout'),lockLabel=make('label'),lockBox=make('input');lockBox.type='checkbox';lockBox.checked=state.locked===true;lockLabel.append(lockBox,document.createTextNode('Lock panel positions and sizes'));presetLabel.append(presetPicker);presetBox.append(presetLabel,applyLayout,saveLayout,renameLayout,lockLabel);windows.prepend(presetBox);installAccessibility(windows);
- let presets=[];try{const stored=JSON.parse(localStorage.getItem(PRESETS_KEY)||localStorage.getItem(LEGACY_PRESETS_KEY)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.name.length<=80&&[1,2].includes(p.layout?.version)).map(p=>({...p,layout:safeLayout(p.layout)}));}catch{}
+ let presets=[];try{const stored=JSON.parse(localStorage.getItem(PRESETS_KEY)||localStorage.getItem(PREVIOUS_PRESETS_KEY)||localStorage.getItem(LEGACY_PRESETS_KEY)||'[]');if(Array.isArray(stored))presets=stored.filter(p=>p&&typeof p.id==='string'&&typeof p.name==='string'&&p.name.length<=80&&[1,2,3].includes(p.layout?.version)).map(p=>({...p,layout:safeLayout(p.layout)}));}catch{}
  function fillPresets(selected='default'){presetPicker.replaceChildren();for(const [id,name] of [['default','Default workspace'],['browse','Find attacks'],['animate','Animate'],['balance','Balance and test']])presetPicker.add(new Option(name,id));for(const preset of presets)presetPicker.add(new Option(preset.name,preset.id));presetPicker.value=selected;}
  function persistPresets(){try{localStorage.setItem(PRESETS_KEY,JSON.stringify(presets));}catch{$('status').textContent='Could not save this layout. Browser storage is full.';return false;}return true;}
- function applyState(next){const clean=safeLayout(next);state.version=2;state.widths=clean.widths;state.locked=clean.locked;state.previewStack=clean.previewStack;state.previewFocus=clean.previewFocus;lockBox.checked=!!state.locked;document.body.classList.toggle('workspace-locked',!!state.locked);for(const r of records){Object.assign(r.state,clean.panels[r.id]||panelDefaults(r.home,records.indexOf(r)));state.panels[r.id]=r.state;show(r);}columnWidths();arrangePreview();persist();}
- function builtIn(kind){const layout={version:2,widths:kind==='browse'?[40,40,20]:kind==='balance'?[18,52,30]:[20,55,25],panels:{},locked:false};for(const r of records){const showIds=kind==='animate'?['library','preview','attackTimeline','panel-9','panel-10']:kind==='balance'?['preview','attackTimeline','sequenceEditor','defenseEditor','cancelEditor','panel-6','panel-11','panel-12']:kind==='browse'?['library','preview']:records.map(r=>r.id);layout.panels[r.id]={...panelDefaults(r.home,records.indexOf(r)),hidden:!showIds.includes(r.id)};}return layout;}
+ function applyState(next){const clean=safeLayout(next);state.version=3;state.tabs=clean.tabs;state.widths=clean.widths;state.locked=clean.locked;state.previewStack=clean.previewStack;state.previewFocus=clean.previewFocus;lockBox.checked=!!state.locked;document.body.classList.toggle('workspace-locked',!!state.locked);for(const r of records){Object.assign(r.state,clean.panels[r.id]||panelDefaults(r.home,records.indexOf(r)));state.panels[r.id]=r.state;show(r);}columnWidths();arrangePreview();persist();}
+ function builtIn(kind){const layout={version:3,tabs:[],widths:kind==='browse'?[40,40,20]:kind==='balance'?[18,52,30]:[20,55,25],panels:{},locked:false};for(const r of records){const showIds=kind==='animate'?['library','preview','attackTimeline','panel-9','panel-10']:kind==='balance'?['preview','attackTimeline','sequenceEditor','defenseEditor','cancelEditor','panel-6','panel-11','panel-12']:kind==='browse'?['library','preview']:records.map(r=>r.id);layout.panels[r.id]={...panelDefaults(r.home,records.indexOf(r)),hidden:!showIds.includes(r.id)};}return layout;}
  applyLayout.onclick=()=>{const named=presets.find(p=>p.id===presetPicker.value);applyState(named?.layout||builtIn(presetPicker.value));$('status').textContent='Workspace layout opened. Hidden panels remain available in the Windows menu.';if(presetPicker.value==='browse')$('findAttacks')?.click();};
  saveLayout.onclick=async()=>{const name=await requestEditorName('Name this workspace layout');if(!name?.trim())return;if(name.trim().length>80){$('status').textContent='Use a layout name under 80 characters.';return;}const id=crypto.randomUUID();presets.push({id,name:name.trim(),layout:structuredClone(state)});if(persistPresets()){fillPresets(id);$('status').textContent='Saved '+name.trim()+' in this browser.';}};
  renameLayout.onclick=async()=>{const preset=presets.find(p=>p.id===presetPicker.value);if(!preset){$('status').textContent='Choose one of your saved layouts to rename. Built-in layouts keep their names.';return;}const name=await requestEditorName('Layout name',preset.name);if(!name?.trim()||name.trim().length>80)return;preset.name=name.trim();if(persistPresets())fillPresets(preset.id);};

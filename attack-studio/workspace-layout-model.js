@@ -1,12 +1,13 @@
 // Layout state is independent of attack data and attack Undo/Redo.
 export const DOCKS = ['left','center','right','top','bottom'];
-export const LAYOUT_KEY = 'cyber-pet-studio-layout-v2';
+export const LAYOUT_KEY = 'cyber-pet-studio-layout-v3';
+export const PREVIOUS_LAYOUT_KEY = 'cyber-pet-studio-layout-v2';
 export const LEGACY_LAYOUT_KEY = 'cyber-pet-studio-layout-v1';
 export function panelDefaults(dock='center',order=0){
  return {dock,order,floating:false,hidden:false,collapsed:false,pinned:false,x:30,y:100,w:480,h:400};
 }
 export function safeLayout(value){
- const valid=!!value&&[1,2].includes(value.version),panels={};
+ const valid=!!value&&[1,2,3].includes(value.version),panels={};
  if(valid&&value.panels&&typeof value.panels==='object'&&!Array.isArray(value.panels)){
   for(const [id,p] of Object.entries(value.panels)){
    if(!/^[a-zA-Z0-9-]+$/.test(id)||!p||!DOCKS.includes(p.dock))continue;
@@ -18,7 +19,50 @@ export function safeLayout(value){
   }
  }
  const widths=valid&&Array.isArray(value.widths)&&value.widths.length===3&&value.widths.every(n=>Number.isFinite(n)&&n>=15&&n<=70)?[...value.widths]:[24,48,28];
- return {version:2,panels,widths,locked:valid&&value.locked===true,previewStack:valid&&value.previewStack===true,previewFocus:valid&&value.previewFocus===true};
+ const result={version:3,panels,widths,tabs:valid&&value.version===3&&Array.isArray(value.tabs)?structuredClone(value.tabs):[],locked:valid&&value.locked===true,previewStack:valid&&value.previewStack===true,previewFocus:valid&&value.previewFocus===true};
+ normalizeTabs(result);return result;
+}
+// A tab group occupies one dock position. Hidden tabs stay in the group so the
+// Windows menu can restore them. Floating panels always leave their group.
+export function normalizeTabs(state){
+ const used=new Set(),ids=new Set(),groups=[];
+ for(const entry of state.tabs||[]){
+  if(!entry||typeof entry.id!=='string'||!/^[a-zA-Z0-9-]+$/.test(entry.id)||ids.has(entry.id)||!Array.isArray(entry.panels))continue;
+  const members=[];let first;
+  for(const id of entry.panels){
+   const p=typeof id==='string'?state.panels[id]:null;
+   if(!p||p.floating||used.has(id)||members.includes(id))continue;
+   if(first&&(p.dock!==first.dock||p.pinned!==first.pinned))continue;
+   first??=p;members.push(id);
+  }
+  if(members.length<2)continue;
+  members.forEach(id=>used.add(id));ids.add(entry.id);
+  groups.push({id:entry.id,panels:members,active:members.includes(entry.active)?entry.active:members[0]});
+ }
+ state.tabs=groups;
+}
+export function tabGroup(state,id){return state.tabs?.find(group=>group.panels.includes(id));}
+export function detachTab(state,id){
+ const group=tabGroup(state,id);if(!group)return false;
+ group.panels=group.panels.filter(member=>member!==id);normalizeTabs(state);return true;
+}
+export function groupTabs(state,id,target){
+ if(id===target||!state.panels[id]||!state.panels[target])return false;
+ detachTab(state,id);
+ const destination=state.panels[target];destination.floating=false;destination.hidden=false;
+ Object.assign(state.panels[id],{dock:destination.dock,pinned:destination.pinned,floating:false,hidden:false});
+ let group=tabGroup(state,target);
+ if(!group){let key='tabs-'+target;while(state.tabs.some(g=>g.id===key))key+='-new';group={id:key,panels:[target],active:target};state.tabs.push(group);}
+ group.panels.push(id);group.active=id;normalizeTabs(state);return true;
+}
+export function dockUnits(state,dock){
+ const units=[],seen=new Set();
+ for(const [id,p] of orderedPanels(state,dock)){
+  if(seen.has(id))continue;
+  const group=tabGroup(state,id),members=group?.panels||[id];members.forEach(key=>seen.add(key));
+  units.push({id:members[0],members,group,pinned:p.pinned,hidden:members.every(key=>state.panels[key].hidden)});
+ }
+ return units.sort((a,b)=>Number(b.pinned)-Number(a.pinned));
 }
 export function orderedPanels(state,dock,exclude){
  return Object.entries(state.panels).filter(([id,p])=>id!==exclude&&p.dock===dock&&!p.floating).sort((a,b)=>a[1].order-b[1].order);
@@ -29,6 +73,7 @@ export function movePanel(state,id,dock,beforeId=null){
  const siblings=orderedPanels(state,dock,id).map(([key])=>key);
  const at=beforeId===null?siblings.length:siblings.indexOf(beforeId);
  if(at<0)return false;
+ detachTab(state,id);
  siblings.splice(at,0,id);Object.assign(state.panels[id],{dock,floating:false});
  siblings.forEach((key,order)=>state.panels[key].order=order);
  return true;
