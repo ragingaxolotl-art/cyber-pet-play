@@ -1,3 +1,5 @@
+import {installFeedback} from '../ui-audio.js';
+installFeedback();
 import {installTeacherPanel} from './teacher-panel.js?v=friends49';
 const frame=document.getElementById('board'),origin='https://ragingaxolotl-art.github.io';
 const send=data=>frame.contentWindow.postMessage(data,origin);

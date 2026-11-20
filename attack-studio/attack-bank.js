@@ -1,3 +1,4 @@
+import {feedback} from './ui-audio.js';
 import {attacksVersion,requireGroupVersion} from './attack-format.js?v=20261109-slow-motion-release';
 // Saved definitions are separate from working drafts. Credentials never enter saved data.
 export const BANK_KEY='cyber-pet-attack-bank-v1';
@@ -60,7 +61,7 @@ export function installAttackBank({current,currentMany=()=>[current()],validate,
  const message=text=>{$('bankStatus').textContent=text;if(announceStatus)status(text);};
  async function local(){return validateBank(await localStore.read(),validate);}
  function render(){onChange(structuredClone(bank.attacks),$('bankSource').value==='classroom'&&remote.connected()?'Classroom bank':'Saved on this device');const selected=$('bankList').value;$('bankList').replaceChildren();for(const a of bank.attacks){const option=document.createElement('option');option.value=a.id;option.textContent=a.name;$('bankList').append(option);}if(bank.attacks.some(a=>a.id===selected))$('bankList').value=selected;$('openAttack').disabled=busy||!bank.attacks.length;$('connectBank').textContent=remote.connected()?'Teacher connection':'Teacher sign in';}
- async function task(action,announce=true){if(busy)return;busy=true;announceStatus=announce;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){if(e.status===401)localStorage.removeItem(SESSION_KEY);message(e.message);}finally{busy=false;announceStatus=true;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
+ async function task(action,announce=true){if(busy)return;busy=true;announceStatus=announce;for(const id of ['saveAttack','refreshBank','openAttack','bankSource','connectBank'])$(id).disabled=true;try{await action();}catch(e){if(announce)feedback('ui_operation_error');if(e.status===401)localStorage.removeItem(SESSION_KEY);message(e.message);}finally{busy=false;announceStatus=true;for(const id of ['saveAttack','refreshBank','bankSource','connectBank'])$(id).disabled=false;render();}}
  function signIn(){ $('bankPassword').value='';$('bankConnection').showModal(); }
  async function refresh(){
   if($('bankSource').value==='classroom'&&!remote.connected()){bank=await local();render();message('Sign in with your teacher password for classroom saves. Showing local recovery copies.');return;}
@@ -77,7 +78,7 @@ export function installAttackBank({current,currentMany=()=>[current()],validate,
    if(conflicts.length&&!confirm(`${conflicts.length} saved attack(s) changed on another device. Replace them with the current versions?`)){message(recovery+' Classroom attack was not replaced.');return;}
    const next=saveManyToBank(latest.bank,attacks,validate);await remote.write(next,latest.revision);bank=next;message('Saved '+(attacks.length>1?attacks.length+' linked reskins':attack.name)+' to the classroom bank. '+recovery);
   }else{if(localError)throw Error('Could not save on this device. Your edits are still open. Download project for a backup, or choose Classroom bank and save there.');bank=localBank;message('Saved '+(attacks.length>1?attacks.length+' linked reskins':attack.name)+' on this device.');}
-  render();$('bankList').value=attack.id;
+  render();$('bankList').value=attack.id;feedback('save_success');
  }
  $('bankSource').onchange=()=>task(refresh);$('refreshBank').onclick=()=>task(refresh);
  $('openAttack').onclick=async()=>{await task(async()=>{const saved=bank.attacks.find(a=>a.id===$('bankList').value);if(saved&&await open(structuredClone(saved),saved.reskinGroupId?structuredClone(bank.attacks.filter(a=>a.reskinGroupId===saved.reskinGroupId)):[]))message('Opened '+saved.name+' from the attack bank.');});$('openAttack').focus();};

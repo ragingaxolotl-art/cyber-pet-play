@@ -1,3 +1,5 @@
+import {installFeedback} from './ui-audio.js';
+installFeedback(document.getElementById('connect'));
 import {watchBoardRelease} from './release-update.js?v=board52';
 import {drawMeepCompanion} from './meep-companion.js?v=board52';
 import {drawIllnessPet} from './illness-renderer.js?v=board52';
